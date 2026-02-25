@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: fastcart
+      POSTGRES_PASSWORD: fastcart123
+      POSTGRES_DB: fastcart_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

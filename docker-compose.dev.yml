@@ -1,0 +1,26 @@
+# Development mode with hot reload
+services:
+  admin-panel-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      target: development
+    container_name: fastcart-admin-panel-dev
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8080/api/v1
+      NODE_ENV: development
+    ports:
+      - "3003:3003"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
+    restart: unless-stopped
+    networks:
+      - fastcart-network
+
+networks:
+  fastcart-network:
+    external: true
+    name: fastcart-backend_fastcart-network
