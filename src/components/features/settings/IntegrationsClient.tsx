@@ -1,11 +1,11 @@
 'use client';
 
-import { SettingsClient } from '@/components/features/settings/SettingsClient';
+import { IntegrationsSettingsClient } from './IntegrationsSettingsClient';
 
 type IntegrationsClientProps = {
   mode?: 'settings' | 'payments' | 'shipping';
 };
 
 export function IntegrationsClient(_: IntegrationsClientProps) {
-  return <SettingsClient />;
+  return <IntegrationsSettingsClient />;
 }
