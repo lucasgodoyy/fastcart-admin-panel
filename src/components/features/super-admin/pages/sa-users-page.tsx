@@ -1,20 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState, type ComponentType } from "react";
 import { motion } from "framer-motion";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Users,
   Search,
-  Plus,
   MoreHorizontal,
   Shield,
   ShieldCheck,
   UserCog,
   Clock,
   Ban,
-  CheckCircle,
-  Mail,
   Key,
+  Power,
+  ChevronDown,
 } from "lucide-react";
 import {
   SaPageHeader,
@@ -47,20 +47,21 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { superAdminService } from "@/services/super-admin";
 
-const mockUsers = [
-  { id: 1, name: "João Silva", email: "joao@email.com", role: "SUPER_ADMIN", status: "ACTIVE", store: "—", lastLogin: "Há 5 min", createdAt: "2024-01-15" },
-  { id: 2, name: "Maria Santos", email: "maria@fashionstore.com", role: "ADMIN", status: "ACTIVE", store: "Fashion Store", lastLogin: "Há 2h", createdAt: "2024-03-10" },
-  { id: 3, name: "Pedro Costa", email: "pedro@techgadgets.com", role: "ADMIN", status: "ACTIVE", store: "TechGadgets Pro", lastLogin: "Há 1 dia", createdAt: "2024-05-22" },
-  { id: 4, name: "Ana Oliveira", email: "ana@casadecor.com", role: "STAFF", status: "ACTIVE", store: "Casa & Decor", lastLogin: "Há 3 dias", createdAt: "2024-06-14" },
-  { id: 5, name: "Carlos Mendes", email: "carlos@sportlife.com", role: "ADMIN", status: "PENDING", store: "SportLife Brasil", lastLogin: "Nunca", createdAt: "2025-02-20" },
-  { id: 6, name: "Luisa Ferreira", email: "luisa@belezanatural.com", role: "ADMIN", status: "SUSPENDED", store: "Beleza Natural", lastLogin: "Há 30 dias", createdAt: "2024-08-05" },
-  { id: 7, name: "Rafael Lima", email: "rafael@staff.com", role: "STAFF", status: "ACTIVE", store: "Fashion Store", lastLogin: "Há 4h", createdAt: "2024-11-30" },
-];
-
-const roleIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+const roleIcons: Record<string, ComponentType<{ className?: string }>> = {
   SUPER_ADMIN: ShieldCheck,
   ADMIN: Shield,
   STAFF: UserCog,
@@ -76,31 +77,67 @@ export function SaUsersPage() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
-
-  const filtered = mockUsers.filter(u => {
-    if (search && !u.name.toLowerCase().includes(search.toLowerCase()) && !u.email.toLowerCase().includes(search.toLowerCase())) return false;
-    if (roleFilter !== "ALL" && u.role !== roleFilter) return false;
-    if (statusFilter !== "ALL" && u.status !== statusFilter) return false;
-    return true;
+  const [resetPasswordDialog, setResetPasswordDialog] = useState<{ open: boolean; userId: number; email: string }>({
+    open: false,
+    userId: 0,
+    email: "",
   });
+  const [newPassword, setNewPassword] = useState("");
+  const queryClient = useQueryClient();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["super-admin-users", roleFilter, statusFilter, search],
+    queryFn: () =>
+      superAdminService.listUsers({
+        role: roleFilter,
+        status: statusFilter,
+        search: search || undefined,
+        page: 0,
+        size: 100,
+      }),
+  });
+
+  const toggleStatusMutation = useMutation({
+    mutationFn: (userId: number) => superAdminService.toggleUserStatus(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["super-admin-users"] });
+    },
+  });
+
+  const changeRoleMutation = useMutation({
+    mutationFn: ({ userId, role }: { userId: number; role: string }) => superAdminService.updateUserRole(userId, role),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["super-admin-users"] });
+    },
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: ({ userId, password }: { userId: number; password: string }) =>
+      superAdminService.resetUserPassword(userId, password),
+    onSuccess: () => {
+      setResetPasswordDialog({ open: false, userId: 0, email: "" });
+      setNewPassword("");
+    },
+  });
+
+  const users = data?.content ?? [];
+  const totalUsers = data?.totalElements ?? 0;
+  const activeUsers = useMemo(() => users.filter((user) => user.status === "ACTIVE").length, [users]);
+  const pendingUsers = useMemo(() => users.filter((user) => user.status === "PENDING").length, [users]);
+  const adminUsers = useMemo(() => users.filter((user) => user.role === "ADMIN").length, [users]);
 
   return (
     <div className="space-y-8">
       <SaPageHeader
         title="Gerenciamento de Usuários"
         description="Gerencie todos os usuários da plataforma, roles e permissões"
-        actions={
-          <Button className="bg-[hsl(var(--sa-accent))] hover:bg-[hsl(var(--sa-accent-hover))] text-white rounded-xl gap-2">
-            <Plus className="h-4 w-4" /> Novo Usuário
-          </Button>
-        }
       />
 
       <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SaStatCard title="Total de Usuários" value="1.247" icon={Users} color="accent" trend={{ value: 12, label: "" }} />
-        <SaStatCard title="Admins de Lojas" value="348" icon={Shield} color="info" />
-        <SaStatCard title="Sessões Ativas" value="89" icon={Clock} color="success" />
-        <SaStatCard title="Pendentes" value="12" icon={Ban} color="warning" />
+        <SaStatCard title="Total de Usuários" value={String(totalUsers)} icon={Users} color="accent" />
+        <SaStatCard title="Admins de Lojas" value={String(adminUsers)} icon={Shield} color="info" />
+        <SaStatCard title="Ativos" value={String(activeUsers)} icon={Clock} color="success" />
+        <SaStatCard title="Pendentes" value={String(pendingUsers)} icon={Ban} color="warning" />
       </motion.div>
 
       <motion.div variants={fadeInUp} initial="initial" animate="animate">
@@ -117,6 +154,7 @@ export function SaUsersPage() {
                 <SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
                 <SelectItem value="ADMIN">Admin</SelectItem>
                 <SelectItem value="STAFF">Staff</SelectItem>
+                <SelectItem value="CUSTOMER">Customer</SelectItem>
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -124,8 +162,7 @@ export function SaUsersPage() {
               <SelectContent className="bg-[hsl(var(--sa-surface))] border-[hsl(var(--sa-border))]">
                 <SelectItem value="ALL">Todos</SelectItem>
                 <SelectItem value="ACTIVE">Ativo</SelectItem>
-                <SelectItem value="PENDING">Pendente</SelectItem>
-                <SelectItem value="SUSPENDED">Suspenso</SelectItem>
+                <SelectItem value="INACTIVE">Inativo</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -133,7 +170,7 @@ export function SaUsersPage() {
       </motion.div>
 
       <motion.div variants={fadeInUp} initial="initial" animate="animate">
-        <SaTableCard title="Usuários" subtitle={`${filtered.length} resultado(s)`}>
+        <SaTableCard title="Usuários" subtitle={`${users.length} resultado(s)`}>
           <Table>
             <TableHeader>
               <TableRow className="border-[hsl(var(--sa-border-subtle))] hover:bg-transparent">
@@ -146,39 +183,71 @@ export function SaUsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((user, i) => {
-                const RoleIcon = roleIcons[user.role] || UserCog;
+              {users.map((user, i) => {
+                const roleLabel = user.role ?? "STAFF";
+                const userName = user.name || user.email;
+                const RoleIcon = roleIcons[roleLabel] || UserCog;
                 return (
                   <motion.tr key={user.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }} className="border-[hsl(var(--sa-border-subtle))] hover:bg-[hsl(var(--sa-surface-hover))] transition-colors">
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] text-white text-[11px] font-bold">
-                          {user.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                          {userName.split(" ").map(n => n[0]).join("").slice(0, 2)}
                         </div>
                         <div>
-                          <p className="text-[13px] font-semibold text-[hsl(var(--sa-text))]">{user.name}</p>
+                          <p className="text-[13px] font-semibold text-[hsl(var(--sa-text))]">{userName}</p>
                           <p className="text-[11px] text-[hsl(var(--sa-text-muted))]">{user.email}</p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${roleBadgeColors[user.role] ?? ""}`}>
-                        <RoleIcon className="h-3 w-3" /> {user.role}
+                      <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${roleBadgeColors[roleLabel] ?? ""}`}>
+                        <RoleIcon className="h-3 w-3" /> {roleLabel}
                       </span>
                     </TableCell>
-                    <TableCell className="text-[12px] text-[hsl(var(--sa-text-secondary))]">{user.store}</TableCell>
+                    <TableCell className="text-[12px] text-[hsl(var(--sa-text-secondary))]">{user.storeName ?? "—"}</TableCell>
                     <TableCell><SaStatusBadge status={user.status} /></TableCell>
-                    <TableCell className="text-[12px] text-[hsl(var(--sa-text-muted))]">{user.lastLogin}</TableCell>
+                    <TableCell className="text-[12px] text-[hsl(var(--sa-text-muted))]">{user.lastLogin ?? "—"}</TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-[hsl(var(--sa-text-muted))] hover:text-[hsl(var(--sa-text))] hover:bg-[hsl(var(--sa-surface-hover))]"><MoreHorizontal className="h-4 w-4" /></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-[hsl(var(--sa-surface))] border-[hsl(var(--sa-border))]">
-                          <DropdownMenuItem className="text-[hsl(var(--sa-text-secondary))] hover:bg-[hsl(var(--sa-surface-hover))] cursor-pointer gap-2"><UserCog className="h-3.5 w-3.5" /> Editar</DropdownMenuItem>
-                          <DropdownMenuItem className="text-[hsl(var(--sa-text-secondary))] hover:bg-[hsl(var(--sa-surface-hover))] cursor-pointer gap-2"><Key className="h-3.5 w-3.5" /> Resetar Senha</DropdownMenuItem>
-                          <DropdownMenuItem className="text-[hsl(var(--sa-text-secondary))] hover:bg-[hsl(var(--sa-surface-hover))] cursor-pointer gap-2"><Mail className="h-3.5 w-3.5" /> Enviar E-mail</DropdownMenuItem>
-                          <DropdownMenuItem className="text-[hsl(var(--sa-danger))] hover:bg-[hsl(var(--sa-danger-subtle))] cursor-pointer gap-2"><Ban className="h-3.5 w-3.5" /> Suspender</DropdownMenuItem>
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger className="text-[hsl(var(--sa-text-secondary))] hover:bg-[hsl(var(--sa-surface-hover))] cursor-pointer gap-2">
+                              <UserCog className="h-3.5 w-3.5" /> Alterar Role
+                              <ChevronDown className="h-3.5 w-3.5 ml-auto" />
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent className="bg-[hsl(var(--sa-surface))] border-[hsl(var(--sa-border))]">
+                              {["SUPER_ADMIN", "ADMIN", "STAFF", "CUSTOMER"].map((role) => (
+                                <DropdownMenuItem
+                                  key={role}
+                                  disabled={role === roleLabel}
+                                  onClick={() => changeRoleMutation.mutate({ userId: user.id, role })}
+                                  className="text-[hsl(var(--sa-text-secondary))] hover:bg-[hsl(var(--sa-surface-hover))] cursor-pointer text-[11px]"
+                                >
+                                  {role === roleLabel ? `✓ ${role}` : role}
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setResetPasswordDialog({ open: true, userId: user.id, email: user.email });
+                              setNewPassword("");
+                            }}
+                            className="text-[hsl(var(--sa-text-secondary))] hover:bg-[hsl(var(--sa-surface-hover))] cursor-pointer gap-2"
+                          >
+                            <Key className="h-3.5 w-3.5" /> Resetar Senha
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => toggleStatusMutation.mutate(user.id)}
+                            className={`cursor-pointer gap-2 ${user.status === "ACTIVE" ? "text-[hsl(var(--sa-danger))] hover:bg-[hsl(var(--sa-danger-subtle))]" : "text-[hsl(var(--sa-success))] hover:bg-[hsl(var(--sa-success))]/10"}`}
+                          >
+                            {user.status === "ACTIVE" ? <Ban className="h-3.5 w-3.5" /> : <Power className="h-3.5 w-3.5" />}
+                            {user.status === "ACTIVE" ? "Suspender" : "Ativar"}
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -187,11 +256,55 @@ export function SaUsersPage() {
               })}
             </TableBody>
           </Table>
-          {filtered.length === 0 && (
+          {!isLoading && users.length === 0 && (
             <SaEmptyState icon={Users} title="Nenhum usuário encontrado" description="Tente ajustar os filtros de busca" />
           )}
         </SaTableCard>
       </motion.div>
+
+      <Dialog
+        open={resetPasswordDialog.open}
+        onOpenChange={(open) => setResetPasswordDialog((prev) => ({ ...prev, open }))}
+      >
+        <DialogContent className="bg-[hsl(var(--sa-surface))] border-[hsl(var(--sa-border))] text-[hsl(var(--sa-text))]">
+          <DialogHeader>
+            <DialogTitle className="text-[hsl(var(--sa-text))]">Resetar Senha</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <p className="text-[12px] text-[hsl(var(--sa-text-secondary))]">
+              Definir nova senha para <strong>{resetPasswordDialog.email}</strong>
+            </p>
+            <Input
+              type="password"
+              placeholder="Nova senha"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))]"
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setResetPasswordDialog({ open: false, userId: 0, email: "" })}
+              className="bg-transparent border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text-secondary))]"
+            >
+              Cancelar
+            </Button>
+            <Button
+              disabled={!newPassword || newPassword.length < 4 || resetPasswordMutation.isPending}
+              onClick={() =>
+                resetPasswordMutation.mutate({
+                  userId: resetPasswordDialog.userId,
+                  password: newPassword,
+                })
+              }
+              className="bg-[hsl(var(--sa-accent))] hover:bg-[hsl(var(--sa-accent-hover))] text-white"
+            >
+              {resetPasswordMutation.isPending ? "Salvando..." : "Confirmar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

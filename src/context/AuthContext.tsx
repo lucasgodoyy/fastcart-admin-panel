@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { LoginCredentials, AuthContextType, User } from '@/types/auth';
+import { LoginCredentials, AuthContextType, User, AuthResponse } from '@/types/auth';
 import { authService } from '@/services/auth';
 import { normalizeRole } from '@/lib/auth-role';
 
@@ -34,19 +34,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false);
   }, []);
 
-  const login = async (credentials: LoginCredentials) => {
+  const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
     setIsLoading(true);
     try {
       const response = await authService.login(credentials);
       setToken(response.token);
 
-      const storeIdStr = response.storeId?.toString();
       setUser({
         id: 'temp-id',
         email: response.email || credentials.email,
         role: normalizeRole(response.role),
         storeId: response.storeId,
       });
+      return response;
     } catch (error) {
       throw error;
     } finally {

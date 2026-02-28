@@ -24,6 +24,7 @@ import {
   ChevronRight,
   ExternalLink,
   Zap,
+  Link2,
 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -91,6 +92,7 @@ const navigation: NavSection[] = [
         { label: t("Campanhas", "Campaigns"), href: "/admin/discounts/promotions" },
       ]},
       { label: t("Marketing", "Marketing"), href: "/admin/marketing", icon: <Speaker className="h-[18px] w-[18px]" /> },
+      { label: t("Afiliados", "Affiliates"), href: "/admin/marketing/affiliates", icon: <Link2 className="h-[18px] w-[18px]" /> },
     ],
   },
   {
@@ -159,6 +161,31 @@ export function AdminSidebar() {
     return `${protocol}//${hostname}`
   }
 
+  const resolveTenantStorefrontUrl = (slug: string) => {
+    const configured = (process.env.NEXT_PUBLIC_STOREFRONT_URL || "").trim()
+    if (configured) {
+      const normalizedBase = configured.replace(/\/$/, "")
+      return `${normalizedBase}/?storeSlug=${encodeURIComponent(slug)}`
+    }
+
+    if (typeof window === "undefined") return ""
+
+    const protocol = window.location.protocol
+    const hostname = window.location.hostname
+    const storefrontPort = process.env.NEXT_PUBLIC_STOREFRONT_PORT || "3000"
+
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return `${protocol}//${slug}.127.0.0.1.nip.io:${storefrontPort}`
+    }
+
+    if (hostname.startsWith("admin.")) {
+      const rootDomain = hostname.replace(/^admin\./, "")
+      return `${protocol}//${slug}.${rootDomain}`
+    }
+
+    return `${protocol}//${slug}.${hostname}`
+  }
+
   const openStorefront = (rawUrl?: string | null) => {
     const trimmed = (rawUrl || "").trim()
     if (trimmed) {
@@ -174,7 +201,7 @@ export function AdminSidebar() {
       return
     }
 
-    const dynamicUrl = `${storefrontBaseUrl}/?storeSlug=${encodeURIComponent(slug)}`
+    const dynamicUrl = resolveTenantStorefrontUrl(slug)
     window.open(dynamicUrl, "_blank", "noopener,noreferrer")
   }
 
@@ -326,7 +353,19 @@ export function AdminSidebar() {
       </nav>
 
       {/* Settings at bottom */}
-      <div className="border-t border-[var(--sidebar-border)] px-3 py-3">
+      <div className="border-t border-[var(--sidebar-border)] px-3 py-3 space-y-1">
+        <Link
+          href="/admin/billing"
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] transition-all duration-150",
+            pathname.startsWith("/admin/billing")
+              ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)] font-semibold"
+              : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)]"
+          )}
+        >
+          <CreditCard className="h-[18px] w-[18px] text-[var(--sidebar-muted)]" />
+          <span className="flex-1">{t("Meu Plano", "My Plan")}</span>
+        </Link>
         <Link
           href="/admin/settings"
           className={cn(

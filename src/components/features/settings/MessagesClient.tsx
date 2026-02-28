@@ -1,13 +1,57 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { SettingsPageLayout } from './SettingsPageLayout';
 import { Button } from '@/components/ui/button';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Loader2, Save } from 'lucide-react';
+import { toast } from 'sonner';
+import storeService, {
+  type CustomerMessageSettings,
+  DEFAULT_CUSTOMER_MESSAGE,
+} from '@/services/storeService';
 
 export function MessagesClient() {
-  const [showMessage, setShowMessage] = useState(false);
-  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [settings, setSettings] = useState<CustomerMessageSettings>({ ...DEFAULT_CUSTOMER_MESSAGE });
+
+  const loadSettings = useCallback(async () => {
+    setLoading(true);
+    try {
+      const store = await storeService.getMyStore();
+      setSettings(storeService.parseCustomerMessage(store.customerMessageJson));
+    } catch {
+      toast.error('Erro ao carregar configurações de mensagem.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadSettings();
+  }, [loadSettings]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await storeService.updateMyStore({
+        customerMessageJson: JSON.stringify(settings),
+      });
+      toast.success('Mensagem para clientes salva com sucesso!');
+    } catch {
+      toast.error('Erro ao salvar mensagem.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-16">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <SettingsPageLayout
@@ -21,8 +65,8 @@ export function MessagesClient() {
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
-              checked={showMessage}
-              onChange={(e) => setShowMessage(e.target.checked)}
+              checked={settings.showMessage}
+              onChange={(e) => setSettings((prev) => ({ ...prev, showMessage: e.target.checked }))}
               className="h-4 w-4 rounded border-border"
             />
             <span className="text-sm font-medium text-foreground">Mostrar uma mensagem</span>
@@ -30,11 +74,11 @@ export function MessagesClient() {
           <p className="text-xs text-muted-foreground mt-1 ml-6">Será mostrada na calculadora de fretes e no checkout.</p>
         </div>
 
-        {showMessage && (
+        {settings.showMessage && (
           <textarea
             className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            value={settings.message}
+            onChange={(e) => setSettings((prev) => ({ ...prev, message: e.target.value }))}
             placeholder="Escreva sua mensagem aqui..."
           />
         )}
@@ -55,7 +99,10 @@ export function MessagesClient() {
       </div>
 
       <div className="flex items-center justify-end">
-        <Button>Salvar</Button>
+        <Button onClick={handleSave} disabled={saving} className="gap-1.5">
+          {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+          Salvar
+        </Button>
       </div>
     </SettingsPageLayout>
   );

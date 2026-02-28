@@ -26,8 +26,9 @@ export const LoginForm: React.FC = () => {
 
   const handleSubmit = async (credentials: LoginCredentials) => {
     try {
-      await login(credentials);
-      router.push('/admin');
+      const response = await login(credentials);
+      const redirectPath = response.role === 'SUPER_ADMIN' ? '/super-admin' : '/admin';
+      router.push(redirectPath);
     } catch (err) {
       const errorObj = err as Record<string, unknown>;
 

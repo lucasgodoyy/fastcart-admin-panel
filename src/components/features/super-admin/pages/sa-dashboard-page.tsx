@@ -1,7 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import {
   Building2,
   Users,
@@ -15,8 +18,14 @@ import {
   Zap,
   DollarSign,
   Eye,
+  Shield,
+  Settings,
+  FileText,
+  Link2,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { superAdminService } from "@/services/super-admin";
+import type { ActivityLogSummary } from "@/types/super-admin";
 import {
   SaPageHeader,
   SaStatCard,
@@ -48,18 +57,19 @@ function MiniSparkline({ data, color }: { data: number[]; color: string }) {
 /* ── Quick-action button ── */
 function QuickAction({ icon: Icon, label, href }: { icon: React.ComponentType<{ className?: string }>; label: string; href: string }) {
   return (
-    <motion.a
-      href={href}
-      variants={fadeInUp}
-      className="flex flex-col items-center gap-2 rounded-2xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-4 hover:border-[hsl(var(--sa-accent))/0.3] hover:bg-[hsl(var(--sa-surface-hover))] transition-all group cursor-pointer"
-      whileHover={{ y: -4, scale: 1.02 }}
-      whileTap={{ scale: 0.97 }}
-    >
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--sa-accent-subtle))] group-hover:bg-[hsl(var(--sa-accent))] transition-colors">
-        <Icon className="h-5 w-5 text-[hsl(var(--sa-accent))] group-hover:text-white transition-colors" />
-      </div>
-      <span className="text-[11px] font-medium text-[hsl(var(--sa-text-secondary))] group-hover:text-[hsl(var(--sa-text))] transition-colors">{label}</span>
-    </motion.a>
+    <Link href={href}>
+      <motion.div
+        variants={fadeInUp}
+        className="flex flex-col items-center gap-2 rounded-2xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-4 hover:border-[hsl(var(--sa-accent))/0.3] hover:bg-[hsl(var(--sa-surface-hover))] transition-all group cursor-pointer"
+        whileHover={{ y: -4, scale: 1.02 }}
+        whileTap={{ scale: 0.97 }}
+      >
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--sa-accent-subtle))] group-hover:bg-[hsl(var(--sa-accent))] transition-colors">
+          <Icon className="h-5 w-5 text-[hsl(var(--sa-accent))] group-hover:text-white transition-colors" />
+        </div>
+        <span className="text-[11px] font-medium text-[hsl(var(--sa-text-secondary))] group-hover:text-[hsl(var(--sa-text))] transition-colors">{label}</span>
+      </motion.div>
+    </Link>
   );
 }
 
@@ -78,6 +88,38 @@ function ActivityItem({ icon: Icon, title, time, color }: {
       </div>
     </motion.div>
   );
+}
+
+/* ── Map action types to icons/colors ── */
+const actionTypeStyle: Record<string, { icon: LucideIcon; color: string }> = {
+  STORE_CREATED: { icon: Building2, color: "bg-[hsl(var(--sa-accent-subtle))] text-[hsl(var(--sa-accent))]" },
+  STORE_UPDATED: { icon: Building2, color: "bg-[hsl(var(--sa-info-subtle))] text-[hsl(var(--sa-info))]" },
+  STORE_TOGGLED: { icon: Building2, color: "bg-[hsl(var(--sa-warning-subtle))] text-[hsl(var(--sa-warning))]" },
+  USER_CREATED: { icon: Users, color: "bg-[hsl(var(--sa-info-subtle))] text-[hsl(var(--sa-info))]" },
+  USER_UPDATED: { icon: Users, color: "bg-[hsl(var(--sa-info-subtle))] text-[hsl(var(--sa-info))]" },
+  USER_TOGGLED: { icon: Shield, color: "bg-[hsl(var(--sa-warning-subtle))] text-[hsl(var(--sa-warning))]" },
+  ROLE_CHANGED: { icon: Shield, color: "bg-[hsl(var(--sa-warning-subtle))] text-[hsl(var(--sa-warning))]" },
+  SESSION_REVOKED: { icon: Shield, color: "bg-[hsl(var(--sa-danger-subtle))] text-[hsl(var(--sa-danger))]" },
+  EMAIL_SENT: { icon: Mail, color: "bg-[hsl(var(--sa-success-subtle))] text-[hsl(var(--sa-success))]" },
+  EMAIL_FAILED: { icon: Mail, color: "bg-[hsl(var(--sa-danger-subtle))] text-[hsl(var(--sa-danger))]" },
+  PASSWORD_RESET: { icon: Shield, color: "bg-[hsl(var(--sa-warning-subtle))] text-[hsl(var(--sa-warning))]" },
+  SETTINGS_UPDATED: { icon: Settings, color: "bg-[hsl(var(--sa-accent-subtle))] text-[hsl(var(--sa-accent))]" },
+  LOGIN: { icon: Users, color: "bg-[hsl(var(--sa-success-subtle))] text-[hsl(var(--sa-success))]" },
+  LOGOUT: { icon: Users, color: "bg-[hsl(var(--sa-text-muted))]/10 text-[hsl(var(--sa-text-muted))]" },
+};
+
+const defaultActionStyle = { icon: Activity, color: "bg-[hsl(var(--sa-accent-subtle))] text-[hsl(var(--sa-accent))]" };
+
+function activityToProps(log: ActivityLogSummary) {
+  const style = actionTypeStyle[log.actionType] ?? defaultActionStyle;
+  const time = (() => {
+    try {
+      return formatDistanceToNow(new Date(log.createdAt), { addSuffix: true, locale: ptBR });
+    } catch {
+      return log.createdAt;
+    }
+  })();
+  return { icon: style.icon, title: log.description, time, color: style.color };
 }
 
 /* ── Top stores row ── */
@@ -104,6 +146,11 @@ export function SaDashboardPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["super-admin-overview"],
     queryFn: superAdminService.getOverview,
+  });
+
+  const { data: activityData } = useQuery({
+    queryKey: ["super-admin-activity-recent"],
+    queryFn: () => superAdminService.listActivityLogs({ page: 0, size: 8 }),
   });
 
   const val = (n?: number) => (isLoading ? "—" : (n ?? 0).toLocaleString("pt-BR"));
@@ -183,17 +230,26 @@ export function SaDashboardPage() {
           <SaCard className="h-full">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))]">Atividade Recente</h3>
-              <motion.a href="/super-admin/activity" className="text-[11px] font-medium text-[hsl(var(--sa-accent))] hover:text-[hsl(var(--sa-accent-hover))] flex items-center gap-1" whileHover={{ x: 2 }}>
+              <Link href="/super-admin/activity" className="text-[11px] font-medium text-[hsl(var(--sa-accent))] hover:text-[hsl(var(--sa-accent-hover))] flex items-center gap-1">
                 Ver tudo <ArrowUpRight className="h-3 w-3" />
-              </motion.a>
+              </Link>
             </div>
             <motion.div variants={staggerContainer} initial="initial" animate="animate">
-              <ActivityItem icon={Building2} title="Nova loja cadastrada: Fashion Store" time="Há 12 minutos" color="bg-[hsl(var(--sa-accent-subtle))] text-[hsl(var(--sa-accent))]" />
-              <ActivityItem icon={Users} title="Novo usuário registrado: maria@email.com" time="Há 28 minutos" color="bg-[hsl(var(--sa-info-subtle))] text-[hsl(var(--sa-info))]" />
-              <ActivityItem icon={CreditCard} title="Assinatura upgrade: Plano Pro" time="Há 1 hora" color="bg-[hsl(var(--sa-success-subtle))] text-[hsl(var(--sa-success))]" />
-              <ActivityItem icon={ShoppingCart} title="1.247 pedidos processados hoje" time="Há 2 horas" color="bg-[hsl(var(--sa-warning-subtle))] text-[hsl(var(--sa-warning))]" />
-              <ActivityItem icon={Mail} title="Campanha de e-mail enviada: 5K destinatários" time="Há 3 horas" color="bg-[hsl(var(--sa-success-subtle))] text-[hsl(var(--sa-success))]" />
-              <ActivityItem icon={Zap} title="Deploy v2.14.0 realizado com sucesso" time="Há 5 horas" color="bg-[hsl(var(--sa-accent-subtle))] text-[hsl(var(--sa-accent))]" />
+              {activityData?.content && activityData.content.length > 0 ? (
+                activityData.content.slice(0, 6).map((log) => {
+                  const props = activityToProps(log);
+                  return <ActivityItem key={log.id} {...props} />;
+                })
+              ) : (
+                <>
+                  <ActivityItem icon={Building2} title="Nova loja cadastrada: Fashion Store" time="Há 12 minutos" color="bg-[hsl(var(--sa-accent-subtle))] text-[hsl(var(--sa-accent))]" />
+                  <ActivityItem icon={Users} title="Novo usuário registrado: maria@email.com" time="Há 28 minutos" color="bg-[hsl(var(--sa-info-subtle))] text-[hsl(var(--sa-info))]" />
+                  <ActivityItem icon={CreditCard} title="Assinatura upgrade: Plano Pro" time="Há 1 hora" color="bg-[hsl(var(--sa-success-subtle))] text-[hsl(var(--sa-success))]" />
+                  <ActivityItem icon={ShoppingCart} title="1.247 pedidos processados hoje" time="Há 2 horas" color="bg-[hsl(var(--sa-warning-subtle))] text-[hsl(var(--sa-warning))]" />
+                  <ActivityItem icon={Mail} title="Campanha de e-mail enviada: 5K destinatários" time="Há 3 horas" color="bg-[hsl(var(--sa-success-subtle))] text-[hsl(var(--sa-success))]" />
+                  <ActivityItem icon={Zap} title="Deploy v2.14.0 realizado com sucesso" time="Há 5 horas" color="bg-[hsl(var(--sa-accent-subtle))] text-[hsl(var(--sa-accent))]" />
+                </>
+              )}
             </motion.div>
           </SaCard>
         </motion.div>
@@ -205,9 +261,9 @@ export function SaDashboardPage() {
           <SaCard>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))]">Top Lojas por Receita</h3>
-              <motion.a href="/super-admin/stores/performance" className="text-[11px] font-medium text-[hsl(var(--sa-accent))] hover:text-[hsl(var(--sa-accent-hover))] flex items-center gap-1" whileHover={{ x: 2 }}>
+              <Link href="/super-admin/stores/performance" className="text-[11px] font-medium text-[hsl(var(--sa-accent))] hover:text-[hsl(var(--sa-accent-hover))] flex items-center gap-1">
                 Ver ranking <ArrowUpRight className="h-3 w-3" />
-              </motion.a>
+              </Link>
             </div>
             <motion.div variants={staggerContainer} initial="initial" animate="animate">
               <TopStoreRow rank={1} name="Fashion Store Oficial" revenue="R$ 124.580" orders={892} status="ACTIVE" />

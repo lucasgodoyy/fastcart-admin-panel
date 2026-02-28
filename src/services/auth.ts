@@ -1,5 +1,5 @@
 import apiClient from '@/lib/api';
-import { LoginCredentials, AuthResponse } from '@/types/auth';
+import { LoginCredentials, AuthResponse, ResetPasswordRequest } from '@/types/auth';
 import { normalizeRole } from '@/lib/auth-role';
 import { redirectToLogin } from '@/lib/session';
 import Cookies from 'js-cookie';
@@ -37,6 +37,10 @@ export const authService = {
       ...response.data,
       role: normalizedRole,
     };
+  },
+
+  resetPassword: async (payload: ResetPasswordRequest): Promise<void> => {
+    await apiClient.post('/auth/reset-password', payload);
   },
 
   logout: (): void => {

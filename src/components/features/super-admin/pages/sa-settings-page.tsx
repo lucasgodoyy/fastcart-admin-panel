@@ -31,6 +31,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
+import { useTabFromPath } from "../hooks/use-tab-from-path";
 
 function SettingRow({ label, desc, children }: { label: string; desc?: string; children: React.ReactNode }) {
   return (
@@ -60,8 +61,10 @@ function SettingSection({ icon: Icon, title, children }: { icon: React.ElementTy
   );
 }
 
+const settingsTabRouteMap = { general: "", integrations: "integrations", "api-keys": "api-keys" };
+
 export function SaSettingsPage() {
-  const [tab, setTab] = useState("general");
+  const [tab, setTab] = useTabFromPath("/super-admin/settings", settingsTabRouteMap, "general");
   const [showStripeKey, setShowStripeKey] = useState(false);
 
   return (
