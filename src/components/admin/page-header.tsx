@@ -1,4 +1,4 @@
-import { HelpCircle, ExternalLink } from "lucide-react"
+import { ExternalLink } from "lucide-react"
 
 interface PageHeaderProps {
   title: string
@@ -10,18 +10,19 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, helpText, helpHref, actions }: PageHeaderProps) {
   return (
-    <div className="mb-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground text-balance">{title}</h1>
-        {actions && <div className="flex items-center gap-3">{actions}</div>}
+    <div className="mb-8">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight text-foreground">{title}</h1>
+          {description && (
+            <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{description}</p>
+          )}
+        </div>
+        {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
       </div>
-      {description && (
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-      )}
       {helpText && helpHref && (
-        <div className="mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-          <HelpCircle className="h-4 w-4" />
-          <a href={helpHref} className="text-primary hover:underline flex items-center gap-1">
+        <div className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+          <a href={helpHref} className="text-primary hover:underline flex items-center gap-1 font-medium">
             {helpText}
             <ExternalLink className="h-3 w-3" />
           </a>

@@ -3,7 +3,7 @@ import { ChannelLinkClient } from '@/components/features/sales-channels/SalesCha
 export default function MarketplacesPage() {
   return (
     <ChannelLinkClient
-      title="Marketplaces"
+      title="Marketplaces e hubs"
       description="Configure a URL do canal de marketplaces da loja."
       channelKey="marketplaces"
     />

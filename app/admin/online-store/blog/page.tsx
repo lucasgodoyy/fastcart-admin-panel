@@ -1,5 +1,5 @@
-import { UnderConstructionClient } from '@/components/features/sales-channels/SalesChannelsClients';
+import { BlogManagementClient } from '@/components/features/blog/BlogManagementClient';
 
 export default function OnlineStoreBlogPage() {
-  return <UnderConstructionClient />;
+  return <BlogManagementClient />;
 }
