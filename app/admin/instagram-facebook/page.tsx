@@ -3,7 +3,7 @@ import { ChannelLinkClient } from '@/components/features/sales-channels/SalesCha
 export default function InstagramFacebookPage() {
   return (
     <ChannelLinkClient
-      title="Instagram & Facebook"
+      title="Instagram e Facebook"
       description="Configure o link do canal para integração e divulgação da loja."
       channelKey="instagramFacebook"
     />
