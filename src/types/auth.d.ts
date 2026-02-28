@@ -3,6 +3,11 @@ export interface LoginCredentials {
   password: string;
 }
 
+export interface ResetPasswordRequest {
+  email: string;
+  newPassword: string;
+}
+
 export interface AuthResponse {
   token: string;
   email?: string;
@@ -23,6 +28,6 @@ export interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (credentials: LoginCredentials) => Promise<void>;
+  login: (credentials: LoginCredentials) => Promise<AuthResponse>;
   logout: () => void;
 }

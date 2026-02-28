@@ -1,10 +1,12 @@
 "use client"
 
-import { Bell, Search, ChevronRight } from "lucide-react"
+import { Search, ChevronRight } from "lucide-react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { useMemo } from "react"
 import { t } from "@/lib/admin-language"
+import { useAuth } from "@/context/AuthContext"
+import { NotificationBell } from "./notification-bell"
 
 const breadcrumbLabelMap: Record<string, string> = {
   admin: t("Painel", "Dashboard"),
@@ -50,6 +52,7 @@ function useBreadcrumbs() {
 
 export function AdminHeader() {
   const breadcrumbs = useBreadcrumbs()
+  const { logout } = useAuth()
 
   return (
     <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6 gap-4">
@@ -81,15 +84,13 @@ export function AdminHeader() {
         </button>
 
         {/* Notifications */}
-        <button className="relative rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
-          <Bell className="h-5 w-5" />
-          <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-            3
-          </span>
-        </button>
+        <NotificationBell />
 
         {/* Profile */}
-        <button className="flex items-center gap-2.5 rounded-lg p-1.5 hover:bg-muted transition-colors">
+        <button
+          onClick={logout}
+          className="flex items-center gap-2.5 rounded-lg p-1.5 hover:bg-muted transition-colors"
+        >
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70 text-sm font-bold text-primary-foreground">
             F
           </div>

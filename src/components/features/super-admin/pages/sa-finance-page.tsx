@@ -34,7 +34,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
+import { useTabFromPath } from "../hooks/use-tab-from-path";
+
+const tabRouteMap = { overview: "", transactions: "transactions", payouts: "payouts", fees: "fees" };
 
 const mockTransactions = [
   { id: "TXN-001", store: "Fashion Store", type: "Venda", amount: "R$ 349,90", fee: "R$ 17,50", net: "R$ 332,40", date: "28/02/2026", status: "COMPLETED" },
@@ -61,7 +63,7 @@ const txnStatusMap: Record<string, { label: string; color: string }> = {
 };
 
 export function SaFinancePage() {
-  const [tab, setTab] = useState("overview");
+  const [tab, setTab] = useTabFromPath("/super-admin/finance", tabRouteMap, "overview");
 
   return (
     <div className="space-y-8">

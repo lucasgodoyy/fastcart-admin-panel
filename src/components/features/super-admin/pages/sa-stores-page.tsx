@@ -1,20 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Building2,
   Search,
   ExternalLink,
   MoreHorizontal,
-  Globe,
-  ShoppingCart,
-  Star,
   TrendingUp,
   Eye,
   Ban,
   CheckCircle,
   AlertTriangle,
+  Power,
 } from "lucide-react";
 import {
   SaPageHeader,
@@ -40,38 +40,91 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { superAdminService } from "@/services/super-admin";
 
-const mockStores = [
-  { id: 1, name: "Fashion Store Oficial", slug: "fashion-store", plan: "Pro", status: "ACTIVE", products: 342, orders: 892, revenue: "R$ 124.580", domain: "fashionstore.com.br" },
-  { id: 2, name: "TechGadgets Pro", slug: "techgadgets", plan: "Pro", status: "ACTIVE", products: 215, orders: 654, revenue: "R$ 98.450", domain: "techgadgets.com" },
-  { id: 3, name: "Casa & Decor Market", slug: "casadecor", plan: "Business", status: "ACTIVE", products: 478, orders: 523, revenue: "R$ 76.320", domain: "casadecor.com.br" },
-  { id: 4, name: "SportLife Brasil", slug: "sportlife", plan: "Trial", status: "TRIAL", products: 89, orders: 412, revenue: "R$ 54.100", domain: null },
-  { id: 5, name: "Beleza Natural", slug: "belezanatural", plan: "Basic", status: "ACTIVE", products: 156, orders: 367, revenue: "R$ 43.890", domain: "belezanatural.com" },
-  { id: 6, name: "Pet Paradise", slug: "petparadise", plan: "Trial", status: "PENDING", products: 12, orders: 0, revenue: "R$ 0", domain: null },
-  { id: 7, name: "Loja Suspensa", slug: "lojasuspensa", plan: "Basic", status: "INACTIVE", products: 45, orders: 23, revenue: "R$ 1.200", domain: null },
-];
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value ?? 0);
 
 export function SaStoresPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
-  const [planFilter, setPlanFilter] = useState("ALL");
+  const queryClient = useQueryClient();
 
-  const filtered = mockStores.filter(s => {
-    if (search && !s.name.toLowerCase().includes(search.toLowerCase()) && !s.slug.toLowerCase().includes(search.toLowerCase())) return false;
-    if (statusFilter !== "ALL" && s.status !== statusFilter) return false;
-    if (planFilter !== "ALL" && s.plan !== planFilter) return false;
-    return true;
+  const { data, isLoading } = useQuery({
+    queryKey: ["super-admin-stores", statusFilter, search],
+    queryFn: () =>
+      superAdminService.listStores({
+        status: statusFilter,
+        search: search || undefined,
+        page: 0,
+        size: 100,
+      }),
   });
+
+  const toggleMutation = useMutation({
+    mutationFn: (storeId: number) => superAdminService.toggleStoreStatus(storeId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["super-admin-stores"] });
+    },
+  });
+
+  const stores = data?.content ?? [];
+  const totalStores = data?.totalElements ?? 0;
+  const activeStores = useMemo(() => stores.filter((store) => store.status === "ACTIVE").length, [stores]);
+  const inactiveStores = useMemo(() => stores.filter((store) => store.status === "INACTIVE").length, [stores]);
+  const gmvTotal = useMemo(
+    () => stores.reduce((acc, current) => acc + Number(current.paidRevenue ?? 0), 0),
+    [stores],
+  );
+
+  const buildStorefrontUrl = (slug: string) => {
+    const configured = (process.env.NEXT_PUBLIC_STOREFRONT_URL || "").trim();
+    if (configured) {
+      return `${configured.replace(/\/$/, "")}/?storeSlug=${encodeURIComponent(slug)}`;
+    }
+
+    if (typeof window === "undefined") {
+      return "";
+    }
+
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+    const storefrontPort = process.env.NEXT_PUBLIC_STOREFRONT_PORT || "3000";
+
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return `${protocol}//${slug}.127.0.0.1.nip.io:${storefrontPort}`;
+    }
+
+    if (hostname.startsWith("admin.")) {
+      const rootDomain = hostname.replace(/^admin\./, "");
+      return `${protocol}//${slug}.${rootDomain}`;
+    }
+
+    return `${protocol}//${slug}.${hostname}`;
+  };
+
+  const openStorefront = (slug: string) => {
+    const url = buildStorefrontUrl(slug);
+    if (!url) {
+      return;
+    }
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
 
   return (
     <div className="space-y-8">
       <SaPageHeader title="Gerenciamento de Lojas" description="Visualize e gerencie todas as lojas da plataforma" />
 
       <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SaStatCard title="Total de Lojas" value="156" icon={Building2} color="accent" trend={{ value: 8, label: "" }} />
-        <SaStatCard title="Lojas Ativas" value="134" icon={CheckCircle} color="success" />
-        <SaStatCard title="Em Trial" value="18" icon={AlertTriangle} color="warning" />
-        <SaStatCard title="GMV Total" value="R$ 2.4M" icon={TrendingUp} color="info" subtitle="Últimos 30 dias" />
+        <SaStatCard title="Total de Lojas" value={String(totalStores)} icon={Building2} color="accent" />
+        <SaStatCard title="Lojas Ativas" value={String(activeStores)} icon={CheckCircle} color="success" />
+        <SaStatCard title="Inativas" value={String(inactiveStores)} icon={AlertTriangle} color="warning" />
+        <SaStatCard title="GMV Total" value={formatCurrency(gmvTotal)} icon={TrendingUp} color="info" subtitle="Pedidos pagos" />
       </motion.div>
 
       <motion.div variants={fadeInUp} initial="initial" animate="animate">
@@ -86,19 +139,7 @@ export function SaStoresPage() {
               <SelectContent className="bg-[hsl(var(--sa-surface))] border-[hsl(var(--sa-border))]">
                 <SelectItem value="ALL">Todos</SelectItem>
                 <SelectItem value="ACTIVE">Ativo</SelectItem>
-                <SelectItem value="TRIAL">Trial</SelectItem>
-                <SelectItem value="PENDING">Pendente</SelectItem>
                 <SelectItem value="INACTIVE">Inativo</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={planFilter} onValueChange={setPlanFilter}>
-              <SelectTrigger className="w-full sm:w-40 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))]"><SelectValue placeholder="Plano" /></SelectTrigger>
-              <SelectContent className="bg-[hsl(var(--sa-surface))] border-[hsl(var(--sa-border))]">
-                <SelectItem value="ALL">Todos os Planos</SelectItem>
-                <SelectItem value="Trial">Trial</SelectItem>
-                <SelectItem value="Basic">Basic</SelectItem>
-                <SelectItem value="Pro">Pro</SelectItem>
-                <SelectItem value="Business">Business</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -106,7 +147,7 @@ export function SaStoresPage() {
       </motion.div>
 
       <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {filtered.map((store, i) => (
+        {stores.map((store) => (
           <motion.div key={store.id} variants={fadeInUp} whileHover={{ y: -4 }} className="group relative rounded-2xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-5 hover:border-[hsl(var(--sa-border))] transition-all">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
@@ -121,27 +162,41 @@ export function SaStoresPage() {
                   <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-[hsl(var(--sa-text-muted))] hover:text-[hsl(var(--sa-text))] hover:bg-[hsl(var(--sa-surface-hover))]"><MoreHorizontal className="h-4 w-4" /></Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-[hsl(var(--sa-surface))] border-[hsl(var(--sa-border))]">
-                  <DropdownMenuItem className="text-[hsl(var(--sa-text-secondary))] hover:bg-[hsl(var(--sa-surface-hover))] cursor-pointer gap-2"><Eye className="h-3.5 w-3.5" /> Ver Detalhes</DropdownMenuItem>
-                  <DropdownMenuItem className="text-[hsl(var(--sa-text-secondary))] hover:bg-[hsl(var(--sa-surface-hover))] cursor-pointer gap-2"><ExternalLink className="h-3.5 w-3.5" /> Abrir Loja</DropdownMenuItem>
-                  <DropdownMenuItem className="text-[hsl(var(--sa-danger))] hover:bg-[hsl(var(--sa-danger-subtle))] cursor-pointer gap-2"><Ban className="h-3.5 w-3.5" /> Suspender</DropdownMenuItem>
+                  <DropdownMenuItem asChild className="text-[hsl(var(--sa-text-secondary))] hover:bg-[hsl(var(--sa-surface-hover))] cursor-pointer gap-2">
+                    <Link href={`/super-admin/stores/${store.id}`}><Eye className="h-3.5 w-3.5" /> Ver Detalhes</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => openStorefront(store.slug)}
+                    className="text-[hsl(var(--sa-text-secondary))] hover:bg-[hsl(var(--sa-surface-hover))] cursor-pointer gap-2"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" /> Abrir Loja
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => toggleMutation.mutate(store.id)}
+                    className={`cursor-pointer gap-2 ${store.status === "ACTIVE" ? "text-[hsl(var(--sa-danger))] hover:bg-[hsl(var(--sa-danger-subtle))]" : "text-[hsl(var(--sa-success))] hover:bg-[hsl(var(--sa-success))]/10"}`}
+                  >
+                    {store.status === "ACTIVE" ? <Ban className="h-3.5 w-3.5" /> : <Power className="h-3.5 w-3.5" />}
+                    {store.status === "ACTIVE" ? "Suspender" : "Ativar"}
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
             <div className="flex items-center gap-2 mb-4">
               <SaStatusBadge status={store.status} />
-              <span className="text-[11px] font-medium text-[hsl(var(--sa-text-muted))] bg-[hsl(var(--sa-surface-hover))] rounded-full px-2 py-0.5">{store.plan}</span>
-              {store.domain && (<span className="text-[11px] text-[hsl(var(--sa-text-muted))] flex items-center gap-1"><Globe className="h-3 w-3" /> {store.domain}</span>)}
+              {store.email && (
+                <span className="text-[11px] text-[hsl(var(--sa-text-muted))]">{store.email}</span>
+              )}
             </div>
             <div className="grid grid-cols-3 gap-3 pt-3 border-t border-[hsl(var(--sa-border-subtle))]">
-              <div className="text-center"><p className="text-[16px] font-bold text-[hsl(var(--sa-text))]">{store.products}</p><p className="text-[10px] text-[hsl(var(--sa-text-muted))]">Produtos</p></div>
-              <div className="text-center"><p className="text-[16px] font-bold text-[hsl(var(--sa-text))]">{store.orders}</p><p className="text-[10px] text-[hsl(var(--sa-text-muted))]">Pedidos</p></div>
-              <div className="text-center"><p className="text-[16px] font-bold text-[hsl(var(--sa-success))]">{store.revenue}</p><p className="text-[10px] text-[hsl(var(--sa-text-muted))]">Receita</p></div>
+              <div className="text-center"><p className="text-[16px] font-bold text-[hsl(var(--sa-text))]">{store.productsCount}</p><p className="text-[10px] text-[hsl(var(--sa-text-muted))]">Produtos</p></div>
+              <div className="text-center"><p className="text-[16px] font-bold text-[hsl(var(--sa-text))]">{store.ordersCount}</p><p className="text-[10px] text-[hsl(var(--sa-text-muted))]">Pedidos</p></div>
+              <div className="text-center"><p className="text-[16px] font-bold text-[hsl(var(--sa-success))]">{formatCurrency(Number(store.paidRevenue ?? 0))}</p><p className="text-[10px] text-[hsl(var(--sa-text-muted))]">Receita</p></div>
             </div>
           </motion.div>
         ))}
       </motion.div>
 
-      {filtered.length === 0 && (<SaEmptyState icon={Building2} title="Nenhuma loja encontrada" description="Tente ajustar os filtros de busca" />)}
+      {!isLoading && stores.length === 0 && (<SaEmptyState icon={Building2} title="Nenhuma loja encontrada" description="Tente ajustar os filtros de busca" />)}
     </div>
   );
 }
