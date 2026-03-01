@@ -1,11 +1,10 @@
-import { RoutePlaceholderPage } from '@/components/admin/RoutePlaceholderPage';
+import { Suspense } from 'react';
+import { AbandonedCartsClient } from '@/components/features/sales/AbandonedCartsClient';
 
 export default function AbandonedCartsPage() {
   return (
-    <RoutePlaceholderPage
-      title="Vendas · Carrinhos abandonados"
-      description="Monitore carrinhos abandonados e ações de recuperação."
-      links={[{ label: 'Lista de vendas', href: '/admin/sales' }]}
-    />
+    <Suspense fallback={<div className="p-8 text-sm text-muted-foreground">Carregando...</div>}>
+      <AbandonedCartsClient />
+    </Suspense>
   );
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
@@ -18,58 +17,34 @@ import {
   Zap,
   DollarSign,
   Eye,
-  Shield,
-  Settings,
-  FileText,
-  Link2,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { superAdminService } from "@/services/super-admin";
-import type { ActivityLogSummary } from "@/types/super-admin";
 import {
   SaPageHeader,
   SaStatCard,
   SaCard,
   SaSkeleton,
   SaStatusBadge,
+  SaEmptyState,
   staggerContainer,
   fadeInUp,
 } from "../ui/sa-components";
 
-/* ── fake sparkline (pure CSS) ── */
-function MiniSparkline({ data, color }: { data: number[]; color: string }) {
-  const max = Math.max(...data);
-  return (
-    <div className="flex items-end gap-[2px] h-8">
-      {data.map((v, i) => (
-        <motion.div
-          key={i}
-          initial={{ height: 0 }}
-          animate={{ height: `${(v / max) * 100}%` }}
-          transition={{ delay: i * 0.05, duration: 0.4, ease: "easeOut" }}
-          className={`w-[3px] rounded-full ${color} opacity-80`}
-        />
-      ))}
-    </div>
-  );
-}
-
 /* ── Quick-action button ── */
 function QuickAction({ icon: Icon, label, href }: { icon: React.ComponentType<{ className?: string }>; label: string; href: string }) {
   return (
-    <Link href={href}>
-      <motion.div
-        variants={fadeInUp}
-        className="flex flex-col items-center gap-2 rounded-2xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-4 hover:border-[hsl(var(--sa-accent))/0.3] hover:bg-[hsl(var(--sa-surface-hover))] transition-all group cursor-pointer"
-        whileHover={{ y: -4, scale: 1.02 }}
-        whileTap={{ scale: 0.97 }}
-      >
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--sa-accent-subtle))] group-hover:bg-[hsl(var(--sa-accent))] transition-colors">
-          <Icon className="h-5 w-5 text-[hsl(var(--sa-accent))] group-hover:text-white transition-colors" />
-        </div>
-        <span className="text-[11px] font-medium text-[hsl(var(--sa-text-secondary))] group-hover:text-[hsl(var(--sa-text))] transition-colors">{label}</span>
-      </motion.div>
-    </Link>
+    <motion.a
+      href={href}
+      variants={fadeInUp}
+      className="flex flex-col items-center gap-2 rounded-2xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-4 hover:border-[hsl(var(--sa-accent))/0.3] hover:bg-[hsl(var(--sa-surface-hover))] transition-all group cursor-pointer"
+      whileHover={{ y: -4, scale: 1.02 }}
+      whileTap={{ scale: 0.97 }}
+    >
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--sa-accent-subtle))] group-hover:bg-[hsl(var(--sa-accent))] transition-colors">
+        <Icon className="h-5 w-5 text-[hsl(var(--sa-accent))] group-hover:text-white transition-colors" />
+      </div>
+      <span className="text-[11px] font-medium text-[hsl(var(--sa-text-secondary))] group-hover:text-[hsl(var(--sa-text))] transition-colors">{label}</span>
+    </motion.a>
   );
 }
 
@@ -88,38 +63,6 @@ function ActivityItem({ icon: Icon, title, time, color }: {
       </div>
     </motion.div>
   );
-}
-
-/* ── Map action types to icons/colors ── */
-const actionTypeStyle: Record<string, { icon: LucideIcon; color: string }> = {
-  STORE_CREATED: { icon: Building2, color: "bg-[hsl(var(--sa-accent-subtle))] text-[hsl(var(--sa-accent))]" },
-  STORE_UPDATED: { icon: Building2, color: "bg-[hsl(var(--sa-info-subtle))] text-[hsl(var(--sa-info))]" },
-  STORE_TOGGLED: { icon: Building2, color: "bg-[hsl(var(--sa-warning-subtle))] text-[hsl(var(--sa-warning))]" },
-  USER_CREATED: { icon: Users, color: "bg-[hsl(var(--sa-info-subtle))] text-[hsl(var(--sa-info))]" },
-  USER_UPDATED: { icon: Users, color: "bg-[hsl(var(--sa-info-subtle))] text-[hsl(var(--sa-info))]" },
-  USER_TOGGLED: { icon: Shield, color: "bg-[hsl(var(--sa-warning-subtle))] text-[hsl(var(--sa-warning))]" },
-  ROLE_CHANGED: { icon: Shield, color: "bg-[hsl(var(--sa-warning-subtle))] text-[hsl(var(--sa-warning))]" },
-  SESSION_REVOKED: { icon: Shield, color: "bg-[hsl(var(--sa-danger-subtle))] text-[hsl(var(--sa-danger))]" },
-  EMAIL_SENT: { icon: Mail, color: "bg-[hsl(var(--sa-success-subtle))] text-[hsl(var(--sa-success))]" },
-  EMAIL_FAILED: { icon: Mail, color: "bg-[hsl(var(--sa-danger-subtle))] text-[hsl(var(--sa-danger))]" },
-  PASSWORD_RESET: { icon: Shield, color: "bg-[hsl(var(--sa-warning-subtle))] text-[hsl(var(--sa-warning))]" },
-  SETTINGS_UPDATED: { icon: Settings, color: "bg-[hsl(var(--sa-accent-subtle))] text-[hsl(var(--sa-accent))]" },
-  LOGIN: { icon: Users, color: "bg-[hsl(var(--sa-success-subtle))] text-[hsl(var(--sa-success))]" },
-  LOGOUT: { icon: Users, color: "bg-[hsl(var(--sa-text-muted))]/10 text-[hsl(var(--sa-text-muted))]" },
-};
-
-const defaultActionStyle = { icon: Activity, color: "bg-[hsl(var(--sa-accent-subtle))] text-[hsl(var(--sa-accent))]" };
-
-function activityToProps(log: ActivityLogSummary) {
-  const style = actionTypeStyle[log.actionType] ?? defaultActionStyle;
-  const time = (() => {
-    try {
-      return formatDistanceToNow(new Date(log.createdAt), { addSuffix: true, locale: ptBR });
-    } catch {
-      return log.createdAt;
-    }
-  })();
-  return { icon: style.icon, title: log.description, time, color: style.color };
 }
 
 /* ── Top stores row ── */
@@ -148,16 +91,28 @@ export function SaDashboardPage() {
     queryFn: superAdminService.getOverview,
   });
 
+  const { data: subStats } = useQuery({
+    queryKey: ["sa-subscription-stats"],
+    queryFn: superAdminService.getSubscriptionStats,
+  });
+
   const { data: activityData } = useQuery({
-    queryKey: ["super-admin-activity-recent"],
-    queryFn: () => superAdminService.listActivityLogs({ page: 0, size: 8 }),
+    queryKey: ["sa-dashboard-activity"],
+    queryFn: () => superAdminService.listActivityLogs({ page: 0, size: 6 }),
+  });
+
+  const { data: topStoresData } = useQuery({
+    queryKey: ["sa-dashboard-top-stores"],
+    queryFn: () => superAdminService.listStores({ page: 0, size: 5 }),
   });
 
   const val = (n?: number) => (isLoading ? "—" : (n ?? 0).toLocaleString("pt-BR"));
+  const fmtMoney = (n: number) => `R$ ${n.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
-  /* mock sparkline data */
-  const spark1 = [4, 5, 8, 6, 9, 12, 10, 14, 11, 16, 13, 18];
-  const spark2 = [2, 3, 5, 4, 7, 6, 9, 8, 10, 12, 11, 14];
+  const recentActivity = activityData?.content ?? [];
+  const topStores = topStoresData?.content ?? [];
+  const mrr = subStats?.mrr ?? 0;
+  const arr = mrr * 12;
 
   return (
     <div className="space-y-8">
@@ -189,29 +144,22 @@ export function SaDashboardPage() {
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))]">Receita da Plataforma</h3>
-                  <p className="text-[12px] text-[hsl(var(--sa-text-muted))]">Resumo dos últimos 30 dias</p>
+                  <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))]">Receita de Assinaturas</h3>
+                  <p className="text-[12px] text-[hsl(var(--sa-text-muted))]">Dados em tempo real do backend</p>
                 </div>
-                <motion.div className="flex items-center gap-1 text-[hsl(var(--sa-success))]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
-                  <TrendingUp className="h-4 w-4" />
-                  <span className="text-[13px] font-bold">+23%</span>
-                </motion.div>
               </div>
               <div className="grid grid-cols-3 gap-6">
                 <div>
-                  <p className="text-[11px] font-medium text-[hsl(var(--sa-text-muted))] mb-1">GMV Total</p>
-                  <p className="text-[24px] font-bold sa-gradient-text">R$ 847K</p>
-                  <MiniSparkline data={spark1} color="bg-[hsl(var(--sa-accent))]" />
+                  <p className="text-[11px] font-medium text-[hsl(var(--sa-text-muted))] mb-1">MRR</p>
+                  <p className="text-[24px] font-bold sa-gradient-text">{fmtMoney(mrr)}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] font-medium text-[hsl(var(--sa-text-muted))] mb-1">Taxa Plataforma</p>
-                  <p className="text-[24px] font-bold text-[hsl(var(--sa-success))]">R$ 42K</p>
-                  <MiniSparkline data={spark2} color="bg-[hsl(var(--sa-success))]" />
+                  <p className="text-[11px] font-medium text-[hsl(var(--sa-text-muted))] mb-1">ARR Projetado</p>
+                  <p className="text-[24px] font-bold text-[hsl(var(--sa-success))]">{fmtMoney(arr)}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] font-medium text-[hsl(var(--sa-text-muted))] mb-1">Pedidos</p>
-                  <p className="text-[24px] font-bold text-[hsl(var(--sa-info))]">3.2K</p>
-                  <MiniSparkline data={[6, 8, 5, 10, 7, 12, 9, 14, 11, 15, 13, 17]} color="bg-[hsl(var(--sa-info))]" />
+                  <p className="text-[11px] font-medium text-[hsl(var(--sa-text-muted))] mb-1">Assinaturas Ativas</p>
+                  <p className="text-[24px] font-bold text-[hsl(var(--sa-info))]">{subStats?.activeSubscriptions ?? 0}</p>
                 </div>
               </div>
             </div>
@@ -230,61 +178,76 @@ export function SaDashboardPage() {
           <SaCard className="h-full">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))]">Atividade Recente</h3>
-              <Link href="/super-admin/activity" className="text-[11px] font-medium text-[hsl(var(--sa-accent))] hover:text-[hsl(var(--sa-accent-hover))] flex items-center gap-1">
+              <motion.a href="/super-admin/activity" className="text-[11px] font-medium text-[hsl(var(--sa-accent))] hover:text-[hsl(var(--sa-accent-hover))] flex items-center gap-1" whileHover={{ x: 2 }}>
                 Ver tudo <ArrowUpRight className="h-3 w-3" />
-              </Link>
+              </motion.a>
             </div>
             <motion.div variants={staggerContainer} initial="initial" animate="animate">
-              {activityData?.content && activityData.content.length > 0 ? (
-                activityData.content.slice(0, 6).map((log) => {
-                  const props = activityToProps(log);
-                  return <ActivityItem key={log.id} {...props} />;
-                })
+              {recentActivity.length === 0 ? (
+                <p className="text-[12px] text-[hsl(var(--sa-text-muted))] py-4 text-center">Nenhuma atividade recente</p>
               ) : (
-                <>
-                  <ActivityItem icon={Building2} title="Nova loja cadastrada: Fashion Store" time="Há 12 minutos" color="bg-[hsl(var(--sa-accent-subtle))] text-[hsl(var(--sa-accent))]" />
-                  <ActivityItem icon={Users} title="Novo usuário registrado: maria@email.com" time="Há 28 minutos" color="bg-[hsl(var(--sa-info-subtle))] text-[hsl(var(--sa-info))]" />
-                  <ActivityItem icon={CreditCard} title="Assinatura upgrade: Plano Pro" time="Há 1 hora" color="bg-[hsl(var(--sa-success-subtle))] text-[hsl(var(--sa-success))]" />
-                  <ActivityItem icon={ShoppingCart} title="1.247 pedidos processados hoje" time="Há 2 horas" color="bg-[hsl(var(--sa-warning-subtle))] text-[hsl(var(--sa-warning))]" />
-                  <ActivityItem icon={Mail} title="Campanha de e-mail enviada: 5K destinatários" time="Há 3 horas" color="bg-[hsl(var(--sa-success-subtle))] text-[hsl(var(--sa-success))]" />
-                  <ActivityItem icon={Zap} title="Deploy v2.14.0 realizado com sucesso" time="Há 5 horas" color="bg-[hsl(var(--sa-accent-subtle))] text-[hsl(var(--sa-accent))]" />
-                </>
+                recentActivity.map((log) => {
+                  const iconMap: Record<string, { icon: typeof Building2; color: string }> = {
+                    CREATE: { icon: Building2, color: "bg-[hsl(var(--sa-accent-subtle))] text-[hsl(var(--sa-accent))]" },
+                    UPDATE: { icon: Zap, color: "bg-[hsl(var(--sa-info-subtle))] text-[hsl(var(--sa-info))]" },
+                    DELETE: { icon: ShoppingCart, color: "bg-[hsl(var(--sa-danger-subtle))] text-[hsl(var(--sa-danger))]" },
+                    LOGIN: { icon: Users, color: "bg-[hsl(var(--sa-success-subtle))] text-[hsl(var(--sa-success))]" },
+                  };
+                  const { icon: Icon, color } = iconMap[log.actionType] ?? iconMap.UPDATE;
+                  return (
+                    <ActivityItem
+                      key={log.id}
+                      icon={Icon}
+                      title={log.description}
+                      time={formatDistanceToNow(new Date(log.createdAt), { addSuffix: true, locale: ptBR })}
+                      color={color}
+                    />
+                  );
+                })
               )}
             </motion.div>
           </SaCard>
         </motion.div>
       </div>
 
-      {/* ── Top Stores + Platform Health ── */}
+      {/* ── Top Stores + Subscription Health ── */}
       <div className="grid gap-6 lg:grid-cols-2">
         <motion.div variants={staggerContainer} initial="initial" animate="animate">
           <SaCard>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))]">Top Lojas por Receita</h3>
-              <Link href="/super-admin/stores/performance" className="text-[11px] font-medium text-[hsl(var(--sa-accent))] hover:text-[hsl(var(--sa-accent-hover))] flex items-center gap-1">
-                Ver ranking <ArrowUpRight className="h-3 w-3" />
-              </Link>
+              <motion.a href="/super-admin/stores" className="text-[11px] font-medium text-[hsl(var(--sa-accent))] hover:text-[hsl(var(--sa-accent-hover))] flex items-center gap-1" whileHover={{ x: 2 }}>
+                Ver todas <ArrowUpRight className="h-3 w-3" />
+              </motion.a>
             </div>
             <motion.div variants={staggerContainer} initial="initial" animate="animate">
-              <TopStoreRow rank={1} name="Fashion Store Oficial" revenue="R$ 124.580" orders={892} status="ACTIVE" />
-              <TopStoreRow rank={2} name="TechGadgets Pro" revenue="R$ 98.450" orders={654} status="ACTIVE" />
-              <TopStoreRow rank={3} name="Casa & Decor Market" revenue="R$ 76.320" orders={523} status="ACTIVE" />
-              <TopStoreRow rank={4} name="SportLife Brasil" revenue="R$ 54.100" orders={412} status="TRIAL" />
-              <TopStoreRow rank={5} name="Beleza Natural" revenue="R$ 43.890" orders={367} status="ACTIVE" />
+              {topStores.length === 0 ? (
+                <p className="text-[12px] text-[hsl(var(--sa-text-muted))] py-4 text-center">Nenhuma loja cadastrada</p>
+              ) : (
+                topStores.map((store, i) => (
+                  <TopStoreRow
+                    key={store.id}
+                    rank={i + 1}
+                    name={store.name}
+                    revenue={`R$ ${(store.paidRevenue ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
+                    orders={store.ordersCount}
+                    status={store.status}
+                  />
+                ))
+              )}
             </motion.div>
           </SaCard>
         </motion.div>
 
         <motion.div variants={staggerContainer} initial="initial" animate="animate">
           <SaCard>
-            <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Saúde da Plataforma</h3>
+            <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Saúde das Assinaturas</h3>
             <div className="space-y-4">
-              <HealthBar label="API Uptime" value={99.97} color="success" />
-              <HealthBar label="Tempo Médio de Resposta" value={94} suffix="ms" color="success" />
-              <HealthBar label="Entrega de E-mails" value={98.2} color="success" />
-              <HealthBar label="Uso de CPU" value={34} color="info" />
-              <HealthBar label="Uso de Memória" value={62} color="warning" />
-              <HealthBar label="Armazenamento" value={48} color="info" />
+              <HealthBar label="Assinaturas Ativas" value={subStats?.activeSubscriptions ?? 0} suffix="" color="success" />
+              <HealthBar label="Em Trial" value={subStats?.trialSubscriptions ?? 0} suffix="" color="info" />
+              <HealthBar label="Canceladas" value={subStats?.cancelledSubscriptions ?? 0} suffix="" color="danger" />
+              <HealthBar label="Churn Rate" value={Number((subStats?.churnRate ?? 0).toFixed(1))} suffix="%" color={subStats && subStats.churnRate < 5 ? "success" : "warning"} />
+              <HealthBar label="LTV Médio" value={subStats?.avgLifetimeValue ?? 0} suffix="" color="info" />
             </div>
           </SaCard>
         </motion.div>

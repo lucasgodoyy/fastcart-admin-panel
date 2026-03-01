@@ -1,95 +1,120 @@
 import apiClient from '@/lib/api';
-import type {
-  Conversation,
-  ChatMessage,
-  CreateConversationRequest,
-  SendMessageRequest,
-  ChatStats,
-} from '@/types/chat';
-import type { PaginatedResult } from '@/types/super-admin';
 
-// ═══════════════════════════════════════════════════════════════
-//  Chat Service — Admin endpoints
-// ═══════════════════════════════════════════════════════════════
+/* ── Types ── */
+
+export type Conversation = {
+  id: number;
+  customerName: string;
+  customerEmail: string;
+  status: string;
+  channel: string;
+  subject: string | null;
+  lastMessagePreview: string | null;
+  lastMessageAt: string | null;
+  unreadAdminCount: number;
+  unreadCustomerCount: number;
+  totalMessages: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ChatMessage = {
+  id: number;
+  conversationId: number;
+  senderType: string;
+  senderName: string;
+  senderEmail: string;
+  content: string;
+  contentType: string;
+  isRead: boolean;
+  readAt: string | null;
+  createdAt: string;
+};
+
+export type PaginatedResult<T> = {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+};
+
+export type ChatStats = {
+  totalConversations: number;
+  openConversations: number;
+  closedConversations: number;
+  archivedConversations: number;
+  unreadMessages: number;
+};
+
+/* ── Service ── */
 
 const chatService = {
-  // ── Conversations ────────────────────────────────────────
-
   listConversations: async (params?: {
-    status?: string;
-    channel?: string;
     page?: number;
     size?: number;
+    status?: string;
+    channel?: string;
   }): Promise<PaginatedResult<Conversation>> => {
-    const response = await apiClient.get<PaginatedResult<Conversation>>(
-      '/admin/chat/conversations',
-      { params }
-    );
-    return response.data;
+    const res = await apiClient.get('/admin/chat/conversations', { params });
+    return res.data;
   },
 
-  getConversation: async (conversationId: number): Promise<Conversation> => {
-    const response = await apiClient.get<Conversation>(
-      `/admin/chat/conversations/${conversationId}`
-    );
-    return response.data;
+  getConversation: async (id: number): Promise<Conversation> => {
+    const res = await apiClient.get(`/admin/chat/conversations/${id}`);
+    return res.data;
   },
 
-  createConversation: async (
-    data: CreateConversationRequest
-  ): Promise<Conversation> => {
-    const response = await apiClient.post<Conversation>(
-      '/admin/chat/conversations',
-      data
-    );
-    return response.data;
+  createConversation: async (data: {
+    customerName: string;
+    customerEmail: string;
+    subject?: string;
+    initialMessage: string;
+  }): Promise<Conversation> => {
+    const res = await apiClient.post('/admin/chat/conversations', data);
+    return res.data;
   },
 
   updateStatus: async (
     conversationId: number,
-    status: string
+    status: 'OPEN' | 'CLOSED' | 'ARCHIVED',
   ): Promise<Conversation> => {
-    const response = await apiClient.put<Conversation>(
+    const res = await apiClient.put(
       `/admin/chat/conversations/${conversationId}/status`,
-      null,
-      { params: { status } }
+      { status },
     );
-    return response.data;
+    return res.data;
   },
-
-  // ── Messages ─────────────────────────────────────────────
 
   listMessages: async (
     conversationId: number,
-    params?: { page?: number; size?: number }
+    params?: { page?: number; size?: number },
   ): Promise<PaginatedResult<ChatMessage>> => {
-    const response = await apiClient.get<PaginatedResult<ChatMessage>>(
+    const res = await apiClient.get(
       `/admin/chat/conversations/${conversationId}/messages`,
-      { params }
+      { params },
     );
-    return response.data;
+    return res.data;
   },
 
   sendMessage: async (
     conversationId: number,
-    data: SendMessageRequest
+    content: string,
   ): Promise<Conversation> => {
-    const response = await apiClient.post<Conversation>(
+    const res = await apiClient.post(
       `/admin/chat/conversations/${conversationId}/messages`,
-      data
+      { content },
     );
-    return response.data;
+    return res.data;
   },
 
   markAsRead: async (conversationId: number): Promise<void> => {
     await apiClient.put(`/admin/chat/conversations/${conversationId}/read`);
   },
 
-  // ── Stats ────────────────────────────────────────────────
-
   getStats: async (): Promise<ChatStats> => {
-    const response = await apiClient.get<ChatStats>('/admin/chat/stats');
-    return response.data;
+    const res = await apiClient.get('/admin/chat/stats');
+    return res.data;
   },
 };
 

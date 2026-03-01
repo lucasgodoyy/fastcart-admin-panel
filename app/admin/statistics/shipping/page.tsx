@@ -3,9 +3,9 @@ import { RoutePlaceholderPage } from '@/components/admin/RoutePlaceholderPage';
 export default function StatisticsShippingPage() {
   return (
     <RoutePlaceholderPage
-      title="Statistics · Shipping"
-      description="Acompanhe custos, SLA e performance de frete."
-      links={[{ label: 'Shipping Settings', href: '/admin/shipping' }]}
+      title="Estatísticas · Envio"
+      description="Análise de custos de frete, SLA de entrega e métricas de logística. Dados serão exibidos quando houver pedidos com envio."
+      links={[{ label: 'Configurações de Envio', href: '/admin/shipping' }]}
     />
   );
 }

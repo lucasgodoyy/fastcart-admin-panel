@@ -1,80 +1,67 @@
 import apiClient from '@/lib/api';
 
-// ── Types ────────────────────────────────────────────────────
-export interface EmailSenderConfig {
-  id: number | null;
+export type EmailSenderConfig = {
+  id: number;
   fromName: string;
   fromEmail: string;
   replyToEmail: string | null;
   active: boolean;
-  updatedAt: string | null;
-}
+  updatedAt: string;
+};
 
-export interface EmailTemplate {
+export type EmailTemplate = {
   id: number;
   templateKey: string;
   subject: string;
   bodyHtml: string;
   active: boolean;
-  updatedAt: string | null;
-}
+  updatedAt: string;
+};
 
-export interface OutboundEmailLog {
+export type EmailLog = {
   id: number;
-  orderId: number | null;
   recipientEmail: string;
   subject: string;
-  templateKey: string;
-  resendMessageId: string | null;
-  deliveryStatus: string;
+  status: string;
+  sentAt: string;
   errorMessage: string | null;
-  lastEventType: string | null;
-  lastEventAt: string | null;
-  sentAt: string | null;
-  createdAt: string;
-}
+};
 
-export interface EmailSenderConfigRequest {
-  fromName: string;
-  fromEmail: string;
-  replyToEmail?: string | null;
-  active: boolean;
-}
-
-export interface EmailTemplateUpsertRequest {
-  subject: string;
-  bodyHtml: string;
-  active: boolean;
-}
-
-// ── Service ──────────────────────────────────────────────────
 const emailService = {
-  // Sender Config
   getSenderConfig: async (): Promise<EmailSenderConfig> => {
-    const response = await apiClient.get<EmailSenderConfig>('/email/sender-config');
-    return response.data;
+    const res = await apiClient.get('/email/sender-config');
+    return res.data;
   },
 
-  updateSenderConfig: async (data: EmailSenderConfigRequest): Promise<EmailSenderConfig> => {
-    const response = await apiClient.put<EmailSenderConfig>('/email/sender-config', data);
-    return response.data;
+  upsertSenderConfig: async (data: {
+    fromName: string;
+    fromEmail: string;
+    replyToEmail?: string;
+    active: boolean;
+  }): Promise<EmailSenderConfig> => {
+    const res = await apiClient.put('/email/sender-config', data);
+    return res.data;
   },
 
-  // Templates
   listTemplates: async (): Promise<EmailTemplate[]> => {
-    const response = await apiClient.get<EmailTemplate[]>('/email/templates');
-    return response.data;
+    const res = await apiClient.get('/email/templates');
+    return res.data;
   },
 
-  upsertTemplate: async (templateKey: string, data: EmailTemplateUpsertRequest): Promise<EmailTemplate> => {
-    const response = await apiClient.put<EmailTemplate>(`/email/templates/${templateKey}`, data);
-    return response.data;
+  upsertTemplate: async (
+    templateKey: string,
+    data: { subject: string; bodyHtml: string; active: boolean },
+  ): Promise<EmailTemplate> => {
+    const res = await apiClient.put(`/email/templates/${templateKey}`, data);
+    return res.data;
   },
 
-  // Logs
-  listLogs: async (params?: { status?: string; limit?: number }): Promise<OutboundEmailLog[]> => {
-    const response = await apiClient.get<OutboundEmailLog[]>('/email/logs', { params });
-    return response.data;
+  listLogs: async (status?: string, limit?: number): Promise<EmailLog[]> => {
+    const params: Record<string, string | number> = {};
+    if (status) params.status = status;
+    if (limit) params.limit = limit;
+    const res = await apiClient.get('/email/logs', { params });
+    return res.data;
   },
 };
 

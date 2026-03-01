@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -35,6 +35,15 @@ export function SaShell({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Apply super-admin-theme to <body> so Radix UI portals
+  // (DropdownMenu, Select, etc.) rendered outside this tree inherit SA vars
+  useEffect(() => {
+    document.body.classList.add("super-admin-theme");
+    return () => {
+      document.body.classList.remove("super-admin-theme");
+    };
+  }, []);
 
   return (
     <div className="super-admin-theme min-h-screen bg-[hsl(var(--sa-bg))] text-[hsl(var(--sa-text))]">

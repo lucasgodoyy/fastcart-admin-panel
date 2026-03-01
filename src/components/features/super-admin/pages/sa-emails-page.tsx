@@ -5,9 +5,9 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useTabFromPath } from "../hooks/use-tab-from-path";
 import {
   Mail,
+  Search,
   FileText,
   Settings,
   Send,
@@ -27,6 +27,7 @@ import {
 } from "../ui/sa-components";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -51,20 +52,11 @@ const statusBadge: Record<string, { label: string; color: string }> = {
   PENDING: { label: "Pendente", color: "warning" },
 };
 
-const emailTabRoutes: Record<string, string> = {
-  logs: "",
-  templates: "templates",
-  config: "config",
-};
-
 export function SaEmailsPage() {
-  const [tab, setTab] = useTabFromPath("/super-admin/emails", emailTabRoutes, "logs");
+  const [tab, setTab] = useState("logs");
   const [status, setStatus] = useState("ALL");
   const [storeFilter, setStoreFilter] = useState("");
   const [page, setPage] = useState(0);
-  const [templateSearch, setTemplateSearch] = useState("");
-  const [templateStoreFilter, setTemplateStoreFilter] = useState("");
-  const [templatePage, setTemplatePage] = useState(0);
 
   const { data, isLoading } = useQuery({
     queryKey: ["super-admin-emails", status, storeFilter, page],
@@ -78,41 +70,18 @@ export function SaEmailsPage() {
     enabled: tab === "logs",
   });
 
-  const { data: templateData, isLoading: isLoadingTemplates } = useQuery({
-    queryKey: ["super-admin-email-templates", templateSearch, templateStoreFilter, templatePage],
-    queryFn: () =>
-      superAdminService.listEmailTemplates({
-        search: templateSearch || undefined,
-        storeId: templateStoreFilter.trim() ? Number(templateStoreFilter) : undefined,
-        page: templatePage,
-        size: 12,
-      }),
+  const { data: templatesData, isLoading: templatesLoading } = useQuery({
+    queryKey: ["super-admin-email-templates"],
+    queryFn: () => superAdminService.listEmailTemplates({ page: 0, size: 50 }),
     enabled: tab === "templates",
   });
 
-  const { data: stats } = useQuery({
-    queryKey: ["super-admin-email-stats"],
-    queryFn: async () => {
-      const [sent, failed, pending] = await Promise.all([
-        superAdminService.listEmailLogs({ status: "SENT", page: 0, size: 1 }),
-        superAdminService.listEmailLogs({ status: "FAILED", page: 0, size: 1 }),
-        superAdminService.listEmailLogs({ status: "PENDING", page: 0, size: 1 }),
-      ]);
-
-      const sentCount = sent.totalElements ?? 0;
-      const failedCount = failed.totalElements ?? 0;
-      const pendingCount = pending.totalElements ?? 0;
-      const deliveryBase = sentCount + failedCount;
-      const deliveryRate = deliveryBase > 0 ? (sentCount / deliveryBase) * 100 : 0;
-
-      return {
-        sentCount,
-        failedCount,
-        pendingCount,
-        deliveryRate,
-      };
-    },
+  const { data: overview } = useQuery({
+    queryKey: ["super-admin-overview"],
+    queryFn: superAdminService.getOverview,
   });
+
+  const templates = templatesData?.content ?? [];
 
   return (
     <div className="space-y-8">
@@ -122,10 +91,18 @@ export function SaEmailsPage() {
       />
 
       <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SaStatCard title="Total Enviados" value={(stats?.sentCount ?? 0).toLocaleString("pt-BR")} icon={Send} color="success" />
-        <SaStatCard title="Taxa de Entrega" value={`${(stats?.deliveryRate ?? 0).toFixed(1)}%`} icon={CheckCircle} color="info" />
-        <SaStatCard title="Falhas" value={(stats?.failedCount ?? 0).toLocaleString("pt-BR")} icon={AlertTriangle} color="danger" />
-        <SaStatCard title="Na Fila" value={(stats?.pendingCount ?? 0).toLocaleString("pt-BR")} icon={Clock} color="warning" />
+        <SaStatCard title="Total de E-mails" value={String(overview?.totalEmailLogs ?? 0)} icon={Send} color="success" />
+        <SaStatCard title="Falhas" value={String(overview?.failedEmailLogs ?? 0)} icon={AlertTriangle} color="danger" />
+        <SaStatCard
+          title="Taxa de Entrega"
+          value={overview && overview.totalEmailLogs > 0
+            ? `${(((overview.totalEmailLogs - overview.failedEmailLogs) / overview.totalEmailLogs) * 100).toFixed(1)}%`
+            : "—"
+          }
+          icon={CheckCircle}
+          color="info"
+        />
+        <SaStatCard title="Templates" value={String(templatesData?.totalElements ?? 0)} icon={FileText} color="warning" />
       </motion.div>
 
       <Tabs value={tab} onValueChange={setTab}>
@@ -226,87 +203,41 @@ export function SaEmailsPage() {
 
         {/* Templates */}
         <TabsContent value="templates" className="mt-6">
-          <div className="space-y-4">
-            <SaCard className="!p-4">
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Input
-                  value={templateSearch}
-                  onChange={(e) => {
-                    setTemplateSearch(e.target.value);
-                    setTemplatePage(0);
-                  }}
-                  placeholder="Buscar template por chave ou assunto"
-                  className="w-full bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] placeholder:text-[hsl(var(--sa-text-muted))]"
-                />
-                <Input
-                  value={templateStoreFilter}
-                  onChange={(e) => {
-                    setTemplateStoreFilter(e.target.value);
-                    setTemplatePage(0);
-                  }}
-                  placeholder="ID da Loja"
-                  className="w-full sm:w-40 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] placeholder:text-[hsl(var(--sa-text-muted))]"
-                />
-              </div>
-            </SaCard>
-
-            {isLoadingTemplates ? (
-              <div className="py-12 text-center text-[hsl(var(--sa-text-muted))]">Carregando...</div>
-            ) : templateData && templateData.content.length > 0 ? (
-              <>
-                <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {templateData.content.map((template) => (
-                    <motion.div
-                      key={template.id}
-                      variants={fadeInUp}
-                      whileHover={{ y: -3 }}
-                      className="rounded-2xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-5 hover:border-[hsl(var(--sa-border))] transition-all"
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--sa-accent-subtle))]">
-                          <FileText className="h-5 w-5 text-[hsl(var(--sa-accent))]" />
-                        </div>
-                        <SaStatusBadge status={template.active ? "ACTIVE" : "INACTIVE"} />
-                      </div>
-                      <h4 className="text-[12px] font-mono text-[hsl(var(--sa-accent))] mb-1">{template.templateKey}</h4>
-                      <p className="text-[13px] font-semibold text-[hsl(var(--sa-text))] mb-2">{template.subject}</p>
-                      <p className="text-[11px] text-[hsl(var(--sa-text-muted))] mb-3">
-                        {template.storeName ? `Loja: ${template.storeName}` : "Template global"}
-                      </p>
-                      <div className="pt-3 border-t border-[hsl(var(--sa-border-subtle))] text-[10px] text-[hsl(var(--sa-text-muted))]">
-                        Atualizado {formatDistanceToNow(new Date(template.updatedAt), { addSuffix: true, locale: ptBR })}
-                      </div>
-                    </motion.div>
-                  ))}
-                </motion.div>
-                <div className="flex items-center justify-between px-2">
-                  <span className="text-[12px] text-[hsl(var(--sa-text-muted))]">Página {templateData.page + 1} de {Math.max(templateData.totalPages, 1)}</span>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setTemplatePage((currentPage) => Math.max(0, currentPage - 1))}
-                      disabled={templateData.first}
-                      className="text-[11px] bg-[hsl(var(--sa-surface))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text-secondary))]"
-                    >
-                      Anterior
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setTemplatePage((currentPage) => currentPage + 1)}
-                      disabled={templateData.last}
-                      className="text-[11px] bg-[hsl(var(--sa-surface))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text-secondary))]"
-                    >
-                      Próxima
-                    </Button>
+          {templatesLoading ? (
+            <div className="py-12 text-center text-[hsl(var(--sa-text-muted))]">Carregando templates...</div>
+          ) : templates.length === 0 ? (
+            <SaEmptyState icon={FileText} title="Nenhum template encontrado" description="Templates de e-mail aparecerão aqui" />
+          ) : (
+            <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {templates.map((tpl) => (
+                <motion.div
+                  key={tpl.id}
+                  variants={fadeInUp}
+                  whileHover={{ y: -3 }}
+                  className="group rounded-2xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-5 hover:border-[hsl(var(--sa-border))] transition-all cursor-pointer"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--sa-accent-subtle))]">
+                      <FileText className="h-5 w-5 text-[hsl(var(--sa-accent))]" />
+                    </div>
+                    <span className={`text-[10px] font-bold ${tpl.active ? "text-[hsl(var(--sa-success))]" : "text-[hsl(var(--sa-text-muted))]"}`}>
+                      {tpl.active ? "Ativo" : "Inativo"}
+                    </span>
                   </div>
-                </div>
-              </>
-            ) : (
-              <SaEmptyState icon={FileText} title="Nenhum template encontrado" description="Ajuste os filtros para ver resultados" />
-            )}
-          </div>
+                  <h4 className="text-[13px] font-semibold text-[hsl(var(--sa-text))] mb-1">{tpl.subject}</h4>
+                  <p className="text-[11px] font-mono text-[hsl(var(--sa-text-muted))] mb-3">{tpl.templateKey}</p>
+                  <div className="flex items-center justify-between pt-3 border-t border-[hsl(var(--sa-border-subtle))]">
+                    <span className="text-[11px] text-[hsl(var(--sa-text-muted))]">
+                      {tpl.storeName || "Plataforma"}
+                    </span>
+                    <span className="text-[11px] text-[hsl(var(--sa-text-muted))]">
+                      {formatDistanceToNow(new Date(tpl.updatedAt), { addSuffix: true, locale: ptBR })}
+                    </span>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
         </TabsContent>
 
         {/* Config */}
@@ -315,16 +246,16 @@ export function SaEmailsPage() {
             <SaCard>
               <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4 flex items-center gap-2">
                 <Settings className="h-4 w-4 text-[hsl(var(--sa-accent))]" />
-                Provedor de E-mail
+                Configuração SMTP
               </h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between py-3 border-b border-[hsl(var(--sa-border-subtle))]">
                   <span className="text-[12px] text-[hsl(var(--sa-text-secondary))]">Provider</span>
-                  <span className="text-[12px] font-bold text-[hsl(var(--sa-text))]">Resend</span>
+                  <span className="text-[12px] font-bold text-[hsl(var(--sa-text))]">Amazon SES</span>
                 </div>
                 <div className="flex items-center justify-between py-3 border-b border-[hsl(var(--sa-border-subtle))]">
-                  <span className="text-[12px] text-[hsl(var(--sa-text-secondary))]">API</span>
-                  <span className="text-[12px] font-mono font-bold text-[hsl(var(--sa-text))]">api.resend.com/emails</span>
+                  <span className="text-[12px] text-[hsl(var(--sa-text-secondary))]">Região</span>
+                  <span className="text-[12px] font-bold text-[hsl(var(--sa-text))]">sa-east-1</span>
                 </div>
                 <div className="flex items-center justify-between py-3 border-b border-[hsl(var(--sa-border-subtle))]">
                   <span className="text-[12px] text-[hsl(var(--sa-text-secondary))]">Status</span>
@@ -332,37 +263,20 @@ export function SaEmailsPage() {
                     <div className="h-2 w-2 rounded-full bg-[hsl(var(--sa-success))] animate-pulse" /> Conectado
                   </span>
                 </div>
-                <div className="flex items-center justify-between py-3 border-b border-[hsl(var(--sa-border-subtle))]">
-                  <span className="text-[12px] text-[hsl(var(--sa-text-secondary))]">Webhooks</span>
-                  <span className="flex items-center gap-2 text-[12px] font-bold text-[hsl(var(--sa-success))]">
-                    <div className="h-2 w-2 rounded-full bg-[hsl(var(--sa-success))] animate-pulse" /> Ativo (Svix)
-                  </span>
-                </div>
                 <div className="flex items-center justify-between py-3">
-                  <span className="text-[12px] text-[hsl(var(--sa-text-secondary))]">Eventos Webhook</span>
-                  <span className="text-[12px] font-bold text-[hsl(var(--sa-text))]">delivered, bounced, complained</span>
+                  <span className="text-[12px] text-[hsl(var(--sa-text-secondary))]">Limite Diário</span>
+                  <span className="text-[12px] font-bold text-[hsl(var(--sa-text))]">50.000</span>
                 </div>
               </div>
             </SaCard>
 
             <SaCard>
-              <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Templates Transacionais</h3>
+              <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Remetentes Verificados</h3>
               <div className="space-y-3">
-                {[
-                  { key: "WELCOME", label: "Boas-vindas" },
-                  { key: "PASSWORD_RESET", label: "Recuperação de senha" },
-                  { key: "ORDER_PAID_CONFIRMATION", label: "Pedido pago" },
-                  { key: "ORDER_DISPATCHED_CONFIRMATION", label: "Pedido enviado" },
-                  { key: "ORDER_DELIVERED", label: "Pedido entregue" },
-                  { key: "ABANDONED_CART_RECOVERY", label: "Carrinho abandonado" },
-                  { key: "CONTACT_FORM_NOTIFICATION", label: "Formulário de contato" },
-                ].map((t) => (
-                  <div key={t.key} className="flex items-center justify-between py-3 border-b border-[hsl(var(--sa-border-subtle))] last:border-0">
-                    <div>
-                      <span className="text-[12px] text-[hsl(var(--sa-text))]">{t.label}</span>
-                      <span className="text-[10px] font-mono text-[hsl(var(--sa-text-muted))] block">{t.key}</span>
-                    </div>
-                    <span className="text-[11px] font-bold text-[hsl(var(--sa-success))]">Ativo</span>
+                {["noreply@fastcart.com", "suporte@fastcart.com", "marketing@fastcart.com"].map(email => (
+                  <div key={email} className="flex items-center justify-between py-3 border-b border-[hsl(var(--sa-border-subtle))] last:border-0">
+                    <span className="text-[12px] text-[hsl(var(--sa-text))]">{email}</span>
+                    <span className="text-[11px] font-bold text-[hsl(var(--sa-success))]">Verificado</span>
                   </div>
                 ))}
               </div>

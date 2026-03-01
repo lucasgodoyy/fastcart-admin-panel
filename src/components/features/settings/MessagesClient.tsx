@@ -1,55 +1,53 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { SettingsPageLayout } from './SettingsPageLayout';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Loader2, Save } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import storeSettingsService, { StoreSettings } from '@/services/storeSettingsService';
 import { toast } from 'sonner';
-import storeService, {
-  type CustomerMessageSettings,
-  DEFAULT_CUSTOMER_MESSAGE,
-} from '@/services/storeService';
+
+type CustomerMessageSettings = {
+  enabled: boolean;
+  message: string;
+};
+
+const DEFAULTS: CustomerMessageSettings = { enabled: false, message: '' };
+
+function parseMsg(json: string | null | undefined): CustomerMessageSettings {
+  if (!json) return { ...DEFAULTS };
+  try { return { ...DEFAULTS, ...JSON.parse(json) }; } catch { return { ...DEFAULTS }; }
+}
 
 export function MessagesClient() {
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [settings, setSettings] = useState<CustomerMessageSettings>({ ...DEFAULT_CUSTOMER_MESSAGE });
+  const queryClient = useQueryClient();
+  const { data: store, isLoading } = useQuery<StoreSettings>({
+    queryKey: ['my-store'],
+    queryFn: () => storeSettingsService.getMyStore(),
+  });
 
-  const loadSettings = useCallback(async () => {
-    setLoading(true);
-    try {
-      const store = await storeService.getMyStore();
-      setSettings(storeService.parseCustomerMessage(store.customerMessageJson));
-    } catch {
-      toast.error('Erro ao carregar configurações de mensagem.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [form, setForm] = useState<CustomerMessageSettings>({ ...DEFAULTS });
 
   useEffect(() => {
-    loadSettings();
-  }, [loadSettings]);
+    if (store) setForm(parseMsg(store.customerMessageJson));
+  }, [store]);
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      await storeService.updateMyStore({
-        customerMessageJson: JSON.stringify(settings),
-      });
-      toast.success('Mensagem para clientes salva com sucesso!');
-    } catch {
-      toast.error('Erro ao salvar mensagem.');
-    } finally {
-      setSaving(false);
-    }
-  };
+  const mutation = useMutation({
+    mutationFn: () =>
+      storeSettingsService.updateMyStore({ customerMessageJson: JSON.stringify(form) }),
+    onSuccess: () => {
+      toast.success('Mensagem salva com sucesso!');
+      queryClient.invalidateQueries({ queryKey: ['my-store'] });
+    },
+    onError: () => toast.error('Erro ao salvar mensagem.'),
+  });
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-16">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
+      <SettingsPageLayout title="Mensagem para clientes" description="Configure uma mensagem para mostrar aos seus clientes antes que finalizem a compra." helpText="Mais sobre mensagem informativa" helpHref="#">
+        <div className="flex items-center justify-center py-12"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+      </SettingsPageLayout>
     );
   }
 
@@ -65,8 +63,8 @@ export function MessagesClient() {
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
-              checked={settings.showMessage}
-              onChange={(e) => setSettings((prev) => ({ ...prev, showMessage: e.target.checked }))}
+              checked={form.enabled}
+              onChange={(e) => setForm((prev) => ({ ...prev, enabled: e.target.checked }))}
               className="h-4 w-4 rounded border-border"
             />
             <span className="text-sm font-medium text-foreground">Mostrar uma mensagem</span>
@@ -74,33 +72,28 @@ export function MessagesClient() {
           <p className="text-xs text-muted-foreground mt-1 ml-6">Será mostrada na calculadora de fretes e no checkout.</p>
         </div>
 
-        {settings.showMessage && (
+        {form.enabled && (
           <textarea
             className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            value={settings.message}
-            onChange={(e) => setSettings((prev) => ({ ...prev, message: e.target.value }))}
+            value={form.message}
+            onChange={(e) => setForm((prev) => ({ ...prev, message: e.target.value }))}
             placeholder="Escreva sua mensagem aqui..."
           />
         )}
       </div>
 
-      <div className="rounded-lg border border-border bg-card p-5">
+      <div className="rounded-lg border border-dashed border-border bg-card p-5">
         <p className="text-sm font-medium text-foreground">Campo Personalizado</p>
         <p className="text-xs text-muted-foreground mt-1">
           Personalize sua página de produto. Adicione campos personalizados para vender sob demanda.
         </p>
-        <div className="mt-3 flex items-center gap-2">
-          <Button variant="outline" size="sm">Instalar</Button>
-          <a href="#" className="text-xs text-primary hover:underline flex items-center gap-1">
-            Mais apps de recursos extras
-            <ExternalLink className="h-3 w-3" />
-          </a>
-        </div>
+        <Button variant="outline" size="sm" className="mt-3" disabled>Em breve</Button>
       </div>
 
-      <div className="flex items-center justify-end">
-        <Button onClick={handleSave} disabled={saving} className="gap-1.5">
-          {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+      <div className="flex items-center justify-end gap-3">
+        <Button variant="outline" onClick={() => store && setForm(parseMsg(store.customerMessageJson))}>Cancelar</Button>
+        <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+          {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Salvar
         </Button>
       </div>

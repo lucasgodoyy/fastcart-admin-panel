@@ -1,12 +1,77 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import storeSettingsService from '@/services/storeSettingsService';
 import { SettingsPageLayout } from './SettingsPageLayout';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Plus } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Loader2, Plus, Save } from 'lucide-react';
+import { toast } from 'sonner';
+
+const CURRENCIES = [
+  { code: 'BRL', label: 'Real Brasileiro (BRL)', flag: '🇧🇷', locale: 'Português' },
+  { code: 'USD', label: 'Dólar Americano (USD)', flag: '🇺🇸', locale: 'English' },
+  { code: 'EUR', label: 'Euro (EUR)', flag: '🇪🇺', locale: 'Multilingual' },
+  { code: 'GBP', label: 'Libra Esterlina (GBP)', flag: '🇬🇧', locale: 'English' },
+  { code: 'ARS', label: 'Peso Argentino (ARS)', flag: '🇦🇷', locale: 'Español' },
+  { code: 'CLP', label: 'Peso Chileno (CLP)', flag: '🇨🇱', locale: 'Español' },
+  { code: 'MXN', label: 'Peso Mexicano (MXN)', flag: '🇲🇽', locale: 'Español' },
+];
 
 export function LanguagesClient() {
+  const queryClient = useQueryClient();
+
+  const { data: store, isLoading } = useQuery({
+    queryKey: ['my-store'],
+    queryFn: storeSettingsService.getMyStore,
+  });
+
+  const [currency, setCurrency] = useState('BRL');
+  const [country, setCountry] = useState('Brasil');
+
+  useEffect(() => {
+    if (store?.storeCurrency) {
+      setCurrency(store.storeCurrency);
+    }
+    if (store?.addressCountry) {
+      setCountry(store.addressCountry);
+    }
+  }, [store]);
+
+  const saveMutation = useMutation({
+    mutationFn: () =>
+      storeSettingsService.updateMyStore({ storeCurrency: currency }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-store'] });
+      toast.success('Configurações salvas!');
+    },
+    onError: () => toast.error('Erro ao salvar configurações.'),
+  });
+
+  const selectedCurrency = CURRENCIES.find((c) => c.code === currency) ?? CURRENCIES[0];
+
+  if (isLoading) {
+    return (
+      <SettingsPageLayout
+        title="Idiomas e moedas"
+        description="Carregando..."
+      >
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        </div>
+      </SettingsPageLayout>
+    );
+  }
+
   return (
     <SettingsPageLayout
       title="Idiomas e moedas"
@@ -24,15 +89,17 @@ export function LanguagesClient() {
 
         <div className="flex items-center justify-between rounded-md border border-border p-3">
           <div className="flex items-center gap-3">
-            <span className="text-lg">🇧🇷</span>
+            <span className="text-lg">{selectedCurrency.flag}</span>
             <div>
-              <p className="text-sm font-medium text-foreground">Brasil</p>
-              <p className="text-xs text-muted-foreground">Reais - Português</p>
+              <p className="text-sm font-medium text-foreground">{country || 'Brasil'}</p>
+              <p className="text-xs text-muted-foreground">
+                {selectedCurrency.label} - {selectedCurrency.locale}
+              </p>
             </div>
           </div>
         </div>
 
-        <Button variant="outline" size="sm" className="gap-1.5">
+        <Button variant="outline" size="sm" className="gap-1.5" disabled>
           <Plus className="h-3.5 w-3.5" />
           Habilitar outro país
         </Button>
@@ -48,7 +115,7 @@ export function LanguagesClient() {
 
         <div className="space-y-1.5">
           <Label htmlFor="defaultCountry" className="text-sm font-medium text-foreground">País padrão</Label>
-          <Input id="defaultCountry" defaultValue="Brasil" disabled />
+          <Input id="defaultCountry" value={country || 'Brasil'} disabled />
         </div>
       </div>
 
@@ -61,42 +128,35 @@ export function LanguagesClient() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="currency" className="text-sm font-medium text-foreground">Moeda padrão</Label>
-          <Input id="currency" defaultValue="Reais" disabled />
+          <Label className="text-sm font-medium text-foreground">Moeda padrão</Label>
+          <Select value={currency} onValueChange={setCurrency}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CURRENCIES.map((c) => (
+                <SelectItem key={c.code} value={c.code}>
+                  {c.flag} {c.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      </div>
-
-      <div className="rounded-lg border border-border bg-card p-5 space-y-4">
-        <div>
-          <p className="text-sm font-medium text-foreground">Taxas de câmbio</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Defina o câmbio que deve ser aplicado aos preços determinados na moeda do administrador.
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <div className="grid grid-cols-3 gap-3 items-center text-xs font-medium text-muted-foreground border-b border-border pb-2">
-            <span>Moeda</span>
-            <span>Equivale a</span>
-            <span></span>
-          </div>
-          <div className="grid grid-cols-3 gap-3 items-center">
-            <span className="text-sm text-foreground">1 EUR</span>
-            <span className="text-sm text-foreground">BRL 6.1044</span>
-            <Button variant="ghost" size="sm" className="text-xs text-primary">Sugestão</Button>
-          </div>
-          <div className="grid grid-cols-3 gap-3 items-center">
-            <span className="text-sm text-foreground">1 USD</span>
-            <span className="text-sm text-foreground">BRL 5.1780</span>
-            <Button variant="ghost" size="sm" className="text-xs text-primary">Sugestão</Button>
-          </div>
-        </div>
-
-        <p className="text-xs text-muted-foreground">Recomendamos atualizar as taxas de câmbio com frequência.</p>
       </div>
 
       <div className="flex items-center justify-end">
-        <Button>Salvar</Button>
+        <Button
+          onClick={() => saveMutation.mutate()}
+          disabled={saveMutation.isPending}
+          className="gap-1.5"
+        >
+          {saveMutation.isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="h-4 w-4" />
+          )}
+          Salvar
+        </Button>
       </div>
     </SettingsPageLayout>
   );

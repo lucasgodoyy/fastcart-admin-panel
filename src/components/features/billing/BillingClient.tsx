@@ -1,293 +1,245 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
+import { useQuery } from '@tanstack/react-query';
 import {
-  CreditCard,
-  Crown,
-  Gem,
-  Rocket,
-  Sparkles,
+
   Check,
-  Loader2,
-  AlertCircle,
+  Star,
+  Crown,
+  Zap,
+  ArrowRight,
   Calendar,
-  Shield,
-} from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import apiClient from "@/lib/api";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+  AlertTriangle,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import billingService from '@/services/billingService';
+import { StoreBillingResponse, AvailablePlan } from '@/types/billing';
+import { t } from '@/lib/admin-language';
 
-/* ── Types ── */
-interface CurrentSubscription {
-  subscriptionId: number;
-  planId: number;
-  planName: string;
-  planSlug: string;
-  planPriceCents: number;
-  currency: string;
-  billingPeriod: string;
-  status: string;
-  features: string[];
-  currentPeriodStart: string | null;
-  currentPeriodEnd: string | null;
-  trialEnd: string | null;
-  canceledAt: string | null;
-  createdAt: string;
+function formatPrice(cents: number, currency: string) {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: currency || 'BRL',
+  }).format(cents / 100);
 }
 
-interface AvailablePlan {
-  id: number;
-  name: string;
-  slug: string;
-  description: string | null;
-  priceCents: number;
-  currency: string;
-  billingPeriod: string;
-  isPopular: boolean;
-  maxStores: number;
-  maxProducts: number | null;
-  features: string[];
-  isCurrent: boolean;
-}
-
-interface StoreBillingResponse {
-  currentSubscription: CurrentSubscription | null;
-  availablePlans: AvailablePlan[];
-}
-
-/* ── Helpers ── */
-function formatCurrency(cents: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100);
-}
 function formatDate(iso: string | null) {
-  if (!iso) return "—";
-  return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "long", year: "numeric" }).format(new Date(iso));
-}
-function planIcon(slug: string) {
-  switch (slug) {
-    case "free": return Sparkles;
-    case "basic": return Rocket;
-    case "pro": return Crown;
-    case "business": return Gem;
-    default: return CreditCard;
-  }
-}
-function statusLabel(status: string) {
-  switch (status) {
-    case "ACTIVE": return { text: "Ativo", variant: "default" as const };
-    case "TRIALING": return { text: "Trial", variant: "secondary" as const };
-    case "PAST_DUE": return { text: "Pagamento pendente", variant: "destructive" as const };
-    case "CANCELED": return { text: "Cancelado", variant: "destructive" as const };
-    case "PAUSED": return { text: "Pausado", variant: "secondary" as const };
-    default: return { text: status, variant: "outline" as const };
-  }
+  if (!iso) return '—';
+  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(iso));
 }
 
-const staggerContainer = {
-  initial: {},
-  animate: { transition: { staggerChildren: 0.08 } },
+const billingPeriodLabel = (p: string) => {
+  const map: Record<string, string> = {
+    monthly: t('Mensal', 'Monthly'),
+    yearly: t('Anual', 'Yearly'),
+    quarterly: t('Trimestral', 'Quarterly'),
+  };
+  return map[p.toLowerCase()] || p;
 };
-const fadeInUp = {
-  initial: { opacity: 0, y: 16 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.35 } },
+
+const statusLabel = (s: string) => {
+  const map: Record<string, string> = {
+    active: t('Ativo', 'Active'),
+    trialing: t('Período de testes', 'Trial'),
+    past_due: t('Pagamento pendente', 'Past Due'),
+    canceled: t('Cancelado', 'Canceled'),
+    unpaid: t('Não pago', 'Unpaid'),
+  };
+  return map[s.toLowerCase()] || s;
 };
 
 export function BillingClient() {
-  const { data: billing, isLoading } = useQuery({
-    queryKey: ["admin-billing"],
-    queryFn: async (): Promise<StoreBillingResponse> => {
-      const res = await apiClient.get<StoreBillingResponse>("/admin/billing");
-      return res.data;
-    },
+  const { data, isLoading } = useQuery<StoreBillingResponse>({
+    queryKey: ['store-billing'],
+    queryFn: () => billingService.getBilling(),
   });
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-24">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="flex items-center justify-center p-16">
+        <p className="text-sm text-muted-foreground">{t('Carregando faturamento...', 'Loading billing...')}</p>
       </div>
     );
   }
 
-  if (!billing) {
-    return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <AlertCircle className="h-10 w-10 text-muted-foreground mb-3" />
-        <p className="text-sm text-muted-foreground">Não foi possível carregar informações de faturamento.</p>
-      </div>
-    );
-  }
-
-  const current = billing.currentSubscription;
-  const plans = billing.availablePlans;
+  const sub = data?.currentSubscription;
+  const plans = data?.availablePlans || [];
 
   return (
-    <div className="space-y-8 max-w-6xl">
-      {/* Page header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Meu Plano</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Gerencie sua assinatura e veja os planos disponíveis.
+    <div className="p-8">
+      <div className="mb-8">
+        <h1 className="text-xl font-bold tracking-tight text-foreground">
+          {t('Assinatura e Planos', 'Subscription & Plans')}
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {t('Gerencie sua assinatura e veja os planos disponíveis.', 'Manage your subscription and view available plans.')}
         </p>
       </div>
 
-      {/* Current subscription card */}
-      {current ? (
-        <motion.div variants={fadeInUp} initial="initial" animate="animate">
-          <Card className="border-primary/20 bg-primary/[0.02]">
-            <CardHeader className="pb-4">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base font-semibold flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-primary" />
-                  Assinatura Atual
-                </CardTitle>
-                <Badge variant={statusLabel(current.status).variant}>
-                  {statusLabel(current.status).text}
-                </Badge>
+      {/* Current Subscription */}
+      {sub ? (
+        <div className="mb-8 rounded-xl border-2 border-primary/20 bg-card p-6">
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <Crown className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-bold text-foreground">{sub.planName}</h2>
+                <Badge variant="default" className="text-xs">{statusLabel(sub.status)}</Badge>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Plano</p>
-                  <p className="text-lg font-bold">{current.planName}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Valor</p>
-                  <p className="text-lg font-bold text-primary">
-                    {formatCurrency(current.planPriceCents)}<span className="text-xs font-normal text-muted-foreground">/{current.billingPeriod === "MONTHLY" ? "mês" : "ano"}</span>
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-                    <Calendar className="h-3 w-3" /> Próxima cobrança
-                  </p>
-                  <p className="text-sm font-medium">{formatDate(current.currentPeriodEnd)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Cliente desde</p>
-                  <p className="text-sm font-medium">{formatDate(current.createdAt)}</p>
-                </div>
-              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {formatPrice(sub.planPriceCents, sub.currency)} / {billingPeriodLabel(sub.billingPeriod)}
+              </p>
+            </div>
+          </div>
 
-              {current.features.length > 0 && (
-                <div className="mt-5 pt-5 border-t">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Recursos inclusos</p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {current.features.map(f => (
-                      <div key={f} className="flex items-center gap-2 text-sm">
-                        <Check className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
-                        {f}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <InfoCard
+              icon={<Calendar className="h-4 w-4 text-muted-foreground" />}
+              label={t('Período atual', 'Current period')}
+              value={`${formatDate(sub.currentPeriodStart)} — ${formatDate(sub.currentPeriodEnd)}`}
+            />
+            {sub.trialEnd && (
+              <InfoCard
+                icon={<Zap className="h-4 w-4 text-yellow-500" />}
+                label={t('Fim do teste', 'Trial ends')}
+                value={formatDate(sub.trialEnd)}
+              />
+            )}
+            {sub.canceledAt && (
+              <InfoCard
+                icon={<AlertTriangle className="h-4 w-4 text-red-500" />}
+                label={t('Cancelado em', 'Canceled at')}
+                value={formatDate(sub.canceledAt)}
+              />
+            )}
+          </div>
+
+          {sub.features.length > 0 && (
+            <div className="mt-4">
+              <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">
+                {t('Recursos incluídos', 'Included Features')}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {sub.features.map((f, i) => (
+                  <span key={i} className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs text-foreground">
+                    <Check className="h-3 w-3 text-green-600" />
+                    {f}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       ) : (
-        <motion.div variants={fadeInUp} initial="initial" animate="animate">
-          <Card>
-            <CardContent className="py-8 text-center">
-              <AlertCircle className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground">Você ainda não possui uma assinatura ativa.</p>
-              <p className="text-xs text-muted-foreground mt-1">Escolha um plano abaixo para começar.</p>
-            </CardContent>
-          </Card>
-        </motion.div>
+        <div className="mb-8 rounded-xl border border-yellow-300 bg-yellow-50 dark:bg-yellow-900/10 p-6">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-yellow-600" />
+            <h2 className="text-sm font-semibold text-foreground">
+              {t('Sem assinatura ativa', 'No active subscription')}
+            </h2>
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t('Escolha um plano abaixo para começar.', 'Choose a plan below to get started.')}
+          </p>
+        </div>
       )}
 
-      {/* Available plans */}
+      {/* Available Plans */}
       <div>
-        <h2 className="text-lg font-semibold mb-4">Planos Disponíveis</h2>
-        <motion.div
-          variants={staggerContainer}
-          initial="initial"
-          animate="animate"
-          className="grid gap-5 md:grid-cols-2 xl:grid-cols-4"
-        >
-          {plans.map((plan) => {
-            const Icon = planIcon(plan.slug);
-            return (
-              <motion.div key={plan.id} variants={fadeInUp}>
-                <Card
-                  className={`relative h-full transition-all duration-200 hover:shadow-md ${
-                    plan.isCurrent
-                      ? "border-primary ring-1 ring-primary/20"
-                      : plan.isPopular
-                        ? "border-primary/40"
-                        : ""
-                  }`}
-                >
-                  {plan.isPopular && !plan.isCurrent && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-[10px] font-bold text-primary-foreground">
-                      MAIS POPULAR
-                    </div>
-                  )}
-                  {plan.isCurrent && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-green-600 px-3 py-0.5 text-[10px] font-bold text-white">
-                      SEU PLANO
-                    </div>
-                  )}
+        <h2 className="mb-4 text-lg font-bold text-foreground">
+          {t('Planos disponíveis', 'Available Plans')}
+        </h2>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {plans.map((plan) => (
+            <PlanCard key={plan.id} plan={plan} />
+          ))}
+          {plans.length === 0 && (
+            <p className="col-span-full text-sm text-muted-foreground">
+              {t('Nenhum plano disponível no momento.', 'No plans available at this time.')}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
-                  <CardContent className="pt-6">
-                    <div className="mb-4">
-                      <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 mb-3">
-                        <Icon className="h-5 w-5 text-primary" />
-                      </div>
-                      <h3 className="text-base font-bold">{plan.name}</h3>
-                      <div className="flex items-baseline gap-1 mt-1">
-                        <span className="text-2xl font-bold">{formatCurrency(plan.priceCents)}</span>
-                        <span className="text-xs text-muted-foreground">/{plan.billingPeriod === "MONTHLY" ? "mês" : "ano"}</span>
-                      </div>
-                      {plan.description && (
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{plan.description}</p>
-                      )}
-                    </div>
+function PlanCard({ plan }: { plan: AvailablePlan }) {
+  return (
+    <div className={`relative rounded-xl border bg-card p-6 transition-shadow hover:shadow-md ${
+      plan.isCurrent ? 'border-primary ring-2 ring-primary/20' : 'border-border'
+    }`}>
+      {plan.isPopular && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+          <span className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-primary-foreground">
+            <Star className="h-3 w-3" fill="currentColor" />
+            {t('Popular', 'Popular')}
+          </span>
+        </div>
+      )}
+      {plan.isCurrent && (
+        <Badge variant="outline" className="absolute right-4 top-4 text-xs">
+          {t('Plano atual', 'Current plan')}
+        </Badge>
+      )}
 
-                    <ul className="space-y-2 mb-6">
-                      {plan.features.map(f => (
-                        <li key={f} className="flex items-center gap-2 text-xs">
-                          <Check className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
+      <h3 className="text-lg font-bold text-foreground">{plan.name}</h3>
+      {plan.description && (
+        <p className="mt-1 text-sm text-muted-foreground">{plan.description}</p>
+      )}
 
-                    <div className="pt-4 border-t">
-                      {plan.isCurrent ? (
-                        <Button variant="outline" className="w-full" disabled>
-                          Plano atual
-                        </Button>
-                      ) : (
-                        <Button
-                          variant={plan.isPopular ? "default" : "outline"}
-                          className="w-full"
-                        >
-                          {current && plan.priceCents > current.planPriceCents
-                            ? "Fazer upgrade"
-                            : current
-                              ? "Alterar plano"
-                              : "Começar agora"
-                          }
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </motion.div>
+      <div className="mt-4">
+        <span className="text-3xl font-extrabold text-foreground">
+          {formatPrice(plan.priceCents, plan.currency)}
+        </span>
+        <span className="text-sm text-muted-foreground">/{billingPeriodLabel(plan.billingPeriod)}</span>
       </div>
 
-      {/* Help note */}
-      <div className="text-center text-xs text-muted-foreground pb-8">
-        <p>Precisa de um plano personalizado? <span className="text-primary font-medium cursor-pointer hover:underline">Fale conosco</span></p>
+      <div className="mt-2 text-xs text-muted-foreground space-y-0.5">
+        <p>{t('Até', 'Up to')} {plan.maxStores} {t('lojas', 'stores')}</p>
+        {plan.maxProducts !== null ? (
+          <p>{t('Até', 'Up to')} {plan.maxProducts} {t('produtos', 'products')}</p>
+        ) : (
+          <p>{t('Produtos ilimitados', 'Unlimited products')}</p>
+        )}
       </div>
+
+      {plan.features.length > 0 && (
+        <ul className="mt-4 space-y-2">
+          {plan.features.map((f, i) => (
+            <li key={i} className="flex items-start gap-2 text-sm text-foreground">
+              <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-600" />
+              {f}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="mt-6">
+        {plan.isCurrent ? (
+          <Button variant="outline" className="w-full" disabled>
+            {t('Plano atual', 'Current Plan')}
+          </Button>
+        ) : (
+          <Button className="w-full gap-2">
+            {t('Selecionar plano', 'Select Plan')}
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function InfoCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="rounded-lg bg-muted/30 p-3">
+      <div className="flex items-center gap-2 mb-1">
+        {icon}
+        <span className="text-xs text-muted-foreground">{label}</span>
+      </div>
+      <p className="text-sm font-medium text-foreground">{value}</p>
     </div>
   );
 }

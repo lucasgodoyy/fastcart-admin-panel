@@ -21,9 +21,12 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 403 || error.response?.status === 401) {
-      console.error('[API Error] Authentication failed:', error.config?.url);
+    if (error.response?.status === 401) {
+      console.error('[API Error] Token expired/invalid:', error.config?.url);
       redirectToLogin();
+    }
+    if (error.response?.status === 403) {
+      console.warn('[API Warning] Forbidden (no permission):', error.config?.url);
     }
     return Promise.reject(error);
   }

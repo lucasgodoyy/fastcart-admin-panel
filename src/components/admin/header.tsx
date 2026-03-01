@@ -1,12 +1,22 @@
 "use client"
 
-import { Search, ChevronRight } from "lucide-react"
-import { usePathname } from "next/navigation"
+import { Bell, Search, ChevronRight, LogOut, User, CheckCheck } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
 import { useMemo } from "react"
 import { t } from "@/lib/admin-language"
 import { useAuth } from "@/context/AuthContext"
-import { NotificationBell } from "./notification-bell"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import notificationService from "@/services/notificationService"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const breadcrumbLabelMap: Record<string, string> = {
   admin: t("Painel", "Dashboard"),
@@ -52,7 +62,29 @@ function useBreadcrumbs() {
 
 export function AdminHeader() {
   const breadcrumbs = useBreadcrumbs()
-  const { logout } = useAuth()
+  const { user, logout } = useAuth()
+  const queryClient = useQueryClient()
+
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: ["notifications-unread-count"],
+    queryFn: notificationService.getUnreadCount,
+    refetchInterval: 30_000,
+    staleTime: 15_000,
+  })
+
+  const { data: recentNotifications } = useQuery({
+    queryKey: ["notifications-recent"],
+    queryFn: () => notificationService.list({ size: 5, unreadOnly: true }),
+    staleTime: 15_000,
+  })
+
+  const markAllRead = useMutation({
+    mutationFn: notificationService.markAllAsRead,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications-unread-count"] })
+      queryClient.invalidateQueries({ queryKey: ["notifications-recent"] })
+    },
+  })
 
   return (
     <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6 gap-4">
@@ -84,17 +116,77 @@ export function AdminHeader() {
         </button>
 
         {/* Notifications */}
-        <NotificationBell />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="relative rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors outline-none">
+              <Bell className="h-5 w-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-80">
+            <div className="flex items-center justify-between px-3 py-2">
+              <DropdownMenuLabel className="p-0 text-sm">{t("Notificações", "Notifications")}</DropdownMenuLabel>
+              {unreadCount > 0 && (
+                <button
+                  onClick={() => markAllRead.mutate()}
+                  className="text-xs text-primary hover:underline flex items-center gap-1"
+                >
+                  <CheckCheck className="h-3 w-3" />
+                  {t("Marcar todas como lidas", "Mark all read")}
+                </button>
+              )}
+            </div>
+            <DropdownMenuSeparator />
+            {(recentNotifications?.content ?? []).length === 0 ? (
+              <div className="px-3 py-6 text-center text-sm text-muted-foreground">
+                {t("Nenhuma notificação nova", "No new notifications")}
+              </div>
+            ) : (
+              (recentNotifications?.content ?? []).map((n) => (
+                <DropdownMenuItem key={n.id} className="flex flex-col items-start gap-0.5 px-3 py-2 cursor-pointer">
+                  <span className="text-sm font-medium">{n.title}</span>
+                  <span className="text-xs text-muted-foreground line-clamp-1">{n.message}</span>
+                </DropdownMenuItem>
+              ))
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* Profile */}
-        <button
-          onClick={logout}
-          className="flex items-center gap-2.5 rounded-lg p-1.5 hover:bg-muted transition-colors"
-        >
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70 text-sm font-bold text-primary-foreground">
-            F
-          </div>
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center gap-2.5 rounded-lg p-1.5 hover:bg-muted transition-colors outline-none">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70 text-sm font-bold text-primary-foreground">
+                {user?.email?.slice(0, 1).toUpperCase() || "A"}
+              </div>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium">{user?.email || "admin@fastcart.com"}</p>
+                <p className="text-xs text-muted-foreground">{user?.role || "ADMIN"}</p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="cursor-pointer">
+              <User className="mr-2 h-4 w-4" />
+              {t("Meu Perfil", "My Profile")}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive cursor-pointer"
+              onClick={logout}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              {t("Sair", "Sign Out")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   )

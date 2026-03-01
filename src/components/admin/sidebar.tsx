@@ -19,6 +19,7 @@ import {
   CreditCard,
   Search as SearchIcon,
   Puzzle,
+  Receipt,
   Cog,
   ChevronDown,
   ChevronRight,
@@ -115,6 +116,7 @@ const navigation: NavSection[] = [
     title: t("Expansão", "Extend"),
     items: [
       { label: t("Integrações", "Integrations"), href: "/admin/apps", icon: <Puzzle className="h-[18px] w-[18px]" /> },
+      { label: t("Assinatura", "Billing"), href: "/admin/billing", icon: <Receipt className="h-[18px] w-[18px]" /> },
     ],
   },
 ]

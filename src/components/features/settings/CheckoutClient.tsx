@@ -1,61 +1,77 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { SettingsPageLayout } from './SettingsPageLayout';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import storeSettingsService, { StoreSettings } from '@/services/storeSettingsService';
 import { toast } from 'sonner';
-import storeService, {
-  type CheckoutSettings,
-  DEFAULT_CHECKOUT_SETTINGS,
-} from '@/services/storeService';
+
+type CheckoutSettings = {
+  useLayoutColors: boolean;
+  askPhone: boolean;
+  askInvoice: boolean;
+  fieldRequired: boolean;
+  restrictPurchases: 'all' | 'authorized';
+  customerMessageFieldName: string;
+  clearSaleCode: string;
+  trackingMessage: string;
+};
+
+const DEFAULTS: CheckoutSettings = {
+  useLayoutColors: false,
+  askPhone: false,
+  askInvoice: false,
+  fieldRequired: false,
+  restrictPurchases: 'all',
+  customerMessageFieldName: '',
+  clearSaleCode: '',
+  trackingMessage: '',
+};
+
+function parseSettings(json: string | null | undefined): CheckoutSettings {
+  if (!json) return { ...DEFAULTS };
+  try {
+    return { ...DEFAULTS, ...JSON.parse(json) };
+  } catch {
+    return { ...DEFAULTS };
+  }
+}
 
 export function CheckoutClient() {
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [settings, setSettings] = useState<CheckoutSettings>({ ...DEFAULT_CHECKOUT_SETTINGS });
+  const queryClient = useQueryClient();
+  const { data: store, isLoading } = useQuery<StoreSettings>({
+    queryKey: ['my-store'],
+    queryFn: () => storeSettingsService.getMyStore(),
+  });
 
-  const loadSettings = useCallback(async () => {
-    setLoading(true);
-    try {
-      const store = await storeService.getMyStore();
-      setSettings(storeService.parseCheckoutSettings(store.checkoutSettingsJson));
-    } catch {
-      toast.error('Erro ao carregar configurações de checkout.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [form, setForm] = useState<CheckoutSettings>({ ...DEFAULTS });
 
   useEffect(() => {
-    loadSettings();
-  }, [loadSettings]);
+    if (store) setForm(parseSettings(store.checkoutSettingsJson));
+  }, [store]);
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      await storeService.updateMyStore({
-        checkoutSettingsJson: JSON.stringify(settings),
-      });
-      toast.success('Configurações do checkout salvas com sucesso!');
-    } catch {
-      toast.error('Erro ao salvar configurações do checkout.');
-    } finally {
-      setSaving(false);
-    }
-  };
+  const mutation = useMutation({
+    mutationFn: () =>
+      storeSettingsService.updateMyStore({ checkoutSettingsJson: JSON.stringify(form) }),
+    onSuccess: () => {
+      toast.success('Configurações do checkout salvas!');
+      queryClient.invalidateQueries({ queryKey: ['my-store'] });
+    },
+    onError: () => toast.error('Erro ao salvar configurações.'),
+  });
 
-  const update = <K extends keyof CheckoutSettings>(key: K, value: CheckoutSettings[K]) => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
-  };
+  const set = <K extends keyof CheckoutSettings>(key: K, val: CheckoutSettings[K]) =>
+    setForm((prev) => ({ ...prev, [key]: val }));
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-16">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
+      <SettingsPageLayout title="Opções do checkout" description="Configure as opções disponíveis para pedir dados adicionais ao seu cliente durante o processo de compra." helpText="Mais sobre checkout" helpHref="#">
+        <div className="flex items-center justify-center py-12"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+      </SettingsPageLayout>
     );
   }
 
@@ -66,21 +82,19 @@ export function CheckoutClient() {
       helpText="Mais sobre checkout"
       helpHref="#"
     >
-      {/* Layout */}
       <div className="rounded-lg border border-border bg-card p-5 space-y-3">
         <p className="text-sm font-medium text-foreground">Layout</p>
         <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
-            checked={settings.useLayoutColors}
-            onChange={(e) => update('useLayoutColors', e.target.checked)}
+            checked={form.useLayoutColors}
+            onChange={(e) => set('useLayoutColors', e.target.checked)}
             className="h-4 w-4 rounded border-border"
           />
           <span className="text-sm text-foreground">Usar as cores do seu layout no checkout</span>
         </label>
       </div>
 
-      {/* Dados do cliente */}
       <div className="rounded-lg border border-border bg-card p-5 space-y-3">
         <p className="text-sm font-medium text-foreground">Dados do cliente</p>
 
@@ -90,8 +104,8 @@ export function CheckoutClient() {
             <label className="flex items-center gap-2 cursor-pointer mt-1">
               <input
                 type="checkbox"
-                checked={settings.askPhone}
-                onChange={(e) => update('askPhone', e.target.checked)}
+                checked={form.askPhone}
+                onChange={(e) => set('askPhone', e.target.checked)}
                 className="h-4 w-4 rounded border-border"
               />
               <span className="text-sm text-muted-foreground">Pedir telefone de contato</span>
@@ -103,8 +117,8 @@ export function CheckoutClient() {
             <label className="flex items-center gap-2 cursor-pointer mt-1">
               <input
                 type="checkbox"
-                checked={settings.askInvoice}
-                onChange={(e) => update('askInvoice', e.target.checked)}
+                checked={form.askInvoice}
+                onChange={(e) => set('askInvoice', e.target.checked)}
                 className="h-4 w-4 rounded border-border"
               />
               <span className="text-sm text-muted-foreground">Pedir endereço para emissão de nota fiscal</span>
@@ -113,7 +127,6 @@ export function CheckoutClient() {
         </div>
       </div>
 
-      {/* Mensagem do cliente */}
       <div className="rounded-lg border border-border bg-card p-5 space-y-3">
         <p className="text-sm font-medium text-foreground">Mensagem do cliente</p>
         <p className="text-xs text-muted-foreground">
@@ -126,8 +139,8 @@ export function CheckoutClient() {
           </Label>
           <Input
             id="fieldName"
-            value={settings.customerMessageFieldName}
-            onChange={(e) => update('customerMessageFieldName', e.target.value)}
+            value={form.customerMessageFieldName}
+            onChange={(e) => set('customerMessageFieldName', e.target.value)}
             placeholder="Instruções sobre o pedido"
           />
         </div>
@@ -135,27 +148,25 @@ export function CheckoutClient() {
         <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
-            checked={settings.fieldRequired}
-            onChange={(e) => update('fieldRequired', e.target.checked)}
+            checked={form.fieldRequired}
+            onChange={(e) => set('fieldRequired', e.target.checked)}
             className="h-4 w-4 rounded border-border"
           />
           <span className="text-sm text-muted-foreground">Marcar campo como obrigatório</span>
         </label>
       </div>
 
-      {/* Mensagem na página de seguimento */}
       <div className="rounded-lg border border-border bg-card p-5 space-y-3">
         <p className="text-sm font-medium text-foreground">Mensagem na página de seguimento</p>
         <p className="text-xs text-muted-foreground">Esta página informará seu cliente sobre o estado do envio.</p>
         <textarea
           className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          value={settings.trackingMessage}
-          onChange={(e) => update('trackingMessage', e.target.value)}
+          value={form.trackingMessage}
+          onChange={(e) => set('trackingMessage', e.target.value)}
           placeholder="Mensagem personalizada"
         />
       </div>
 
-      {/* ClearSale */}
       <div className="rounded-lg border border-border bg-card p-5 space-y-3">
         <p className="text-sm font-medium text-foreground">ClearSale</p>
         <p className="text-xs text-muted-foreground">A ClearSale ajudará a analisar o risco dos pedidos efetuados em sua loja.</p>
@@ -164,15 +175,10 @@ export function CheckoutClient() {
           <Label htmlFor="clearSaleCode" className="text-sm font-medium text-foreground">
             Código de integração
           </Label>
-          <Input
-            id="clearSaleCode"
-            value={settings.clearSaleCode}
-            onChange={(e) => update('clearSaleCode', e.target.value)}
-          />
+          <Input id="clearSaleCode" value={form.clearSaleCode} onChange={(e) => set('clearSaleCode', e.target.value)} />
         </div>
       </div>
 
-      {/* Restringir compras */}
       <div className="rounded-lg border border-border bg-card p-5 space-y-3">
         <p className="text-sm font-medium text-foreground">Restringir compras</p>
         <p className="text-xs text-muted-foreground">Defina quem pode comprar na sua loja.</p>
@@ -182,8 +188,8 @@ export function CheckoutClient() {
             <input
               type="radio"
               name="restrict"
-              checked={settings.restrictPurchases === 'all'}
-              onChange={() => update('restrictPurchases', 'all')}
+              checked={form.restrictPurchases === 'all'}
+              onChange={() => set('restrictPurchases', 'all')}
               className="h-4 w-4"
             />
             <span className="text-sm text-foreground">Todos os clientes</span>
@@ -192,8 +198,8 @@ export function CheckoutClient() {
             <input
               type="radio"
               name="restrict"
-              checked={settings.restrictPurchases === 'authorized'}
-              onChange={() => update('restrictPurchases', 'authorized')}
+              checked={form.restrictPurchases === 'authorized'}
+              onChange={() => set('restrictPurchases', 'authorized')}
               className="h-4 w-4"
             />
             <span className="text-sm text-foreground">Somente clientes autorizados</span>
@@ -201,27 +207,17 @@ export function CheckoutClient() {
         </div>
       </div>
 
-      {/* Alterar meio de pagamento */}
       <div className="rounded-lg border border-border bg-card p-5 space-y-3">
         <p className="text-sm font-medium text-foreground">Alterar meio de pagamento</p>
         <p className="text-xs text-muted-foreground">
           Permita que seus clientes escolham outro meio de pagamento pela página de acompanhamento e aumente suas vendas.
         </p>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={settings.allowPaymentMethodChange}
-            onChange={(e) => update('allowPaymentMethodChange', e.target.checked)}
-            className="h-4 w-4 rounded border-border"
-          />
-          <span className="text-sm text-muted-foreground">Permitir troca de meio de pagamento</span>
-        </label>
       </div>
 
-      {/* Save */}
-      <div className="flex items-center justify-end">
-        <Button onClick={handleSave} disabled={saving} className="gap-1.5">
-          {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+      <div className="flex items-center justify-end gap-3">
+        <Button variant="outline" onClick={() => store && setForm(parseSettings(store.checkoutSettingsJson))}>Cancelar</Button>
+        <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+          {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Salvar
         </Button>
       </div>

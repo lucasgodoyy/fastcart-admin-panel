@@ -1,8 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import { SettingsPageLayout } from './SettingsPageLayout';
 import { Button } from '@/components/ui/button';
-import { Truck, Package, Edit, Plus, Info } from 'lucide-react';
+import { Truck, Package, Edit, Plus, Info, ArrowRight } from 'lucide-react';
 
 export function ShippingMethodsClient() {
   return (
@@ -19,13 +20,19 @@ export function ShippingMethodsClient() {
             <Truck className="h-5 w-5 text-muted-foreground" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-foreground">Nuvem Envio</p>
+            <p className="text-sm font-medium text-foreground">Melhor Envio</p>
             <ul className="mt-1.5 space-y-1 text-xs text-muted-foreground">
-              <li>Transportadoras integradas: Correios, Jadlog e Loggi.</li>
-              <li>Fretes até 30% mais baratos.</li>
+              <li>Transportadoras integradas: Correios, Jadlog, Loggi e mais.</li>
+              <li>Cotação automática de frete em tempo real.</li>
               <li>Emissão de etiquetas integrada às suas vendas.</li>
-              <li>Envio automático de códigos de rastreio.</li>
+              <li>Rastreamento automático de envios.</li>
             </ul>
+            <Link href="/admin/settings/integrations">
+              <Button variant="outline" size="sm" className="mt-3 gap-1.5">
+                Configurar Melhor Envio
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -40,38 +47,20 @@ export function ShippingMethodsClient() {
             <p className="mt-1 text-xs text-muted-foreground">
               Crie o meio de envio que desejar para realizar as entregas dos seus produtos.
             </p>
-            <Button variant="outline" size="sm" className="mt-3 gap-1.5">
+            <Button variant="outline" size="sm" className="mt-3 gap-1.5" disabled>
               <Plus className="h-3.5 w-3.5" />
-              Adicionar entrega personalizada
+              Adicionar (em breve)
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="rounded-lg border border-border bg-card p-5">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-sm font-medium text-foreground">Custo e prazo de entrega padrão</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Defina um custo e prazo de entrega fixos para quando os meios de envio estiverem fora de serviço.
-            </p>
-            <div className="mt-2 flex gap-4 text-xs text-muted-foreground">
-              <span>Custo: R$ 20</span>
-              <span>Prazo: 10 dias úteis</span>
-            </div>
-          </div>
-          <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground">
-            <Edit className="h-3.5 w-3.5" />
-            Editar
-          </Button>
-        </div>
-      </div>
-
-      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 flex items-start gap-3">
+      <div className="rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-900/10 dark:border-blue-800 p-4 flex items-start gap-3">
         <Info className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
-        <p className="text-xs text-blue-700">
-          Você sabia que também pode enviar seus pedidos personalizados por Nuvem Envio e centralizar tudo em um só lugar?{' '}
-          <a href="#" className="font-medium underline">Saiba mais</a>
+        <p className="text-xs text-blue-700 dark:text-blue-400">
+          Configure a integração com o Melhor Envio na página de{' '}
+          <Link href="/admin/settings/integrations" className="font-medium underline">Integrações</Link>
+          {' '}para ativar cotação de frete automática e emissão de etiquetas.
         </p>
       </div>
     </SettingsPageLayout>

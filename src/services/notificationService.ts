@@ -1,99 +1,99 @@
 import apiClient from '@/lib/api';
-import type {
-  NotificationItem,
-  NotificationType,
-  NotificationPreference,
-  NotificationStats,
-  CreateNotificationRequest,
-  UpdatePreferenceRequest,
-  PaginatedResult,
-} from '@/types/super-admin';
 
-// ═══════════════════════════════════════════════════════════════
-//  Admin / Store-owner Notification Service
-// ═══════════════════════════════════════════════════════════════
+/* ── Types ── */
+
+export type NotificationItem = {
+  id: number;
+  storeId: number | null;
+  storeName: string | null;
+  userId: number;
+  userEmail: string;
+  type: string;
+  channel: string;
+  title: string;
+  message: string;
+  actionUrl: string | null;
+  isRead: boolean;
+  readAt: string | null;
+  createdAt: string;
+};
+
+export type NotificationPreference = {
+  id: number;
+  notificationType: string;
+  typeLabel: string;
+  typeDescription: string;
+  typeCategory: string;
+  channelInApp: boolean;
+  channelEmail: boolean;
+  channelPush: boolean;
+};
+
+export type NotificationType = {
+  code: string;
+  label: string;
+  description: string;
+  category: string;
+  defaultEmail: boolean;
+  defaultInApp: boolean;
+  defaultPush: boolean;
+  sortOrder: number;
+};
+
+export type PaginatedNotifications = {
+  content: NotificationItem[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+};
+
+/* ── Service ── */
 
 const notificationService = {
-  // ── List ──────────────────────────────────────────────────
-
   list: async (params?: {
-    type?: string;
-    unreadOnly?: boolean;
     page?: number;
     size?: number;
-  }): Promise<PaginatedResult<NotificationItem>> => {
-    const response = await apiClient.get<PaginatedResult<NotificationItem>>(
-      '/notifications',
-      { params }
-    );
-    return response.data;
+    type?: string;
+    unreadOnly?: boolean;
+  }): Promise<PaginatedNotifications> => {
+    const res = await apiClient.get('/notifications', { params });
+    return res.data;
   },
-
-  // ── Unread Count ─────────────────────────────────────────
 
   getUnreadCount: async (): Promise<number> => {
-    const response = await apiClient.get<{ count: number }>('/notifications/unread-count');
-    return response.data.count;
+    const res = await apiClient.get('/notifications/unread-count');
+    return res.data.count;
   },
 
-  // ── Mark As Read ─────────────────────────────────────────
-
-  markAsRead: async (notificationId: number): Promise<void> => {
-    await apiClient.put(`/notifications/${notificationId}/read`);
+  markAsRead: async (id: number): Promise<void> => {
+    await apiClient.put(`/notifications/${id}/read`);
   },
 
   markAllAsRead: async (): Promise<number> => {
-    const response = await apiClient.put<{ updated: number }>('/notifications/read-all');
-    return response.data.updated;
+    const res = await apiClient.put('/notifications/read-all');
+    return res.data.updated;
   },
-
-  // ── Notification Types ───────────────────────────────────
 
   listTypes: async (): Promise<NotificationType[]> => {
-    const response = await apiClient.get<NotificationType[]>('/notifications/types');
-    return response.data;
+    const res = await apiClient.get('/notifications/types');
+    return res.data;
   },
-
-  // ── Preferences ──────────────────────────────────────────
 
   getPreferences: async (): Promise<NotificationPreference[]> => {
-    const response = await apiClient.get<NotificationPreference[]>('/notifications/preferences');
-    return response.data;
+    const res = await apiClient.get('/notifications/preferences');
+    return res.data;
   },
 
-  updatePreference: async (data: UpdatePreferenceRequest): Promise<NotificationPreference> => {
-    const response = await apiClient.put<NotificationPreference>('/notifications/preferences', data);
-    return response.data;
+  updatePreference: async (data: {
+    notificationType: string;
+    channelInApp?: boolean;
+    channelEmail?: boolean;
+    channelPush?: boolean;
+  }): Promise<NotificationPreference> => {
+    const res = await apiClient.put('/notifications/preferences', data);
+    return res.data;
   },
 };
 
 export default notificationService;
-
-// ═══════════════════════════════════════════════════════════════
-//  Super-Admin Notification Service
-// ═══════════════════════════════════════════════════════════════
-
-export const superAdminNotificationService = {
-  list: async (params?: {
-    type?: string;
-    storeId?: number;
-    page?: number;
-    size?: number;
-  }): Promise<PaginatedResult<NotificationItem>> => {
-    const response = await apiClient.get<PaginatedResult<NotificationItem>>(
-      '/super-admin/notifications',
-      { params }
-    );
-    return response.data;
-  },
-
-  getStats: async (): Promise<NotificationStats> => {
-    const response = await apiClient.get<NotificationStats>('/super-admin/notifications/stats');
-    return response.data;
-  },
-
-  create: async (data: CreateNotificationRequest): Promise<NotificationItem> => {
-    const response = await apiClient.post<NotificationItem>('/super-admin/notifications', data);
-    return response.data;
-  },
-};

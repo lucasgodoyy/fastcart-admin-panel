@@ -1,5 +1,5 @@
-import { OrdersClient } from '@/components/features/sales/OrdersClient';
+import { OrderListClient } from '@/components/features/orders/OrderListClient';
 
 export default function SalesListPage() {
-  return <OrdersClient />;
+  return <OrderListClient />;
 }

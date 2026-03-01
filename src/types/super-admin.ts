@@ -1,3 +1,15 @@
+// ── Pagination ──────────────────────────────────────────────────
+export interface PaginatedResult<T> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+}
+
+// ── Platform Overview ──────────────────────────────────────────
 export interface PlatformOverview {
   totalStores: number;
   activeStores: number;
@@ -9,16 +21,16 @@ export interface PlatformOverview {
   failedEmailLogs: number;
 }
 
+// ── Platform Settings ──────────────────────────────────────────
 export interface PlatformGeneralSettings {
-  applicationName: string;
-  storeFrontendUrl: string;
-  adminFrontendUrl: string;
-  flywayEnabled: boolean;
-  swaggerEnabled: boolean;
-  swaggerPath: string;
-  defaultEmailFrom: string;
+  platformName: string;
+  supportEmail: string;
+  defaultTimezone: string;
+  defaultLanguage: string;
+  maintenanceMode: boolean;
 }
 
+// ── Store Management ───────────────────────────────────────────
 export interface StoreSummary {
   id: number;
   name: string;
@@ -26,25 +38,49 @@ export interface StoreSummary {
   email: string | null;
   active: boolean;
   status: string;
+  planName: string | null;
+  customDomain: string | null;
   productsCount: number;
   ordersCount: number;
   paidRevenue: number;
   createdAt: string;
-  updatedAt: string;
+  updatedAt: string | null;
 }
 
+// ── User Management ────────────────────────────────────────────
 export interface UserSummary {
   id: number;
-  name: string | null;
   email: string;
-  role: string | null;
-  active: boolean;
+  firstName: string | null;
+  lastName: string | null;
+  role: string;
   status: string;
-  storeId: number | null;
   storeName: string | null;
-  lastLogin: string | null;
+  storeId: number | null;
+  lastLoginAt: string | null;
+  createdAt: string;
 }
 
+export interface UserSession {
+  id: number;
+  userId: number;
+  userEmail: string;
+  ipAddress: string;
+  userAgent: string;
+  active: boolean;
+  createdAt: string;
+  lastAccessedAt: string;
+}
+
+export interface ResetUserPasswordRequest {
+  newPassword: string;
+}
+
+export interface UpdateUserRoleRequest {
+  role: string;
+}
+
+// ── Support Tickets ────────────────────────────────────────────
 export interface SupportTicketSummary {
   id: number;
   storeId: number | null;
@@ -58,6 +94,7 @@ export interface SupportTicketSummary {
   updatedAt: string;
 }
 
+// ── Email Logs & Templates ─────────────────────────────────────
 export interface OutboundEmailLogSummary {
   id: number;
   storeId: number | null;
@@ -68,20 +105,6 @@ export interface OutboundEmailLogSummary {
   deliveryStatus: string;
   createdAt: string;
   sentAt: string | null;
-}
-
-export interface UserSessionSummary {
-  id: number;
-  userId: number;
-  userEmail: string;
-  userRole: string | null;
-  ipAddress: string | null;
-  userAgent: string | null;
-  createdAt: string;
-  expiresAt: string;
-  lastSeenAt: string | null;
-  revoked: boolean;
-  active: boolean;
 }
 
 export interface EmailTemplateSummary {
@@ -95,155 +118,197 @@ export interface EmailTemplateSummary {
   updatedAt: string;
 }
 
-export interface ActivityLogSummary {
+// ── Activity Logs ──────────────────────────────────────────────
+export interface ActivityLog {
   id: number;
   userId: number | null;
   userEmail: string | null;
+  userRole: string | null;
   actionType: string;
   description: string;
-  entityType: string | null;
-  entityId: number | null;
   ipAddress: string | null;
   createdAt: string;
 }
 
-// ── Subscriptions ──────────────────────────────────────────
-
+// ── Subscription Plans ─────────────────────────────────────────
 export interface SubscriptionPlan {
   id: number;
   name: string;
   slug: string;
-  description: string | null;
-  priceCents: number;
-  currency: string;
-  billingPeriod: string;
-  sortOrder: number;
-  isPopular: boolean;
-  isActive: boolean;
+  monthlyPrice: number;
+  annualPrice: number | null;
+  maxProducts: number;
   maxStores: number;
-  maxProducts: number | null;
-  features: string[];
-  stripeProductId: string | null;
-  stripePriceId: string | null;
-  subscriberCount: number;
+  maxStaff: number;
+  featuresJson: string;
+  stripePriceIdMonthly: string | null;
+  stripePriceIdAnnual: string | null;
+  active: boolean;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface CreateOrUpdatePlanRequest {
   name: string;
   slug: string;
-  description?: string;
-  priceCents: number;
-  billingPeriod?: string;
-  sortOrder?: number;
-  isPopular?: boolean;
-  isActive?: boolean;
-  maxStores?: number;
-  maxProducts?: number | null;
-  features?: string[];
-  stripeProductId?: string;
-  stripePriceId?: string;
+  monthlyPrice: number;
+  annualPrice?: number | null;
+  maxProducts: number;
+  maxStores: number;
+  maxStaff: number;
+  featuresJson: string;
+  stripePriceIdMonthly?: string | null;
+  stripePriceIdAnnual?: string | null;
+  active?: boolean;
 }
 
 export interface StoreSubscription {
   id: number;
   storeId: number;
   storeName: string;
-  storeSlug: string;
+  storeEmail: string;
   planId: number;
   planName: string;
-  planSlug: string;
-  planPriceCents: number;
   status: string;
-  stripeCustomerId: string | null;
-  stripeSubscriptionId: string | null;
-  currentPeriodStart: string | null;
-  currentPeriodEnd: string | null;
-  trialEnd: string | null;
-  canceledAt: string | null;
+  currentPeriodStart: string;
+  currentPeriodEnd: string;
+  monthlyPrice: number;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface SubscriptionStats {
-  activeSubscribers: number;
-  trialingSubscribers: number;
-  canceledSubscribers: number;
-  totalSubscribers: number;
-  mrrCents: number;
-  churnRatePercent: number;
+  totalSubscriptions: number;
+  activeSubscriptions: number;
+  trialSubscriptions: number;
+  cancelledSubscriptions: number;
+  mrr: number;
+  churnRate: number;
+  avgLifetimeValue: number;
 }
 
-// ── Notifications ──────────────────────────────────────────
-
-export interface NotificationItem {
+// ── Affiliates ─────────────────────────────────────────────────
+export interface Affiliate {
   id: number;
+  name: string;
+  email: string;
+  code: string;
+  status: string;
   storeId: number | null;
   storeName: string | null;
-  userId: number | null;
-  userEmail: string | null;
-  type: string;
-  channel: string;
-  title: string;
-  message: string;
-  actionUrl: string | null;
-  isRead: boolean;
-  readAt: string | null;
+  totalClicks: number;
+  totalConversions: number;
+  totalRevenue: number;
+  totalCommission: number;
+  tier: string;
   createdAt: string;
 }
 
-export interface NotificationType {
-  code: string;
-  label: string;
-  description: string | null;
-  category: string;
-  defaultEmail: boolean;
-  defaultInApp: boolean;
-  defaultPush: boolean;
-  sortOrder: number;
+export interface AffiliateStats {
+  totalAffiliates: number;
+  activeAffiliates: number;
+  totalRevenue: number;
+  totalCommissions: number;
+  avgConversionRate: number;
 }
 
-export interface NotificationPreference {
-  id: number | null;
-  notificationType: string;
-  typeLabel: string;
-  typeDescription: string | null;
-  typeCategory: string;
-  channelInApp: boolean;
-  channelEmail: boolean;
-  channelPush: boolean;
+export interface AffiliateConversion {
+  id: number;
+  affiliateId: number;
+  affiliateName: string;
+  storeId: number;
+  storeName: string;
+  saleAmount: number;
+  commissionAmount: number;
+  status: string;
+  createdAt: string;
+}
+
+export interface AffiliatePayout {
+  id: number;
+  affiliateId: number;
+  affiliateName: string;
+  amount: number;
+  status: string;
+  paidAt: string | null;
+  createdAt: string;
+}
+
+// ── Marketing ──────────────────────────────────────────────────
+export interface MarketingStats {
+  totalCampaigns: number;
+  activeCampaigns: number;
+  totalBanners: number;
+  activeBanners: number;
+}
+
+export interface MarketingCampaign {
+  id: number;
+  name: string;
+  status: string;
+  type: string;
+  storeId: number | null;
+  storeName: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  createdAt: string;
+}
+
+export interface CampaignUpsertRequest {
+  name: string;
+  type: string;
+  status?: string;
+  startDate?: string | null;
+  endDate?: string | null;
+}
+
+export interface MarketingBanner {
+  id: number;
+  title: string;
+  imageUrl: string;
+  linkUrl: string | null;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface BannerUpsertRequest {
+  title: string;
+  imageUrl: string;
+  linkUrl?: string | null;
+  active?: boolean;
+}
+
+export interface PushTemplate {
+  id: number;
+  title: string;
+  body: string;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface PushTemplateUpsertRequest {
+  title: string;
+  body: string;
+  active?: boolean;
+}
+
+// ── Notifications ──────────────────────────────────────────────
+export interface SANotification {
+  id: number;
+  type: string;
+  title: string;
+  message: string;
+  storeId: number | null;
+  read: boolean;
+  createdAt: string;
 }
 
 export interface NotificationStats {
   totalNotifications: number;
   unreadNotifications: number;
-  todayNotifications: number;
-  countByType: Record<string, number>;
 }
 
 export interface CreateNotificationRequest {
-  storeId?: number;
-  userId?: number;
   type: string;
   title: string;
   message: string;
-  actionUrl?: string;
-}
-
-export interface UpdatePreferenceRequest {
-  notificationType: string;
-  channelInApp: boolean;
-  channelEmail: boolean;
-  channelPush: boolean;
-}
-
-export interface PaginatedResult<T> {
-  content: T[];
-  page: number;
-  size: number;
-  totalElements: number;
-  totalPages: number;
-  first: boolean;
-  last: boolean;
+  storeId?: number | null;
 }

@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation"
+import { DashboardClient } from "@/components/features/dashboard/DashboardClient"
 
 export default function AdminPage() {
-  redirect("/admin/products/categories")
+  return <DashboardClient />
 }

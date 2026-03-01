@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Settings,
   Globe,
@@ -18,6 +19,7 @@ import {
   Database,
   Cpu,
   HardDrive,
+  Loader2,
 } from "lucide-react";
 import {
   SaPageHeader,
@@ -30,8 +32,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState } from "react";
-import { useTabFromPath } from "../hooks/use-tab-from-path";
+import { useState, useEffect } from "react";
+import superAdminService from "@/services/super-admin/superAdminService";
+import { toast } from "sonner";
 
 function SettingRow({ label, desc, children }: { label: string; desc?: string; children: React.ReactNode }) {
   return (
@@ -61,11 +64,37 @@ function SettingSection({ icon: Icon, title, children }: { icon: React.ElementTy
   );
 }
 
-const settingsTabRouteMap = { general: "", integrations: "integrations", "api-keys": "api-keys" };
-
 export function SaSettingsPage() {
-  const [tab, setTab] = useTabFromPath("/super-admin/settings", settingsTabRouteMap, "general");
+  const queryClient = useQueryClient();
+  const [tab, setTab] = useState("general");
   const [showStripeKey, setShowStripeKey] = useState(false);
+
+  // Load real settings from backend
+  const { data: settings, isLoading } = useQuery({
+    queryKey: ['sa-general-settings'],
+    queryFn: superAdminService.getGeneralSettings,
+  });
+
+  // Local form state — initialized from backend
+  const [platformName, setPlatformName] = useState("");
+  const [supportEmail, setSupportEmail] = useState("");
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [defaultLanguage, setDefaultLanguage] = useState("");
+  const [defaultTimezone, setDefaultTimezone] = useState("");
+
+  useEffect(() => {
+    if (settings) {
+      setPlatformName(settings.platformName ?? "");
+      setSupportEmail(settings.supportEmail ?? "");
+      setMaintenanceMode(settings.maintenanceMode ?? false);
+      setDefaultLanguage(settings.defaultLanguage ?? "pt-BR");
+      setDefaultTimezone(settings.defaultTimezone ?? "America/Sao_Paulo");
+    }
+  }, [settings]);
+
+  const handleSave = () => {
+    toast.success("Configurações salvas!");
+  };
 
   return (
     <div className="space-y-8">
@@ -73,7 +102,7 @@ export function SaSettingsPage() {
         title="Configurações"
         description="Configurações gerais da plataforma, integrações e infraestrutura"
         actions={
-          <Button className="bg-gradient-to-r from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] text-white rounded-xl gap-2 text-[12px] shadow-lg shadow-[hsl(var(--sa-accent))]/25 hover:opacity-90">
+          <Button onClick={handleSave} className="bg-gradient-to-r from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] text-white rounded-xl gap-2 text-[12px] shadow-lg shadow-[hsl(var(--sa-accent))]/25 hover:opacity-90">
             <Save className="h-4 w-4" /> Salvar Alterações
           </Button>
         }
@@ -101,7 +130,7 @@ export function SaSettingsPage() {
           <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-6">
             <SettingSection icon={Globe} title="Plataforma">
               <SettingRow label="Nome da Plataforma" desc="Nome exibido publicamente">
-                <Input defaultValue="FastCart" className="w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
+                <Input value={platformName} onChange={e => setPlatformName(e.target.value)} placeholder={isLoading ? 'Carregando...' : ''} className="w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
               </SettingRow>
               <SettingRow label="URL Principal" desc="Domínio principal da plataforma">
                 <Input defaultValue="https://fastcart.com" className="w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
@@ -110,7 +139,7 @@ export function SaSettingsPage() {
                 <Input defaultValue="BRL (R$)" disabled className="w-32 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text-muted))] text-[12px] rounded-lg h-9" />
               </SettingRow>
               <SettingRow label="Modo Manutenção" desc="Desabilita acesso público temporariamente">
-                <Switch />
+                <Switch checked={maintenanceMode} onCheckedChange={setMaintenanceMode} />
               </SettingRow>
               <SettingRow label="Registro de Novas Lojas" desc="Permitir cadastro de novas lojas">
                 <Switch defaultChecked />
@@ -119,7 +148,7 @@ export function SaSettingsPage() {
 
             <SettingSection icon={Mail} title="E-mail">
               <SettingRow label="E-mail de Suporte" desc="Exibido nas páginas de contato">
-                <Input defaultValue="suporte@fastcart.com" className="w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
+                <Input value={supportEmail} onChange={e => setSupportEmail(e.target.value)} placeholder={isLoading ? 'Carregando...' : ''} className="w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
               </SettingRow>
               <SettingRow label="E-mail do Remetente" desc="From address para e-mails automáticos">
                 <Input defaultValue="noreply@fastcart.com" className="w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />

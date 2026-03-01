@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import {
   Wallet,
   DollarSign,
@@ -14,6 +15,7 @@ import {
   Download,
   Calendar,
   Building2,
+  AlertTriangle,
 } from "lucide-react";
 import {
   SaPageHeader,
@@ -34,24 +36,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useTabFromPath } from "../hooks/use-tab-from-path";
+import { useState } from "react";
+import { superAdminService } from "@/services/super-admin";
+import type { SubscriptionStats } from "@/types/super-admin";
 
-const tabRouteMap = { overview: "", transactions: "transactions", payouts: "payouts", fees: "fees" };
+const fmtMoney = (n: number) => `R$ ${n.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
-const mockTransactions = [
-  { id: "TXN-001", store: "Fashion Store", type: "Venda", amount: "R$ 349,90", fee: "R$ 17,50", net: "R$ 332,40", date: "28/02/2026", status: "COMPLETED" },
-  { id: "TXN-002", store: "TechGadgets", type: "Venda", amount: "R$ 1.299,00", fee: "R$ 64,95", net: "R$ 1.234,05", date: "28/02/2026", status: "COMPLETED" },
-  { id: "TXN-003", store: "Casa Decor", type: "Reembolso", amount: "-R$ 89,90", fee: "-R$ 4,50", net: "-R$ 85,40", date: "27/02/2026", status: "REFUNDED" },
-  { id: "TXN-004", store: "SportLife", type: "Venda", amount: "R$ 199,00", fee: "R$ 9,95", net: "R$ 189,05", date: "27/02/2026", status: "PENDING" },
-  { id: "TXN-005", store: "Beleza Natural", type: "Assinatura", amount: "R$ 149,00", fee: "—", net: "R$ 149,00", date: "27/02/2026", status: "COMPLETED" },
-];
-
-const mockPayouts = [
-  { id: "PAY-001", store: "Fashion Store", amount: "R$ 12.450", period: "01-15 Fev", date: "20/02/2026", status: "PAID" },
-  { id: "PAY-002", store: "TechGadgets", amount: "R$ 8.320", period: "01-15 Fev", date: "20/02/2026", status: "PAID" },
-  { id: "PAY-003", store: "Casa Decor", amount: "R$ 6.780", period: "01-15 Fev", date: "20/02/2026", status: "PROCESSING" },
-  { id: "PAY-004", store: "SportLife", amount: "R$ 3.450", period: "16-28 Fev", date: "—", status: "SCHEDULED" },
-];
+// NOTE: Transaction and payout data requires Stripe integration.
+// These tables will be wired once STRIPE_SECRET_KEY is configured.
 
 const txnStatusMap: Record<string, { label: string; color: string }> = {
   COMPLETED: { label: "Concluído", color: "success" },
@@ -63,7 +55,15 @@ const txnStatusMap: Record<string, { label: string; color: string }> = {
 };
 
 export function SaFinancePage() {
-  const [tab, setTab] = useTabFromPath("/super-admin/finance", tabRouteMap, "overview");
+  const [tab, setTab] = useState("overview");
+
+  const { data: stats } = useQuery({
+    queryKey: ["sa-subscription-stats"],
+    queryFn: superAdminService.getSubscriptionStats,
+  });
+
+  const mrr = stats?.mrr ?? 0;
+  const arr = mrr * 12;
 
   return (
     <div className="space-y-8">
@@ -78,10 +78,10 @@ export function SaFinancePage() {
       />
 
       <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SaStatCard title="Receita Bruta" value="R$ 847K" icon={DollarSign} color="success" trend={{ value: 23, label: "" }} subtitle="Últimos 30 dias" />
-        <SaStatCard title="Taxas da Plataforma" value="R$ 42.3K" icon={Receipt} color="accent" trend={{ value: 18, label: "" }} />
-        <SaStatCard title="Repasses Pendentes" value="R$ 28.4K" icon={Banknote} color="warning" />
-        <SaStatCard title="Reembolsos" value="R$ 3.2K" icon={CreditCard} color="danger" subtitle="0.38% do GMV" />
+        <SaStatCard title="MRR (Assinaturas)" value={fmtMoney(mrr)} icon={DollarSign} color="success" trend={{ value: 0, label: "" }} subtitle="Recorrente" />
+        <SaStatCard title="ARR Projetado" value={fmtMoney(arr)} icon={Receipt} color="accent" />
+        <SaStatCard title="Assinaturas Ativas" value={String(stats?.activeSubscriptions ?? 0)} icon={Banknote} color="warning" />
+        <SaStatCard title="Cancelamentos" value={String(stats?.cancelledSubscriptions ?? 0)} icon={CreditCard} color="danger" subtitle={`Churn ${(stats?.churnRate ?? 0).toFixed(1)}%`} />
       </motion.div>
 
       <Tabs value={tab} onValueChange={setTab}>
@@ -104,57 +104,28 @@ export function SaFinancePage() {
         <TabsContent value="overview" className="mt-6">
           <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid gap-6 lg:grid-cols-2">
             <SaCard>
-              <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Fluxo de Caixa</h3>
+              <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Fluxo de Caixa (Assinaturas)</h3>
               <div className="space-y-4">
                 {[
-                  { label: "Entrada (vendas)", value: "R$ 847.000", change: 23, color: "sa-success" },
-                  { label: "Taxas coletadas", value: "R$ 42.350", change: 18, color: "sa-accent" },
-                  { label: "Assinaturas", value: "R$ 38.670", change: 12, color: "sa-info" },
-                  { label: "Reembolsos", value: "-R$ 3.200", change: -15, color: "sa-danger" },
-                  { label: "Repasses às lojas", value: "-R$ 801.450", change: 22, color: "sa-warning" },
+                  { label: "MRR (Recorrente)", value: fmtMoney(mrr), color: "sa-success" },
+                  { label: "ARR Projetado", value: fmtMoney(arr), color: "sa-accent" },
+                  { label: "Assinaturas Ativas", value: String(stats?.activeSubscriptions ?? 0), color: "sa-info" },
+                  { label: "Em Trial", value: String(stats?.trialSubscriptions ?? 0), color: "sa-warning" },
+                  { label: "Canceladas", value: String(stats?.cancelledSubscriptions ?? 0), color: "sa-danger" },
                 ].map(item => (
                   <motion.div key={item.label} variants={fadeInUp} className="flex items-center justify-between py-3 border-b border-[hsl(var(--sa-border-subtle))] last:border-0">
                     <span className="text-[12px] text-[hsl(var(--sa-text-secondary))]">{item.label}</span>
-                    <div className="flex items-center gap-3">
-                      <span className={`text-[14px] font-bold text-[hsl(var(--${item.color}))]`}>{item.value}</span>
-                      <span className={`text-[11px] font-semibold flex items-center gap-0.5 ${item.change > 0 ? "text-[hsl(var(--sa-success))]" : "text-[hsl(var(--sa-danger))]"}`}>
-                        {item.change > 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                        {Math.abs(item.change)}%
-                      </span>
-                    </div>
+                    <span className={`text-[14px] font-bold text-[hsl(var(--${item.color}))]`}>{item.value}</span>
                   </motion.div>
                 ))}
               </div>
             </SaCard>
 
             <SaCard>
-              <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Top Lojas por Volume</h3>
-              <div className="space-y-3">
-                {[
-                  { name: "Fashion Store", volume: "R$ 124.580", pct: 14.7 },
-                  { name: "TechGadgets Pro", volume: "R$ 98.450", pct: 11.6 },
-                  { name: "Casa Decor", volume: "R$ 76.320", pct: 9.0 },
-                  { name: "SportLife", volume: "R$ 54.100", pct: 6.4 },
-                  { name: "Beleza Natural", volume: "R$ 43.890", pct: 5.2 },
-                ].map((store, i) => (
-                  <motion.div key={store.name} variants={fadeInUp} className="flex items-center gap-3 py-2">
-                    <span className="text-[11px] font-bold text-[hsl(var(--sa-text-muted))] w-5">#{i + 1}</span>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[12px] font-semibold text-[hsl(var(--sa-text))]">{store.name}</span>
-                        <span className="text-[12px] font-bold text-[hsl(var(--sa-success))]">{store.volume}</span>
-                      </div>
-                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-[hsl(var(--sa-surface-hover))]">
-                        <motion.div
-                          className="h-full rounded-full bg-[hsl(var(--sa-accent))]"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${store.pct}%` }}
-                          transition={{ duration: 0.8, delay: 0.2 + i * 0.1 }}
-                        />
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
+              <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Transações de Vendas (Stripe)</h3>
+              <div className="flex items-center gap-3 py-8 justify-center text-center">
+                <AlertTriangle className="h-5 w-5 text-[hsl(var(--sa-warning))]" />
+                <p className="text-[12px] text-[hsl(var(--sa-text-muted))]">Integração Stripe não configurada. Configure STRIPE_SECRET_KEY para ver dados de GMV e transações.</p>
               </div>
             </SaCard>
           </motion.div>
@@ -163,78 +134,27 @@ export function SaFinancePage() {
         {/* Transactions */}
         <TabsContent value="transactions" className="mt-6">
           <motion.div variants={fadeInUp} initial="initial" animate="animate">
-            <SaTableCard title="Transações Recentes" subtitle="Últimas transações processadas">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-[hsl(var(--sa-border-subtle))] hover:bg-transparent">
-                    <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">ID</TableHead>
-                    <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Loja</TableHead>
-                    <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Tipo</TableHead>
-                    <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Valor</TableHead>
-                    <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Taxa</TableHead>
-                    <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Líquido</TableHead>
-                    <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {mockTransactions.map((tx, i) => (
-                    <motion.tr
-                      key={tx.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: i * 0.05 }}
-                      className="border-[hsl(var(--sa-border-subtle))] hover:bg-[hsl(var(--sa-surface-hover))] transition-colors"
-                    >
-                      <TableCell className="text-[12px] font-mono text-[hsl(var(--sa-text-muted))]">{tx.id}</TableCell>
-                      <TableCell className="text-[12px] text-[hsl(var(--sa-text))]">{tx.store}</TableCell>
-                      <TableCell className="text-[12px] text-[hsl(var(--sa-text-secondary))]">{tx.type}</TableCell>
-                      <TableCell className="text-[12px] font-bold text-[hsl(var(--sa-text))]">{tx.amount}</TableCell>
-                      <TableCell className="text-[12px] text-[hsl(var(--sa-accent))]">{tx.fee}</TableCell>
-                      <TableCell className="text-[12px] font-bold text-[hsl(var(--sa-success))]">{tx.net}</TableCell>
-                      <TableCell><SaStatusBadge status={tx.status} map={txnStatusMap} /></TableCell>
-                    </motion.tr>
-                  ))}
-                </TableBody>
-              </Table>
-            </SaTableCard>
+            <SaCard>
+              <div className="flex items-center gap-3 py-12 justify-center text-center flex-col">
+                <AlertTriangle className="h-8 w-8 text-[hsl(var(--sa-warning))]" />
+                <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))]">Integração Stripe Necessária</h3>
+                <p className="text-[12px] text-[hsl(var(--sa-text-muted))] max-w-md">As transações de vendas e pagamentos serão exibidas aqui após configurar a integração com Stripe Connect.</p>
+                <Button className="mt-2 bg-[hsl(var(--sa-accent))] hover:bg-[hsl(var(--sa-accent-hover))] text-white rounded-xl">Configurar Stripe</Button>
+              </div>
+            </SaCard>
           </motion.div>
         </TabsContent>
 
         {/* Payouts */}
         <TabsContent value="payouts" className="mt-6">
           <motion.div variants={fadeInUp} initial="initial" animate="animate">
-            <SaTableCard title="Repasses às Lojas" subtitle="Histórico de pagamentos">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-[hsl(var(--sa-border-subtle))] hover:bg-transparent">
-                    <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">ID</TableHead>
-                    <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Loja</TableHead>
-                    <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Valor</TableHead>
-                    <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Período</TableHead>
-                    <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Data</TableHead>
-                    <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {mockPayouts.map((p, i) => (
-                    <motion.tr
-                      key={p.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: i * 0.05 }}
-                      className="border-[hsl(var(--sa-border-subtle))] hover:bg-[hsl(var(--sa-surface-hover))] transition-colors"
-                    >
-                      <TableCell className="text-[12px] font-mono text-[hsl(var(--sa-text-muted))]">{p.id}</TableCell>
-                      <TableCell className="text-[12px] text-[hsl(var(--sa-text))]">{p.store}</TableCell>
-                      <TableCell className="text-[12px] font-bold text-[hsl(var(--sa-success))]">{p.amount}</TableCell>
-                      <TableCell className="text-[12px] text-[hsl(var(--sa-text-secondary))]">{p.period}</TableCell>
-                      <TableCell className="text-[12px] text-[hsl(var(--sa-text-muted))]">{p.date}</TableCell>
-                      <TableCell><SaStatusBadge status={p.status} map={txnStatusMap} /></TableCell>
-                    </motion.tr>
-                  ))}
-                </TableBody>
-              </Table>
-            </SaTableCard>
+            <SaCard>
+              <div className="flex items-center gap-3 py-12 justify-center text-center flex-col">
+                <AlertTriangle className="h-8 w-8 text-[hsl(var(--sa-warning))]" />
+                <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))]">Repasses Stripe Connect</h3>
+                <p className="text-[12px] text-[hsl(var(--sa-text-muted))] max-w-md">O histórico de repasses às lojas será exibido aqui após configurar o Stripe Connect para split payments.</p>
+              </div>
+            </SaCard>
           </motion.div>
         </TabsContent>
 
@@ -262,12 +182,12 @@ export function SaFinancePage() {
             </SaCard>
 
             <SaCard>
-              <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Receita de Taxas (Mês)</h3>
+              <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Receita de Assinaturas (Mês)</h3>
               <div className="space-y-3">
                 {[
-                  { label: "Taxa por transação", value: "R$ 28.450", pct: 67.2 },
-                  { label: "Assinaturas", value: "R$ 11.200", pct: 26.5 },
-                  { label: "Outros", value: "R$ 2.700", pct: 6.3 },
+                  { label: "MRR (Recorrente)", value: fmtMoney(mrr), pct: 100 },
+                  { label: "ARR Projetado", value: fmtMoney(arr), pct: 100 },
+                  { label: "Assinaturas Ativas", value: String(stats?.activeSubscriptions ?? 0), pct: stats ? (stats.activeSubscriptions / Math.max(stats.totalSubscriptions, 1)) * 100 : 0 },
                 ].map((item, i) => (
                   <motion.div key={item.label} variants={fadeInUp}>
                     <div className="flex items-center justify-between mb-1">

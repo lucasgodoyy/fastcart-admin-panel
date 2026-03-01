@@ -1,14 +1,10 @@
-import { RoutePlaceholderPage } from '@/components/admin/RoutePlaceholderPage';
+import { Suspense } from 'react';
+import { FreeShippingClient } from '@/components/features/discounts/FreeShippingClient';
 
 export default function FreeShippingPage() {
   return (
-    <RoutePlaceholderPage
-      title="Discounts · Free Shipping"
-      description="Configure campanhas e regras de frete grátis por condição."
-      links={[
-        { label: 'Coupons', href: '/admin/discounts/coupons' },
-        { label: 'Promotions', href: '/admin/discounts/promotions' },
-      ]}
-    />
+    <Suspense fallback={<div className="p-8 text-sm text-muted-foreground">Carregando...</div>}>
+      <FreeShippingClient />
+    </Suspense>
   );
 }

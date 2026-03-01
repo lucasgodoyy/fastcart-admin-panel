@@ -1,698 +1,425 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  MessageSquare,
-  Search,
-  Send,
-  Plus,
-  Archive,
-  CheckCircle2,
-  Circle,
-  Clock,
-  MailOpen,
-  Loader2,
-  User,
-  Headphones,
-  X,
-  MessagesSquare,
-  MoreVertical,
-} from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import chatService, {
+  Conversation,
+  ChatMessage,
+  PaginatedResult,
+  ChatStats,
+} from '@/services/chatService';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+// Textarea not available — use Input instead
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import chatService from '@/services/chatService';
-import type {
-  Conversation,
-  ChatMessage,
-  ConversationStatus,
-  ChatStats,
-} from '@/types/chat';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  MessageSquare,
+  Plus,
+  Loader2,
+  Send,
+  Inbox,
+  Archive,
+  CheckCircle2,
+  User,
+  Clock,
+} from 'lucide-react';
 import { toast } from 'sonner';
-import { formatDistanceToNow, format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
-// ═══════════════════════════════════════════════════════════════
-//  Helpers
-// ═══════════════════════════════════════════════════════════════
+const statusFilters = [
+  { value: 'ALL', label: 'Todos' },
+  { value: 'OPEN', label: 'Abertos' },
+  { value: 'CLOSED', label: 'Fechados' },
+  { value: 'ARCHIVED', label: 'Arquivados' },
+];
 
-const STATUS_CONFIG: Record<ConversationStatus, { icon: React.ReactNode; color: string; bg: string; label: string }> = {
-  OPEN: { icon: <Circle className="h-3 w-3 fill-green-500 text-green-500" />, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-950/40', label: 'Aberta' },
-  CLOSED: { icon: <CheckCircle2 className="h-3 w-3" />, color: 'text-gray-500', bg: 'bg-gray-50 dark:bg-gray-800', label: 'Fechada' },
-  ARCHIVED: { icon: <Archive className="h-3 w-3" />, color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-950/40', label: 'Arquivada' },
-};
-
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
+function timeAgo(iso: string | null) {
+  if (!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'agora';
+  if (mins < 60) return `${mins}m`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d`;
 }
-
-function timeAgo(dateStr: string | null): string {
-  if (!dateStr) return '';
-  try {
-    return formatDistanceToNow(new Date(dateStr), { addSuffix: true, locale: ptBR });
-  } catch {
-    return '';
-  }
-}
-
-function formatTime(dateStr: string): string {
-  try {
-    return format(new Date(dateStr), 'HH:mm', { locale: ptBR });
-  } catch {
-    return '';
-  }
-}
-
-function formatDate(dateStr: string): string {
-  try {
-    const d = new Date(dateStr);
-    const today = new Date();
-    if (d.toDateString() === today.toDateString()) return 'Hoje';
-    const yesterday = new Date();
-    yesterday.setDate(today.getDate() - 1);
-    if (d.toDateString() === yesterday.toDateString()) return 'Ontem';
-    return format(d, "dd 'de' MMM", { locale: ptBR });
-  } catch {
-    return '';
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  Stat Card
-// ═══════════════════════════════════════════════════════════════
-
-function StatCard({ label, value, icon }: { label: string; value: number; icon: React.ReactNode }) {
-  return (
-    <div className="flex items-center gap-3 rounded-lg border bg-card p-3 text-card-foreground">
-      <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary">
-        {icon}
-      </div>
-      <div>
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="text-lg font-semibold">{value}</p>
-      </div>
-    </div>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  New Conversation Dialog
-// ═══════════════════════════════════════════════════════════════
-
-function NewConversationDialog({
-  open,
-  onOpenChange,
-  onCreated,
-}: {
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
-  onCreated: (c: Conversation) => void;
-}) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [subject, setSubject] = useState('');
-  const [message, setMessage] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async () => {
-    if (!name.trim() || !email.trim() || !message.trim()) {
-      toast.error('Preencha nome, email e mensagem.');
-      return;
-    }
-    setLoading(true);
-    try {
-      const conversation = await chatService.createConversation({
-        customerName: name.trim(),
-        customerEmail: email.trim(),
-        subject: subject.trim() || undefined,
-        initialMessage: message.trim(),
-      });
-      toast.success('Conversa criada com sucesso!');
-      onCreated(conversation);
-      onOpenChange(false);
-      setName('');
-      setEmail('');
-      setSubject('');
-      setMessage('');
-    } catch {
-      toast.error('Erro ao criar conversa.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Nova conversa</DialogTitle>
-          <DialogDescription>Inicie uma conversa com um cliente.</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-3 pt-2">
-          <Input placeholder="Nome do cliente" value={name} onChange={(e) => setName(e.target.value)} />
-          <Input placeholder="Email do cliente" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <Input placeholder="Assunto (opcional)" value={subject} onChange={(e) => setSubject(e.target.value)} />
-          <Textarea
-            placeholder="Mensagem inicial..."
-            rows={3}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-          />
-          <Button className="w-full" onClick={handleSubmit} disabled={loading}>
-            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-            Iniciar conversa
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  Conversation List Item
-// ═══════════════════════════════════════════════════════════════
-
-function ConversationItem({
-  conversation,
-  isActive,
-  onClick,
-}: {
-  conversation: Conversation;
-  isActive: boolean;
-  onClick: () => void;
-}) {
-  const cfg = STATUS_CONFIG[conversation.status];
-
-  return (
-    <button
-      onClick={onClick}
-      className={`w-full text-left px-3 py-3 transition-colors hover:bg-accent/50 border-b border-border/50 ${
-        isActive ? 'bg-accent' : ''
-      }`}
-    >
-      <div className="flex items-start gap-3">
-        <Avatar className="h-10 w-10 shrink-0">
-          <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
-            {getInitials(conversation.customerName)}
-          </AvatarFallback>
-        </Avatar>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-2">
-            <span className="truncate text-sm font-medium">{conversation.customerName}</span>
-            <span className="shrink-0 text-[11px] text-muted-foreground">
-              {timeAgo(conversation.lastMessageAt)}
-            </span>
-          </div>
-          {conversation.subject && (
-            <p className="truncate text-xs text-muted-foreground mt-0.5">{conversation.subject}</p>
-          )}
-          <div className="flex items-center justify-between gap-2 mt-1">
-            <p className="truncate text-xs text-muted-foreground">
-              {conversation.lastMessagePreview || 'Sem mensagens'}
-            </p>
-            <div className="flex items-center gap-1.5 shrink-0">
-              {conversation.unreadAdminCount > 0 && (
-                <Badge variant="default" className="h-5 min-w-[20px] justify-center rounded-full px-1.5 text-[10px]">
-                  {conversation.unreadAdminCount}
-                </Badge>
-              )}
-              <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${cfg.color}`}>
-                {cfg.label}
-              </Badge>
-            </div>
-          </div>
-        </div>
-      </div>
-    </button>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  Message Bubble
-// ═══════════════════════════════════════════════════════════════
-
-function MessageBubble({ msg }: { msg: ChatMessage }) {
-  const isAdmin = msg.senderType === 'ADMIN';
-  const isSystem = msg.senderType === 'SYSTEM';
-
-  if (isSystem) {
-    return (
-      <div className="flex justify-center my-2">
-        <span className="text-[11px] text-muted-foreground bg-muted rounded-full px-3 py-1">
-          {msg.content}
-        </span>
-      </div>
-    );
-  }
-
-  return (
-    <div className={`flex ${isAdmin ? 'justify-end' : 'justify-start'} mb-2`}>
-      <div
-        className={`max-w-[70%] rounded-2xl px-4 py-2.5 ${
-          isAdmin
-            ? 'bg-primary text-primary-foreground rounded-br-md'
-            : 'bg-muted text-foreground rounded-bl-md'
-        }`}
-      >
-        {!isAdmin && (
-          <p className="text-[11px] font-medium opacity-70 mb-0.5">{msg.senderName}</p>
-        )}
-        <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
-        <div className={`flex items-center gap-1 mt-1 ${isAdmin ? 'justify-end' : 'justify-start'}`}>
-          <span className="text-[10px] opacity-60">{formatTime(msg.createdAt)}</span>
-          {isAdmin && msg.read && <CheckCircle2 className="h-3 w-3 opacity-60" />}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  Date Separator
-// ═══════════════════════════════════════════════════════════════
-
-function DateSeparator({ date }: { date: string }) {
-  return (
-    <div className="flex items-center gap-3 my-4">
-      <Separator className="flex-1" />
-      <span className="text-[11px] text-muted-foreground shrink-0">{formatDate(date)}</span>
-      <Separator className="flex-1" />
-    </div>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  ChatClient (main)
-// ═══════════════════════════════════════════════════════════════
 
 export function ChatClient() {
-  // ── State ────────────────────────────────────────────────
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [activeConv, setActiveConv] = useState<Conversation | null>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [stats, setStats] = useState<ChatStats | null>(null);
-
-  const [loadingConvs, setLoadingConvs] = useState(true);
-  const [loadingMsgs, setLoadingMsgs] = useState(false);
-  const [sendingMsg, setSendingMsg] = useState(false);
-
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<ConversationStatus | ''>('');
-  const [newConvOpen, setNewConvOpen] = useState(false);
-  const [msgInput, setMsgInput] = useState('');
-  const [showActions, setShowActions] = useState(false);
-
+  const queryClient = useQueryClient();
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [newMessage, setNewMessage] = useState('');
+  const [dialogOpen, setDialogOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const pollRef = useRef<NodeJS.Timeout | null>(null);
 
-  // ── Load conversations ───────────────────────────────────
-  const loadConversations = useCallback(async () => {
-    try {
-      const params: Record<string, string | number> = { size: 100 };
-      if (statusFilter) params.status = statusFilter;
-      const result = await chatService.listConversations(params);
-      setConversations(result.content);
-    } catch {
-      // silent – polling
-    }
-  }, [statusFilter]);
-
-  const loadStats = useCallback(async () => {
-    try {
-      const s = await chatService.getStats();
-      setStats(s);
-    } catch {
-      // silent
-    }
-  }, []);
-
-  // ── Initial load ─────────────────────────────────────────
-  useEffect(() => {
-    const init = async () => {
-      setLoadingConvs(true);
-      await Promise.all([loadConversations(), loadStats()]);
-      setLoadingConvs(false);
-    };
-    init();
-  }, [loadConversations, loadStats]);
-
-  // ── Polling every 10s ────────────────────────────────────
-  useEffect(() => {
-    pollRef.current = setInterval(() => {
-      loadConversations();
-      loadStats();
-    }, 10000);
-    return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
-    };
-  }, [loadConversations, loadStats]);
-
-  // ── Load messages for active conversation ────────────────
-  const loadMessages = useCallback(
-    async (convId: number) => {
-      setLoadingMsgs(true);
-      try {
-        const result = await chatService.listMessages(convId, { size: 200 });
-        setMessages(result.content);
-        // mark as read
-        await chatService.markAsRead(convId).catch(() => {});
-        // refresh unread counters
-        loadConversations();
-        loadStats();
-      } catch {
-        toast.error('Erro ao carregar mensagens.');
-      } finally {
-        setLoadingMsgs(false);
-      }
-    },
-    [loadConversations, loadStats]
-  );
-
-  // Poll messages for the active conversation
-  useEffect(() => {
-    if (!activeConv) return;
-    const interval = setInterval(() => {
-      loadMessages(activeConv.id);
-    }, 8000);
-    return () => clearInterval(interval);
-  }, [activeConv, loadMessages]);
-
-  // ── Scroll to bottom ────────────────────────────────────
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  // ── Select conversation ─────────────────────────────────
-  const selectConversation = (conv: Conversation) => {
-    setActiveConv(conv);
-    setShowActions(false);
-    loadMessages(conv.id);
-  };
-
-  // ── Send message ────────────────────────────────────────
-  const handleSend = async () => {
-    if (!msgInput.trim() || !activeConv) return;
-    setSendingMsg(true);
-    try {
-      await chatService.sendMessage(activeConv.id, { content: msgInput.trim() });
-      setMsgInput('');
-      await loadMessages(activeConv.id);
-    } catch {
-      toast.error('Erro ao enviar mensagem.');
-    } finally {
-      setSendingMsg(false);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
-  // ── Status update ───────────────────────────────────────
-  const handleStatusChange = async (status: ConversationStatus) => {
-    if (!activeConv) return;
-    try {
-      const updated = await chatService.updateStatus(activeConv.id, status);
-      setActiveConv(updated);
-      loadConversations();
-      loadStats();
-      toast.success(`Conversa ${STATUS_CONFIG[status].label.toLowerCase()}.`);
-    } catch {
-      toast.error('Erro ao atualizar status.');
-    }
-    setShowActions(false);
-  };
-
-  // ── New conversation created ────────────────────────────
-  const handleConvCreated = (conv: Conversation) => {
-    loadConversations();
-    loadStats();
-    selectConversation(conv);
-  };
-
-  // ── Filter ──────────────────────────────────────────────
-  const filteredConversations = conversations.filter((c) => {
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      return (
-        c.customerName.toLowerCase().includes(term) ||
-        c.customerEmail.toLowerCase().includes(term) ||
-        (c.subject ?? '').toLowerCase().includes(term)
-      );
-    }
-    return true;
+  // Stats
+  const { data: stats } = useQuery<ChatStats>({
+    queryKey: ['chat-stats'],
+    queryFn: chatService.getStats,
   });
 
-  // ── Date grouping helper for messages ───────────────────
-  function groupedMessages(msgs: ChatMessage[]) {
-    const groups: { date: string; messages: ChatMessage[] }[] = [];
-    let currentDate = '';
-    for (const m of msgs) {
-      const d = new Date(m.createdAt).toDateString();
-      if (d !== currentDate) {
-        currentDate = d;
-        groups.push({ date: m.createdAt, messages: [m] });
-      } else {
-        groups[groups.length - 1].messages.push(m);
-      }
-    }
-    return groups;
-  }
+  // Conversations list
+  const { data: convData, isLoading: loadingConvs } = useQuery<PaginatedResult<Conversation>>({
+    queryKey: ['chat-conversations', statusFilter],
+    queryFn: () =>
+      chatService.listConversations({
+        size: 50,
+        status: statusFilter === 'ALL' ? undefined : statusFilter,
+      }),
+  });
 
-  // ═══════════════════════════════════════════════════════════
-  //  Render
-  // ═══════════════════════════════════════════════════════════
+  // Selected conversation messages
+  const { data: messagesData, isLoading: loadingMessages } = useQuery<PaginatedResult<ChatMessage>>({
+    queryKey: ['chat-messages', selectedId],
+    queryFn: () => chatService.listMessages(selectedId!, { size: 100 }),
+    enabled: !!selectedId,
+    refetchInterval: 10_000,
+  });
+
+  // Send message
+  const sendMutation = useMutation({
+    mutationFn: () => chatService.sendMessage(selectedId!, newMessage),
+    onSuccess: () => {
+      setNewMessage('');
+      queryClient.invalidateQueries({ queryKey: ['chat-messages', selectedId] });
+      queryClient.invalidateQueries({ queryKey: ['chat-conversations'] });
+    },
+    onError: () => toast.error('Erro ao enviar mensagem.'),
+  });
+
+  // Create conversation
+  const [form, setForm] = useState({
+    customerName: '',
+    customerEmail: '',
+    subject: '',
+    initialMessage: '',
+  });
+
+  const createConv = useMutation({
+    mutationFn: () => chatService.createConversation(form),
+    onSuccess: (conv) => {
+      queryClient.invalidateQueries({ queryKey: ['chat-conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['chat-stats'] });
+      setDialogOpen(false);
+      setSelectedId(conv.id);
+      setForm({ customerName: '', customerEmail: '', subject: '', initialMessage: '' });
+      toast.success('Conversa criada!');
+    },
+    onError: () => toast.error('Erro ao criar conversa.'),
+  });
+
+  // Update status
+  const updateStatus = useMutation({
+    mutationFn: ({ id, status }: { id: number; status: 'OPEN' | 'CLOSED' | 'ARCHIVED' }) =>
+      chatService.updateStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chat-conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['chat-stats'] });
+      toast.success('Status atualizado.');
+    },
+  });
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messagesData]);
+
+  const conversations = convData?.content ?? [];
+  const messages = messagesData?.content ?? [];
+
+  const selectedConv = conversations.find((c) => c.id === selectedId);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
-      {/* ── Stats Bar ─────────────────────────────────── */}
-      <div className="grid grid-cols-3 gap-3 p-4 pb-3">
-        <StatCard label="Não lidas" value={stats?.totalUnread ?? 0} icon={<MailOpen className="h-4 w-4" />} />
-        <StatCard label="Abertas" value={stats?.openConversations ?? 0} icon={<MessagesSquare className="h-4 w-4" />} />
-        <StatCard label="Fechadas" value={stats?.closedConversations ?? 0} icon={<CheckCircle2 className="h-4 w-4" />} />
-      </div>
-
-      {/* ── Main Chat Area ────────────────────────────── */}
-      <div className="flex flex-1 min-h-0 mx-4 mb-4 rounded-lg border bg-card overflow-hidden">
-        {/* ── Left Panel: Conversation List ────────────── */}
-        <div className="w-80 shrink-0 border-r flex flex-col">
-          {/* Header */}
-          <div className="p-3 border-b space-y-2">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold flex items-center gap-2">
-                <MessageSquare className="h-4 w-4" />
-                Conversas
-              </h2>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setNewConvOpen(true)}>
-                <Plus className="h-4 w-4" />
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-foreground">Chat</h1>
+          <p className="text-sm text-muted-foreground">
+            Central de mensagens com clientes
+          </p>
+        </div>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm" className="gap-1.5">
+              <Plus className="h-4 w-4" />
+              Nova conversa
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Iniciar conversa</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-2">
+              <div className="space-y-1.5">
+                <Label>Nome do cliente</Label>
+                <Input
+                  value={form.customerName}
+                  onChange={(e) => setForm((p) => ({ ...p, customerName: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>E-mail</Label>
+                <Input
+                  type="email"
+                  value={form.customerEmail}
+                  onChange={(e) => setForm((p) => ({ ...p, customerEmail: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Assunto</Label>
+                <Input
+                  value={form.subject}
+                  onChange={(e) => setForm((p) => ({ ...p, subject: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Mensagem inicial</Label>
+                <Input
+                  value={form.initialMessage}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm((p) => ({ ...p, initialMessage: e.target.value }))}
+                  placeholder="Escreva a primeira mensagem..."
+                />
+              </div>
+              <Button
+                className="w-full"
+                onClick={() => createConv.mutate()}
+                disabled={!form.customerName || !form.customerEmail || !form.initialMessage || createConv.isPending}
+              >
+                {createConv.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Criar
               </Button>
             </div>
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-              <Input
-                placeholder="Buscar..."
-                className="h-8 pl-8 text-xs"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            {/* Status tabs */}
-            <div className="flex gap-1">
-              {(['' as const, 'OPEN' as const, 'CLOSED' as const, 'ARCHIVED' as const] as const).map((s) => (
-                <Button
-                  key={s || 'all'}
-                  variant={statusFilter === s ? 'default' : 'ghost'}
-                  size="sm"
-                  className="h-6 text-[11px] px-2"
-                  onClick={() => setStatusFilter(s as ConversationStatus | '')}
-                >
-                  {s ? STATUS_CONFIG[s as ConversationStatus].label : 'Todas'}
-                </Button>
-              ))}
-            </div>
-          </div>
+          </DialogContent>
+        </Dialog>
+      </div>
 
-          {/* Conversation list */}
+      {/* Stats bar */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-xs font-medium text-muted-foreground">Total</CardTitle>
+            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent><div className="text-2xl font-bold">{stats?.totalConversations ?? 0}</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-xs font-medium text-muted-foreground">Abertos</CardTitle>
+            <Inbox className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent><div className="text-2xl font-bold text-blue-600">{stats?.openConversations ?? 0}</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-xs font-medium text-muted-foreground">Fechados</CardTitle>
+            <CheckCircle2 className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent><div className="text-2xl font-bold text-green-600">{stats?.closedConversations ?? 0}</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-xs font-medium text-muted-foreground">Não lidas</CardTitle>
+            <Clock className="h-4 w-4 text-orange-500" />
+          </CardHeader>
+          <CardContent><div className="text-2xl font-bold text-orange-600">{stats?.unreadMessages ?? 0}</div></CardContent>
+        </Card>
+      </div>
+
+      {/* Chat layout */}
+      <div className="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-4 h-[calc(100vh-380px)] min-h-100">
+        {/* Conversation list */}
+        <Card className="flex flex-col overflow-hidden">
+          <CardHeader className="p-3 border-b">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {statusFilters.map((f) => (
+                  <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CardHeader>
           <ScrollArea className="flex-1">
             {loadingConvs ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
               </div>
-            ) : filteredConversations.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-                <MessageSquare className="h-8 w-8 text-muted-foreground/40 mb-2" />
-                <p className="text-sm text-muted-foreground">Nenhuma conversa encontrada</p>
-                <Button variant="link" size="sm" className="mt-1 text-xs" onClick={() => setNewConvOpen(true)}>
-                  Iniciar nova conversa
-                </Button>
+            ) : conversations.length === 0 ? (
+              <div className="py-12 text-center text-sm text-muted-foreground">
+                Nenhuma conversa.
               </div>
             ) : (
-              filteredConversations.map((c) => (
-                <ConversationItem
-                  key={c.id}
-                  conversation={c}
-                  isActive={activeConv?.id === c.id}
-                  onClick={() => selectConversation(c)}
-                />
-              ))
+              <div className="divide-y">
+                {conversations.map((conv) => (
+                  <button
+                    key={conv.id}
+                    onClick={() => setSelectedId(conv.id)}
+                    className={cn(
+                      'w-full text-left p-3 hover:bg-muted/50 transition-colors',
+                      selectedId === conv.id && 'bg-muted',
+                    )}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium truncate">{conv.customerName}</span>
+                      <span className="text-[10px] text-muted-foreground">{timeAgo(conv.lastMessageAt)}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate">{conv.subject || conv.customerEmail}</p>
+                    <div className="flex items-center justify-between mt-1">
+                      <p className="text-xs text-muted-foreground truncate max-w-50">
+                        {conv.lastMessagePreview || 'Sem mensagens'}
+                      </p>
+                      {conv.unreadAdminCount > 0 && (
+                        <Badge variant="default" className="h-4 px-1 text-[10px] rounded-full">
+                          {conv.unreadAdminCount}
+                        </Badge>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
             )}
           </ScrollArea>
-        </div>
+        </Card>
 
-        {/* ── Right Panel: Messages ────────────────────── */}
-        <div className="flex-1 flex flex-col min-w-0">
-          {!activeConv ? (
-            /* Empty state */
-            <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-              <div className="rounded-full bg-primary/10 p-6 mb-4">
-                <MessageSquare className="h-10 w-10 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold mb-1">Chat com clientes</h3>
-              <p className="text-sm text-muted-foreground max-w-sm">
-                Selecione uma conversa ao lado ou inicie uma nova para começar a atender seus clientes.
-              </p>
-              <Button className="mt-4" onClick={() => setNewConvOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Nova conversa
-              </Button>
+        {/* Message panel */}
+        <Card className="flex flex-col overflow-hidden">
+          {!selectedId ? (
+            <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground">
+              Selecione uma conversa para ver as mensagens.
             </div>
           ) : (
             <>
-              {/* Message header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b">
-                <div className="flex items-center gap-3 min-w-0">
-                  <Avatar className="h-9 w-9 shrink-0">
-                    <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                      {getInitials(activeConv.customerName)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium truncate">{activeConv.customerName}</span>
-                      <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${STATUS_CONFIG[activeConv.status].color}`}>
-                        {STATUS_CONFIG[activeConv.status].label}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground truncate">{activeConv.customerEmail}</p>
-                  </div>
+              {/* Header */}
+              <CardHeader className="p-3 border-b flex flex-row items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">{selectedConv?.customerName}</p>
+                  <p className="text-xs text-muted-foreground truncate">{selectedConv?.subject || selectedConv?.customerEmail}</p>
                 </div>
-                <div className="relative">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowActions(!showActions)}>
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                  {showActions && (
-                    <div className="absolute right-0 top-full mt-1 w-44 rounded-md border bg-popover p-1 shadow-md z-50">
-                      {activeConv.status !== 'OPEN' && (
-                        <button
-                          className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
-                          onClick={() => handleStatusChange('OPEN')}
-                        >
-                          <Circle className="h-3.5 w-3.5 text-green-500" /> Reabrir
-                        </button>
-                      )}
-                      {activeConv.status !== 'CLOSED' && (
-                        <button
-                          className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
-                          onClick={() => handleStatusChange('CLOSED')}
-                        >
-                          <CheckCircle2 className="h-3.5 w-3.5 text-gray-500" /> Fechar
-                        </button>
-                      )}
-                      {activeConv.status !== 'ARCHIVED' && (
-                        <button
-                          className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
-                          onClick={() => handleStatusChange('ARCHIVED')}
-                        >
-                          <Archive className="h-3.5 w-3.5 text-orange-500" /> Arquivar
-                        </button>
-                      )}
-                    </div>
+                <div className="flex gap-1.5 shrink-0">
+                  {selectedConv?.status !== 'CLOSED' && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs"
+                      onClick={() => updateStatus.mutate({ id: selectedId, status: 'CLOSED' })}
+                    >
+                      Fechar
+                    </Button>
+                  )}
+                  {selectedConv?.status === 'CLOSED' && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs"
+                      onClick={() => updateStatus.mutate({ id: selectedId, status: 'OPEN' })}
+                    >
+                      Reabrir
+                    </Button>
+                  )}
+                  {selectedConv?.status !== 'ARCHIVED' && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 text-xs"
+                      onClick={() => updateStatus.mutate({ id: selectedId, status: 'ARCHIVED' })}
+                    >
+                      <Archive className="h-3.5 w-3.5" />
+                    </Button>
                   )}
                 </div>
-              </div>
+              </CardHeader>
 
-              {/* Messages area */}
-              <ScrollArea className="flex-1 px-4 py-3">
-                {loadingMsgs && messages.length === 0 ? (
+              {/* Messages */}
+              <ScrollArea className="flex-1 p-4">
+                {loadingMessages ? (
                   <div className="flex items-center justify-center py-12">
                     <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                   </div>
                 ) : messages.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <Clock className="h-6 w-6 text-muted-foreground/40 mb-2" />
-                    <p className="text-sm text-muted-foreground">Nenhuma mensagem ainda</p>
+                  <div className="py-12 text-center text-sm text-muted-foreground">
+                    Nenhuma mensagem nesta conversa.
                   </div>
                 ) : (
-                  groupedMessages(messages).map((group) => (
-                    <div key={group.date}>
-                      <DateSeparator date={group.date} />
-                      {group.messages.map((m) => (
-                        <MessageBubble key={m.id} msg={m} />
-                      ))}
-                    </div>
-                  ))
+                  <div className="space-y-4">
+                    {messages.map((msg) => {
+                      const isAdmin = msg.senderType === 'ADMIN';
+                      return (
+                        <div key={msg.id} className={cn('flex', isAdmin ? 'justify-end' : 'justify-start')}>
+                          <div className={cn(
+                            'max-w-[75%] rounded-lg px-3 py-2',
+                            isAdmin
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted',
+                          )}>
+                            <div className="flex items-center gap-1.5 mb-0.5">
+                              {!isAdmin && <User className="h-3 w-3" />}
+                              <span className="text-[10px] font-medium">{msg.senderName}</span>
+                            </div>
+                            <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                            <p className={cn(
+                              'text-[10px] mt-1',
+                              isAdmin ? 'text-primary-foreground/70' : 'text-muted-foreground',
+                            )}>
+                              {new Date(msg.createdAt).toLocaleString('pt-BR')}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div ref={messagesEndRef} />
+                  </div>
                 )}
-                <div ref={messagesEndRef} />
               </ScrollArea>
 
-              {/* Input area */}
-              <div className="border-t p-3">
-                <div className="flex items-end gap-2">
-                  <Textarea
-                    placeholder="Digite sua mensagem..."
-                    className="min-h-[40px] max-h-[120px] resize-none text-sm"
-                    rows={1}
-                    value={msgInput}
-                    onChange={(e) => setMsgInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    disabled={sendingMsg || activeConv.status === 'ARCHIVED'}
-                  />
-                  <Button
-                    size="icon"
-                    className="h-10 w-10 shrink-0"
-                    onClick={handleSend}
-                    disabled={!msgInput.trim() || sendingMsg || activeConv.status === 'ARCHIVED'}
-                  >
-                    {sendingMsg ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Send className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-                {activeConv.status === 'ARCHIVED' && (
-                  <p className="text-[11px] text-muted-foreground mt-1">
-                    Conversa arquivada. Reabra para enviar mensagens.
-                  </p>
-                )}
+              {/* Input */}
+              <div className="border-t p-3 flex gap-2">
+                <Input
+                  placeholder="Digite sua mensagem..."
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey && newMessage.trim()) {
+                      e.preventDefault();
+                      sendMutation.mutate();
+                    }
+                  }}
+                />
+                <Button
+                  size="icon"
+                  disabled={!newMessage.trim() || sendMutation.isPending}
+                  onClick={() => sendMutation.mutate()}
+                >
+                  {sendMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                </Button>
               </div>
             </>
           )}
-        </div>
+        </Card>
       </div>
-
-      {/* ── New Conversation Dialog ───────────────────── */}
-      <NewConversationDialog open={newConvOpen} onOpenChange={setNewConvOpen} onCreated={handleConvCreated} />
     </div>
   );
 }
