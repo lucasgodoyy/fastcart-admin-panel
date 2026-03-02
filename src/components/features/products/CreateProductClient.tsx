@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { FormEvent, useMemo, useState } from 'react';
+import { FormEvent, useCallback, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ExternalLink, Upload } from 'lucide-react';
@@ -12,6 +12,7 @@ import { brandService, categoryService, product as productService } from '@/serv
 import { Brand } from '@/types/brand';
 import { Category } from '@/types/category';
 import { CreateProductRequest } from '@/types/product';
+import { GeneratedVariant, ProductVariations, VariantOption } from './ProductVariations';
 
 const initialForm: CreateProductRequest = {
   sku: null,
@@ -47,6 +48,20 @@ export function CreateProductClient() {
   const router = useRouter();
   const [form, setForm] = useState<CreateProductRequest>(initialForm);
   const [images, setImages] = useState<File[]>([]);
+  const variantDataRef = useRef<{ variants: GeneratedVariant[]; options: VariantOption[] }>({
+    variants: [],
+    options: [],
+  });
+
+  const handleVariationsChange = useCallback(
+    (variants: GeneratedVariant[], options: VariantOption[]) => {
+      variantDataRef.current = { variants, options };
+      // Sync sizeOptions for backward compatibility
+      const sizeOpt = options.find((o) => o.name === 'Tamanho');
+      setForm((prev) => ({ ...prev, sizeOptions: sizeOpt ? sizeOpt.values.join(',') : '' }));
+    },
+    [],
+  );
 
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ['categories', 'create-product'],
@@ -113,6 +128,15 @@ export function CreateProductClient() {
       videoUrl: form.videoUrl?.trim() || undefined,
       productType: form.productType || 'PHYSICAL',
       sizeOptions: form.sizeOptions?.trim() || undefined,
+      initialVariants: variantDataRef.current.variants
+        .filter((v) => v.available)
+        .map((v) => ({
+          sku: v.sku || undefined,
+          size: v.combination['Tamanho'] || undefined,
+          color: v.combination['Cor'] || undefined,
+          stock: v.stock,
+          priceAdjustment: v.priceAdjustment || undefined,
+        })),
     };
 
     createMutation.mutate({ request: payload, images });
@@ -352,13 +376,8 @@ export function CreateProductClient() {
 
         <div className="rounded-lg border border-border bg-card p-6">
           <h2 className="mb-2 text-lg font-semibold text-foreground">Variações</h2>
-          <p className="mb-3 text-sm text-muted-foreground">Combine diferentes propriedades do produto. Exemplo: cor + tamanho.</p>
-          <label className="mb-1 block text-sm text-muted-foreground">Adicionar variações</label>
-          <Input
-            value={form.sizeOptions ?? ''}
-            onChange={(event) => setForm((prev) => ({ ...prev, sizeOptions: event.target.value }))}
-            placeholder="Ex: P,M,G"
-          />
+          <p className="mb-4 text-sm text-muted-foreground">Combine diferentes propriedades do seu produto. Exemplo: cor + tamanho.</p>
+          <ProductVariations onChange={handleVariationsChange} />
         </div>
 
         <div className="rounded-lg border border-border bg-card p-6">

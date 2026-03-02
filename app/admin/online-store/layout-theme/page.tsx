@@ -1,5 +1,5 @@
-import { OnlineStoreLayoutClient } from '@/components/features/sales-channels/SalesChannelsClients';
+import { ThemeGalleryClient } from '@/components/features/layout-editor/ThemeGalleryClient';
 
 export default function OnlineStoreLayoutThemePage() {
-  return <OnlineStoreLayoutClient />;
+  return <ThemeGalleryClient />;
 }
