@@ -1,5 +1,7 @@
-import { AdminSidebar } from "@/components/admin/sidebar"
+import { AdminSidebar, MobileSidebar } from "@/components/admin/sidebar"
 import { AdminHeader } from "@/components/admin/header"
+import { MobileSidebarProvider } from "@/context/MobileSidebarContext"
+import { MobileSidebarSheet } from "@/components/admin/mobile-sidebar-sheet"
 
 export default function AdminLayout({
   children,
@@ -7,14 +9,19 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      <AdminSidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <AdminHeader />
-        <main className="flex-1 overflow-y-auto bg-muted/30">
-          {children}
-        </main>
+    <MobileSidebarProvider>
+      <div className="flex h-screen overflow-hidden bg-background">
+        {/* Desktop sidebar — hidden on mobile */}
+        <AdminSidebar />
+        {/* Mobile sidebar drawer */}
+        <MobileSidebarSheet />
+        <div className="flex flex-1 flex-col overflow-hidden min-w-0">
+          <AdminHeader />
+          <main className="flex-1 overflow-y-auto bg-muted/30">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </MobileSidebarProvider>
   )
 }

@@ -122,6 +122,18 @@ const navigation: NavSection[] = [
 ]
 
 export function AdminSidebar() {
+  return (
+    <aside className="hidden lg:flex h-full w-[248px] flex-col bg-[var(--sidebar-bg)] overflow-y-auto shrink-0">
+      <SidebarContent />
+    </aside>
+  )
+}
+
+export function MobileSidebar() {
+  return <SidebarContent />
+}
+
+function SidebarContent() {
   const pathname = usePathname()
   const { user } = useAuth()
   const { data: salesChannelSettings } = useQuery({
@@ -237,7 +249,7 @@ export function AdminSidebar() {
   }
 
   return (
-    <aside className="flex h-full w-[248px] flex-col bg-[var(--sidebar-bg)] overflow-y-auto">
+    <div className="flex h-full flex-col bg-[var(--sidebar-bg)] overflow-y-auto">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--sidebar-primary)]">
@@ -381,6 +393,6 @@ export function AdminSidebar() {
           <span className="flex-1">{t("Configurações", "Settings")}</span>
         </Link>
       </div>
-    </aside>
+    </div>
   )
 }

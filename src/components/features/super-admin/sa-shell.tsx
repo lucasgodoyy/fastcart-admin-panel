@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import {
   Bell,
@@ -24,6 +25,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+/* ── Hook: detect desktop (lg ≥ 1024) ── */
+function useIsDesktop() {
+  const [desktop, setDesktop] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia("(min-width: 1024px)");
+    const handler = (e: MediaQueryListEvent | MediaQueryList) => setDesktop(e.matches);
+    handler(mql);
+    mql.addEventListener("change", handler as (e: MediaQueryListEvent) => void);
+    return () => mql.removeEventListener("change", handler as (e: MediaQueryListEvent) => void);
+  }, []);
+  return desktop;
+}
+
 const pageTransition = {
   initial: { opacity: 0, y: 12 },
   animate: { opacity: 1, y: 0 },
@@ -33,8 +47,20 @@ const pageTransition = {
 
 export function SaShell({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
+  const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const isDesktop = useIsDesktop();
+
+  // Close mobile sidebar when switching to desktop
+  useEffect(() => {
+    if (isDesktop) setMobileOpen(false);
+  }, [isDesktop]);
+
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   // Apply super-admin-theme to <body> so Radix UI portals
   // (DropdownMenu, Select, etc.) rendered outside this tree inherit SA vars
@@ -84,13 +110,13 @@ export function SaShell({ children }: { children: React.ReactNode }) {
 
       {/* Main content area */}
       <motion.div
-        className="relative flex flex-col min-h-screen"
-        animate={{ marginLeft: collapsed ? 72 : 272 }}
+        className="relative flex flex-col min-h-screen min-w-0"
+        animate={{ marginLeft: isDesktop ? (collapsed ? 72 : 272) : 0 }}
         transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-        style={{ marginLeft: 272 }}
+        style={{ marginLeft: isDesktop ? 272 : 0 }}
       >
         {/* Header */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-header))]/80 backdrop-blur-xl px-6">
+        <header className="sticky top-0 z-30 flex h-14 lg:h-16 items-center justify-between border-b border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-header))]/80 backdrop-blur-xl px-3 sm:px-4 lg:px-6">
           <div className="flex items-center gap-3">
             {/* Mobile menu */}
             <button
@@ -182,7 +208,7 @@ export function SaShell({ children }: { children: React.ReactNode }) {
           <motion.div
             key={typeof window !== "undefined" ? window.location.pathname : "shell"}
             {...pageTransition}
-            className="p-6 md:p-8 lg:p-10"
+            className="p-4 md:p-6 lg:p-10"
           >
             {children}
           </motion.div>

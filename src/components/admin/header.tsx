@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, Search, ChevronRight, LogOut, User, CheckCheck } from "lucide-react"
+import { Bell, Search, ChevronRight, LogOut, User, CheckCheck, Menu } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
 import { useMemo } from "react"
@@ -9,6 +9,7 @@ import { useAuth } from "@/context/AuthContext"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import notificationService from "@/services/notificationService"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useMobileSidebar } from "@/context/MobileSidebarContext"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -63,6 +64,7 @@ function useBreadcrumbs() {
 export function AdminHeader() {
   const breadcrumbs = useBreadcrumbs()
   const { user, logout } = useAuth()
+  const { toggle } = useMobileSidebar()
   const queryClient = useQueryClient()
 
   const { data: unreadCount = 0 } = useQuery({
@@ -87,9 +89,20 @@ export function AdminHeader() {
   })
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6 gap-4">
-      {/* Breadcrumbs */}
-      <nav className="flex items-center gap-1 text-sm min-w-0">
+    <header className="flex h-14 lg:h-16 items-center justify-between border-b border-border bg-card px-3 sm:px-4 lg:px-6 gap-2 sm:gap-4">
+      {/* Left side: hamburger + breadcrumbs */}
+      <div className="flex items-center gap-2 min-w-0">
+        {/* Hamburger - mobile only */}
+        <button
+          onClick={toggle}
+          className="lg:hidden flex items-center justify-center rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors shrink-0"
+          aria-label="Open menu"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+
+        {/* Breadcrumbs */}
+        <nav className="hidden sm:flex items-center gap-1 text-sm min-w-0">
         {breadcrumbs.map((crumb, i) => (
           <span key={crumb.href} className="flex items-center gap-1 min-w-0">
             {i > 0 && <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
@@ -102,7 +115,8 @@ export function AdminHeader() {
             )}
           </span>
         ))}
-      </nav>
+        </nav>
+      </div>
 
       {/* Right side */}
       <div className="flex items-center gap-3 shrink-0">
