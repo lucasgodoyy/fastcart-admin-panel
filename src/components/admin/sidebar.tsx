@@ -33,6 +33,13 @@ import salesChannelsService from "@/services/salesChannels"
 import apiClient from "@/lib/api"
 import { useAuth } from "@/context/AuthContext"
 import { t } from "@/lib/admin-language"
+import { useMobileSidebar } from "@/context/MobileSidebarContext"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 interface NavItem {
   label: string
@@ -122,18 +129,24 @@ const navigation: NavSection[] = [
 ]
 
 export function AdminSidebar() {
+  const { collapsed } = useMobileSidebar()
   return (
-    <aside className="hidden lg:flex h-full w-[248px] flex-col bg-[var(--sidebar-bg)] overflow-y-auto shrink-0">
-      <SidebarContent />
+    <aside
+      className={cn(
+        "hidden lg:flex h-full flex-col bg-[var(--sidebar-bg)] overflow-y-auto shrink-0 transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
+        collapsed ? "w-[64px]" : "w-[248px]"
+      )}
+    >
+      <SidebarContent collapsed={collapsed} />
     </aside>
   )
 }
 
 export function MobileSidebar() {
-  return <SidebarContent />
+  return <SidebarContent collapsed={false} />
 }
 
-function SidebarContent() {
+function SidebarContent({ collapsed }: { collapsed: boolean }) {
   const pathname = usePathname()
   const { user } = useAuth()
   const { data: salesChannelSettings } = useQuery({
@@ -249,23 +262,27 @@ function SidebarContent() {
   }
 
   return (
+    <TooltipProvider delayDuration={0}>
     <div className="flex h-full flex-col bg-[var(--sidebar-bg)] overflow-y-auto">
       {/* Logo */}
-      <div className="flex items-center gap-2.5 px-5 py-5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--sidebar-primary)]">
+      <div className={cn("flex items-center gap-2.5 py-5", collapsed ? "justify-center px-2" : "px-5")}>
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--sidebar-primary)] shrink-0">
           <Zap className="h-4.5 w-4.5 text-white" fill="white" />
         </div>
-        <span className="text-[15px] font-bold tracking-tight text-[var(--sidebar-foreground)]">FastCart</span>
+        {!collapsed && <span className="text-[15px] font-bold tracking-tight text-[var(--sidebar-foreground)]">FastCart</span>}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-1 space-y-4">
+      <nav className={cn("flex-1 py-1 space-y-4", collapsed ? "px-1.5" : "px-3")}>
         {navigation.map((section, sectionIndex) => (
           <div key={sectionIndex}>
-            {section.title && (
+            {section.title && !collapsed && (
               <div className="px-3 pb-1.5 pt-2 text-[11px] font-semibold tracking-wide text-[var(--sidebar-muted)]">
                 {section.title}
               </div>
+            )}
+            {section.title && collapsed && (
+              <div className="my-2 mx-1.5 h-px bg-[var(--sidebar-border)]" />
             )}
             <div className="space-y-0.5">
             {section.items.map((item) => {
@@ -273,30 +290,31 @@ function SidebarContent() {
               const expanded = expandedItems.includes(item.label)
               const hasChildren = item.children && item.children.length > 0
 
-              return (
-                <div key={item.label}>
-                  <div className="flex items-center">
-                    <Link
-                      href={hasChildren ? item.children![0].href : item.href}
-                      onClick={(e) => {
-                        if (hasChildren) {
-                          e.preventDefault()
-                          toggleExpand(item.label)
-                        }
-                      }}
-                      className={cn(
-                        "flex flex-1 items-center gap-3 rounded-lg px-3 py-2 text-[13px] transition-all duration-150",
-                        active
-                          ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)] font-semibold"
-                          : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]"
-                      )}
-                    >
-                      <span className={cn(
-                        "transition-colors",
-                        active ? "text-[var(--sidebar-primary)]" : "text-[var(--sidebar-muted)]"
-                      )}>
-                        {item.icon}
-                      </span>
+              const linkContent = (
+                <Link
+                  href={hasChildren && !collapsed ? item.children![0].href : (hasChildren ? item.children![0].href : item.href)}
+                  onClick={(e) => {
+                    if (hasChildren && !collapsed) {
+                      e.preventDefault()
+                      toggleExpand(item.label)
+                    }
+                  }}
+                  className={cn(
+                    "flex flex-1 items-center rounded-lg transition-all duration-150",
+                    collapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2 text-[13px]",
+                    active
+                      ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)] font-semibold"
+                      : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]"
+                  )}
+                >
+                  <span className={cn(
+                    "transition-colors shrink-0",
+                    active ? "text-[var(--sidebar-primary)]" : "text-[var(--sidebar-muted)]"
+                  )}>
+                    {item.icon}
+                  </span>
+                  {!collapsed && (
+                    <>
                       <span className="flex-1">{item.label}</span>
                       {item.badge && (
                         <span className="rounded-full bg-[var(--sidebar-primary)] px-2 py-0.5 text-[10px] font-semibold text-white">
@@ -330,9 +348,24 @@ function SidebarContent() {
                           {expanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
                         </span>
                       )}
-                    </Link>
+                    </>
+                  )}
+                </Link>
+              )
+
+              return (
+                <div key={item.label}>
+                  <div className="flex items-center">
+                    {collapsed ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>{linkContent}</TooltipTrigger>
+                        <TooltipContent side="right" sideOffset={8}>{item.label}</TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      linkContent
+                    )}
                   </div>
-                  {hasChildren && expanded && (
+                  {hasChildren && expanded && !collapsed && (
                     <div className="ml-[30px] mt-0.5 space-y-0.5 border-l-2 border-[var(--sidebar-border)] pl-3">
                       {item.children!.map((child) => {
                         const childActive = pathname === child.href
@@ -367,32 +400,72 @@ function SidebarContent() {
       </nav>
 
       {/* Settings at bottom */}
-      <div className="border-t border-[var(--sidebar-border)] px-3 py-3 space-y-1">
-        <Link
-          href="/admin/billing"
-          className={cn(
-            "flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] transition-all duration-150",
-            pathname.startsWith("/admin/billing")
-              ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)] font-semibold"
-              : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)]"
-          )}
-        >
-          <CreditCard className="h-[18px] w-[18px] text-[var(--sidebar-muted)]" />
-          <span className="flex-1">{t("Meu Plano", "My Plan")}</span>
-        </Link>
-        <Link
-          href="/admin/settings"
-          className={cn(
-            "flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] transition-all duration-150",
-            pathname.startsWith("/admin/settings")
-              ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)] font-semibold"
-              : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)]"
-          )}
-        >
-          <Cog className="h-[18px] w-[18px] text-[var(--sidebar-muted)]" />
-          <span className="flex-1">{t("Configurações", "Settings")}</span>
-        </Link>
+      <div className={cn("border-t border-[var(--sidebar-border)] py-3 space-y-1", collapsed ? "px-1.5" : "px-3")}>
+        {collapsed ? (
+          <>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href="/admin/billing"
+                  className={cn(
+                    "flex items-center justify-center rounded-lg p-2.5 transition-all duration-150",
+                    pathname.startsWith("/admin/billing")
+                      ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)] font-semibold"
+                      : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)]"
+                  )}
+                >
+                  <CreditCard className="h-[18px] w-[18px] text-[var(--sidebar-muted)]" />
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right" sideOffset={8}>{t("Meu Plano", "My Plan")}</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href="/admin/settings"
+                  className={cn(
+                    "flex items-center justify-center rounded-lg p-2.5 transition-all duration-150",
+                    pathname.startsWith("/admin/settings")
+                      ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)] font-semibold"
+                      : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)]"
+                  )}
+                >
+                  <Cog className="h-[18px] w-[18px] text-[var(--sidebar-muted)]" />
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right" sideOffset={8}>{t("Configurações", "Settings")}</TooltipContent>
+            </Tooltip>
+          </>
+        ) : (
+          <>
+            <Link
+              href="/admin/billing"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] transition-all duration-150",
+                pathname.startsWith("/admin/billing")
+                  ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)] font-semibold"
+                  : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)]"
+              )}
+            >
+              <CreditCard className="h-[18px] w-[18px] text-[var(--sidebar-muted)]" />
+              <span className="flex-1">{t("Meu Plano", "My Plan")}</span>
+            </Link>
+            <Link
+              href="/admin/settings"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] transition-all duration-150",
+                pathname.startsWith("/admin/settings")
+                  ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)] font-semibold"
+                  : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)]"
+              )}
+            >
+              <Cog className="h-[18px] w-[18px] text-[var(--sidebar-muted)]" />
+              <span className="flex-1">{t("Configurações", "Settings")}</span>
+            </Link>
+          </>
+        )}
       </div>
     </div>
+    </TooltipProvider>
   )
 }

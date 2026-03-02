@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, Search, ChevronRight, LogOut, User, CheckCheck, Menu } from "lucide-react"
+import { Bell, Search, ChevronRight, LogOut, User, CheckCheck, Menu, PanelLeftClose, PanelLeftOpen } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
 import { useMemo } from "react"
@@ -64,7 +64,7 @@ function useBreadcrumbs() {
 export function AdminHeader() {
   const breadcrumbs = useBreadcrumbs()
   const { user, logout } = useAuth()
-  const { toggle } = useMobileSidebar()
+  const { toggle, toggleCollapse, collapsed } = useMobileSidebar()
   const queryClient = useQueryClient()
 
   const { data: unreadCount = 0 } = useQuery({
@@ -90,7 +90,7 @@ export function AdminHeader() {
 
   return (
     <header className="flex h-14 lg:h-16 items-center justify-between border-b border-border bg-card px-3 sm:px-4 lg:px-6 gap-2 sm:gap-4">
-      {/* Left side: hamburger + breadcrumbs */}
+      {/* Left side: hamburger + collapse toggle + breadcrumbs */}
       <div className="flex items-center gap-2 min-w-0">
         {/* Hamburger - mobile only */}
         <button
@@ -99,6 +99,15 @@ export function AdminHeader() {
           aria-label="Open menu"
         >
           <Menu className="h-5 w-5" />
+        </button>
+
+        {/* Collapse toggle - desktop only */}
+        <button
+          onClick={toggleCollapse}
+          className="hidden lg:flex items-center justify-center rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors shrink-0"
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
         </button>
 
         {/* Breadcrumbs */}

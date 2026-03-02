@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { cn } from "@/lib/utils";
 import {
   Bell,
   ChevronDown,
@@ -25,19 +26,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-/* ── Hook: detect desktop (lg ≥ 1024) ── */
-function useIsDesktop() {
-  const [desktop, setDesktop] = useState(false);
-  useEffect(() => {
-    const mql = window.matchMedia("(min-width: 1024px)");
-    const handler = (e: MediaQueryListEvent | MediaQueryList) => setDesktop(e.matches);
-    handler(mql);
-    mql.addEventListener("change", handler as (e: MediaQueryListEvent) => void);
-    return () => mql.removeEventListener("change", handler as (e: MediaQueryListEvent) => void);
-  }, []);
-  return desktop;
-}
-
 const pageTransition = {
   initial: { opacity: 0, y: 12 },
   animate: { opacity: 1, y: 0 },
@@ -50,12 +38,6 @@ export function SaShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const isDesktop = useIsDesktop();
-
-  // Close mobile sidebar when switching to desktop
-  useEffect(() => {
-    if (isDesktop) setMobileOpen(false);
-  }, [isDesktop]);
 
   // Close mobile sidebar on route change
   useEffect(() => {
@@ -108,12 +90,12 @@ export function SaShell({ children }: { children: React.ReactNode }) {
         )}
       </AnimatePresence>
 
-      {/* Main content area */}
-      <motion.div
-        className="relative flex flex-col min-h-screen min-w-0"
-        animate={{ marginLeft: isDesktop ? (collapsed ? 72 : 272) : 0 }}
-        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-        style={{ marginLeft: isDesktop ? 272 : 0 }}
+      {/* Main content area — margin handled by CSS breakpoints */}
+      <div
+        className={cn(
+          "relative flex flex-col min-h-screen min-w-0 transition-[margin-left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
+          collapsed ? "lg:ml-[72px]" : "lg:ml-[272px]"
+        )}
       >
         {/* Header */}
         <header className="sticky top-0 z-30 flex h-14 lg:h-16 items-center justify-between border-b border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-header))]/80 backdrop-blur-xl px-3 sm:px-4 lg:px-6">
@@ -213,7 +195,7 @@ export function SaShell({ children }: { children: React.ReactNode }) {
             {children}
           </motion.div>
         </main>
-      </motion.div>
+      </div>
     </div>
   );
 }
