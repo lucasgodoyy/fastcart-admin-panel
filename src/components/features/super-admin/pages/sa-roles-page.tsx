@@ -81,7 +81,7 @@ export function SaRolesPage() {
 
   const changeRoleMutation = useMutation({
     mutationFn: ({ userId, role }: { userId: number; role: string }) =>
-      superAdminService.updateUserRole(userId, role),
+      superAdminService.updateUserRole(userId, { role }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["super-admin-roles-users"] });
     },

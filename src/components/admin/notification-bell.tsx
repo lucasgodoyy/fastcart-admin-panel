@@ -7,7 +7,7 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import Link from "next/link";
 import notificationService from "@/services/notificationService";
-import type { NotificationItem } from "@/types/super-admin";
+import type { NotificationItem } from "@/services/notificationService";
 
 const typeIconMap: Record<string, React.ReactNode> = {
   NEW_ORDER: <ShoppingCart className="h-4 w-4 text-blue-500" />,

@@ -51,6 +51,7 @@ export interface StoreSummary {
 export interface UserSummary {
   id: number;
   email: string;
+  name: string | null;
   firstName: string | null;
   lastName: string | null;
   role: string;
@@ -65,11 +66,14 @@ export interface UserSession {
   id: number;
   userId: number;
   userEmail: string;
+  userRole: string | null;
   ipAddress: string;
   userAgent: string;
   active: boolean;
+  revoked: boolean;
   createdAt: string;
   lastAccessedAt: string;
+  expiresAt: string;
 }
 
 export interface ResetUserPasswordRequest {

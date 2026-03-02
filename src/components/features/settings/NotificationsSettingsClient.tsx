@@ -30,7 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import notificationService from "@/services/notificationService";
-import type { NotificationItem, NotificationPreference } from "@/types/super-admin";
+import type { NotificationItem, NotificationPreference } from "@/services/notificationService";
 
 // ── Type icon mapping ────────────────────────────────────────
 const typeIcon: Record<string, React.ReactNode> = {

@@ -7,10 +7,17 @@ export type AffiliateSettings = {
   storeId: number;
   enabled: boolean;
   defaultCommissionPercent: number;
+  commissionRate: number;
   cookieDurationDays: number;
+  cookieDays: number;
   minPayoutCents: number;
+  minPayout: number;
+  payoutDay: number;
   autoApproveConversions: boolean;
+  autoApprove: boolean;
   termsAndConditions: string | null;
+  termsUrl: string | null;
+  updatedAt: string | null;
 };
 
 export type Affiliate = {
@@ -20,11 +27,17 @@ export type Affiliate = {
   email: string;
   referralCode: string;
   commissionPercent: number;
+  commissionRate: number;
   status: string;
   totalClicks: number;
   totalConversions: number;
+  totalRevenue: number;
   totalRevenueCents: number;
+  totalOrders: number;
+  totalEarned: number;
   totalEarnedCents: number;
+  totalCommission: number;
+  totalPaid: number;
   totalPaidCents: number;
   createdAt: string;
 };
@@ -32,12 +45,17 @@ export type Affiliate = {
 export type AffiliateLink = {
   id: number;
   affiliateId: number;
+  affiliateName: string;
   targetUrl: string;
+  destinationUrl: string;
   slug: string;
   fullUrl: string;
   clicks: number;
+  totalClicks: number;
   conversions: number;
+  totalConversions: number;
   active: boolean;
+  status: string;
   createdAt: string;
 };
 
@@ -47,9 +65,13 @@ export type AffiliateConversion = {
   affiliateName: string;
   orderId: number | null;
   orderTotal: number;
+  orderAmount: number;
   commissionCents: number;
+  commissionAmount: number;
+  commissionRate: number;
   status: string;
   convertedAt: string;
+  createdAt: string;
   approvedAt: string | null;
 };
 
@@ -57,7 +79,11 @@ export type AffiliatePayout = {
   id: number;
   affiliateId: number;
   affiliateName: string;
+  amount: number;
   amountCents: number;
+  method: string;
+  reference: string | null;
+  notes: string | null;
   status: string;
   paidAt: string | null;
   createdAt: string;
@@ -66,11 +92,16 @@ export type AffiliatePayout = {
 export type AffiliateStats = {
   totalAffiliates: number;
   activeAffiliates: number;
+  pendingAffiliates: number;
   totalClicks: number;
   totalConversions: number;
   conversionRate: number;
+  totalRevenue: number;
   totalRevenueCents: number;
+  totalCommission: number;
   totalCommissionCents: number;
+  pendingCommission: number;
+  paidCommission: number;
   pendingPayoutCents: number;
 };
 
@@ -140,8 +171,12 @@ const affiliateService = {
 
   createLink: async (body: {
     affiliateId: number;
-    targetUrl: string;
+    targetUrl?: string;
+    destinationUrl?: string;
     slug?: string;
+    utmSource?: string;
+    utmMedium?: string;
+    utmCampaign?: string;
   }): Promise<AffiliateLink> => {
     const { data } = await apiClient.post('/affiliates/links', body);
     return data;
@@ -184,7 +219,11 @@ const affiliateService = {
 
   createPayout: async (body: {
     affiliateId: number;
-    amountCents: number;
+    amountCents?: number;
+    amount?: number;
+    method?: string;
+    reference?: string;
+    notes?: string;
   }): Promise<AffiliatePayout> => {
     const { data } = await apiClient.post('/affiliates/payouts', body);
     return data;

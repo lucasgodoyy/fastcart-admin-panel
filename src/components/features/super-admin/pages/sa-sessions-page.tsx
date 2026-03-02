@@ -74,7 +74,7 @@ export function SaSessionsPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["super-admin-sessions", search, activeOnly],
     queryFn: () =>
-      superAdminService.listSessions({
+      superAdminService.listUserSessions({
         activeOnly: activeOnly === "ACTIVE" ? true : undefined,
         search: search || undefined,
         page: 0,
