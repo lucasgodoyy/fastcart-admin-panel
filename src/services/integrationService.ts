@@ -42,6 +42,11 @@ const integrationService = {
     return data;
   },
 
+  async connectMelhorEnvioWithToken(accessToken: string): Promise<MelhorEnvioConnectionStatus> {
+    const { data } = await apiClient.post<MelhorEnvioConnectionStatus>('/shipping-accounts/melhor-envio/connect-token', { accessToken });
+    return data;
+  },
+
   async disconnectMelhorEnvio(): Promise<void> {
     await apiClient.delete('/shipping-accounts/melhor-envio/disconnect');
   },

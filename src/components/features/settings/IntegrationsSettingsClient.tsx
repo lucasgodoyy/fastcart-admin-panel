@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
@@ -15,6 +15,7 @@ import {
   RefreshCw,
   Loader2,
   Unplug,
+  KeyRound,
 } from 'lucide-react';
 
 import { SettingsPageLayout } from './SettingsPageLayout';
@@ -142,6 +143,20 @@ export function IntegrationsSettingsClient() {
     },
     onError: () => toast.error('Falha ao desconectar Melhor Envio.'),
   });
+
+  const connectMelhorEnvioTokenMutation = useMutation({
+    mutationFn: (token: string) => integrationService.connectMelhorEnvioWithToken(token),
+    onSuccess: () => {
+      toast.success('Melhor Envio conectado com token direto!');
+      queryClient.invalidateQueries({ queryKey: MELHOR_QUERY_KEY });
+      setShowTokenInput(false);
+      setDirectToken('');
+    },
+    onError: () => toast.error('Token inválido ou expirado. Verifique e tente novamente.'),
+  });
+
+  const [showTokenInput, setShowTokenInput] = useState(false);
+  const [directToken, setDirectToken] = useState('');
 
   useEffect(() => {
     const stripeReturn = searchParams.get('stripe');
@@ -391,6 +406,15 @@ export function IntegrationsSettingsClient() {
               {melhorEnvioStatus?.connected ? 'Reconectar Melhor Envio' : 'Conectar Melhor Envio'}
             </Button>
 
+            <Button
+              variant="outline"
+              onClick={() => setShowTokenInput(!showTokenInput)}
+              disabled={connectMelhorEnvioTokenMutation.isPending}
+            >
+              <KeyRound className="mr-2 h-3.5 w-3.5" />
+              {showTokenInput ? 'Cancelar' : 'Conectar com Token'}
+            </Button>
+
             {melhorEnvioStatus?.connected && (
               <Button
                 variant="outline"
@@ -401,6 +425,37 @@ export function IntegrationsSettingsClient() {
               </Button>
             )}
           </div>
+
+          {showTokenInput && (
+            <div className="mt-3 space-y-2 rounded-lg border border-border bg-muted/30 p-3">
+              <p className="text-xs text-muted-foreground">
+                Cole o access token gerado no painel do Melhor Envio (sandbox ou produção).
+              </p>
+              <textarea
+                value={directToken}
+                onChange={(e) => setDirectToken(e.target.value)}
+                placeholder="eyJ0eXAiOiJKV1QiLCJhbGciOi..."
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs font-mono min-h-[60px] resize-y placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+              <Button
+                size="sm"
+                onClick={() => {
+                  const trimmed = directToken.trim();
+                  if (!trimmed) {
+                    toast.error('Cole o token antes de conectar.');
+                    return;
+                  }
+                  connectMelhorEnvioTokenMutation.mutate(trimmed);
+                }}
+                disabled={connectMelhorEnvioTokenMutation.isPending || !directToken.trim()}
+              >
+                {connectMelhorEnvioTokenMutation.isPending && (
+                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                )}
+                Validar e Conectar
+              </Button>
+            </div>
+          )}
 
           <p className="mt-3 text-xs text-muted-foreground">
             O lojista pode criar a conta no Melhor Envio durante o fluxo de autorização.
