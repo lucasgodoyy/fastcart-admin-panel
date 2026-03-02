@@ -80,7 +80,7 @@ export function OrderDetailClient() {
 
   if (!order) {
     return (
-      <div className="p-8">
+      <div className="p-4 md:p-6 lg:p-8">
         <p className="text-sm text-muted-foreground">{t('Pedido não encontrado.', 'Order not found.')}</p>
         <Button variant="outline" className="mt-4" onClick={() => router.push('/admin/sales')}>
           <ArrowLeft className="mr-2 h-4 w-4" /> {t('Voltar', 'Back')}
@@ -95,7 +95,7 @@ export function OrderDetailClient() {
   const canDeliver = order.status === 'SHIPPED';
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-6 lg:p-8">
       {/* Back button + header */}
       <div className="mb-6">
         <Button variant="ghost" size="sm" className="mb-3 gap-1.5 text-muted-foreground" onClick={() => router.push('/admin/sales')}>

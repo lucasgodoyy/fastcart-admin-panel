@@ -70,7 +70,7 @@ export function DashboardClient() {
     : 1;
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-6 lg:p-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-foreground">
@@ -81,7 +81,7 @@ export function DashboardClient() {
           </p>
         </div>
         {/* Period Selector */}
-        <div className="flex gap-1 rounded-lg border border-border bg-card p-1">
+        <div className="flex flex-wrap gap-1 rounded-lg border border-border bg-card p-1">
           {periods.map(p => (
             <button
               key={p.key}
@@ -217,6 +217,7 @@ export function DashboardClient() {
             {t('Nenhum pedido encontrado ainda.', 'No orders yet.')}
           </div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-muted/30 text-left">
@@ -255,6 +256,7 @@ export function DashboardClient() {
               })}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

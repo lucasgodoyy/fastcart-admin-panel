@@ -95,10 +95,10 @@ export function InventoryClient() {
   const rows = useMemo(() => products, [products]);
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-6 lg:p-8">
       <h1 className="mb-6 text-4xl font-semibold text-foreground">Inventário</h1>
 
-      <div className="overflow-hidden rounded-md border border-border bg-card">
+      <div className="overflow-x-auto overflow-hidden rounded-md border border-border bg-card">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border bg-muted/30 text-left">

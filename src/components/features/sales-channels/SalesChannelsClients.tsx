@@ -182,7 +182,7 @@ export function OnlineStoreLayoutClient() {
   const { settings, isLoading, isSaving, save } = useSalesChannelSettings();
 
   if (isLoading) {
-    return <div className="p-8 text-sm text-muted-foreground">Carregando...</div>;
+    return <div className="p-4 md:p-6 lg:p-8 text-sm text-muted-foreground">Carregando...</div>;
   }
 
   return (
@@ -288,7 +288,7 @@ function OnlineStoreLayoutEditor({
   };
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-6 lg:p-8">
       <SectionHeader title="Layout" description="Tema define a base visual. Layout ajusta fonte, cor principal e banner." />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
@@ -509,7 +509,7 @@ export function OnlineStorePagesClient() {
   const { settings, isLoading, isSaving, save } = useSalesChannelSettings();
 
   if (isLoading) {
-    return <div className="p-8 text-sm text-muted-foreground">Carregando...</div>;
+    return <div className="p-4 md:p-6 lg:p-8 text-sm text-muted-foreground">Carregando...</div>;
   }
 
   return (
@@ -724,7 +724,7 @@ Medição do pé\tBR\tUS
   };
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-6 lg:p-8">
       <SectionHeader title="Páginas" description="Fale sobre sua marca e compartilhe informações importantes com seus clientes." />
 
       <Card className="mb-6">
@@ -955,7 +955,7 @@ export function OnlineStoreMenusClient() {
   const { settings, isLoading, isSaving, save } = useSalesChannelSettings();
 
   if (isLoading) {
-    return <div className="p-8 text-sm text-muted-foreground">Carregando...</div>;
+    return <div className="p-4 md:p-6 lg:p-8 text-sm text-muted-foreground">Carregando...</div>;
   }
 
   return (
@@ -1064,7 +1064,7 @@ function OnlineStoreMenusEditor({
   };
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-6 lg:p-8">
       <SectionHeader title="Menus" description="Defina os links de navegação da sua loja online." />
       <Card>
         <CardHeader>
@@ -1211,7 +1211,7 @@ export function OnlineStoreFiltersClient() {
   const { settings, isLoading, isSaving, save } = useSalesChannelSettings();
 
   if (isLoading) {
-    return <div className="p-8 text-sm text-muted-foreground">Carregando...</div>;
+    return <div className="p-4 md:p-6 lg:p-8 text-sm text-muted-foreground">Carregando...</div>;
   }
 
   return (
@@ -1311,7 +1311,7 @@ function OnlineStoreFiltersEditor({
     .filter(({ item }) => !isMainFilter(item.label));
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-6 lg:p-8">
       <SectionHeader title="Filtros" description="Defina quais filtros a vitrine usa e quais estão em roadmap." />
       <Card>
         <CardHeader>
@@ -1424,7 +1424,7 @@ export function SocialLinksClient() {
   const { settings, isLoading, isSaving, save } = useSalesChannelSettings();
 
   if (isLoading) {
-    return <div className="p-8 text-sm text-muted-foreground">Carregando...</div>;
+    return <div className="p-4 md:p-6 lg:p-8 text-sm text-muted-foreground">Carregando...</div>;
   }
 
   return (
@@ -1461,7 +1461,7 @@ function SocialLinksEditor({
   ];
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-6 lg:p-8">
       <SectionHeader
         title="Social Media Links"
         description="Adicione os links/redes sociais para exibição no rodapé da loja."
@@ -1505,7 +1505,7 @@ export function ChannelLinkClient({
   const { settings, isLoading, isSaving, save } = useSalesChannelSettings();
 
   if (isLoading) {
-    return <div className="p-8 text-sm text-muted-foreground">Carregando...</div>;
+    return <div className="p-4 md:p-6 lg:p-8 text-sm text-muted-foreground">Carregando...</div>;
   }
 
   return (
@@ -1543,7 +1543,7 @@ function ChannelLinkEditor({
   const currentValue = useMemo(() => (value ?? '').trim(), [value]);
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-6 lg:p-8">
       <SectionHeader title={title} description={description} />
       <Card>
         <CardHeader>
@@ -1585,10 +1585,10 @@ function ChannelLinkEditor({
 
 export function UnderConstructionClient() {
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-6 lg:p-8">
       <SectionHeader title="Em construção" description="Esta seção ainda está em desenvolvimento." />
       <Card>
-        <CardContent className="p-8 text-sm text-muted-foreground">
+        <CardContent className="p-4 md:p-8 text-sm text-muted-foreground">
           Em breve você poderá configurar este recurso diretamente por aqui.
         </CardContent>
       </Card>

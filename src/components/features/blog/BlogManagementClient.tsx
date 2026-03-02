@@ -144,7 +144,7 @@ export function BlogManagementClient() {
   };
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6">
       <div>
         <h1 className="text-2xl font-semibold text-foreground">Blog</h1>
         <p className="text-sm text-muted-foreground">Crie posts por loja com persistência no backend SaaS.</p>

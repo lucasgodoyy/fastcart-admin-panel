@@ -93,24 +93,24 @@ export function CustomerDetailClient({ customerId }: CustomerDetailClientProps) 
 
   if (!storeId) {
     return (
-      <div className="mx-auto max-w-3xl p-8 text-sm text-muted-foreground">
+      <div className="mx-auto max-w-3xl p-4 md:p-6 lg:p-8 text-sm text-muted-foreground">
         StoreId não encontrado no login atual.
       </div>
     );
   }
 
   if (isLoading) {
-    return <div className="mx-auto max-w-3xl p-8 text-sm text-muted-foreground">Carregando cliente...</div>;
+    return <div className="mx-auto max-w-3xl p-4 md:p-6 lg:p-8 text-sm text-muted-foreground">Carregando cliente...</div>;
   }
 
   if (!customer) {
-    return <div className="mx-auto max-w-3xl p-8 text-sm text-muted-foreground">Cliente não encontrado.</div>;
+    return <div className="mx-auto max-w-3xl p-4 md:p-6 lg:p-8 text-sm text-muted-foreground">Cliente não encontrado.</div>;
   }
 
   return (
-    <div className="mx-auto max-w-3xl p-8">
+    <div className="mx-auto max-w-3xl p-4 md:p-6 lg:p-8">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <Link href="/admin/customers" className="text-muted-foreground hover:text-foreground">
               <ChevronLeft className="h-5 w-5" />

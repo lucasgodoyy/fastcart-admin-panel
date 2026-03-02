@@ -65,8 +65,8 @@ export function CustomerClient() {
   }, [customers, search]);
 
   return (
-    <div className="p-8">
-      <div className="mb-6 flex items-center justify-between">
+    <div className="p-4 md:p-6 lg:p-8">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-5 font-semibold text-foreground">Clientes</h1>
         <div className="flex items-center gap-3">
           <Button variant="outline" className="gap-2">
@@ -102,7 +102,7 @@ export function CustomerClient() {
 
       {storeId && <div className="mb-4 text-sm text-muted-foreground">{filteredCustomers.length} clientes</div>}
 
-      <div className="overflow-hidden rounded-md border border-border bg-card">
+      <div className="overflow-x-auto overflow-hidden rounded-md border border-border bg-card">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border bg-muted/30 text-left">

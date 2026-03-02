@@ -127,7 +127,7 @@ export function EmailTemplateEditClient({ templateSlug }: Props) {
         helpText="Voltar"
         helpHref="/admin/settings/emails"
       >
-        <div className="rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
+        <div className="rounded-lg border border-dashed border-border bg-muted/30 p-4 md:p-8 text-center">
           <p className="text-sm text-muted-foreground">
             Template &quot;{templateKey}&quot; não foi encontrado. Verifique se o seeding foi executado.
           </p>

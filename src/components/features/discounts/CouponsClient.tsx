@@ -205,8 +205,8 @@ export function CouponsClient() {
   const isSaving = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <div className="p-8">
-      <div className="mb-6 flex items-center justify-between">
+    <div className="p-4 md:p-6 lg:p-8">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-5 font-semibold text-foreground">Coupons</h1>
           <p className="text-sm text-muted-foreground">Cupons com desconto percentual ou valor fixo.</p>
@@ -231,7 +231,7 @@ export function CouponsClient() {
 
       <div className="mb-4 text-sm text-muted-foreground">{filteredCoupons.length} cupons</div>
 
-      <div className="overflow-hidden rounded-md border border-border bg-card">
+      <div className="overflow-x-auto overflow-hidden rounded-md border border-border bg-card">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border bg-muted/30 text-left">
@@ -313,7 +313,7 @@ export function CouponsClient() {
               placeholder="Código (ex.: BEMVINDO10)"
             />
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <label className="space-y-1 text-sm">
                 <span className="text-muted-foreground">Tipo de desconto</span>
                 <select
@@ -336,7 +336,7 @@ export function CouponsClient() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <label className="space-y-1 text-sm">
                 <span className="text-muted-foreground">Escopo</span>
                 <select
@@ -362,7 +362,7 @@ export function CouponsClient() {
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Input
                 type="number"
                 step="0.01"
@@ -381,7 +381,7 @@ export function CouponsClient() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Input
                 type="number"
                 min="1"
@@ -398,7 +398,7 @@ export function CouponsClient() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <label className="space-y-1 text-sm">
                 <span className="text-muted-foreground">Início</span>
                 <Input

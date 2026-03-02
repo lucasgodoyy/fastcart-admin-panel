@@ -261,6 +261,7 @@ export function MarketingClient() {
                   Nenhuma campanha ainda. Crie a primeira!
                 </div>
               ) : (
+                <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -307,6 +308,7 @@ export function MarketingClient() {
                     ))}
                   </TableBody>
                 </Table>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -325,6 +327,7 @@ export function MarketingClient() {
                   Nenhum banner cadastrado.
                 </div>
               ) : (
+                <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -360,6 +363,7 @@ export function MarketingClient() {
                     ))}
                   </TableBody>
                 </Table>
+                </div>
               )}
             </CardContent>
           </Card>

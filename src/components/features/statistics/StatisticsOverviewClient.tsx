@@ -39,7 +39,7 @@ export function StatisticsOverviewClient() {
     ? Math.max(...stats.dailyRevenue.map(d => d.revenue), 1) : 1;
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-6 lg:p-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-foreground">

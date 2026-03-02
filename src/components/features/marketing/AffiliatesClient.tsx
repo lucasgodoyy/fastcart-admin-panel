@@ -364,7 +364,7 @@ function AffiliatesTab() {
               <DialogDescription>Cadastre um novo parceiro afiliado.</DialogDescription>
             </DialogHeader>
             <form onSubmit={handleCreate} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Nome *</Label>
                   <Input id="name" name="name" required />
@@ -415,7 +415,7 @@ function AffiliatesTab() {
         <EmptyState message="Nenhum afiliado encontrado." />
       ) : (
         <Card>
-          <CardContent className="p-0">
+          <CardContent className="overflow-x-auto p-0">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -582,7 +582,7 @@ function LinksTab() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="slug">Slug *</Label>
                   <Input id="slug" name="slug" required placeholder="promo-verao" />
@@ -621,7 +621,7 @@ function LinksTab() {
         <EmptyState message="Nenhum link criado ainda." />
       ) : (
         <Card>
-          <CardContent className="p-0">
+          <CardContent className="overflow-x-auto p-0">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -719,7 +719,7 @@ function ConversionsTab() {
         <EmptyState message="Nenhuma conversão encontrada." />
       ) : (
         <Card>
-          <CardContent className="p-0">
+          <CardContent className="overflow-x-auto p-0">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -890,7 +890,7 @@ function PayoutsTab() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="amount">Valor *</Label>
                   <Input id="amount" name="amount" type="number" step="0.01" min="0.01" required />
@@ -934,7 +934,7 @@ function PayoutsTab() {
         <EmptyState message="Nenhum pagamento encontrado." />
       ) : (
         <Card>
-          <CardContent className="p-0">
+          <CardContent className="overflow-x-auto p-0">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -1041,7 +1041,7 @@ function SettingsTab() {
             <Switch name="enabled" defaultChecked={settings.enabled} />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="commissionRate">Comissão Padrão (%)</Label>
               <Input id="commissionRate" name="commissionRate" type="number" step="0.01" defaultValue={settings.commissionRate} />

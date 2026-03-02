@@ -166,7 +166,7 @@ export function OrdersClient() {
           <p className="text-sm text-muted-foreground">Nenhum pedido encontrado.</p>
         </div>
       ) : (
-        <div className="rounded-lg border border-border overflow-hidden">
+        <div className="rounded-lg border border-border overflow-hidden overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b border-border bg-muted/50">

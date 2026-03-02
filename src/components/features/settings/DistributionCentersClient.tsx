@@ -52,7 +52,7 @@ export function DistributionCentersClient() {
           <Input id="country" value={form.country} onChange={(e) => handleChange('country', e.target.value)} disabled />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label htmlFor="cep" className="text-sm font-medium text-foreground">CEP</Label>
             <Input id="cep" value={form.cep} onChange={(e) => handleChange('cep', e.target.value)} placeholder="00000-000" />
@@ -64,7 +64,7 @@ export function DistributionCentersClient() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label htmlFor="city" className="text-sm font-medium text-foreground">Cidade</Label>
             <Input id="city" value={form.city} onChange={(e) => handleChange('city', e.target.value)} />
@@ -85,7 +85,7 @@ export function DistributionCentersClient() {
           <Input id="street" value={form.street} onChange={(e) => handleChange('street', e.target.value)} />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label htmlFor="number" className="text-sm font-medium text-foreground">Número</Label>
             <Input id="number" value={form.number} onChange={(e) => handleChange('number', e.target.value)} />

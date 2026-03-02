@@ -119,9 +119,9 @@ export function CreateProductClient() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl p-8">
+    <div className="mx-auto max-w-4xl p-4 md:p-6 lg:p-8">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <Link href="/admin/products" className="text-muted-foreground hover:text-foreground">
               <ChevronLeft className="h-5 w-5" />

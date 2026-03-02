@@ -134,7 +134,7 @@ export function SaStoresPage() {
               {store.planName && <span className="text-[11px] font-medium text-[hsl(var(--sa-text-muted))] bg-[hsl(var(--sa-surface-hover))] rounded-full px-2 py-0.5">{store.planName}</span>}
               {store.customDomain && (<span className="text-[11px] text-[hsl(var(--sa-text-muted))] flex items-center gap-1"><Globe className="h-3 w-3" /> {store.customDomain}</span>)}
             </div>
-            <div className="grid grid-cols-3 gap-3 pt-3 border-t border-[hsl(var(--sa-border-subtle))]">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3 pt-3 border-t border-[hsl(var(--sa-border-subtle))]">
               <div className="text-center"><p className="text-[16px] font-bold text-[hsl(var(--sa-text))]">{store.productsCount}</p><p className="text-[10px] text-[hsl(var(--sa-text-muted))]">Produtos</p></div>
               <div className="text-center"><p className="text-[16px] font-bold text-[hsl(var(--sa-text))]">{store.ordersCount}</p><p className="text-[10px] text-[hsl(var(--sa-text-muted))]">Pedidos</p></div>
               <div className="text-center"><p className="text-[16px] font-bold text-[hsl(var(--sa-success))]">R$ {(store.paidRevenue ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</p><p className="text-[10px] text-[hsl(var(--sa-text-muted))]">Receita</p></div>

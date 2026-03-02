@@ -148,7 +148,7 @@ export function SaDashboardPage() {
                   <p className="text-[12px] text-[hsl(var(--sa-text-muted))]">Dados em tempo real do backend</p>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                 <div>
                   <p className="text-[11px] font-medium text-[hsl(var(--sa-text-muted))] mb-1">MRR</p>
                   <p className="text-[24px] font-bold sa-gradient-text">{fmtMoney(mrr)}</p>

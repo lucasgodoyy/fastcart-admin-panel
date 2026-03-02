@@ -57,7 +57,7 @@ export function FinanceClient() {
     : 1;
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-6 lg:p-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-foreground">
@@ -212,6 +212,7 @@ export function FinanceClient() {
             {t('Nenhuma transação encontrada.', 'No transactions found.')}
           </div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-muted/30 text-left">
@@ -238,6 +239,7 @@ export function FinanceClient() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

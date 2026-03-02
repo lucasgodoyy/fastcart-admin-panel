@@ -193,6 +193,7 @@ export function AbandonedCartsClient() {
               Nenhum carrinho encontrado com esse status.
             </div>
           ) : (
+            <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -237,6 +238,7 @@ export function AbandonedCartsClient() {
                 ))}
               </TableBody>
             </Table>
+            </div>
           )}
         </CardContent>
       </Card>

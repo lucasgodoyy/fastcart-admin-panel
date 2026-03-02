@@ -638,6 +638,7 @@ export function EmailsClient() {
                   Nenhum e-mail enviado ainda.
                 </div>
               ) : (
+                <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -662,6 +663,7 @@ export function EmailsClient() {
                     ))}
                   </TableBody>
                 </Table>
+                </div>
               )}
             </CardContent>
           </Card>

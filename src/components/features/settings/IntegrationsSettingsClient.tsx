@@ -4,7 +4,18 @@ import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
-import { CreditCard, ShieldCheck, Truck } from 'lucide-react';
+import {
+  CreditCard,
+  ShieldCheck,
+  Truck,
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
+  ExternalLink,
+  RefreshCw,
+  Loader2,
+  Unplug,
+} from 'lucide-react';
 
 import { SettingsPageLayout } from './SettingsPageLayout';
 import { Button } from '@/components/ui/button';
@@ -14,12 +25,60 @@ import { MelhorEnvioConnectionStatus, StripeConnectStatus } from '@/types/integr
 const STRIPE_QUERY_KEY = ['integration', 'stripe-connect'];
 const MELHOR_QUERY_KEY = ['integration', 'melhor-envio'];
 
+/* ─── Stripe status helpers ─── */
+function getStripeState(status?: StripeConnectStatus) {
+  if (!status || !status.connected) return 'NOT_CONNECTED';
+  if (status.chargesEnabled && status.payoutsEnabled) return 'ACTIVE';
+  if (status.onboardingCompleted) return 'RESTRICTED';
+  return 'ONBOARDING_PENDING';
+}
+
+function getStripeIndicator(state: string) {
+  switch (state) {
+    case 'ACTIVE':
+      return {
+        icon: <CheckCircle2 className="h-5 w-5 text-emerald-500" />,
+        label: 'Ativo',
+        description: 'Pagamentos, repasses e transferências funcionando normalmente.',
+        badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800',
+      };
+    case 'RESTRICTED':
+      return {
+        icon: <AlertTriangle className="h-5 w-5 text-amber-500" />,
+        label: 'Ação necessária',
+        description:
+          'O Stripe precisa de informações adicionais para manter os pagamentos ativos. Complete o onboarding para evitar suspensões.',
+        badgeClass: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800',
+      };
+    case 'ONBOARDING_PENDING':
+      return {
+        icon: <AlertTriangle className="h-5 w-5 text-amber-500" />,
+        label: 'Onboarding pendente',
+        description:
+          'Você iniciou a conexão com o Stripe mas ainda não completou todas as etapas. Clique em "Completar cadastro" para continuar.',
+        badgeClass: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800',
+      };
+    default:
+      return {
+        icon: <XCircle className="h-5 w-5 text-muted-foreground" />,
+        label: 'Não conectado',
+        description:
+          'Conecte sua conta Stripe para receber pagamentos dos seus clientes diretamente na sua conta bancária.',
+        badgeClass: 'bg-muted text-muted-foreground border-border',
+      };
+  }
+}
+
 export function IntegrationsSettingsClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
 
-  const { data: stripeStatus, isLoading: isLoadingStripe } = useQuery<StripeConnectStatus>({
+  const {
+    data: stripeStatus,
+    isLoading: isLoadingStripe,
+    isRefetching: isRefetchingStripe,
+  } = useQuery<StripeConnectStatus>({
     queryKey: STRIPE_QUERY_KEY,
     queryFn: integrationService.getStripeStatus,
   });
@@ -34,7 +93,7 @@ export function IntegrationsSettingsClient() {
     onSuccess: (response) => {
       window.location.href = response.onboardingUrl;
     },
-    onError: () => toast.error('Falha ao iniciar conexão com Stripe.'),
+    onError: () => toast.error('Falha ao iniciar conexão com Stripe. Tente novamente.'),
   });
 
   const openStripeDashboardMutation = useMutation({
@@ -95,6 +154,7 @@ export function IntegrationsSettingsClient() {
 
     if (stripeReturn === 'refresh') {
       toast.info('Complete o onboarding do Stripe para ativar pagamentos.');
+      queryClient.invalidateQueries({ queryKey: STRIPE_QUERY_KEY });
       router.replace('/admin/settings/integrations');
     }
   }, [queryClient, router, searchParams]);
@@ -121,64 +181,173 @@ export function IntegrationsSettingsClient() {
     connectMelhorEnvioMutation.mutate(oauthCode);
   }, [connectMelhorEnvioMutation, router, searchParams]);
 
+  const stripeState = getStripeState(stripeStatus);
+  const stripeIndicator = getStripeIndicator(stripeState);
+  const isStripeLoading = isLoadingStripe || isRefetchingStripe;
+
   return (
     <SettingsPageLayout
       title="Integrações"
       description="Conecte pagamentos e frete da loja no modelo SaaS."
     >
       <div className="grid gap-4">
-        <div className="rounded-lg border border-border bg-card p-5">
-          <div className="mb-4 flex items-center gap-2">
-            <CreditCard className="h-5 w-5 text-muted-foreground" />
-            <h2 className="text-base font-semibold text-foreground">Stripe Connect</h2>
-          </div>
-
-          <div className="mb-4 text-sm text-muted-foreground">
-            {isLoadingStripe
-              ? 'Carregando status...'
-              : stripeStatus?.connected
-                ? `Conectado (${stripeStatus.accountStatus || 'PENDING'})`
-                : 'Não conectado'}
-          </div>
-
-          {stripeStatus?.connected && (
-            <div className="mb-4 space-y-1 text-xs text-muted-foreground">
-              <p>Account ID: {stripeStatus.stripeAccountId}</p>
-              <p>Onboarding: {stripeStatus.onboardingCompleted ? 'Completo' : 'Pendente'}</p>
-              <p>Charges enabled: {stripeStatus.chargesEnabled ? 'Sim' : 'Não'}</p>
-              <p>Payouts enabled: {stripeStatus.payoutsEnabled ? 'Sim' : 'Não'}</p>
+        {/* ─── STRIPE CONNECT ─── */}
+        <div className="rounded-lg border border-border bg-card overflow-hidden">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-border px-5 py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50 dark:bg-violet-950/30">
+                <CreditCard className="h-4.5 w-4.5 text-violet-600 dark:text-violet-400" />
+              </div>
+              <div>
+                <h2 className="text-sm font-semibold text-foreground">Stripe Connect</h2>
+                <p className="text-xs text-muted-foreground">Receba pagamentos na sua conta</p>
+              </div>
             </div>
-          )}
+            {!isStripeLoading && (
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${stripeIndicator.badgeClass}`}
+              >
+                {stripeIndicator.icon}
+                {stripeIndicator.label}
+              </span>
+            )}
+          </div>
 
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              onClick={() => openStripeOnboardingMutation.mutate()}
-              disabled={openStripeOnboardingMutation.isPending}
-            >
-              {stripeStatus?.connected ? 'Continuar onboarding Stripe' : 'Conectar Stripe'}
-            </Button>
-
-            {stripeStatus?.connected && (
+          {/* Body */}
+          <div className="px-5 py-4">
+            {isStripeLoading ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Verificando status do Stripe...
+              </div>
+            ) : (
               <>
-                <Button
-                  variant="outline"
-                  onClick={() => openStripeDashboardMutation.mutate()}
-                  disabled={openStripeDashboardMutation.isPending}
-                >
-                  Abrir dashboard Stripe
-                </Button>
+                {/* Status message */}
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {stripeIndicator.description}
+                </p>
 
-                <Button
-                  variant="outline"
-                  onClick={() => disconnectStripeMutation.mutate()}
-                  disabled={disconnectStripeMutation.isPending}
-                >
-                  Desconectar Stripe
-                </Button>
+                {/* Detail grid — only when connected */}
+                {stripeStatus?.connected && (
+                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <StatusCard
+                      label="Pagamentos"
+                      ok={stripeStatus.chargesEnabled}
+                    />
+                    <StatusCard
+                      label="Repasses"
+                      ok={stripeStatus.payoutsEnabled}
+                    />
+                    <StatusCard
+                      label="Onboarding"
+                      ok={stripeStatus.onboardingCompleted}
+                    />
+                  </div>
+                )}
+
+                {/* Warning banner for restricted / pending */}
+                {(stripeState === 'RESTRICTED' || stripeState === 'ONBOARDING_PENDING') && (
+                  <div className="mt-4 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-950/30">
+                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                    <div className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+                      {stripeState === 'RESTRICTED' ? (
+                        <>
+                          <strong>Funcionalidades podem ser suspensas.</strong> O Stripe solicitou
+                          informações adicionais (ex: documento de identidade, dados bancários). Complete
+                          as pendências para evitar interrupção nos pagamentos.
+                        </>
+                      ) : (
+                        <>
+                          <strong>Cadastro incompleto.</strong> Você precisa finalizar o processo de
+                          verificação no Stripe para começar a receber pagamentos. Clique no botão abaixo
+                          para continuar de onde parou.
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </div>
+
+          {/* Actions */}
+          {!isStripeLoading && (
+            <div className="flex flex-wrap items-center gap-2 border-t border-border px-5 py-3 bg-muted/30">
+              {stripeState === 'NOT_CONNECTED' && (
+                <Button
+                  onClick={() => openStripeOnboardingMutation.mutate()}
+                  disabled={openStripeOnboardingMutation.isPending}
+                  size="sm"
+                >
+                  {openStripeOnboardingMutation.isPending && (
+                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                  )}
+                  Conectar Stripe
+                </Button>
+              )}
+
+              {(stripeState === 'ONBOARDING_PENDING' || stripeState === 'RESTRICTED') && (
+                <Button
+                  onClick={() => openStripeOnboardingMutation.mutate()}
+                  disabled={openStripeOnboardingMutation.isPending}
+                  size="sm"
+                  variant={stripeState === 'RESTRICTED' ? 'destructive' : 'default'}
+                >
+                  {openStripeOnboardingMutation.isPending && (
+                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                  )}
+                  {stripeState === 'RESTRICTED' ? 'Resolver pendências' : 'Completar cadastro'}
+                </Button>
+              )}
+
+              {stripeState === 'ACTIVE' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => openStripeDashboardMutation.mutate()}
+                  disabled={openStripeDashboardMutation.isPending}
+                >
+                  {openStripeDashboardMutation.isPending ? (
+                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <ExternalLink className="mr-2 h-3.5 w-3.5" />
+                  )}
+                  Abrir dashboard Stripe
+                </Button>
+              )}
+
+              {stripeStatus?.connected && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => queryClient.invalidateQueries({ queryKey: STRIPE_QUERY_KEY })}
+                  >
+                    <RefreshCw className={`mr-2 h-3.5 w-3.5 ${isRefetchingStripe ? 'animate-spin' : ''}`} />
+                    Atualizar status
+                  </Button>
+
+                  <div className="ml-auto">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => {
+                        if (confirm('Tem certeza que deseja desconectar o Stripe? Você não receberá mais pagamentos até reconectar.')) {
+                          disconnectStripeMutation.mutate();
+                        }
+                      }}
+                      disabled={disconnectStripeMutation.isPending}
+                    >
+                      <Unplug className="mr-2 h-3.5 w-3.5" />
+                      Desconectar
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="rounded-lg border border-border bg-card p-5">
@@ -244,5 +413,30 @@ export function IntegrationsSettingsClient() {
         Modelo multi-tenant: cada loja conecta sua própria conta Stripe e Melhor Envio.
       </div>
     </SettingsPageLayout>
+  );
+}
+
+/* ─── Small status card component ─── */
+function StatusCard({ label, ok }: { label: string; ok: boolean }) {
+  return (
+    <div
+      className={`flex flex-col items-center justify-center rounded-lg border p-3 text-center ${
+        ok
+          ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/30'
+          : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30'
+      }`}
+    >
+      {ok ? (
+        <CheckCircle2 className="mb-1 h-4 w-4 text-emerald-500" />
+      ) : (
+        <XCircle className="mb-1 h-4 w-4 text-red-500" />
+      )}
+      <span className={`text-xs font-medium ${ok ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'}`}>
+        {label}
+      </span>
+      <span className={`text-[10px] ${ok ? 'text-emerald-600 dark:text-emerald-500' : 'text-red-600 dark:text-red-500'}`}>
+        {ok ? 'Ativo' : 'Inativo'}
+      </span>
+    </div>
   );
 }

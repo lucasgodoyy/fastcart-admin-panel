@@ -170,8 +170,8 @@ export function PromotionsClient() {
   const isSaving = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <div className="p-8">
-      <div className="mb-6 flex items-center justify-between">
+    <div className="p-4 md:p-6 lg:p-8">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-5 font-semibold text-foreground">Promotions</h1>
           <p className="text-sm text-muted-foreground">Discounts de regra Buy X Pay Y ligados ao backend.</p>
@@ -197,7 +197,7 @@ export function PromotionsClient() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-md border border-border bg-card">
+      <div className="overflow-x-auto overflow-hidden rounded-md border border-border bg-card">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border bg-muted/30 text-left">
@@ -281,7 +281,7 @@ export function PromotionsClient() {
               placeholder="Nome interno da promoção"
             />
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Input
                 type="number"
                 min="1"
@@ -298,7 +298,7 @@ export function PromotionsClient() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <label className="space-y-1 text-sm">
                 <span className="text-muted-foreground">Escopo de compra</span>
                 <select
@@ -339,7 +339,7 @@ export function PromotionsClient() {
               placeholder="Limite de uso (opcional)"
             />
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <label className="space-y-1 text-sm">
                 <span className="text-muted-foreground">Início</span>
                 <Input

@@ -38,8 +38,8 @@ import { toast } from "sonner";
 
 function SettingRow({ label, desc, children }: { label: string; desc?: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between py-4 border-b border-[hsl(var(--sa-border-subtle))] last:border-0">
-      <div className="flex-1 min-w-0 mr-4">
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between py-4 border-b border-[hsl(var(--sa-border-subtle))] last:border-0">
+      <div className="flex-1 min-w-0 sm:mr-4">
         <p className="text-[13px] font-semibold text-[hsl(var(--sa-text))]">{label}</p>
         {desc && <p className="text-[11px] text-[hsl(var(--sa-text-muted))] mt-0.5">{desc}</p>}
       </div>
@@ -130,13 +130,13 @@ export function SaSettingsPage() {
           <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-6">
             <SettingSection icon={Globe} title="Plataforma">
               <SettingRow label="Nome da Plataforma" desc="Nome exibido publicamente">
-                <Input value={platformName} onChange={e => setPlatformName(e.target.value)} placeholder={isLoading ? 'Carregando...' : ''} className="w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
+                <Input value={platformName} onChange={e => setPlatformName(e.target.value)} placeholder={isLoading ? 'Carregando...' : ''} className="w-full sm:w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
               </SettingRow>
               <SettingRow label="URL Principal" desc="Domínio principal da plataforma">
-                <Input defaultValue="https://fastcart.com" className="w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
+                <Input defaultValue="https://fastcart.com" className="w-full sm:w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
               </SettingRow>
               <SettingRow label="Moeda Padrão" desc="Moeda utilizada nas transações">
-                <Input defaultValue="BRL (R$)" disabled className="w-32 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text-muted))] text-[12px] rounded-lg h-9" />
+                <Input defaultValue="BRL (R$)" disabled className="w-full sm:w-32 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text-muted))] text-[12px] rounded-lg h-9" />
               </SettingRow>
               <SettingRow label="Modo Manutenção" desc="Desabilita acesso público temporariamente">
                 <Switch checked={maintenanceMode} onCheckedChange={setMaintenanceMode} />
@@ -148,10 +148,10 @@ export function SaSettingsPage() {
 
             <SettingSection icon={Mail} title="E-mail">
               <SettingRow label="E-mail de Suporte" desc="Exibido nas páginas de contato">
-                <Input value={supportEmail} onChange={e => setSupportEmail(e.target.value)} placeholder={isLoading ? 'Carregando...' : ''} className="w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
+                <Input value={supportEmail} onChange={e => setSupportEmail(e.target.value)} placeholder={isLoading ? 'Carregando...' : ''} className="w-full sm:w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
               </SettingRow>
               <SettingRow label="E-mail do Remetente" desc="From address para e-mails automáticos">
-                <Input defaultValue="noreply@fastcart.com" className="w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
+                <Input defaultValue="noreply@fastcart.com" className="w-full sm:w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
               </SettingRow>
             </SettingSection>
           </motion.div>
@@ -187,10 +187,10 @@ export function SaSettingsPage() {
 
             <SettingSection icon={Globe} title="SEO & Meta">
               <SettingRow label="Título da Página" desc="Tag &lt;title&gt; principal">
-                <Input defaultValue="FastCart — Crie Sua Loja Virtual" className="w-80 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
+                <Input defaultValue="FastCart — Crie Sua Loja Virtual" className="w-full sm:w-80 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
               </SettingRow>
               <SettingRow label="Meta Description">
-                <Input defaultValue="A plataforma completa para criação de lojas virtuais" className="w-80 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
+                <Input defaultValue="A plataforma completa para criação de lojas virtuais" className="w-full sm:w-80 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
               </SettingRow>
             </SettingSection>
           </motion.div>
@@ -253,7 +253,7 @@ export function SaSettingsPage() {
 
             <SettingSection icon={Bell} title="Webhooks">
               <SettingRow label="URL de Webhook" desc="Endpoint para eventos da plataforma">
-                <Input placeholder="https://..." className="w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
+                <Input placeholder="https://..." className="w-full sm:w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
               </SettingRow>
               <SettingRow label="Eventos" desc="Selecione os eventos que disparam o webhook">
                 <Button variant="outline" className="bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text-secondary))] text-[12px] rounded-lg h-9 gap-1">
@@ -269,14 +269,14 @@ export function SaSettingsPage() {
           <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-6">
             <SettingSection icon={CreditCard} title="Stripe (Pagamentos)">
               <SettingRow label="Chave Pública" desc="Publishable key do Stripe">
-                <Input defaultValue="pk_live_51..." className="w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9 font-mono" />
+                <Input defaultValue="pk_live_51..." className="w-full sm:w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9 font-mono" />
               </SettingRow>
               <SettingRow label="Chave Secreta" desc="Secret key do Stripe">
                 <div className="flex items-center gap-2">
                   <Input
                     type={showStripeKey ? "text" : "password"}
                     defaultValue="sk_live_51..."
-                    className="w-56 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9 font-mono"
+                    className="w-full sm:w-56 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9 font-mono"
                   />
                   <Button variant="ghost" size="icon" className="h-9 w-9 text-[hsl(var(--sa-text-muted))]" onClick={() => setShowStripeKey(v => !v)}>
                     {showStripeKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -284,7 +284,7 @@ export function SaSettingsPage() {
                 </div>
               </SettingRow>
               <SettingRow label="Webhook Secret" desc="Para validar eventos do Stripe">
-                <Input type="password" defaultValue="whsec_..." className="w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9 font-mono" />
+                <Input type="password" defaultValue="whsec_..." className="w-full sm:w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9 font-mono" />
               </SettingRow>
               <SettingRow label="Modo Teste" desc="Usar chaves de teste do Stripe">
                 <Switch />
@@ -293,10 +293,10 @@ export function SaSettingsPage() {
 
             <SettingSection icon={Mail} title="Provedor de E-mail">
               <SettingRow label="Provedor" desc="Serviço de envio de e-mails">
-                <Input defaultValue="Amazon SES" className="w-40 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
+                <Input defaultValue="Amazon SES" className="w-full sm:w-40 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
               </SettingRow>
               <SettingRow label="SMTP Host">
-                <Input defaultValue="email-smtp.us-east-1.amazonaws.com" className="w-80 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9 font-mono" />
+                <Input defaultValue="email-smtp.us-east-1.amazonaws.com" className="w-full sm:w-80 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9 font-mono" />
               </SettingRow>
               <SettingRow label="SMTP Port">
                 <Input defaultValue="587" className="w-20 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />

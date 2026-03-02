@@ -64,7 +64,7 @@ export function SaStoreDetailPage({ storeId }: { storeId: number }) {
 
   const { data: store, isLoading } = useQuery({
     queryKey: ["super-admin-store", storeId],
-    queryFn: () => superAdminService.getStoreById(storeId),
+    queryFn: () => superAdminService.getStore(storeId),
     enabled: !!storeId,
   });
 
@@ -125,7 +125,7 @@ export function SaStoreDetailPage({ storeId }: { storeId: number }) {
           title={store.name}
           description={`/${store.slug} · Criada ${relativeDate(store.createdAt)}`}
           actions={
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <SaStatusBadge status={store.status} />
               <Button
                 variant="outline"
