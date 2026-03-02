@@ -63,6 +63,10 @@ const emailService = {
     const res = await apiClient.get('/email/logs', { params });
     return res.data;
   },
+
+  resendEmail: async (logId: number): Promise<void> => {
+    await apiClient.post(`/email/logs/${logId}/resend`);
+  },
 };
 
 export default emailService;

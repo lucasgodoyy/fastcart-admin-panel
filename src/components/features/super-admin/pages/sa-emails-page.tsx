@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
+  RotateCcw,
 } from "lucide-react";
 import {
   SaPageHeader,
@@ -45,6 +46,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { superAdminService } from "@/services/super-admin";
+import { toast } from "sonner";
 
 const statusBadge: Record<string, { label: string; color: string }> = {
   SENT: { label: "Enviado", color: "success" },
@@ -79,6 +81,17 @@ export function SaEmailsPage() {
   const { data: overview } = useQuery({
     queryKey: ["super-admin-overview"],
     queryFn: superAdminService.getOverview,
+  });
+
+  const queryClient = useQueryClient();
+
+  const resendMutation = useMutation({
+    mutationFn: (logId: number) => superAdminService.resendEmail(logId),
+    onSuccess: () => {
+      toast.success("E-mail reenviado com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["super-admin-emails"] });
+    },
+    onError: () => toast.error("Erro ao reenviar e-mail"),
   });
 
   const templates = templatesData?.content ?? [];
@@ -157,6 +170,7 @@ export function SaEmailsPage() {
                         <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Template</TableHead>
                         <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Status</TableHead>
                         <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Enviado</TableHead>
+                        <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -177,6 +191,17 @@ export function SaEmailsPage() {
                           </TableCell>
                           <TableCell className="text-[12px] text-[hsl(var(--sa-text-muted))]">
                             {formatDistanceToNow(new Date(row.createdAt), { addSuffix: true, locale: ptBR })}
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              disabled={resendMutation.isPending}
+                              onClick={() => resendMutation.mutate(row.id)}
+                              className="h-7 px-2 text-[11px] text-[hsl(var(--sa-accent))] hover:bg-[hsl(var(--sa-accent))]/10 rounded-lg gap-1"
+                            >
+                              <RotateCcw className="h-3 w-3" /> Reenviar
+                            </Button>
                           </TableCell>
                         </motion.tr>
                       ))}

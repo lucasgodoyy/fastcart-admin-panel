@@ -9,6 +9,7 @@ import type {
   ResetUserPasswordRequest,
   UpdateUserRoleRequest,
   SupportTicketSummary,
+  SupportTicketDetail,
   OutboundEmailLogSummary,
   EmailTemplateSummary,
   ActivityLog,
@@ -121,6 +122,20 @@ const superAdminService = {
     return data;
   },
 
+  getSupportTicketDetail: async (ticketId: number): Promise<SupportTicketDetail> => {
+    const { data } = await apiClient.get<SupportTicketDetail>(`/super-admin/support/tickets/${ticketId}`);
+    return data;
+  },
+
+  replyToSupportTicket: async (ticketId: number, message: string): Promise<SupportTicketDetail> => {
+    const { data } = await apiClient.post<SupportTicketDetail>(`/super-admin/support/tickets/${ticketId}/reply`, { message });
+    return data;
+  },
+
+  updateSupportTicketStatus: async (ticketId: number, status: string): Promise<void> => {
+    await apiClient.put(`/super-admin/support/tickets/${ticketId}/status`, { status });
+  },
+
   // ── Email Logs & Templates ────────────────────────────────────
   listEmailLogs: async (params?: {
     status?: string;
@@ -140,6 +155,10 @@ const superAdminService = {
   }): Promise<PaginatedResult<EmailTemplateSummary>> => {
     const { data } = await apiClient.get<PaginatedResult<EmailTemplateSummary>>('/super-admin/emails/templates', { params });
     return data;
+  },
+
+  resendEmail: async (logId: number): Promise<void> => {
+    await apiClient.post(`/super-admin/emails/logs/${logId}/resend`);
   },
 
   // ── Activity Logs ─────────────────────────────────────────────

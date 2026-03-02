@@ -26,6 +26,8 @@ import {
   ExternalLink,
   Zap,
   Link2,
+  Headphones,
+  Bell,
 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -85,6 +87,8 @@ const navigation: NavSection[] = [
       { label: t("Financeiro", "Finances"), href: "/admin/payments", icon: <Wallet className="h-[18px] w-[18px]" /> },
       { label: t("Logística", "Fulfillment"), href: "/admin/shipping", icon: <Truck className="h-[18px] w-[18px]" /> },
       { label: t("Caixa de entrada", "Inbox"), href: "/admin/chat", icon: <MessageSquare className="h-[18px] w-[18px]" />, badge: t("Novo", "New") },
+      { label: t("Suporte", "Support"), href: "/admin/support", icon: <Headphones className="h-[18px] w-[18px]" /> },
+      { label: t("Notificações", "Notifications"), href: "/admin/notifications", icon: <Bell className="h-[18px] w-[18px]" /> },
       { label: t("Pessoas", "People"), href: "/admin/customers", icon: <Users2 className="h-[18px] w-[18px]" />, children: [
         { label: t("Todos os clientes", "All Customers"), href: "/admin/customers" },
         { label: t("Mensagens", "Messages"), href: "/admin/customers/messages" },

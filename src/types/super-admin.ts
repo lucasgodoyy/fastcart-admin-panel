@@ -98,6 +98,29 @@ export interface SupportTicketSummary {
   updatedAt: string;
 }
 
+export interface SupportTicketDetail {
+  id: number;
+  storeId: number | null;
+  storeName: string | null;
+  customerName: string | null;
+  customerEmail: string;
+  subject: string;
+  status: string;
+  source: string;
+  createdAt: string;
+  updatedAt: string;
+  messages: SupportMessage[];
+}
+
+export interface SupportMessage {
+  id: number;
+  senderType: string;
+  senderName: string | null;
+  senderEmail: string;
+  messageBody: string;
+  createdAt: string;
+}
+
 // ── Email Logs & Templates ─────────────────────────────────────
 export interface OutboundEmailLogSummary {
   id: number;
