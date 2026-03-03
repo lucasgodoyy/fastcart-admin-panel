@@ -80,7 +80,20 @@ export function CreateProductClient() {
       toast.success('Produto criado com sucesso');
       router.push('/admin/products');
     },
-    onError: () => toast.error('Não foi possível criar o produto'),
+    onError: (error: any) => {
+      const msg = error?.response?.data?.message || error?.message || '';
+      if (msg.includes('Limite de produtos')) {
+        toast.error(msg, {
+          duration: 8000,
+          action: {
+            label: 'Fazer upgrade',
+            onClick: () => router.push('/admin/billing'),
+          },
+        });
+      } else {
+        toast.error(msg || 'Não foi possível criar o produto');
+      }
+    },
   });
 
   const imagesLabel = useMemo(() => {

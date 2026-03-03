@@ -67,6 +67,18 @@ const emailService = {
   resendEmail: async (logId: number): Promise<void> => {
     await apiClient.post(`/email/logs/${logId}/resend`);
   },
+
+  sendEmail: async (data: { to: string; subject: string; bodyHtml: string }): Promise<EmailLog> => {
+    const res = await apiClient.post('/email/send', data);
+    return res.data;
+  },
+
+  sendTestEmail: async (recipientEmail: string, templateKey?: string): Promise<EmailLog> => {
+    const params: Record<string, string> = { recipientEmail };
+    if (templateKey) params.templateKey = templateKey;
+    const res = await apiClient.post('/email/send-test', null, { params });
+    return res.data;
+  },
 };
 
 export default emailService;

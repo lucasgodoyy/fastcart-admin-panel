@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Package, Truck, CheckCircle2, Clock, XCircle, DollarSign, Users, ShoppingBag, Loader2, BarChart3, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import orderService, { type AdminOrder, type OrderStats } from '@/services/orderService';
+import orderService from '@/services/sales/orderService';
+import type { AdminOrder, OrderStats } from '@/types/order';
 
 const STATUS_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string; label: string }> = {
   PENDING: { icon: <Clock className="h-3 w-3" />, color: 'text-yellow-600', bg: 'bg-yellow-50 dark:bg-yellow-950', label: 'Pendente' },
@@ -52,7 +53,7 @@ export function OrdersClient() {
   const handleDispatch = async (orderId: number) => {
     setActionLoading(orderId);
     try {
-      const updated = await orderService.dispatchOrder(orderId);
+      const updated = await orderService.dispatch(orderId);
       setOrders((prev) => prev.map((o) => (o.id === orderId ? updated : o)));
       showToast('success', `Pedido #${orderId} marcado como enviado!`);
     } catch {
@@ -65,7 +66,7 @@ export function OrdersClient() {
   const handleDeliver = async (orderId: number) => {
     setActionLoading(orderId);
     try {
-      const updated = await orderService.deliverOrder(orderId);
+      const updated = await orderService.deliver(orderId);
       setOrders((prev) => prev.map((o) => (o.id === orderId ? updated : o)));
       showToast('success', `Pedido #${orderId} marcado como entregue!`);
     } catch {
@@ -197,7 +198,7 @@ export function OrdersClient() {
                     </td>
                     <td className="p-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        {order.status === 'PAID' && (
+                        {order.paymentStatus?.toUpperCase() === 'PAID' && order.status !== 'SHIPPED' && order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && (
                           <Button
                             variant="outline"
                             size="sm"

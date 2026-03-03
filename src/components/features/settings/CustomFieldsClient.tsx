@@ -1,8 +1,7 @@
 'use client';
 
 import { SettingsPageLayout } from './SettingsPageLayout';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Package } from 'lucide-react';
 
 export function CustomFieldsClient() {
   return (
@@ -10,38 +9,26 @@ export function CustomFieldsClient() {
       title="Campos personalizados"
       description="Adicione informação exclusiva e personalize a gestão de sua loja."
     >
-      <div className="rounded-lg border border-border bg-card p-5 space-y-4">
-        <Button variant="outline" className="gap-1.5">
-          <Plus className="h-4 w-4" />
-          Criar campo em Categorias
-        </Button>
-
-        <div>
-          <p className="text-sm font-medium text-foreground">Que tipo de campo quer criar?</p>
-          <div className="mt-3 grid grid-cols-1 gap-2">
-            {[
-              { label: 'Texto curto', desc: 'Campo para inserir texto simples.' },
-              { label: 'Texto longo', desc: 'Campo para textos maiores e descrições.' },
-              { label: 'Numérico', desc: 'Campo que aceita apenas números.' },
-              { label: 'Seleção', desc: 'Lista suspensa com opções pré-definidas.' },
-              { label: 'Checkbox', desc: 'Campo de marcação (sim/não).' },
-            ].map((type) => (
-              <button
-                key={type.label}
-                className="flex items-start gap-3 rounded-md border border-border p-3 text-left transition-colors hover:bg-accent/50"
-              >
-                <div>
-                  <p className="text-sm font-medium text-foreground">{type.label}</p>
-                  <p className="text-xs text-muted-foreground">{type.desc}</p>
-                </div>
-              </button>
-            ))}
-          </div>
+      <div className="rounded-lg border border-dashed border-border bg-card p-8 md:p-12 text-center space-y-4">
+        <div className="mx-auto h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+          <Package className="h-6 w-6 text-muted-foreground" />
         </div>
-      </div>
-
-      <div className="rounded-lg border border-dashed border-border bg-card p-4 md:p-8 text-center">
-        <p className="text-sm text-muted-foreground">Nenhum campo personalizado criado ainda.</p>
+        <div>
+          <p className="text-sm font-semibold text-foreground">Em breve</p>
+          <p className="text-xs text-muted-foreground mt-1 max-w-md mx-auto leading-relaxed">
+            Campos personalizados permitirão adicionar informações extras aos seus produtos e categorias, como gravação, personalização, tamanho sob medida e mais. Estamos trabalhando para entregar esta funcionalidade em breve.
+          </p>
+        </div>
+        <div className="flex flex-wrap justify-center gap-2 pt-2">
+          {['Texto curto', 'Texto longo', 'Numérico', 'Seleção', 'Checkbox'].map((type) => (
+            <span
+              key={type}
+              className="rounded-full border border-border bg-muted/50 px-3 py-1 text-[11px] text-muted-foreground"
+            >
+              {type}
+            </span>
+          ))}
+        </div>
       </div>
     </SettingsPageLayout>
   );

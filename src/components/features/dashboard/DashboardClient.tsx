@@ -23,6 +23,8 @@ import {
 import orderService from '@/services/sales/orderService';
 import { AdminOrder, DashboardStats, OrderStatus } from '@/types/order';
 import { t } from '@/lib/admin-language';
+import { SetupChecklist } from './SetupChecklist';
+import { ActivityFeed } from './ActivityFeed';
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(amount);
@@ -95,6 +97,16 @@ export function DashboardClient() {
               {p.label}
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* Setup Checklist + Activity Feed */}
+      <div className="grid gap-6 lg:grid-cols-5 mb-6">
+        <div className="lg:col-span-3">
+          <SetupChecklist />
+        </div>
+        <div className="lg:col-span-2">
+          <ActivityFeed />
         </div>
       </div>
 

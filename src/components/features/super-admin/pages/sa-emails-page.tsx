@@ -35,6 +35,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -128,6 +136,8 @@ export function SaEmailsPage() {
   const [status, setStatus] = useState("ALL");
   const [storeFilter, setStoreFilter] = useState("");
   const [page, setPage] = useState(0);
+  const [composeOpen, setComposeOpen] = useState(false);
+  const [composeForm, setComposeForm] = useState({ to: "", subject: "", bodyHtml: "" });
 
   const { data, isLoading } = useQuery({
     queryKey: ["super-admin-emails", status, storeFilter, page],
@@ -163,6 +173,21 @@ export function SaEmailsPage() {
     onError: () => toast.error("Erro ao reenviar e-mail"),
   });
 
+  const composeMutation = useMutation({
+    mutationFn: () => superAdminService.sendPlatformEmail(composeForm),
+    onSuccess: (data) => {
+      if (data.status === "SENT") {
+        toast.success("E-mail da plataforma enviado com sucesso!");
+      } else {
+        toast.error("Falha ao enviar e-mail. Verifique configuração do Resend.");
+      }
+      setComposeOpen(false);
+      setComposeForm({ to: "", subject: "", bodyHtml: "" });
+      queryClient.invalidateQueries({ queryKey: ["super-admin-emails"] });
+    },
+    onError: () => toast.error("Erro ao enviar e-mail da plataforma"),
+  });
+
   const templates = templatesData?.content ?? [];
 
   return (
@@ -170,6 +195,15 @@ export function SaEmailsPage() {
       <SaPageHeader
         title="E-mails da Plataforma"
         description="Monitore envios, gerencie cenários e configurações Resend"
+        actions={
+          <Button
+            size="sm"
+            onClick={() => setComposeOpen(true)}
+            className="bg-[hsl(var(--sa-accent))] text-white hover:bg-[hsl(var(--sa-accent))]/90 rounded-lg gap-1.5 text-[12px]"
+          >
+            <Send className="h-3.5 w-3.5" /> Enviar e-mail
+          </Button>
+        }
       />
 
       {/* Stats */}
@@ -488,6 +522,72 @@ export function SaEmailsPage() {
           </motion.div>
         </TabsContent>
       </Tabs>
+
+      {/* ═══ Compose Platform Email Dialog ═══ */}
+      <Dialog open={composeOpen} onOpenChange={setComposeOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="h-4 w-4" /> Enviar e-mail da plataforma
+            </DialogTitle>
+            <DialogDescription>
+              Envie um e-mail como Super Admin para lojistas ou qualquer destinatário. Sai de <strong>noreply@lojaki.store</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-1.5">
+              <Label>Destinatário</Label>
+              <Input
+                type="email"
+                placeholder="lojista@email.com"
+                value={composeForm.to}
+                onChange={(e) => setComposeForm(p => ({ ...p, to: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Assunto</Label>
+              <Input
+                placeholder="Assunto do e-mail"
+                value={composeForm.subject}
+                onChange={(e) => setComposeForm(p => ({ ...p, subject: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Conteúdo HTML</Label>
+              <textarea
+                className="w-full h-40 p-3 text-xs font-mono bg-background border rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-ring"
+                placeholder="<p>Olá lojista! Temos uma novidade para você.</p>"
+                value={composeForm.bodyHtml}
+                onChange={(e) => setComposeForm(p => ({ ...p, bodyHtml: e.target.value }))}
+              />
+            </div>
+            {composeForm.bodyHtml && (
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-1.5 text-xs">Preview</Label>
+                <div
+                  className="border rounded-lg p-4 bg-white text-black text-sm min-h-16"
+                  dangerouslySetInnerHTML={{ __html: composeForm.bodyHtml }}
+                />
+              </div>
+            )}
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setComposeOpen(false)}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => composeMutation.mutate()}
+                disabled={composeMutation.isPending || !composeForm.to || !composeForm.subject || !composeForm.bodyHtml}
+              >
+                {composeMutation.isPending ? (
+                  <span className="flex items-center gap-2"><RotateCcw className="h-3.5 w-3.5 animate-spin" /> Enviando...</span>
+                ) : (
+                  <span className="flex items-center gap-2"><Send className="h-3.5 w-3.5" /> Enviar</span>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

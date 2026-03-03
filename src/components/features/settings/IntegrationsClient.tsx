@@ -6,6 +6,6 @@ type IntegrationsClientProps = {
   mode?: 'settings' | 'payments' | 'shipping';
 };
 
-export function IntegrationsClient(_: IntegrationsClientProps) {
-  return <IntegrationsSettingsClient />;
+export function IntegrationsClient({ mode }: IntegrationsClientProps) {
+  return <IntegrationsSettingsClient mode={mode} />;
 }

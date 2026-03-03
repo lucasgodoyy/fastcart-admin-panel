@@ -166,6 +166,12 @@ export default function AdminSupportPage() {
               <h4 className="text-sm font-semibold">{t("Detalhes", "Details")}</h4>
               <div className="space-y-3 text-sm">
                 <div>
+                  <span className="text-xs uppercase tracking-wider text-muted-foreground">{t("Assunto", "Subject")}</span>
+                  <div className="mt-0.5">
+                    <Badge variant="secondary" className="text-xs">{ticketDetail.subject}</Badge>
+                  </div>
+                </div>
+                <div>
                   <span className="text-xs uppercase tracking-wider text-muted-foreground">{t("Cliente", "Customer")}</span>
                   <p className="mt-0.5">{ticketDetail.customerName || "—"}</p>
                   <p className="text-xs text-muted-foreground">{ticketDetail.customerEmail}</p>
@@ -312,6 +318,9 @@ export default function AdminSupportPage() {
                 <span className="flex items-center gap-1">
                   <User className="h-3 w-3" /> {ticket.customerName || ticket.customerEmail}
                 </span>
+                {ticket.customerName && (
+                  <span className="text-xs text-muted-foreground">{ticket.customerEmail}</span>
+                )}
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" /> {new Date(ticket.createdAt).toLocaleDateString("pt-BR")}
                 </span>

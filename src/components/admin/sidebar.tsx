@@ -17,8 +17,6 @@ import {
   Speaker,
   Globe,
   CreditCard,
-  Search as SearchIcon,
-  Puzzle,
   Receipt,
   Cog,
   ChevronDown,
@@ -36,6 +34,7 @@ import apiClient from "@/lib/api"
 import { useAuth } from "@/context/AuthContext"
 import { t } from "@/lib/admin-language"
 import { useMobileSidebar } from "@/context/MobileSidebarContext"
+import { AdminThemeToggle } from "@/components/shared/admin-theme-toggle"
 import {
   Tooltip,
   TooltipContent,
@@ -64,9 +63,6 @@ const navigation: NavSection[] = [
       { label: t("Estatísticas", "Analytics"), href: "/admin/statistics", icon: <TrendingUp className="h-[18px] w-[18px]" />, children: [
         { label: t("Visão geral", "Overview"), href: "/admin/statistics" },
         { label: t("Pagamentos", "Payments"), href: "/admin/statistics/payments" },
-        { label: t("Envio", "Shipping"), href: "/admin/statistics/shipping" },
-        { label: t("Produtos", "Products"), href: "/admin/statistics/products" },
-        { label: t("Fontes de tráfego", "Traffic Sources"), href: "/admin/statistics/traffic" },
       ]},
     ],
   },
@@ -75,24 +71,19 @@ const navigation: NavSection[] = [
     items: [
       { label: t("Pedidos", "Orders"), href: "/admin/sales", icon: <ShoppingBag className="h-[18px] w-[18px]" />, children: [
         { label: t("Todos os pedidos", "All Orders"), href: "/admin/sales" },
-        { label: t("Pedidos manuais", "Manual Orders"), href: "/admin/sales/manual-orders" },
         { label: t("Carrinhos abandonados", "Abandoned Carts"), href: "/admin/sales/abandoned-carts" },
       ]},
       { label: t("Catálogo", "Catalog"), href: "/admin/products", icon: <Package className="h-[18px] w-[18px]" />, children: [
         { label: t("Todos os produtos", "All Products"), href: "/admin/products" },
         { label: t("Estoque", "Inventory"), href: "/admin/products/inventory" },
         { label: t("Categorias", "Categories"), href: "/admin/products/categories" },
-        { label: t("Tabelas de preço", "Price Tables"), href: "/admin/products/price-tables" },
       ]},
       { label: t("Financeiro", "Finances"), href: "/admin/payments", icon: <Wallet className="h-[18px] w-[18px]" /> },
       { label: t("Logística", "Fulfillment"), href: "/admin/shipping", icon: <Truck className="h-[18px] w-[18px]" /> },
-      { label: t("Caixa de entrada", "Inbox"), href: "/admin/chat", icon: <MessageSquare className="h-[18px] w-[18px]" />, badge: t("Novo", "New") },
+      { label: t("Caixa de entrada", "Inbox"), href: "/admin/chat", icon: <MessageSquare className="h-[18px] w-[18px]" /> },
       { label: t("Suporte", "Support"), href: "/admin/support", icon: <Headphones className="h-[18px] w-[18px]" /> },
       { label: t("Notificações", "Notifications"), href: "/admin/notifications", icon: <Bell className="h-[18px] w-[18px]" /> },
-      { label: t("Pessoas", "People"), href: "/admin/customers", icon: <Users2 className="h-[18px] w-[18px]" />, children: [
-        { label: t("Todos os clientes", "All Customers"), href: "/admin/customers" },
-        { label: t("Mensagens", "Messages"), href: "/admin/customers/messages" },
-      ]},
+      { label: t("Clientes", "Customers"), href: "/admin/customers", icon: <Users2 className="h-[18px] w-[18px]" /> },
     ],
   },
   {
@@ -113,20 +104,18 @@ const navigation: NavSection[] = [
       { label: t("Loja virtual", "Storefront"), href: "/admin/online-store", icon: <Globe className="h-[18px] w-[18px]" />, external: true, children: [
         { label: t("Tema e layout", "Theme & Layout"), href: "/admin/online-store/layout-theme" },
         { label: t("Páginas", "Pages"), href: "/admin/online-store/pages" },
-        { label: t("Blog", "Blog"), href: "/admin/online-store/blog", badge: t("Novo", "New") },
+        { label: t("Blog", "Blog"), href: "/admin/online-store/blog" },
         { label: t("Navegação", "Navigation"), href: "/admin/online-store/menus" },
         { label: t("Filtros", "Filters"), href: "/admin/online-store/filters" },
         { label: t("Links sociais", "Social Links"), href: "/admin/online-store/social-links" },
+        { label: t("Google Shopping", "Google Shopping"), href: "/admin/online-store/google-shopping" },
         { label: t("Manutenção", "Maintenance"), href: "/admin/online-store/under-construction" },
       ]},
-      { label: t("Ponto de venda", "Point of Sale"), href: "/admin/pos", icon: <CreditCard className="h-[18px] w-[18px]" />, external: true },
-      { label: t("Google Shopping", "Google Shopping"), href: "/admin/google-shopping", icon: <SearchIcon className="h-[18px] w-[18px]" /> },
     ],
   },
   {
-    title: t("Expansão", "Extend"),
+    title: t("Conta", "Account"),
     items: [
-      { label: t("Integrações", "Integrations"), href: "/admin/apps", icon: <Puzzle className="h-[18px] w-[18px]" /> },
       { label: t("Assinatura", "Billing"), href: "/admin/billing", icon: <Receipt className="h-[18px] w-[18px]" /> },
     ],
   },
@@ -439,6 +428,14 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
               </TooltipTrigger>
               <TooltipContent side="right" sideOffset={8}>{t("Configurações", "Settings")}</TooltipContent>
             </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center justify-center rounded-lg p-2.5">
+                  <AdminThemeToggle />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="right" sideOffset={8}>{t("Tema", "Theme")}</TooltipContent>
+            </Tooltip>
           </>
         ) : (
           <>
@@ -466,6 +463,10 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
               <Cog className="h-[18px] w-[18px] text-[var(--sidebar-muted)]" />
               <span className="flex-1">{t("Configurações", "Settings")}</span>
             </Link>
+            <div className="flex items-center gap-3 rounded-lg px-3 py-1 text-[13px] text-[var(--sidebar-foreground)]">
+              <AdminThemeToggle />
+              <span className="text-[var(--sidebar-muted)] text-xs">{t("Tema", "Theme")}</span>
+            </div>
           </>
         )}
       </div>

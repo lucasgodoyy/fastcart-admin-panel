@@ -1,47 +1,66 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Paintbrush, Eye, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import themeService from '@/services/theme';
 import salesChannelsService from '@/services/salesChannels';
 import type { ThemeSectionsResponse } from '@/types/theme';
+import { TEMPLATE_PRESETS } from '@/types/theme';
 import type { SalesChannelSettings } from '@/types/salesChannel';
+import { toast } from 'sonner';
+import { t } from '@/lib/admin-language';
 
 /* ──────────────────────────────────────────────
  * Template catalog — display available themes
  * ────────────────────────────────────────────── */
-const TEMPLATES = [
+const TEMPLATES: Array<{
+  id: string;
+  name: string;
+  description: string;
+  preview: string;
+  niches: string[];
+  status: 'available' | 'coming_soon';
+}> = [
   {
     id: 'template-1',
     name: 'Morelia',
-    description: 'Template clássico para moda. Layout limpo com hero banner, grade de produtos e carrinho lateral.',
+    description: 'Template clássico para moda. Layout limpo com hero banner, grade 4 colunas de produtos e carrinho lateral.',
     preview: '/templates/template-1-preview.png',
     niches: ['fashion', 'beauty', 'watches-accessories'],
-    status: 'available' as const,
+    status: 'available',
   },
   {
     id: 'template-2',
     name: 'Patagonia',
-    description: 'Template editorial para marcas premium. Tipografia bold, seções em destaque e vídeo hero.',
+    description: 'Template editorial para marcas premium. Hero full-screen, logo centralizado, grade 2 colunas com imagens grandes.',
     preview: '/templates/template-2-preview.png',
-    niches: ['fashion', 'sport-nutrition'],
-    status: 'coming_soon' as const,
+    niches: ['fashion', 'lifestyle', 'premium'],
+    status: 'available',
   },
   {
     id: 'template-3',
     name: 'Aurora',
-    description: 'Template moderno para eletrônicos e tech. Design escuro, cards com specs e comparação rápida.',
+    description: 'Template moderno para eletrônicos e tech. Barra de promoções, grade 3 colunas com badges de specs, carrinho popup.',
     preview: '/templates/template-3-preview.png',
-    niches: ['electronics'],
-    status: 'coming_soon' as const,
+    niches: ['electronics', 'tech', 'gaming'],
+    status: 'available',
+  },
+  {
+    id: 'template-4',
+    name: 'Glamour',
+    description: 'Template luxuoso para beleza e cosméticos. Hero full-screen, logo centralizado, grade 4 colunas, carrinho lateral, estilo Kylie Cosmetics.',
+    preview: '/templates/template-4-preview.png',
+    niches: ['beauty', 'cosmetics', 'skincare', 'wellness'],
+    status: 'available',
   },
 ];
 
 export function ThemeGalleryClient() {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const { data: themeData, isLoading: isThemeLoading } = useQuery<ThemeSectionsResponse>({
     queryKey: ['theme-sections'],
@@ -51,6 +70,27 @@ export function ThemeGalleryClient() {
   const { data: channelData, isLoading: isChannelLoading } = useQuery<SalesChannelSettings>({
     queryKey: ['sales-channel-settings'],
     queryFn: () => salesChannelsService.getSettings(),
+  });
+
+  const activateTemplateMutation = useMutation({
+    mutationFn: async (templateId: string) => {
+      const preset = TEMPLATE_PRESETS[templateId];
+      if (!preset) throw new Error('Template not found');
+      // Save the preset as the active theme sections
+      await themeService.updateThemeSections({
+        themeSectionsJson: JSON.stringify(preset),
+      });
+      // Update the template ID on the sales channel
+      await salesChannelsService.updateSettings({ templateId });
+    },
+    onSuccess: () => {
+      toast.success(t('Template ativado com sucesso!', 'Template activated successfully!'));
+      queryClient.invalidateQueries({ queryKey: ['theme-sections'] });
+      queryClient.invalidateQueries({ queryKey: ['sales-channel-settings'] });
+    },
+    onError: () => {
+      toast.error(t('Erro ao ativar template.', 'Error activating template.'));
+    },
   });
 
   const isLoading = isThemeLoading || isChannelLoading;
@@ -194,13 +234,22 @@ export function ThemeGalleryClient() {
 
                   {/* Actions */}
                   {template.status === 'available' ? (
-                    <Button
-                      className="w-full"
-                      variant={isCurrent ? 'default' : 'outline'}
-                      onClick={handleEditLayout}
-                    >
-                      {isCurrent ? 'Personalizar' : 'Usar este template'}
-                    </Button>
+                    isCurrent ? (
+                      <Button className="w-full" onClick={handleEditLayout}>
+                        {t('Personalizar', 'Customize')}
+                      </Button>
+                    ) : (
+                      <Button
+                        className="w-full"
+                        variant="outline"
+                        disabled={activateTemplateMutation.isPending}
+                        onClick={() => activateTemplateMutation.mutate(template.id)}
+                      >
+                        {activateTemplateMutation.isPending
+                          ? t('Ativando...', 'Activating...')
+                          : t('Usar este template', 'Use this template')}
+                      </Button>
+                    )
                   ) : (
                     <Button className="w-full" variant="outline" disabled>
                       Em breve

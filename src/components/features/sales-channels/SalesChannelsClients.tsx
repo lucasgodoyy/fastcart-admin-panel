@@ -78,8 +78,10 @@ const NICHE_OPTIONS = [
   { value: 'fashion', label: 'Roupa / Moda' },
   { value: 'sport-nutrition', label: 'Sport Nutrition' },
   { value: 'beauty', label: 'Maquiagem / Beleza' },
+  { value: 'cosmetics', label: 'Cosméticos / Skincare' },
   { value: 'watches-accessories', label: 'Relógio e Acessórios' },
   { value: 'electronics', label: 'Eletrônicos' },
+  { value: 'wellness', label: 'Bem-estar / Wellness' },
 ];
 
 const DEFAULT_ATTRIBUTES_BY_NICHE: Record<string, ProductAttributeSetting[]> = {
@@ -108,6 +110,16 @@ const DEFAULT_ATTRIBUTES_BY_NICHE: Record<string, ProductAttributeSetting[]> = {
     { key: 'size', label: 'Tamanho', enabled: false, required: false },
     { key: 'weight', label: 'Peso', enabled: true, required: false },
   ],
+  cosmetics: [
+    { key: 'color', label: 'Cor/Tom', enabled: true, required: true },
+    { key: 'size', label: 'Tamanho', enabled: true, required: false },
+    { key: 'weight', label: 'Peso', enabled: false, required: false },
+  ],
+  wellness: [
+    { key: 'color', label: 'Cor', enabled: false, required: false },
+    { key: 'size', label: 'Tamanho', enabled: true, required: false },
+    { key: 'weight', label: 'Peso', enabled: true, required: false },
+  ],
 };
 
 const THEME_PRESETS = [
@@ -127,6 +139,22 @@ const THEME_PRESETS = [
     layoutPreset: 'fashion-editorial',
     status: 'draft' as const,
   },
+  {
+    id: 'aurora',
+    name: 'Aurora',
+    templateId: 'template-3',
+    storeNiche: 'electronics',
+    layoutPreset: 'tech-modern',
+    status: 'live' as const,
+  },
+  {
+    id: 'glamour',
+    name: 'Glamour',
+    templateId: 'template-4',
+    storeNiche: 'beauty',
+    layoutPreset: 'beauty-luxury',
+    status: 'live' as const,
+  },
 ];
 
 const FONT_OPTIONS = [
@@ -140,6 +168,8 @@ const PRIMARY_COLOR_OPTIONS = [
   { value: '248 45% 38%', label: 'Roxo editorial' },
   { value: '165 85% 32%', label: 'Verde essentials' },
   { value: '196 85% 36%', label: 'Azul clean' },
+  { value: '340 82% 52%', label: 'Rosa beauty' },
+  { value: '350 60% 45%', label: 'Rose gold' },
 ];
 
 function useSalesChannelSettings() {
