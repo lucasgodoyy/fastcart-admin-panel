@@ -1,8 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSearchParams } from 'next/navigation';
 import {
-
   Check,
   Star,
   Crown,
@@ -10,12 +11,16 @@ import {
   ArrowRight,
   Calendar,
   AlertTriangle,
+  Loader2,
+  ExternalLink,
+  CheckCircle2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import billingService from '@/services/billingService';
 import { StoreBillingResponse, AvailablePlan } from '@/types/billing';
 import { t } from '@/lib/admin-language';
+import { toast } from 'sonner';
 
 function formatPrice(cents: number, currency: string) {
   return new Intl.NumberFormat('pt-BR', {
@@ -50,10 +55,27 @@ const statusLabel = (s: string) => {
 };
 
 export function BillingClient() {
+  const searchParams = useSearchParams();
+  const [portalLoading, setPortalLoading] = useState(false);
+
   const { data, isLoading } = useQuery<StoreBillingResponse>({
     queryKey: ['store-billing'],
     queryFn: () => billingService.getBilling(),
   });
+
+  const isSuccess = searchParams.get('success') === 'true';
+  const isCanceled = searchParams.get('canceled') === 'true';
+
+  const handleManageSubscription = async () => {
+    try {
+      setPortalLoading(true);
+      const { url } = await billingService.createPortalSession();
+      window.location.href = url;
+    } catch {
+      toast.error(t('Erro ao abrir o portal de assinatura.', 'Failed to open subscription portal.'));
+      setPortalLoading(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -77,6 +99,24 @@ export function BillingClient() {
         </p>
       </div>
 
+      {/* Success/Cancel banners */}
+      {isSuccess && (
+        <div className="mb-6 flex items-center gap-3 rounded-xl border border-green-300 bg-green-50 dark:bg-green-900/10 p-4">
+          <CheckCircle2 className="h-5 w-5 text-green-600" />
+          <p className="text-sm font-medium text-green-800 dark:text-green-300">
+            {t('Assinatura realizada com sucesso! Seu plano já está ativo.', 'Subscription successful! Your plan is now active.')}
+          </p>
+        </div>
+      )}
+      {isCanceled && (
+        <div className="mb-6 flex items-center gap-3 rounded-xl border border-yellow-300 bg-yellow-50 dark:bg-yellow-900/10 p-4">
+          <AlertTriangle className="h-5 w-5 text-yellow-600" />
+          <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
+            {t('Checkout cancelado. Você pode tentar novamente quando quiser.', 'Checkout canceled. You can try again anytime.')}
+          </p>
+        </div>
+      )}
+
       {/* Current Subscription */}
       {sub ? (
         <div className="mb-8 rounded-xl border-2 border-primary/20 bg-card p-6">
@@ -91,6 +131,20 @@ export function BillingClient() {
                 {formatPrice(sub.planPriceCents, sub.currency)} / {billingPeriodLabel(sub.billingPeriod)}
               </p>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={handleManageSubscription}
+              disabled={portalLoading}
+            >
+              {portalLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <ExternalLink className="h-4 w-4" />
+              )}
+              {t('Gerenciar assinatura', 'Manage subscription')}
+            </Button>
           </div>
 
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -152,7 +206,7 @@ export function BillingClient() {
         </h2>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => (
-            <PlanCard key={plan.id} plan={plan} />
+            <PlanCard key={plan.id} plan={plan} hasActiveSubscription={!!sub} />
           ))}
           {plans.length === 0 && (
             <p className="col-span-full text-sm text-muted-foreground">
@@ -165,7 +219,20 @@ export function BillingClient() {
   );
 }
 
-function PlanCard({ plan }: { plan: AvailablePlan }) {
+function PlanCard({ plan, hasActiveSubscription }: { plan: AvailablePlan; hasActiveSubscription: boolean }) {
+  const [loading, setLoading] = useState(false);
+
+  const handleSelectPlan = async () => {
+    try {
+      setLoading(true);
+      const { url } = await billingService.createCheckout(plan.id);
+      window.location.href = url;
+    } catch {
+      toast.error(t('Erro ao iniciar o checkout. Tente novamente.', 'Failed to start checkout. Please try again.'));
+      setLoading(false);
+    }
+  };
+
   return (
     <div className={`relative rounded-xl border bg-card p-6 transition-shadow hover:shadow-md ${
       plan.isCurrent ? 'border-primary ring-2 ring-primary/20' : 'border-border'
@@ -221,10 +288,24 @@ function PlanCard({ plan }: { plan: AvailablePlan }) {
           <Button variant="outline" className="w-full" disabled>
             {t('Plano atual', 'Current Plan')}
           </Button>
+        ) : hasActiveSubscription ? (
+          <Button variant="outline" className="w-full" disabled>
+            {t('Use o portal para trocar', 'Use portal to switch')}
+          </Button>
         ) : (
-          <Button className="w-full gap-2">
-            {t('Selecionar plano', 'Select Plan')}
-            <ArrowRight className="h-4 w-4" />
+          <Button
+            className="w-full gap-2"
+            onClick={handleSelectPlan}
+            disabled={loading}
+          >
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <>
+                {t('Selecionar plano', 'Select Plan')}
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
           </Button>
         )}
       </div>
