@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -12,9 +13,20 @@ import {
   User,
   Mail,
   Tag,
+  Ban,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import orderService from '@/services/sales/orderService';
 import { AdminOrder, OrderStatus } from '@/types/order';
 import { t } from '@/lib/admin-language';
@@ -41,6 +53,7 @@ export function OrderDetailClient() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const orderId = Number(params.id);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
 
   const { data: order, isLoading } = useQuery<AdminOrder>({
     queryKey: ['store-order', orderId],
@@ -70,6 +83,21 @@ export function OrderDetailClient() {
     onError: () => toast.error(t('Erro ao marcar como entregue.', 'Error marking as delivered.')),
   });
 
+  const cancelMutation = useMutation({
+    mutationFn: () => orderService.cancel(orderId),
+    onSuccess: () => {
+      toast.success(t('Pedido cancelado com sucesso!', 'Order cancelled successfully!'));
+      setCancelDialogOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['store-order', orderId] });
+      queryClient.invalidateQueries({ queryKey: ['store-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['store-order-stats'] });
+    },
+    onError: () => {
+      toast.error(t('Erro ao cancelar pedido.', 'Error cancelling order.'));
+      setCancelDialogOpen(false);
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-16">
@@ -91,8 +119,9 @@ export function OrderDetailClient() {
 
   const sc = statusConfig[order.status] || statusConfig.PENDING;
   const isPaid = order.paymentStatus.toLowerCase() === 'paid';
-  const canDispatch = isPaid && order.status !== 'SHIPPED' && order.status !== 'DELIVERED';
+  const canDispatch = isPaid && order.status !== 'SHIPPED' && order.status !== 'DELIVERED' && order.status !== 'CANCELLED';
   const canDeliver = order.status === 'SHIPPED';
+  const canCancel = order.status !== 'CANCELLED' && order.status !== 'DELIVERED';
 
   return (
     <div className="p-4 md:p-6 lg:p-8">
@@ -134,9 +163,58 @@ export function OrderDetailClient() {
                 {deliverMutation.isPending ? t('Processando...', 'Processing...') : t('Marcar como Entregue', 'Mark as Delivered')}
               </Button>
             )}
+            {canCancel && (
+              <Button
+                onClick={() => setCancelDialogOpen(true)}
+                variant="destructive"
+                className="gap-2"
+              >
+                <Ban className="h-4 w-4" />
+                {t('Cancelar Pedido', 'Cancel Order')}
+              </Button>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Cancel confirmation dialog */}
+      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('Cancelar Pedido', 'Cancel Order')} #{order.id}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {isPaid
+                ? t(
+                    'O pedido será cancelado e o reembolso total será processado via Stripe. O estoque dos produtos será restaurado. Esta ação não pode ser desfeita.',
+                    'The order will be cancelled and a full refund will be issued via Stripe. Product stock will be restored. This action cannot be undone.'
+                  )
+                : t(
+                    'O pedido será cancelado e o estoque dos produtos será restaurado. Esta ação não pode ser desfeita.',
+                    'The order will be cancelled and product stock will be restored. This action cannot be undone.'
+                  )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={cancelMutation.isPending}>
+              {t('Voltar', 'Go Back')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                cancelMutation.mutate();
+              }}
+              disabled={cancelMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {cancelMutation.isPending
+                ? t('Cancelando...', 'Cancelling...')
+                : isPaid
+                  ? t('Cancelar e Reembolsar', 'Cancel & Refund')
+                  : t('Cancelar Pedido', 'Cancel Order')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Left: items + totals */}

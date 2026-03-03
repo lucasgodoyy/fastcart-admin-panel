@@ -161,6 +161,11 @@ const superAdminService = {
     await apiClient.post(`/super-admin/emails/logs/${logId}/resend`);
   },
 
+  sendPlatformEmail: async (data: { to: string; subject: string; bodyHtml: string }): Promise<{ status: string; messageId: string }> => {
+    const { data: result } = await apiClient.post('/super-admin/emails/send', data);
+    return result;
+  },
+
   // ── Activity Logs ─────────────────────────────────────────────
   listActivityLogs: async (params?: {
     actionType?: string;

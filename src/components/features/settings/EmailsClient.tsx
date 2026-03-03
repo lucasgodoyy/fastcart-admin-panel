@@ -338,6 +338,10 @@ export function EmailsClient() {
   const [tab, setTab] = useState('automation');
   const [editEvent, setEditEvent] = useState<EmailEvent | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [isQuickSetup, setIsQuickSetup] = useState(false);
+  const [composeOpen, setComposeOpen] = useState(false);
+  const [composeForm, setComposeForm] = useState({ to: '', subject: '', bodyHtml: '' });
+  const [testEmailAddr, setTestEmailAddr] = useState('');
 
   /* ── Data queries ── */
   const { data: senderConfig, isLoading: loadingSender } = useQuery<EmailSenderConfig>({
@@ -383,6 +387,30 @@ export function EmailsClient() {
     onError: () => toast.error('Erro ao salvar remetente.'),
   });
 
+  /* ── Quick setup: activate essential templates with defaults ── */
+  const quickSetupMutation = useMutation({
+    mutationFn: async () => {
+      const essentialKeys = ['order_confirmation', 'payment_confirmed', 'order_shipped', 'welcome', 'abandoned_cart'];
+      for (const key of essentialKeys) {
+        const event = EMAIL_EVENTS.find((e) => e.key === key);
+        if (!event) continue;
+        const existing = templates.find((t) => t.templateKey === key);
+        if (existing?.active) continue; // already active
+        await emailService.upsertTemplate(key, {
+          subject: existing?.subject ?? event.defaultSubject,
+          bodyHtml: existing?.bodyHtml ?? event.defaultBody,
+          active: true,
+        });
+      }
+    },
+    onSuccess: () => {
+      toast.success('5 automações essenciais ativadas!');
+      queryClient.invalidateQueries({ queryKey: ['email-templates'] });
+      setIsQuickSetup(false);
+    },
+    onError: () => toast.error('Erro. Tente ativar individualmente.'),
+  });
+
   /* ── Template editor form ── */
   const [editForm, setEditForm] = useState({ subject: '', bodyHtml: '', active: true });
 
@@ -412,6 +440,29 @@ export function EmailsClient() {
     onError: () => toast.error('Erro ao salvar template.'),
   });
 
+  /* ── Send test email ── */
+  const sendTestMutation = useMutation({
+    mutationFn: () => emailService.sendTestEmail(testEmailAddr, 'order_confirmation'),
+    onSuccess: () => {
+      toast.success('E-mail de teste enviado!');
+      setTestEmailAddr('');
+      queryClient.invalidateQueries({ queryKey: ['email-logs'] });
+    },
+    onError: () => toast.error('Erro ao enviar e-mail de teste.'),
+  });
+
+  /* ── Compose & send email ── */
+  const composeMutation = useMutation({
+    mutationFn: () => emailService.sendEmail(composeForm),
+    onSuccess: () => {
+      toast.success('E-mail enviado com sucesso!');
+      setComposeOpen(false);
+      setComposeForm({ to: '', subject: '', bodyHtml: '' });
+      queryClient.invalidateQueries({ queryKey: ['email-logs'] });
+    },
+    onError: () => toast.error('Erro ao enviar e-mail.'),
+  });
+
   /* ── Helpers ── */
   function isTemplateActive(key: string) {
     const t = templates.find((tpl) => tpl.templateKey === key);
@@ -438,6 +489,58 @@ export function EmailsClient() {
           Configure e-mails que são disparados automaticamente por ações na sua loja.
         </p>
       </div>
+
+      {/* Onboarding banner — only shows when nothing is configured yet */}
+      {configuredCount === 0 && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="p-5">
+            <div className="flex items-start gap-4">
+              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <Mail className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-foreground">Configure seus e-mails em 1 clique</h3>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  Ative as 5 automações essenciais (confirmação de pedido, pagamento, envio, boas‑vindas e carrinho abandonado) com templates profissionais prontos em português. Você pode personalizar tudo depois.
+                </p>
+                <div className="flex items-center gap-3 mt-3">
+                  <Button
+                    size="sm"
+                    onClick={() => quickSetupMutation.mutate()}
+                    disabled={quickSetupMutation.isPending}
+                  >
+                    {quickSetupMutation.isPending ? (
+                      <><Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> Ativando...</>
+                    ) : (
+                      <><Zap className="mr-1.5 h-3.5 w-3.5" /> Ativar 5 automações essenciais</>
+                    )}
+                  </Button>
+                  <span className="text-xs text-muted-foreground">Leva menos de 5 segundos</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Quick setup bar — when some but not all essentials are active */}
+      {configuredCount > 0 && activeCount < 5 && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/30">
+          <AlertCircle className="h-4 w-4 text-amber-600 shrink-0" />
+          <p className="flex-1 text-xs text-amber-800 dark:text-amber-300">
+            Você tem apenas <strong>{activeCount}</strong> de 5 automações essenciais ativas. Ative as restantes para não perder vendas.
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs shrink-0"
+            onClick={() => quickSetupMutation.mutate()}
+            disabled={quickSetupMutation.isPending}
+          >
+            {quickSetupMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Completar setup'}
+          </Button>
+        </div>
+      )}
 
       {/* Stats row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -491,6 +594,28 @@ export function EmailsClient() {
 
         {/* ═══ Automations Tab ═══ */}
         <TabsContent value="automation" className="mt-4 space-y-6">
+          {/* How it works guide */}
+          <div className="rounded-lg border border-border bg-card/50 p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Info className="h-4 w-4 text-muted-foreground" />
+              <p className="text-xs font-semibold text-foreground">Como funciona?</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-muted-foreground">
+              <div className="flex items-start gap-2">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold shrink-0">1</span>
+                <p>Clique em &quot;Ativar&quot; na automação desejada.</p>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold shrink-0">2</span>
+                <p>Personalize o assunto e conteúdo se quiser (ou use o padrão).</p>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-bold shrink-0">3</span>
+                <p>Pronto! O e-mail será enviado automaticamente quando a ação acontecer.</p>
+              </div>
+            </div>
+          </div>
+
           {(['orders', 'customers', 'marketing', 'system'] as const).map((cat) => {
             const events = EMAIL_EVENTS.filter((e) => e.category === cat);
             const catInfo = CATEGORY_LABELS[cat];
@@ -623,6 +748,36 @@ export function EmailsClient() {
                       Salvar
                     </Button>
                   </div>
+
+                  {/* ── Send Test Email ── */}
+                  <div className="border-t pt-4 mt-4">
+                    <p className="text-sm font-medium mb-1">Enviar e-mail de teste</p>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Envie um e-mail de teste para verificar se a configuração está funcionando corretamente.
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="email"
+                        className="max-w-sm"
+                        placeholder="seu@email.com"
+                        value={testEmailAddr}
+                        onChange={(e) => setTestEmailAddr(e.target.value)}
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => sendTestMutation.mutate()}
+                        disabled={sendTestMutation.isPending || !testEmailAddr}
+                      >
+                        {sendTestMutation.isPending ? (
+                          <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Send className="mr-1.5 h-3.5 w-3.5" />
+                        )}
+                        Enviar teste
+                      </Button>
+                    </div>
+                  </div>
                 </>
               )}
             </CardContent>
@@ -630,7 +785,16 @@ export function EmailsClient() {
         </TabsContent>
 
         {/* ═══ Logs Tab ═══ */}
-        <TabsContent value="logs" className="mt-4">
+        <TabsContent value="logs" className="mt-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Histórico de envios</p>
+              <p className="text-xs text-muted-foreground">Últimos {logs.length} e-mails enviados pela sua loja.</p>
+            </div>
+            <Button size="sm" onClick={() => setComposeOpen(true)}>
+              <Send className="mr-1.5 h-3.5 w-3.5" /> Enviar e-mail
+            </Button>
+          </div>
           <Card>
             <CardContent className="p-0">
               {logs.length === 0 ? (
@@ -777,6 +941,75 @@ export function EmailsClient() {
               >
                 {templateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Salvar template
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ═══ Compose Email Dialog ═══ */}
+      <Dialog open={composeOpen} onOpenChange={setComposeOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="h-4 w-4" /> Enviar e-mail
+            </DialogTitle>
+            <DialogDescription>
+              Envie um e-mail avulso para um cliente. O e-mail sairá com as configurações do remetente da sua loja.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-1.5">
+              <Label>Destinatário</Label>
+              <Input
+                type="email"
+                placeholder="cliente@email.com"
+                value={composeForm.to}
+                onChange={(e) => setComposeForm((p) => ({ ...p, to: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Assunto</Label>
+              <Input
+                placeholder="Assunto do e-mail"
+                value={composeForm.subject}
+                onChange={(e) => setComposeForm((p) => ({ ...p, subject: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Conteúdo HTML</Label>
+              <textarea
+                className="w-full h-40 p-3 text-xs font-mono bg-background border rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-ring"
+                placeholder="<p>Olá! Este é um e-mail da nossa loja.</p>"
+                value={composeForm.bodyHtml}
+                onChange={(e) => setComposeForm((p) => ({ ...p, bodyHtml: e.target.value }))}
+              />
+            </div>
+            {composeForm.bodyHtml && (
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-1.5">
+                  <Eye className="h-3.5 w-3.5" /> Preview
+                </Label>
+                <div
+                  className="border rounded-lg p-4 bg-white text-black text-sm min-h-16"
+                  dangerouslySetInnerHTML={{ __html: composeForm.bodyHtml }}
+                />
+              </div>
+            )}
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setComposeOpen(false)}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => composeMutation.mutate()}
+                disabled={composeMutation.isPending || !composeForm.to || !composeForm.subject || !composeForm.bodyHtml}
+              >
+                {composeMutation.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="mr-1.5 h-4 w-4" />
+                )}
+                Enviar
               </Button>
             </div>
           </div>

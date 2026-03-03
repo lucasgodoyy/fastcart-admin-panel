@@ -10,6 +10,11 @@ import {
   TrendingDown,
   Percent,
   ArrowRight,
+  Clock,
+  Package,
+  Truck,
+  CheckCircle2,
+  XCircle,
 } from 'lucide-react';
 import orderService from '@/services/sales/orderService';
 import { DashboardStats } from '@/types/order';
@@ -96,22 +101,60 @@ export function StatisticsOverviewClient() {
         )}
       </div>
 
-      {/* Quick Links */}
-      <div className="grid gap-4 md:grid-cols-4">
-        {[
-          { label: t('Pagamentos', 'Payments'), href: '/admin/statistics/payments', desc: t('Receita e conversão', 'Revenue & conversion') },
-          { label: t('Envio', 'Shipping'), href: '/admin/statistics/shipping', desc: t('SLA e performance', 'SLA & performance') },
-          { label: t('Produtos', 'Products'), href: '/admin/statistics/products', desc: t('Mais vendidos', 'Top sellers') },
-          { label: t('Tráfego', 'Traffic'), href: '/admin/statistics/traffic', desc: t('Fontes de aquisição', 'Acquisition sources') },
-        ].map(link => (
-          <Link key={link.href} href={link.href} className="rounded-lg border border-border bg-card p-4 hover:bg-muted/30 transition-colors group">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-sm font-semibold text-foreground">{link.label}</span>
-              <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+      {/* Order Status Funnel — unique to Statistics */}
+      <div className="rounded-lg border border-border bg-card p-5 mb-6">
+        <h2 className="text-sm font-semibold text-foreground mb-4">
+          {t('Funil de Pedidos', 'Order Funnel')}
+        </h2>
+        {isLoading || !stats ? (
+          <div className="h-32 flex items-center justify-center text-sm text-muted-foreground">{t('Carregando...', 'Loading...')}</div>
+        ) : (() => {
+          const totalOrders = stats.totalOrders || 1;
+          const funnel = [
+            { label: t('Pendentes', 'Pending'), count: stats.pendingOrders, icon: <Clock className="h-4 w-4" />, color: 'bg-yellow-500' },
+            { label: t('Processando', 'Processing'), count: stats.paidOrders, icon: <Package className="h-4 w-4" />, color: 'bg-blue-500' },
+            { label: t('Enviados', 'Shipped'), count: stats.shippedOrders, icon: <Truck className="h-4 w-4" />, color: 'bg-indigo-500' },
+            { label: t('Entregues', 'Delivered'), count: stats.deliveredOrders, icon: <CheckCircle2 className="h-4 w-4" />, color: 'bg-green-500' },
+            { label: t('Cancelados', 'Cancelled'), count: stats.cancelledOrders, icon: <XCircle className="h-4 w-4" />, color: 'bg-red-500' },
+          ];
+          return (
+            <div className="space-y-3">
+              {funnel.map((item, i) => {
+                const pct = totalOrders > 0 ? Math.round((item.count / totalOrders) * 100) : 0;
+                return (
+                  <div key={i} className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 w-28 shrink-0">
+                      {item.icon}
+                      <span className="text-xs text-muted-foreground">{item.label}</span>
+                    </div>
+                    <div className="flex-1 h-6 rounded-full bg-muted/50 overflow-hidden">
+                      <div className={`h-full rounded-full ${item.color} transition-all`} style={{ width: `${Math.max(pct, 1)}%` }} />
+                    </div>
+                    <span className="text-xs font-semibold text-foreground w-14 text-right">{item.count} ({pct}%)</span>
+                  </div>
+                );
+              })}
             </div>
-            <p className="text-xs text-muted-foreground">{link.desc}</p>
-          </Link>
-        ))}
+          );
+        })()}
+      </div>
+
+      {/* Quick Links */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Link href="/admin/statistics/payments" className="rounded-lg border border-border bg-card p-4 hover:bg-muted/30 transition-colors group">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-sm font-semibold text-foreground">{t('Pagamentos', 'Payments')}</span>
+            <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+          </div>
+          <p className="text-xs text-muted-foreground">{t('Receita, funil de pagamento e conversão', 'Revenue, payment funnel & conversion')}</p>
+        </Link>
+        <Link href="/admin/payments" className="rounded-lg border border-border bg-card p-4 hover:bg-muted/30 transition-colors group">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-sm font-semibold text-foreground">{t('Financeiro', 'Finance')}</span>
+            <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+          </div>
+          <p className="text-xs text-muted-foreground">{t('Receita total, transações e repasses', 'Total revenue, transactions & payouts')}</p>
+        </Link>
       </div>
     </div>
   );

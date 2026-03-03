@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { QueryProvider } from "@/components/shared/providers";
 import { AuthProvider } from "@/context/AuthContext";
+import { ThemeProvider } from "@/components/shared/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { isEnglish } from "@/lib/admin-language";
 import "./globals.css";
@@ -29,14 +30,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang={isEnglish ? "en" : "pt-BR"} className="light" data-theme="light" translate="yes">
+    <html lang={isEnglish ? "en" : "pt-BR"} suppressHydrationWarning translate="yes">
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased bg-background text-foreground`}
       >
-        <QueryProvider>
-          <AuthProvider>{children}</AuthProvider>
-        </QueryProvider>
-        <Toaster />
+        <ThemeProvider
+          attribute="data-theme"
+          defaultTheme="light"
+          themes={["light", "warm"]}
+          disableTransitionOnChange
+        >
+          <QueryProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </QueryProvider>
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

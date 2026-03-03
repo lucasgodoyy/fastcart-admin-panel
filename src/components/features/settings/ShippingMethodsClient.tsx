@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { SettingsPageLayout } from './SettingsPageLayout';
 import { Button } from '@/components/ui/button';
-import { Truck, Package, Edit, Plus, Info, ArrowRight } from 'lucide-react';
+import { Truck, Package, Plus, Info, ArrowRight } from 'lucide-react';
 
 export function ShippingMethodsClient() {
   return (
@@ -27,7 +27,7 @@ export function ShippingMethodsClient() {
               <li>Emissão de etiquetas integrada às suas vendas.</li>
               <li>Rastreamento automático de envios.</li>
             </ul>
-            <Link href="/admin/settings/integrations">
+            <Link href="/admin/shipping">
               <Button variant="outline" size="sm" className="mt-3 gap-1.5">
                 Configurar Melhor Envio
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -59,7 +59,7 @@ export function ShippingMethodsClient() {
         <Info className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
         <p className="text-xs text-blue-700 dark:text-blue-400">
           Configure a integração com o Melhor Envio na página de{' '}
-          <Link href="/admin/settings/integrations" className="font-medium underline">Integrações</Link>
+          <Link href="/admin/shipping" className="font-medium underline">Logística</Link>
           {' '}para ativar cotação de frete automática e emissão de etiquetas.
         </p>
       </div>

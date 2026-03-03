@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { ShoppingBag, DollarSign, Truck, CheckCircle2, Clock, XCircle, Users, Package, Loader2, TrendingUp } from 'lucide-react';
-import orderService, { type OrderStats } from '@/services/orderService';
+import orderService from '@/services/sales/orderService';
+import type { OrderStats } from '@/types/order';
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);

@@ -70,10 +70,22 @@ function getStripeIndicator(state: string) {
   }
 }
 
-export function IntegrationsSettingsClient() {
+type IntegrationsMode = 'settings' | 'payments' | 'shipping';
+
+const MODE_META: Record<IntegrationsMode, { title: string; description: string }> = {
+  settings: { title: 'Integrações', description: 'Conecte pagamentos e frete da loja no modelo SaaS.' },
+  payments: { title: 'Pagamentos', description: 'Configure a integração de pagamentos da sua loja.' },
+  shipping: { title: 'Frete', description: 'Configure a integração de frete da sua loja.' },
+};
+
+export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: IntegrationsMode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
+
+  const showStripe = mode === 'settings' || mode === 'payments';
+  const showMelhorEnvio = mode === 'settings' || mode === 'shipping';
+  const meta = MODE_META[mode];
 
   const {
     data: stripeStatus,
@@ -82,11 +94,13 @@ export function IntegrationsSettingsClient() {
   } = useQuery<StripeConnectStatus>({
     queryKey: STRIPE_QUERY_KEY,
     queryFn: integrationService.getStripeStatus,
+    enabled: showStripe,
   });
 
   const { data: melhorEnvioStatus, isLoading: isLoadingMelhorEnvio } = useQuery<MelhorEnvioConnectionStatus>({
     queryKey: MELHOR_QUERY_KEY,
     queryFn: integrationService.getMelhorEnvioStatus,
+    enabled: showMelhorEnvio,
   });
 
   const openStripeOnboardingMutation = useMutation({
@@ -202,11 +216,12 @@ export function IntegrationsSettingsClient() {
 
   return (
     <SettingsPageLayout
-      title="Integrações"
-      description="Conecte pagamentos e frete da loja no modelo SaaS."
+      title={meta.title}
+      description={meta.description}
     >
       <div className="grid gap-4">
         {/* ─── STRIPE CONNECT ─── */}
+        {showStripe && (
         <div className="rounded-lg border border-border bg-card overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-border px-5 py-4">
@@ -364,7 +379,9 @@ export function IntegrationsSettingsClient() {
             </div>
           )}
         </div>
+        )}
 
+        {showMelhorEnvio && (
         <div className="rounded-lg border border-border bg-card p-5">
           <div className="mb-4 flex items-center gap-2">
             <Truck className="h-5 w-5 text-muted-foreground" />
@@ -461,12 +478,15 @@ export function IntegrationsSettingsClient() {
             O lojista pode criar a conta no Melhor Envio durante o fluxo de autorização.
           </p>
         </div>
+        )}
       </div>
 
-      <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-        <ShieldCheck className="h-3.5 w-3.5" />
-        Modelo multi-tenant: cada loja conecta sua própria conta Stripe e Melhor Envio.
-      </div>
+      {mode === 'settings' && (
+        <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+          <ShieldCheck className="h-3.5 w-3.5" />
+          Modelo multi-tenant: cada loja conecta sua própria conta Stripe e Melhor Envio.
+        </div>
+      )}
     </SettingsPageLayout>
   );
 }
