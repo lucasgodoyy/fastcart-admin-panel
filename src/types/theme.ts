@@ -476,3 +476,208 @@ export const TEMPLATE_PRESETS: Record<string, ThemeSections> = {
   'template-3': AURORA_THEME_SECTIONS,
   'template-4': GLAMOUR_THEME_SECTIONS,
 };
+
+// ── Template-specific presets ─────────────────────────────
+
+/** Patagonia — editorial / premium brand layout */
+export const PATAGONIA_THEME_SECTIONS: ThemeSections = {
+  header: {
+    enabled: true,
+    logoPosition: 'center',
+    showSearch: true,
+    showCart: true,
+    transparentOnHero: true,
+    stickyHeader: true,
+    announcementBar: { enabled: true, text: 'Frete grátis acima de R$299', bgColor: '#1a1a2e', textColor: '#e0e0e0' },
+  },
+  hero: {
+    enabled: true,
+    type: 'video',
+    slides: [],
+    height: 'full',
+    overlayOpacity: 0.4,
+  },
+  featuredProducts: {
+    enabled: true,
+    title: 'Coleção em destaque',
+    maxProducts: 6,
+    columns: 2,
+    showPrice: true,
+    showBadge: false,
+  },
+  productList: {
+    enabled: true,
+    defaultView: 'grid',
+    columns: 2,
+    showFilters: true,
+    showSort: true,
+    productsPerPage: 12,
+    quickView: false,
+    hoverEffect: 'swap',
+  },
+  productDetail: {
+    enabled: true,
+    imagePosition: 'left',
+    showRelated: true,
+    showReviews: false,
+    showShareButtons: true,
+    stickyAddToCart: true,
+    zoomOnHover: true,
+  },
+  cart: {
+    enabled: true,
+    style: 'drawer',
+    showShippingEstimate: true,
+    showCouponField: true,
+    showCrossSell: false,
+  },
+  footer: {
+    enabled: true,
+    columns: 3,
+    showNewsletter: true,
+    showSocialLinks: true,
+    showPaymentIcons: true,
+    copyrightText: '',
+    bgColor: '#1a1a2e',
+    textColor: '#f5f5f5',
+  },
+  customCss: '',
+};
+
+/** Aurora — tech / electronics modern layout */
+export const AURORA_THEME_SECTIONS: ThemeSections = {
+  header: {
+    enabled: true,
+    logoPosition: 'left',
+    showSearch: true,
+    showCart: true,
+    transparentOnHero: false,
+    stickyHeader: true,
+    announcementBar: { enabled: true, text: '⚡ Ofertas relâmpago — até 40% OFF', bgColor: '#ff4d4d', textColor: '#ffffff' },
+  },
+  hero: {
+    enabled: true,
+    type: 'slideshow',
+    slides: [],
+    height: 'large',
+    overlayOpacity: 0.2,
+  },
+  featuredProducts: {
+    enabled: true,
+    title: 'Mais vendidos',
+    maxProducts: 12,
+    columns: 3,
+    showPrice: true,
+    showBadge: true,
+  },
+  productList: {
+    enabled: true,
+    defaultView: 'grid',
+    columns: 3,
+    showFilters: true,
+    showSort: true,
+    productsPerPage: 24,
+    quickView: true,
+    hoverEffect: 'zoom',
+  },
+  productDetail: {
+    enabled: true,
+    imagePosition: 'right',
+    showRelated: true,
+    showReviews: false,
+    showShareButtons: false,
+    stickyAddToCart: true,
+    zoomOnHover: true,
+  },
+  cart: {
+    enabled: true,
+    style: 'popup',
+    showShippingEstimate: true,
+    showCouponField: true,
+    showCrossSell: true,
+  },
+  footer: {
+    enabled: true,
+    columns: 4,
+    showNewsletter: true,
+    showSocialLinks: true,
+    showPaymentIcons: true,
+    copyrightText: '',
+    bgColor: '#0f0f13',
+    textColor: '#e8e8ed',
+  },
+  customCss: '',
+};
+
+/** Glamour — beauty / cosmetics luxury layout (Kylie Cosmetics inspired) */
+export const GLAMOUR_THEME_SECTIONS: ThemeSections = {
+  header: {
+    enabled: true,
+    logoPosition: 'center',
+    showSearch: true,
+    showCart: true,
+    transparentOnHero: true,
+    stickyHeader: true,
+    announcementBar: { enabled: true, text: '✨ Frete grátis em compras acima de R$149 ✨', bgColor: '#1a1a1a', textColor: '#f5e6e0' },
+  },
+  hero: {
+    enabled: true,
+    type: 'slideshow',
+    slides: [],
+    height: 'full',
+    overlayOpacity: 0.25,
+  },
+  featuredProducts: {
+    enabled: true,
+    title: 'Best Sellers',
+    maxProducts: 8,
+    columns: 4,
+    showPrice: true,
+    showBadge: true,
+  },
+  productList: {
+    enabled: true,
+    defaultView: 'grid',
+    columns: 4,
+    showFilters: true,
+    showSort: true,
+    productsPerPage: 20,
+    quickView: true,
+    hoverEffect: 'swap',
+  },
+  productDetail: {
+    enabled: true,
+    imagePosition: 'left',
+    showRelated: true,
+    showReviews: false,
+    showShareButtons: true,
+    stickyAddToCart: true,
+    zoomOnHover: true,
+  },
+  cart: {
+    enabled: true,
+    style: 'drawer',
+    showShippingEstimate: true,
+    showCouponField: true,
+    showCrossSell: true,
+  },
+  footer: {
+    enabled: true,
+    columns: 4,
+    showNewsletter: true,
+    showSocialLinks: true,
+    showPaymentIcons: true,
+    copyrightText: '',
+    bgColor: '#1a1a1a',
+    textColor: '#f5e6e0',
+  },
+  customCss: '',
+};
+
+/** Map template ID → default sections preset */
+export const TEMPLATE_PRESETS: Record<string, ThemeSections> = {
+  'template-1': DEFAULT_THEME_SECTIONS,
+  'template-2': PATAGONIA_THEME_SECTIONS,
+  'template-3': AURORA_THEME_SECTIONS,
+  'template-4': GLAMOUR_THEME_SECTIONS,
+};
