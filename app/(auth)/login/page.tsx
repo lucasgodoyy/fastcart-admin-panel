@@ -11,7 +11,7 @@ export default function LoginPage() {
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm">
             <Zap className="h-5 w-5 text-white" fill="white" />
           </div>
-          <span className="text-lg font-bold tracking-tight">FastCart</span>
+          <span className="text-lg font-bold tracking-tight">Lojaki</span>
         </div>
         <div>
           <h2 className="text-3xl font-bold leading-tight">
@@ -25,7 +25,7 @@ export default function LoginPage() {
           </p>
         </div>
         <p className="text-xs text-white/40">
-          &copy; {new Date().getFullYear()} FastCart. {t('Todos os direitos reservados.', 'All rights reserved.')}
+          &copy; {new Date().getFullYear()} Lojaki. {t('Todos os direitos reservados.', 'All rights reserved.')}
         </p>
       </div>
 
@@ -36,7 +36,7 @@ export default function LoginPage() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
               <Zap className="h-4.5 w-4.5 text-white" fill="white" />
             </div>
-            <span className="text-lg font-bold tracking-tight text-foreground">FastCart</span>
+            <span className="text-lg font-bold tracking-tight text-foreground">Lojaki</span>
           </div>
           <LoginForm />
         </div>

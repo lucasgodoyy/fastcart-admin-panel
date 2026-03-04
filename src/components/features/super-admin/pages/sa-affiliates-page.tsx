@@ -84,8 +84,8 @@ export function SaAffiliatesPage() {
       <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <SaStatCard title="Parceiros Ativos" value={String(stats?.activeAffiliates ?? 0)} icon={Users} color="accent" trend={{ value: 15, label: "" }} />
         <SaStatCard title="Receita por Afiliados" value={fmtMoney(stats?.totalRevenue ?? 0)} icon={DollarSign} color="success" trend={{ value: 22, label: "" }} />
-        <SaStatCard title="Comissões Totais" value={fmtMoney(stats?.totalCommissions ?? 0)} icon={TrendingUp} color="info" />
-        <SaStatCard title="Taxa de Conversão" value={`${(stats?.avgConversionRate ?? 0).toFixed(1)}%`} icon={Percent} color="warning" />
+        <SaStatCard title="Comissões Totais" value={fmtMoney(stats?.totalCommission ?? 0)} icon={TrendingUp} color="info" />
+        <SaStatCard title="Taxa de Conversão" value={`${(stats?.conversionRate ?? 0).toFixed(1)}%`} icon={Percent} color="warning" />
       </motion.div>
 
       <Tabs value={tab} onValueChange={setTab}>
@@ -110,7 +110,7 @@ export function SaAffiliatesPage() {
                   <TableRow className="border-[hsl(var(--sa-border-subtle))] hover:bg-transparent">
                     <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Parceiro</TableHead>
                     <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Código</TableHead>
-                    <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Tier</TableHead>
+                    <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Comissão</TableHead>
                     <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Cliques</TableHead>
                     <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Conversões</TableHead>
                     <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Comissão</TableHead>
@@ -134,12 +134,12 @@ export function SaAffiliatesPage() {
                       </TableCell>
                       <TableCell>
                         <span className="inline-flex items-center gap-1 rounded-lg bg-[hsl(var(--sa-bg))] px-2 py-1 text-[11px] font-mono font-bold text-[hsl(var(--sa-accent))]">
-                          {p.code} <Copy className="h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" />
+                          {p.referralCode} <Copy className="h-3 w-3 cursor-pointer opacity-50 hover:opacity-100" />
                         </span>
                       </TableCell>
-                      <TableCell className="text-[12px] font-semibold text-[hsl(var(--sa-text))]">{p.tier}</TableCell>
+                      <TableCell className="text-[12px] font-semibold text-[hsl(var(--sa-text))]">{p.commissionRate != null ? `${p.commissionRate}%` : '-'}</TableCell>
                       <TableCell className="text-[12px] text-[hsl(var(--sa-text-secondary))]">{p.totalClicks.toLocaleString("pt-BR")}</TableCell>
-                      <TableCell className="text-[12px] font-semibold text-[hsl(var(--sa-text))]">{p.totalConversions}</TableCell>
+                      <TableCell className="text-[12px] font-semibold text-[hsl(var(--sa-text))]">{p.totalOrders}</TableCell>
                       <TableCell className="text-[12px] font-bold text-[hsl(var(--sa-success))]">{fmtMoney(p.totalCommission)}</TableCell>
                       <TableCell><SaStatusBadge status={p.status} /></TableCell>
                     </motion.tr>
@@ -176,7 +176,7 @@ export function SaAffiliatesPage() {
                     >
                       <TableCell className="text-[12px] font-semibold text-[hsl(var(--sa-text))]">{c.affiliateName}</TableCell>
                       <TableCell className="text-[12px] text-[hsl(var(--sa-text-secondary))]">{c.storeName}</TableCell>
-                      <TableCell className="text-[12px] text-[hsl(var(--sa-text))]">{fmtMoney(c.saleAmount)}</TableCell>
+                      <TableCell className="text-[12px] text-[hsl(var(--sa-text))]">{fmtMoney(c.orderAmount)}</TableCell>
                       <TableCell className="text-[12px] font-bold text-[hsl(var(--sa-success))]">{fmtMoney(c.commissionAmount)}</TableCell>
                       <TableCell className="text-[12px] text-[hsl(var(--sa-text-muted))]">{new Date(c.createdAt).toLocaleDateString("pt-BR")}</TableCell>
                       <TableCell>
@@ -205,7 +205,7 @@ export function SaAffiliatesPage() {
                       <span className="text-[11px] font-bold text-[hsl(var(--sa-text-muted))] w-5">#{i + 1}</span>
                       <div>
                         <p className="text-[12px] font-semibold text-[hsl(var(--sa-text))]">{p.name}</p>
-                        <p className="text-[10px] text-[hsl(var(--sa-text-muted))] font-mono">{p.code}</p>
+                        <p className="text-[10px] text-[hsl(var(--sa-text-muted))] font-mono">{p.referralCode}</p>
                       </div>
                     </div>
                     <span className="text-[12px] font-bold text-[hsl(var(--sa-accent))]">{p.totalClicks.toLocaleString("pt-BR")} cliques</span>
@@ -217,16 +217,16 @@ export function SaAffiliatesPage() {
             <SaCard>
               <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Melhores Conversores</h3>
               <div className="space-y-3">
-                {[...partners].filter(p => p.totalClicks > 0).sort((a, b) => (b.totalConversions / b.totalClicks) - (a.totalConversions / a.totalClicks)).slice(0, 5).map((p, i) => (
+                {[...partners].filter(p => p.totalClicks > 0).sort((a, b) => (b.totalOrders / b.totalClicks) - (a.totalOrders / a.totalClicks)).slice(0, 5).map((p, i) => (
                   <motion.div key={p.id} variants={fadeInUp} className="flex items-center justify-between py-2 border-b border-[hsl(var(--sa-border-subtle))] last:border-0">
                     <div className="flex items-center gap-3">
                       <span className="text-[11px] font-bold text-[hsl(var(--sa-text-muted))] w-5">#{i + 1}</span>
                       <div>
                         <p className="text-[12px] font-semibold text-[hsl(var(--sa-text))]">{p.name}</p>
-                        <p className="text-[10px] text-[hsl(var(--sa-text-muted))]">{p.totalConversions} conversões</p>
+                        <p className="text-[10px] text-[hsl(var(--sa-text-muted))]">{p.totalOrders} conversões</p>
                       </div>
                     </div>
-                    <span className="text-[12px] font-bold text-[hsl(var(--sa-success))]">{((p.totalConversions / p.totalClicks) * 100).toFixed(1)}%</span>
+                    <span className="text-[12px] font-bold text-[hsl(var(--sa-success))]">{((p.totalOrders / p.totalClicks) * 100).toFixed(1)}%</span>
                   </motion.div>
                 ))}
               </div>

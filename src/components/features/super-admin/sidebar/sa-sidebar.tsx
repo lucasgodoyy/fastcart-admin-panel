@@ -234,7 +234,7 @@ export function SaSidebar({ collapsed = false }: { collapsed?: boolean }) {
             exit={{ opacity: 0 }}
           >
             <Link href="/super-admin" className="flex flex-col">
-              <span className="text-[14px] font-bold text-[hsl(var(--sa-text))]">FastCart</span>
+              <span className="text-[14px] font-bold text-[hsl(var(--sa-text))]">Lojaki</span>
               <span className="text-[10px] font-medium text-[hsl(var(--sa-text-muted))]">Super Admin</span>
             </Link>
           </motion.div>

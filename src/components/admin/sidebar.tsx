@@ -262,7 +262,7 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--sidebar-primary)] shrink-0">
           <Zap className="h-4.5 w-4.5 text-white" fill="white" />
         </div>
-        {!collapsed && <span className="text-[15px] font-bold tracking-tight text-[var(--sidebar-foreground)]">FastCart</span>}
+        {!collapsed && <span className="text-[15px] font-bold tracking-tight text-[var(--sidebar-foreground)]">Lojaki</span>}
       </div>
 
       {/* Navigation */}

@@ -133,7 +133,7 @@ export function SaSettingsPage() {
                 <Input value={platformName} onChange={e => setPlatformName(e.target.value)} placeholder={isLoading ? 'Carregando...' : ''} className="w-full sm:w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
               </SettingRow>
               <SettingRow label="URL Principal" desc="Domínio principal da plataforma">
-                <Input defaultValue="https://fastcart.com" className="w-full sm:w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
+                <Input defaultValue="https://lojaki.com" className="w-full sm:w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
               </SettingRow>
               <SettingRow label="Moeda Padrão" desc="Moeda utilizada nas transações">
                 <Input defaultValue="BRL (R$)" disabled className="w-full sm:w-32 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text-muted))] text-[12px] rounded-lg h-9" />
@@ -151,7 +151,7 @@ export function SaSettingsPage() {
                 <Input value={supportEmail} onChange={e => setSupportEmail(e.target.value)} placeholder={isLoading ? 'Carregando...' : ''} className="w-full sm:w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
               </SettingRow>
               <SettingRow label="E-mail do Remetente" desc="From address para e-mails automáticos">
-                <Input defaultValue="noreply@fastcart.com" className="w-full sm:w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
+                <Input defaultValue="noreply@lojaki.com" className="w-full sm:w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
               </SettingRow>
             </SettingSection>
           </motion.div>
@@ -187,7 +187,7 @@ export function SaSettingsPage() {
 
             <SettingSection icon={Globe} title="SEO & Meta">
               <SettingRow label="Título da Página" desc="Tag &lt;title&gt; principal">
-                <Input defaultValue="FastCart — Crie Sua Loja Virtual" className="w-full sm:w-80 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
+                <Input defaultValue="Lojaki — Crie Sua Loja Virtual" className="w-full sm:w-80 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
               </SettingRow>
               <SettingRow label="Meta Description">
                 <Input defaultValue="A plataforma completa para criação de lojas virtuais" className="w-full sm:w-80 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />

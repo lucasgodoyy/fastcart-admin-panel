@@ -215,26 +215,38 @@ export interface SubscriptionStats {
 // ── Affiliates ─────────────────────────────────────────────────
 export interface Affiliate {
   id: number;
-  name: string;
-  email: string;
-  code: string;
-  status: string;
   storeId: number | null;
   storeName: string | null;
+  userId: number | null;
+  name: string;
+  email: string;
+  phone: string | null;
+  document: string | null;
+  referralCode: string;
+  commissionRate: number;
+  status: string;
+  pixKey: string | null;
+  bankInfo: string | null;
+  notes: string | null;
   totalClicks: number;
-  totalConversions: number;
+  totalOrders: number;
   totalRevenue: number;
   totalCommission: number;
-  tier: string;
+  approvedAt: string | null;
   createdAt: string;
 }
 
 export interface AffiliateStats {
   totalAffiliates: number;
   activeAffiliates: number;
+  pendingAffiliates: number;
   totalRevenue: number;
-  totalCommissions: number;
-  avgConversionRate: number;
+  totalCommission: number;
+  pendingCommission: number;
+  paidCommission: number;
+  totalClicks: number;
+  totalConversions: number;
+  conversionRate: number;
 }
 
 export interface AffiliateConversion {
@@ -243,9 +255,14 @@ export interface AffiliateConversion {
   affiliateName: string;
   storeId: number;
   storeName: string;
-  saleAmount: number;
+  orderId: number | null;
+  orderAmount: number;
+  commissionRate: number;
   commissionAmount: number;
   status: string;
+  approvedAt: string | null;
+  rejectedAt: string | null;
+  rejectionReason: string | null;
   createdAt: string;
 }
 
@@ -253,7 +270,12 @@ export interface AffiliatePayout {
   id: number;
   affiliateId: number;
   affiliateName: string;
+  storeId: number;
+  storeName: string;
   amount: number;
+  method: string;
+  reference: string | null;
+  notes: string | null;
   status: string;
   paidAt: string | null;
   createdAt: string;

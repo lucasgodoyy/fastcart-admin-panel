@@ -5,10 +5,10 @@ import { Globe, ShieldCheck, Link2 } from "lucide-react";
 import { SaPageHeader, SaCard, SaStatusBadge, fadeInUp, staggerContainer } from "../ui/sa-components";
 
 const domains = [
-  { host: "fastcart.com", ssl: "VALID", status: "ACTIVE" },
-  { host: "admin.fastcart.com", ssl: "VALID", status: "ACTIVE" },
-  { host: "api.fastcart.com", ssl: "VALID", status: "ACTIVE" },
-  { host: "staging.fastcart.com", ssl: "PENDING", status: "CONFIG" },
+  { host: "lojaki.com", ssl: "VALID", status: "ACTIVE" },
+  { host: "admin.lojaki.com", ssl: "VALID", status: "ACTIVE" },
+  { host: "api.lojaki.com", ssl: "VALID", status: "ACTIVE" },
+  { host: "staging.lojaki.com", ssl: "PENDING", status: "CONFIG" },
 ];
 
 const map = {

@@ -39,6 +39,10 @@ export const authService = {
     };
   },
 
+  register: async (payload: { email: string; password: string; storeName: string }): Promise<void> => {
+    await apiClient.post('/users/register', payload);
+  },
+
   resetPassword: async (payload: ResetPasswordRequest): Promise<void> => {
     await apiClient.post('/auth/reset-password', payload);
   },

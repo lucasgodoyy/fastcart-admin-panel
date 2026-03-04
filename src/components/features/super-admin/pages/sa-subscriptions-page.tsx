@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   CreditCard,
   Crown,
@@ -12,9 +12,11 @@ import {
   TrendingUp,
   Users,
   Check,
-  ArrowUpRight,
   DollarSign,
-  Calendar,
+  Plus,
+  Pencil,
+  Trash2,
+  Power,
 } from "lucide-react";
 import {
   SaPageHeader,
@@ -26,6 +28,17 @@ import {
   fadeInUp,
 } from "../ui/sa-components";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -36,7 +49,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { superAdminService } from "@/services/super-admin";
-import type { SubscriptionPlan, StoreSubscription, SubscriptionStats } from "@/types/super-admin";
+import type { SubscriptionPlan, StoreSubscription, SubscriptionStats, CreateOrUpdatePlanRequest } from "@/types/super-admin";
 
 const planIcons: Record<string, React.ElementType> = {
   free: Sparkles, basic: Rocket, pro: Crown, business: Gem,
@@ -51,23 +64,50 @@ const planGradients: Record<string, string> = {
   business: "from-[hsl(var(--sa-success-subtle))] to-[hsl(var(--sa-surface))]",
 };
 
+const emptyPlanForm: CreateOrUpdatePlanRequest = {
+  name: "", slug: "", monthlyPrice: 0, annualPrice: null,
+  maxProducts: 100, maxStores: 1, maxStaff: 2, featuresJson: "[]",
+  stripePriceIdMonthly: null, stripePriceIdAnnual: null, active: true,
+};
+
 export function SaSubscriptionsPage() {
   const [tab, setTab] = useState("plans");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
+  const [formData, setFormData] = useState<CreateOrUpdatePlanRequest>(emptyPlanForm);
+  const [featuresText, setFeaturesText] = useState("");
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const queryClient = useQueryClient();
 
   const { data: plansData } = useQuery({
     queryKey: ["sa-plans"],
     queryFn: () => superAdminService.listPlans({ size: 50 }),
   });
-
   const { data: subsData } = useQuery({
     queryKey: ["sa-subscriptions"],
     queryFn: () => superAdminService.listSubscriptions({ size: 50 }),
     enabled: tab === "subscribers" || tab === "billing",
   });
-
   const { data: stats } = useQuery({
     queryKey: ["sa-subscription-stats"],
     queryFn: superAdminService.getSubscriptionStats,
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (body: CreateOrUpdatePlanRequest) => superAdminService.createPlan(body),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["sa-plans"] }); closeDialog(); },
+  });
+  const updateMutation = useMutation({
+    mutationFn: ({ id, body }: { id: number; body: CreateOrUpdatePlanRequest }) => superAdminService.updatePlan(id, body),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["sa-plans"] }); closeDialog(); },
+  });
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => superAdminService.deletePlan(id),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["sa-plans"] }); setDeleteConfirmId(null); },
+  });
+  const toggleMutation = useMutation({
+    mutationFn: (id: number) => superAdminService.togglePlanActive(id),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["sa-plans"] }); },
   });
 
   const plans = plansData?.content ?? [];
@@ -75,15 +115,48 @@ export function SaSubscriptionsPage() {
   const fmt = (n?: number) => (n ?? 0).toLocaleString("pt-BR");
   const fmtMoney = (n?: number) => `R$ ${(n ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
+  function openCreate() {
+    setEditingPlan(null);
+    setFormData({ ...emptyPlanForm });
+    setFeaturesText("");
+    setDialogOpen(true);
+  }
+  function openEdit(plan: SubscriptionPlan) {
+    setEditingPlan(plan);
+    let features: string[] = [];
+    try { features = JSON.parse(plan.featuresJson || "[]"); } catch { features = []; }
+    setFormData({
+      name: plan.name, slug: plan.slug, monthlyPrice: plan.monthlyPrice,
+      annualPrice: plan.annualPrice, maxProducts: plan.maxProducts,
+      maxStores: plan.maxStores, maxStaff: plan.maxStaff, featuresJson: plan.featuresJson,
+      stripePriceIdMonthly: plan.stripePriceIdMonthly, stripePriceIdAnnual: plan.stripePriceIdAnnual,
+      active: plan.active,
+    });
+    setFeaturesText(features.join("\n"));
+    setDialogOpen(true);
+  }
+  function closeDialog() { setDialogOpen(false); setEditingPlan(null); setFormData({ ...emptyPlanForm }); setFeaturesText(""); }
+  function handleSave() {
+    const features = featuresText.split("\n").map(f => f.trim()).filter(Boolean);
+    const body: CreateOrUpdatePlanRequest = { ...formData, featuresJson: JSON.stringify(features) };
+    if (editingPlan) updateMutation.mutate({ id: editingPlan.id, body }); else createMutation.mutate(body);
+  }
+  const isSaving = createMutation.isPending || updateMutation.isPending;
+
   return (
     <div className="space-y-8">
       <SaPageHeader
         title="Assinaturas & Planos"
         description="Gerencie planos de assinatura e faturamento da plataforma"
         actions={
-          <Button className="bg-[hsl(var(--sa-accent))] hover:bg-[hsl(var(--sa-accent-hover))] text-white rounded-xl gap-2">
-            <CreditCard className="h-4 w-4" /> Configurar Stripe
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={openCreate} className="bg-[hsl(var(--sa-success))] hover:bg-[hsl(var(--sa-success))]/90 text-white rounded-xl gap-2">
+              <Plus className="h-4 w-4" /> Novo Plano
+            </Button>
+            <Button className="bg-[hsl(var(--sa-accent))] hover:bg-[hsl(var(--sa-accent-hover))] text-white rounded-xl gap-2">
+              <CreditCard className="h-4 w-4" /> Configurar Stripe
+            </Button>
+          </div>
         }
       />
 
@@ -148,9 +221,17 @@ export function SaSubscriptionsPage() {
                   </ul>
                   <div className="flex items-center justify-between pt-4 border-t border-[hsl(var(--sa-border-subtle))]">
                     <span className="text-[11px] text-[hsl(var(--sa-text-muted))]">{plan.active ? "Ativo" : "Inativo"}</span>
-                    <Button variant="ghost" size="sm" className="text-[11px] text-[hsl(var(--sa-accent))] hover:text-[hsl(var(--sa-accent-hover))] gap-1 p-0 h-auto">
-                      Editar <ArrowUpRight className="h-3 w-3" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="sm" className="text-[11px] text-[hsl(var(--sa-text-muted))] hover:text-[hsl(var(--sa-warning))] p-1 h-auto" title={plan.active ? "Desativar" : "Ativar"} onClick={() => toggleMutation.mutate(plan.id)}>
+                        <Power className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="text-[11px] text-[hsl(var(--sa-accent))] hover:text-[hsl(var(--sa-accent-hover))] p-1 h-auto" onClick={() => openEdit(plan)}>
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="text-[11px] text-red-500 hover:text-red-400 p-1 h-auto" onClick={() => setDeleteConfirmId(plan.id)}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </div>
                 </motion.div>
               );
@@ -251,6 +332,94 @@ export function SaSubscriptionsPage() {
           </motion.div>
         </TabsContent>
       </Tabs>
+
+      {/* ── Create / Edit Plan Dialog ──────────────────────────────── */}
+      <Dialog open={dialogOpen} onOpenChange={(open) => !open && closeDialog()}>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingPlan ? "Editar Plano" : "Criar Novo Plano"}</DialogTitle>
+            <DialogDescription>
+              {editingPlan ? "Atualize as informações do plano de assinatura." : "Preencha os dados para criar um novo plano de assinatura."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="plan-name">Nome</Label>
+                <Input id="plan-name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Ex: Pro" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="plan-slug">Slug</Label>
+                <Input id="plan-slug" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} placeholder="Ex: pro" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="plan-monthly">Preço Mensal (R$)</Label>
+                <Input id="plan-monthly" type="number" step="0.01" value={formData.monthlyPrice} onChange={(e) => setFormData({ ...formData, monthlyPrice: parseFloat(e.target.value) || 0 })} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="plan-annual">Preço Anual (R$)</Label>
+                <Input id="plan-annual" type="number" step="0.01" value={formData.annualPrice ?? ""} onChange={(e) => setFormData({ ...formData, annualPrice: e.target.value ? parseFloat(e.target.value) : null })} placeholder="Opcional" />
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="plan-products">Máx. Produtos</Label>
+                <Input id="plan-products" type="number" value={formData.maxProducts} onChange={(e) => setFormData({ ...formData, maxProducts: parseInt(e.target.value) || 0 })} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="plan-stores">Máx. Lojas</Label>
+                <Input id="plan-stores" type="number" value={formData.maxStores} onChange={(e) => setFormData({ ...formData, maxStores: parseInt(e.target.value) || 0 })} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="plan-staff">Máx. Staff</Label>
+                <Input id="plan-staff" type="number" value={formData.maxStaff} onChange={(e) => setFormData({ ...formData, maxStaff: parseInt(e.target.value) || 0 })} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="plan-stripe-monthly">Stripe Price ID (Mensal)</Label>
+                <Input id="plan-stripe-monthly" value={formData.stripePriceIdMonthly ?? ""} onChange={(e) => setFormData({ ...formData, stripePriceIdMonthly: e.target.value || null })} placeholder="price_..." />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="plan-stripe-annual">Stripe Price ID (Anual)</Label>
+                <Input id="plan-stripe-annual" value={formData.stripePriceIdAnnual ?? ""} onChange={(e) => setFormData({ ...formData, stripePriceIdAnnual: e.target.value || null })} placeholder="price_..." />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="plan-features">Features (uma por linha)</Label>
+              <textarea id="plan-features" className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" value={featuresText} onChange={(e) => setFeaturesText(e.target.value)} placeholder={"Até 100 produtos\nSuporte por email\nDomínio customizado"} />
+            </div>
+            <div className="flex items-center gap-3">
+              <Switch id="plan-active" checked={formData.active ?? true} onCheckedChange={(checked) => setFormData({ ...formData, active: checked })} />
+              <Label htmlFor="plan-active">Plano ativo</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={closeDialog} disabled={isSaving}>Cancelar</Button>
+            <Button onClick={handleSave} disabled={isSaving || !formData.name || !formData.slug}>
+              {isSaving ? "Salvando..." : editingPlan ? "Salvar Alterações" : "Criar Plano"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Delete Confirmation Dialog ─────────────────────────────── */}
+      <Dialog open={deleteConfirmId !== null} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Excluir Plano</DialogTitle>
+            <DialogDescription>Tem certeza que deseja excluir este plano? Esta ação não pode ser desfeita.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteConfirmId(null)}>Cancelar</Button>
+            <Button variant="destructive" onClick={() => deleteConfirmId && deleteMutation.mutate(deleteConfirmId)} disabled={deleteMutation.isPending}>
+              {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

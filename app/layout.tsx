@@ -18,10 +18,10 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: isEnglish ? "FastCart - Admin Panel" : "FastCart - Painel Administrativo",
+  title: isEnglish ? "Lojaki - Admin Panel" : "Lojaki - Painel Administrativo",
   description: isEnglish
-    ? "FastCart e-commerce admin panel"
-    : "Painel administrativo de e-commerce da FastCart",
+    ? "Lojaki e-commerce admin panel"
+    : "Painel administrativo de e-commerce da Lojaki",
 };
 
 export default function RootLayout({

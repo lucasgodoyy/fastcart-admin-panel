@@ -92,6 +92,33 @@ export interface FooterSection {
   textColor: string;
 }
 
+// ── Colors ─────────────────────────────────────────────────
+export interface ThemeColors {
+  primary: string;
+  secondary: string;
+  accent: string;
+  background: string;
+  text: string;
+}
+
+// ── Typography ────────────────────────────────────────────
+export type FontFamily = 'inter' | 'georgia' | 'system' | 'poppins' | 'playfair';
+
+export interface ThemeTypography {
+  headingFont: FontFamily;
+  bodyFont: FontFamily;
+  baseFontSize: 'small' | 'medium' | 'large';
+}
+
+// ── Design Options ────────────────────────────────────────
+export interface ThemeDesign {
+  logoUrl: string;
+  faviconUrl: string;
+  borderRadius: 'none' | 'small' | 'medium' | 'large';
+  buttonStyle: 'filled' | 'outline' | 'pill';
+  containerWidth: 'narrow' | 'default' | 'wide';
+}
+
 // ── Full Theme Sections Config ────────────────────────────
 export interface ThemeSections {
   header: HeaderSection;
@@ -102,6 +129,9 @@ export interface ThemeSections {
   cart: CartSection;
   footer: FooterSection;
   customCss: string;
+  colors: ThemeColors;
+  typography: ThemeTypography;
+  design: ThemeDesign;
 }
 
 // ── API Response/Request ──────────────────────────────────
@@ -124,7 +154,7 @@ export interface UpdateThemeSectionsRequest {
 }
 
 // ── Section metadata for the sidebar ──────────────────────
-export type SectionKey = keyof Omit<ThemeSections, 'customCss'>;
+export type SectionKey = keyof Omit<ThemeSections, 'customCss' | 'colors' | 'typography' | 'design'>;
 
 export interface SectionMeta {
   key: SectionKey | 'customCss';
@@ -144,6 +174,28 @@ export const SECTION_REGISTRY: SectionMeta[] = [
 ];
 
 // ── Default theme sections ────────────────────────────────
+export const DEFAULT_COLORS: ThemeColors = {
+  primary: '#000000',
+  secondary: '#4b5563',
+  accent: '#ef4444',
+  background: '#ffffff',
+  text: '#111111',
+};
+
+export const DEFAULT_TYPOGRAPHY: ThemeTypography = {
+  headingFont: 'inter',
+  bodyFont: 'inter',
+  baseFontSize: 'medium',
+};
+
+export const DEFAULT_DESIGN: ThemeDesign = {
+  logoUrl: '',
+  faviconUrl: '',
+  borderRadius: 'medium',
+  buttonStyle: 'filled',
+  containerWidth: 'default',
+};
+
 export const DEFAULT_THEME_SECTIONS: ThemeSections = {
   header: {
     enabled: true,
@@ -206,6 +258,9 @@ export const DEFAULT_THEME_SECTIONS: ThemeSections = {
     textColor: '#FFFFFF',
   },
   customCss: '',
+  colors: { ...DEFAULT_COLORS },
+  typography: { ...DEFAULT_TYPOGRAPHY },
+  design: { ...DEFAULT_DESIGN },
 };
 
 // ── Template-specific presets ─────────────────────────────
@@ -273,6 +328,9 @@ export const PATAGONIA_THEME_SECTIONS: ThemeSections = {
     textColor: '#f5f5f5',
   },
   customCss: '',
+  colors: { primary: '#1a1a2e', secondary: '#16213e', accent: '#e94560', background: '#fafafa', text: '#1a1a2e' },
+  typography: { headingFont: 'playfair', bodyFont: 'inter', baseFontSize: 'medium' },
+  design: { logoUrl: '', faviconUrl: '', borderRadius: 'small', buttonStyle: 'outline', containerWidth: 'narrow' },
 };
 
 /** Aurora — tech / electronics modern layout */
@@ -338,6 +396,9 @@ export const AURORA_THEME_SECTIONS: ThemeSections = {
     textColor: '#e8e8ed',
   },
   customCss: '',
+  colors: { primary: '#ff4d4d', secondary: '#0f0f13', accent: '#fbbf24', background: '#ffffff', text: '#0f0f13' },
+  typography: { headingFont: 'inter', bodyFont: 'inter', baseFontSize: 'medium' },
+  design: { logoUrl: '', faviconUrl: '', borderRadius: 'medium', buttonStyle: 'filled', containerWidth: 'wide' },
 };
 
 /** Glamour — beauty / cosmetics luxury layout (Kylie Cosmetics inspired) */
@@ -403,6 +464,9 @@ export const GLAMOUR_THEME_SECTIONS: ThemeSections = {
     textColor: '#f5e6e0',
   },
   customCss: '',
+  colors: { primary: '#c9184a', secondary: '#1a1a1a', accent: '#f5e6e0', background: '#fffbf7', text: '#1a1a1a' },
+  typography: { headingFont: 'playfair', bodyFont: 'poppins', baseFontSize: 'medium' },
+  design: { logoUrl: '', faviconUrl: '', borderRadius: 'large', buttonStyle: 'pill', containerWidth: 'default' },
 };
 
 /** Map template ID → default sections preset */

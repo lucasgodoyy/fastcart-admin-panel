@@ -288,4 +288,114 @@
 .super-admin-theme ::-webkit-scrollbar { width: 6px; height: 6px; }
 .super-admin-theme ::-webkit-scrollbar-track { background: hsl(var(--sa-bg)); }
 .super-admin-theme ::-webkit-scrollbar-thumb { background: hsl(var(--sa-border)); border-radius: 3px; }
+
+/* ══════════════════════════════════════════════════════════════
+   ██  THEME 2 — OCEAN BLUE  (teal/cyan accent on deep navy)
+   ══════════════════════════════════════════════════════════════ */
+.sa-theme-ocean {
+  --sa-bg: 222 47% 6%;
+  --sa-bg-secondary: 222 42% 9%;
+  --sa-surface: 222 38% 11%;
+  --sa-surface-hover: 222 35% 15%;
+  --sa-surface-active: 222 32% 19%;
+  --sa-border: 222 30% 17%;
+  --sa-border-subtle: 222 30% 13%;
+  --sa-text: 0 0% 96%;
+  --sa-text-secondary: 220 15% 58%;
+  --sa-text-muted: 220 12% 40%;
+  --sa-accent: 199 89% 48%;
+  --sa-accent-hover: 199 89% 55%;
+  --sa-accent-subtle: 199 89% 12%;
+  --sa-success: 142 76% 46%;
+  --sa-success-subtle: 142 76% 11%;
+  --sa-warning: 38 92% 50%;
+  --sa-warning-subtle: 38 92% 11%;
+  --sa-danger: 0 84% 60%;
+  --sa-danger-subtle: 0 84% 11%;
+  --sa-info: 262 83% 58%;
+  --sa-info-subtle: 262 83% 12%;
+  --sa-gradient-start: 199 89% 48%;
+  --sa-gradient-end: 217 91% 60%;
+  --sa-sidebar: 222 47% 7%;
+  --sa-header: 222 44% 8%;
+
+  --background: var(--sa-bg);
+  --foreground: var(--sa-text);
+  --card: var(--sa-surface);
+  --card-foreground: var(--sa-text);
+  --popover: var(--sa-surface);
+  --popover-foreground: var(--sa-text);
+  --primary: var(--sa-accent);
+  --primary-foreground: 0 0% 100%;
+  --secondary: var(--sa-surface-hover);
+  --secondary-foreground: var(--sa-text);
+  --muted: var(--sa-surface);
+  --muted-foreground: var(--sa-text-secondary);
+  --accent: var(--sa-surface-hover);
+  --accent-foreground: var(--sa-text);
+  --destructive: var(--sa-danger);
+  --destructive-foreground: 0 0% 100%;
+  --border: var(--sa-border);
+  --input: var(--sa-border);
+  --ring: var(--sa-accent);
+}
+
+.sa-theme-ocean ::-webkit-scrollbar { width: 6px; height: 6px; }
+.sa-theme-ocean ::-webkit-scrollbar-track { background: hsl(var(--sa-bg)); }
+.sa-theme-ocean ::-webkit-scrollbar-thumb { background: hsl(var(--sa-border)); border-radius: 3px; }
+
+/* ══════════════════════════════════════════════════════════════
+   ██  THEME 3 — MIDNIGHT FOREST  (emerald accent on near-black)
+   ══════════════════════════════════════════════════════════════ */
+.sa-theme-forest {
+  --sa-bg: 160 20% 4%;
+  --sa-bg-secondary: 160 16% 7%;
+  --sa-surface: 160 14% 9%;
+  --sa-surface-hover: 160 12% 13%;
+  --sa-surface-active: 160 11% 17%;
+  --sa-border: 160 10% 14%;
+  --sa-border-subtle: 160 10% 10%;
+  --sa-text: 0 0% 95%;
+  --sa-text-secondary: 155 10% 58%;
+  --sa-text-muted: 155 8% 40%;
+  --sa-accent: 142 76% 46%;
+  --sa-accent-hover: 142 76% 52%;
+  --sa-accent-subtle: 142 76% 10%;
+  --sa-success: 158 64% 45%;
+  --sa-success-subtle: 158 64% 10%;
+  --sa-warning: 38 92% 50%;
+  --sa-warning-subtle: 38 92% 10%;
+  --sa-danger: 0 84% 60%;
+  --sa-danger-subtle: 0 84% 10%;
+  --sa-info: 199 89% 48%;
+  --sa-info-subtle: 199 89% 10%;
+  --sa-gradient-start: 142 76% 46%;
+  --sa-gradient-end: 158 64% 45%;
+  --sa-sidebar: 160 20% 5%;
+  --sa-header: 160 18% 6%;
+
+  --background: var(--sa-bg);
+  --foreground: var(--sa-text);
+  --card: var(--sa-surface);
+  --card-foreground: var(--sa-text);
+  --popover: var(--sa-surface);
+  --popover-foreground: var(--sa-text);
+  --primary: var(--sa-accent);
+  --primary-foreground: 0 0% 100%;
+  --secondary: var(--sa-surface-hover);
+  --secondary-foreground: var(--sa-text);
+  --muted: var(--sa-surface);
+  --muted-foreground: var(--sa-text-secondary);
+  --accent: var(--sa-surface-hover);
+  --accent-foreground: var(--sa-text);
+  --destructive: var(--sa-danger);
+  --destructive-foreground: 0 0% 100%;
+  --border: var(--sa-border);
+  --input: var(--sa-border);
+  --ring: var(--sa-accent);
+}
+
+.sa-theme-forest ::-webkit-scrollbar { width: 6px; height: 6px; }
+.sa-theme-forest ::-webkit-scrollbar-track { background: hsl(var(--sa-bg)); }
+.sa-theme-forest ::-webkit-scrollbar-thumb { background: hsl(var(--sa-border)); border-radius: 3px; }
 .super-admin-theme ::-webkit-scrollbar-thumb:hover { background: hsl(var(--sa-text-muted)); }

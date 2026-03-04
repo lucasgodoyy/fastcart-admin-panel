@@ -38,23 +38,47 @@ export function SaShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [themeClass, setThemeClass] = useState("super-admin-theme");
 
   // Close mobile sidebar on route change
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
 
-  // Apply super-admin-theme to <body> so Radix UI portals
-  // (DropdownMenu, Select, etc.) rendered outside this tree inherit SA vars
+  // Apply theme to <body> so Radix UI portals inherit SA vars
+  const applyTheme = (themeId: string) => {
+    const cls =
+      themeId === "ocean" ? "sa-theme-ocean" :
+      themeId === "forest" ? "sa-theme-forest" :
+      "super-admin-theme";
+    setThemeClass(cls);
+    document.body.className = document.body.className
+      .replace(/\bsuper-admin-theme\b|\bsa-theme-\w+\b/g, "")
+      .trim() + " " + cls;
+  };
+
   useEffect(() => {
-    document.body.classList.add("super-admin-theme");
+    const saved = typeof window !== "undefined"
+      ? (localStorage.getItem("sa-admin-theme") || "dark-neon")
+      : "dark-neon";
+    applyTheme(saved);
     return () => {
-      document.body.classList.remove("super-admin-theme");
+      document.body.className = document.body.className
+        .replace(/\bsuper-admin-theme\b|\bsa-theme-\w+\b/g, "")
+        .trim();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: Event) => applyTheme((e as CustomEvent<string>).detail);
+    window.addEventListener("sa-theme-change", handler);
+    return () => window.removeEventListener("sa-theme-change", handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <div className="super-admin-theme min-h-screen bg-[hsl(var(--sa-bg))] text-[hsl(var(--sa-text))]">
+    <div className={`${themeClass} min-h-screen bg-[hsl(var(--sa-bg))] text-[hsl(var(--sa-text))]`}>
       {/* Ambient background effects */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-[40%] -right-[20%] h-[80vh] w-[60vw] rounded-full bg-[hsl(var(--sa-accent))] opacity-[0.02] blur-[120px]" />
@@ -163,7 +187,7 @@ export function SaShell({ children }: { children: React.ReactNode }) {
               >
                 <DropdownMenuLabel className="text-[hsl(var(--sa-text-secondary))]">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium text-[hsl(var(--sa-text))]">{user?.email || "admin@fastcart.com"}</p>
+                    <p className="text-sm font-medium text-[hsl(var(--sa-text))]">{user?.email || "admin@lojaki.com"}</p>
                     <p className="text-xs text-[hsl(var(--sa-text-muted))]">SUPER_ADMIN</p>
                   </div>
                 </DropdownMenuLabel>

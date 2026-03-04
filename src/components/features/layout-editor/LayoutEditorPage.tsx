@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -8,6 +8,7 @@ import {
   X, Eye, HelpCircle, ExternalLink, ChevronRight,
   ArrowUp, Home, LayoutGrid, ScanSearch, ShoppingCart,
   ArrowDown, Code2, Paintbrush, Type, Settings2, Image,
+  Monitor, Tablet, Smartphone, RefreshCw, Check,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,8 +35,12 @@ import type {
   ProductDetailSection,
   CartSection,
   FooterSection,
+  ThemeColors,
+  ThemeTypography,
+  ThemeDesign,
+  FontFamily,
 } from '@/types/theme';
-import { DEFAULT_THEME_SECTIONS, SECTION_REGISTRY } from '@/types/theme';
+import { DEFAULT_THEME_SECTIONS, SECTION_REGISTRY, DEFAULT_COLORS, DEFAULT_TYPOGRAPHY, DEFAULT_DESIGN } from '@/types/theme';
 
 /* ──────────────────────────────────────────────────────────
  * Icon resolver — maps section keys to Lucide components
@@ -84,7 +89,11 @@ export default function LayoutEditorPage() {
 
   const mutation = useMutation({
     mutationFn: (sections: ThemeSections) =>
-      themeService.updateThemeSections({ themeSectionsJson: JSON.stringify(sections) }),
+      themeService.updateThemeSections({
+        themeSectionsJson: JSON.stringify(sections),
+        logoUrl: sections.design?.logoUrl || undefined,
+        faviconUrl: sections.design?.faviconUrl || undefined,
+      }),
     onSuccess: (resp) => {
       queryClient.setQueryData(QUERY_KEY, resp);
       toast.success('Alterações publicadas');
@@ -96,11 +105,26 @@ export default function LayoutEditorPage() {
   const [sections, setSections] = useState<ThemeSections>(DEFAULT_THEME_SECTIONS);
   const [activePanel, setActivePanel] = useState<SectionKey | 'customCss' | 'colors' | 'fonts' | 'settings' | null>(null);
   const [logoUrl, setLogoUrl] = useState('');
+  const [deviceView, setDeviceView] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [iframeKey, setIframeKey] = useState(0);
 
   // Hydrate from API
   useEffect(() => {
     if (data) {
-      setSections(parseThemeSections(data.themeSectionsJson));
+      const parsed = parseThemeSections(data.themeSectionsJson);
+      // Ensure new fields have defaults if missing from API
+      setSections({
+        ...parsed,
+        colors: parsed.colors || { ...DEFAULT_COLORS },
+        typography: parsed.typography || { ...DEFAULT_TYPOGRAPHY },
+        design: {
+          ...DEFAULT_DESIGN,
+          ...(parsed.design || {}),
+          logoUrl: parsed.design?.logoUrl || data.logoUrl || '',
+          faviconUrl: parsed.design?.faviconUrl || data.faviconUrl || '',
+        },
+      });
       setLogoUrl(data.logoUrl || '');
     }
   }, [data]);
@@ -112,6 +136,13 @@ export default function LayoutEditorPage() {
 
   // ── Publish action ──────────────────────────────────────
   const handlePublish = () => mutation.mutate(sections);
+
+  // Refresh preview after publish
+  useEffect(() => {
+    if (mutation.isSuccess) {
+      setIframeKey((k) => k + 1);
+    }
+  }, [mutation.isSuccess]);
 
   // ── Storefront preview URL ──────────────────────────────
   const previewUrl = useMemo(() => {
@@ -147,6 +178,29 @@ export default function LayoutEditorPage() {
           <span className="text-sm font-medium">Editar layout</span>
         </div>
         <div className="flex items-center gap-2">
+          <div className="flex items-center rounded-lg border bg-muted/50 p-0.5">
+            <button
+              onClick={() => setDeviceView('desktop')}
+              className={`rounded-md p-1.5 transition-colors ${deviceView === 'desktop' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              title="Desktop"
+            >
+              <Monitor className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setDeviceView('tablet')}
+              className={`rounded-md p-1.5 transition-colors ${deviceView === 'tablet' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              title="Tablet"
+            >
+              <Tablet className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setDeviceView('mobile')}
+              className={`rounded-md p-1.5 transition-colors ${deviceView === 'mobile' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              title="Mobile"
+            >
+              <Smartphone className="h-4 w-4" />
+            </button>
+          </div>
           <span className="text-xs text-emerald-600 font-medium">● Layout atual</span>
         </div>
         <div className="flex items-center gap-2">
@@ -196,9 +250,17 @@ export default function LayoutEditorPage() {
         </aside>
 
         {/* ── Live preview iframe ──────────────────────── */}
-        <main className="flex-1 bg-zinc-100 p-4 overflow-hidden">
-          <div className="mx-auto h-full w-full max-w-[1200px] overflow-hidden rounded-lg border bg-white shadow-sm">
+        <main className="flex-1 bg-zinc-100 dark:bg-zinc-900 p-4 overflow-hidden flex items-start justify-center">
+          <div
+            className="h-full overflow-hidden rounded-lg border bg-white shadow-sm transition-all duration-300 ease-in-out"
+            style={{
+              width: deviceView === 'desktop' ? '100%' : deviceView === 'tablet' ? '768px' : '375px',
+              maxWidth: '100%',
+            }}
+          >
             <iframe
+              key={iframeKey}
+              ref={iframeRef}
               src={previewUrl}
               className="h-full w-full border-0"
               title="Preview da loja"
@@ -324,9 +386,9 @@ function SidebarPanel({
         {panelKey === 'cart' && <CartEditor value={sections.cart} onChange={(v) => onUpdate('cart', v)} />}
         {panelKey === 'footer' && <FooterEditor value={sections.footer} onChange={(v) => onUpdate('footer', v)} />}
         {panelKey === 'customCss' && <CustomCssEditor value={sections.customCss} onChange={(v) => onUpdate('customCss', v)} />}
-        {panelKey === 'colors' && <ColorsEditor />}
-        {panelKey === 'fonts' && <FontsEditor />}
-        {panelKey === 'settings' && <DesignOptionsEditor />}
+        {panelKey === 'colors' && <ColorsEditor value={sections.colors || { ...DEFAULT_COLORS }} onChange={(v) => onUpdate('colors', v)} />}
+        {panelKey === 'fonts' && <FontsEditor value={sections.typography || { ...DEFAULT_TYPOGRAPHY }} onChange={(v) => onUpdate('typography', v)} />}
+        {panelKey === 'settings' && <DesignOptionsEditor value={sections.design || { ...DEFAULT_DESIGN }} onChange={(v) => onUpdate('design', v)} />}
       </div>
     </div>
   );
@@ -685,26 +747,66 @@ function CustomCssEditor({ value, onChange }: { value: string; onChange: (v: str
 }
 
 /* ── Colors Editor ─────────────────────────────────────── */
-function ColorsEditor() {
+function ColorsEditor({ value, onChange }: { value: ThemeColors; onChange: (v: ThemeColors) => void }) {
+  const set = <K extends keyof ThemeColors>(key: K, val: ThemeColors[K]) =>
+    onChange({ ...value, [key]: val });
+
+  const colorFields: { key: keyof ThemeColors; label: string; description: string }[] = [
+    { key: 'primary', label: 'Cor primária', description: 'Botões, links e destaques' },
+    { key: 'secondary', label: 'Cor secundária', description: 'Elementos de apoio' },
+    { key: 'accent', label: 'Cor de destaque', description: 'Promoções e badges' },
+    { key: 'background', label: 'Fundo da página', description: 'Cor de fundo geral' },
+    { key: 'text', label: 'Cor do texto', description: 'Texto principal da loja' },
+  ];
+
   return (
     <div className="space-y-4">
       <p className="text-xs text-muted-foreground">
-        As cores da loja são gerenciadas nas configurações de aparência do canal de vendas.
+        Defina as cores que compõem a identidade visual da sua loja.
       </p>
-      <div className="space-y-3">
-        {[
-          { label: 'Preto clássico', value: '0 0% 9%' },
-          { label: 'Roxo editorial', value: '248 45% 38%' },
-          { label: 'Verde essentials', value: '165 85% 32%' },
-          { label: 'Azul clean', value: '196 85% 36%' },
-        ].map((c) => (
-          <div key={c.value} className="flex items-center gap-3 rounded-md border p-3">
-            <div className="h-8 w-8 rounded-full border" style={{ backgroundColor: `hsl(${c.value})` }} />
-            <div>
-              <p className="text-sm font-medium">{c.label}</p>
-              <p className="text-xs text-muted-foreground">HSL({c.value})</p>
-            </div>
+      {colorFields.map(({ key, label, description }) => (
+        <div key={key} className="space-y-1.5">
+          <Label className="text-xs">{label}</Label>
+          <div className="flex items-center gap-2">
+            <input
+              type="color"
+              value={value[key]}
+              onChange={(e) => set(key, e.target.value)}
+              className="h-9 w-9 rounded-md border cursor-pointer shrink-0"
+            />
+            <Input
+              value={value[key]}
+              onChange={(e) => set(key, e.target.value)}
+              className="flex-1 font-mono text-xs"
+              placeholder="#000000"
+            />
           </div>
+          <p className="text-[11px] text-muted-foreground">{description}</p>
+        </div>
+      ))}
+
+      {/* Quick palette presets */}
+      <div className="border-t pt-4 space-y-2">
+        <p className="text-xs font-medium uppercase text-muted-foreground">Paletas rápidas</p>
+        {[
+          { name: 'Preto clássico', colors: { primary: '#000000', secondary: '#4b5563', accent: '#ef4444', background: '#ffffff', text: '#111111' } },
+          { name: 'Roxo editorial', colors: { primary: '#7c3aed', secondary: '#4c1d95', accent: '#f59e0b', background: '#faf5ff', text: '#1e1b4b' } },
+          { name: 'Verde essentials', colors: { primary: '#059669', secondary: '#047857', accent: '#f97316', background: '#f0fdf4', text: '#064e3b' } },
+          { name: 'Azul clean', colors: { primary: '#2563eb', secondary: '#1e40af', accent: '#f43f5e', background: '#eff6ff', text: '#1e3a5f' } },
+          { name: 'Rosa glam', colors: { primary: '#c9184a', secondary: '#1a1a1a', accent: '#f5e6e0', background: '#fffbf7', text: '#1a1a1a' } },
+        ].map((preset) => (
+          <button
+            key={preset.name}
+            onClick={() => onChange(preset.colors)}
+            className="flex w-full items-center gap-3 rounded-md border p-2.5 hover:bg-accent/50 transition-colors text-left"
+          >
+            <div className="flex gap-1">
+              {Object.values(preset.colors).slice(0, 3).map((c, i) => (
+                <div key={i} className="h-5 w-5 rounded-full border" style={{ backgroundColor: c }} />
+              ))}
+            </div>
+            <span className="text-xs font-medium">{preset.name}</span>
+          </button>
         ))}
       </div>
     </div>
@@ -712,40 +814,197 @@ function ColorsEditor() {
 }
 
 /* ── Fonts Editor ──────────────────────────────────────── */
-function FontsEditor() {
+const FONT_OPTIONS: { value: FontFamily; label: string; family: string; sample: string }[] = [
+  { value: 'inter', label: 'Inter (moderna)', family: 'Inter, sans-serif', sample: 'AaBbCcDd 1234 — Elegância em detalhes' },
+  { value: 'poppins', label: 'Poppins (geométrica)', family: 'Poppins, sans-serif', sample: 'AaBbCcDd 1234 — Elegância em detalhes' },
+  { value: 'playfair', label: 'Playfair (editorial)', family: 'Playfair Display, Georgia, serif', sample: 'AaBbCcDd 1234 — Elegância em detalhes' },
+  { value: 'georgia', label: 'Georgia (clássica)', family: 'Georgia, serif', sample: 'AaBbCcDd 1234 — Elegância em detalhes' },
+  { value: 'system', label: 'System UI (clean)', family: 'system-ui, sans-serif', sample: 'AaBbCcDd 1234 — Elegância em detalhes' },
+];
+
+function FontsEditor({ value, onChange }: { value: ThemeTypography; onChange: (v: ThemeTypography) => void }) {
+  const set = <K extends keyof ThemeTypography>(key: K, val: ThemeTypography[K]) =>
+    onChange({ ...value, [key]: val });
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <p className="text-xs text-muted-foreground">
-        Escolha a fonte que melhor representa sua marca.
+        Escolha as fontes que melhor representam sua marca.
       </p>
-      {[
-        { label: 'Inter (moderna)', family: 'Inter, sans-serif', sample: 'AaBbCcDd 1234' },
-        { label: 'Georgia (editorial)', family: 'Georgia, serif', sample: 'AaBbCcDd 1234' },
-        { label: 'System UI (clean)', family: 'system-ui, sans-serif', sample: 'AaBbCcDd 1234' },
-      ].map((f) => (
-        <div key={f.label} className="rounded-md border p-3">
-          <p className="text-sm font-medium">{f.label}</p>
-          <p className="mt-1 text-lg" style={{ fontFamily: f.family }}>{f.sample}</p>
+
+      {/* Heading font */}
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Fonte dos títulos</Label>
+        <div className="space-y-1.5">
+          {FONT_OPTIONS.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => set('headingFont', f.value)}
+              className={`flex w-full items-center gap-3 rounded-md border p-3 text-left transition-colors ${
+                value.headingFont === f.value ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:bg-accent/50'
+              }`}
+            >
+              <div className="flex-1">
+                <p className="text-sm font-medium">{f.label}</p>
+                <p className="mt-0.5 text-sm" style={{ fontFamily: f.family }}>{f.sample}</p>
+              </div>
+              {value.headingFont === f.value && <Check className="h-4 w-4 text-primary shrink-0" />}
+            </button>
+          ))}
         </div>
-      ))}
+      </div>
+
+      {/* Body font */}
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Fonte do corpo</Label>
+        <div className="space-y-1.5">
+          {FONT_OPTIONS.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => set('bodyFont', f.value)}
+              className={`flex w-full items-center gap-3 rounded-md border p-3 text-left transition-colors ${
+                value.bodyFont === f.value ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:bg-accent/50'
+              }`}
+            >
+              <div className="flex-1">
+                <p className="text-sm font-medium">{f.label}</p>
+                <p className="mt-0.5 text-sm" style={{ fontFamily: f.family }}>{f.sample}</p>
+              </div>
+              {value.bodyFont === f.value && <Check className="h-4 w-4 text-primary shrink-0" />}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Font size */}
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Tamanho base</Label>
+        <Select value={value.baseFontSize} onValueChange={(v) => set('baseFontSize', v as ThemeTypography['baseFontSize'])}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="small">Pequeno (14px)</SelectItem>
+            <SelectItem value="medium">Médio (16px)</SelectItem>
+            <SelectItem value="large">Grande (18px)</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
     </div>
   );
 }
 
 /* ── Design Options Editor ─────────────────────────────── */
-function DesignOptionsEditor() {
+function DesignOptionsEditor({ value, onChange }: { value: ThemeDesign; onChange: (v: ThemeDesign) => void }) {
+  const set = <K extends keyof ThemeDesign>(key: K, val: ThemeDesign[K]) =>
+    onChange({ ...value, [key]: val });
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <p className="text-xs text-muted-foreground">
-        Configurações gerais de design — logo, favicon e opções avançadas.
+        Configurações gerais de design — logo, favicon e opções de aparência.
       </p>
-      <div>
+
+      {/* Logo */}
+      <div className="space-y-1.5">
         <Label className="text-xs">URL do logotipo</Label>
-        <Input placeholder="https://cdn.../logo.png" className="mt-1" />
+        <Input
+          value={value.logoUrl}
+          onChange={(e) => set('logoUrl', e.target.value)}
+          placeholder="https://cdn.../logo.png"
+        />
+        {value.logoUrl && (
+          <div className="mt-2 flex items-center justify-center rounded-md border bg-muted/30 p-4">
+            <img src={value.logoUrl} alt="Logo" className="max-h-12 max-w-[180px] object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+          </div>
+        )}
       </div>
-      <div>
+
+      {/* Favicon */}
+      <div className="space-y-1.5">
         <Label className="text-xs">URL do favicon</Label>
-        <Input placeholder="https://cdn.../favicon.ico" className="mt-1" />
+        <Input
+          value={value.faviconUrl}
+          onChange={(e) => set('faviconUrl', e.target.value)}
+          placeholder="https://cdn.../favicon.ico"
+        />
+        {value.faviconUrl && (
+          <div className="mt-2 flex items-center gap-2">
+            <img src={value.faviconUrl} alt="Favicon" className="h-6 w-6 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            <span className="text-xs text-muted-foreground">Preview do favicon</span>
+          </div>
+        )}
+      </div>
+
+      {/* Border radius */}
+      <div className="space-y-1.5">
+        <Label className="text-xs">Arredondamento dos cantos</Label>
+        <div className="grid grid-cols-4 gap-2">
+          {([
+            { val: 'none', label: 'Nenhum', radius: '0px' },
+            { val: 'small', label: 'Sutil', radius: '4px' },
+            { val: 'medium', label: 'Médio', radius: '8px' },
+            { val: 'large', label: 'Grande', radius: '16px' },
+          ] as const).map(({ val, label, radius }) => (
+            <button
+              key={val}
+              onClick={() => set('borderRadius', val)}
+              className={`flex flex-col items-center gap-1.5 rounded-md border p-2.5 transition-colors ${
+                value.borderRadius === val ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:bg-accent/50'
+              }`}
+            >
+              <div
+                className="h-8 w-8 border-2 border-foreground/40"
+                style={{ borderRadius: radius }}
+              />
+              <span className="text-[10px] font-medium">{label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Button style */}
+      <div className="space-y-1.5">
+        <Label className="text-xs">Estilo dos botões</Label>
+        <div className="grid grid-cols-3 gap-2">
+          {([
+            { val: 'filled', label: 'Preenchido' },
+            { val: 'outline', label: 'Contorno' },
+            { val: 'pill', label: 'Arredondado' },
+          ] as const).map(({ val, label }) => (
+            <button
+              key={val}
+              onClick={() => set('buttonStyle', val)}
+              className={`rounded-md border p-2.5 text-center transition-colors ${
+                value.buttonStyle === val ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:bg-accent/50'
+              }`}
+            >
+              <div className="flex justify-center mb-1.5">
+                <div
+                  className={`px-3 py-1 text-[10px] font-medium ${
+                    val === 'filled' ? 'bg-foreground text-background rounded' :
+                    val === 'outline' ? 'border border-foreground text-foreground rounded' :
+                    'bg-foreground text-background rounded-full'
+                  }`}
+                >
+                  Botão
+                </div>
+              </div>
+              <span className="text-[10px] font-medium">{label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Container width */}
+      <div className="space-y-1.5">
+        <Label className="text-xs">Largura do conteúdo</Label>
+        <Select value={value.containerWidth} onValueChange={(v) => set('containerWidth', v as ThemeDesign['containerWidth'])}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="narrow">Estreito (1024px)</SelectItem>
+            <SelectItem value="default">Padrão (1200px)</SelectItem>
+            <SelectItem value="wide">Largo (1440px)</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );
