@@ -117,6 +117,17 @@ const chatService = {
     const res = await apiClient.get('/admin/chat/stats');
     return res.data;
   },
+
+  listStoreMembers: async (): Promise<StoreMember[]> => {
+    const res = await apiClient.get('/users/store-members');
+    return res.data;
+  },
+};
+
+export type StoreMember = {
+  id: number;
+  email: string;
+  role: string;
 };
 
 export default chatService;

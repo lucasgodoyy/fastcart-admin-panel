@@ -27,6 +27,17 @@ export type EmailLog = {
   errorMessage: string | null;
 };
 
+type EmailLogApi = {
+  id: number;
+  recipientEmail: string;
+  subject: string;
+  status?: string;
+  deliveryStatus?: string;
+  sentAt?: string | null;
+  createdAt?: string | null;
+  errorMessage?: string | null;
+};
+
 export type PaginatedResult<T> = {
   content: T[];
   page: number;
@@ -138,8 +149,15 @@ const emailService = {
     const params: Record<string, string | number> = {};
     if (status) params.status = status;
     if (limit) params.limit = limit;
-    const res = await apiClient.get('/email/logs', { params });
-    return res.data;
+    const res = await apiClient.get<EmailLogApi[]>('/email/logs', { params });
+    return res.data.map((log) => ({
+      id: log.id,
+      recipientEmail: log.recipientEmail,
+      subject: log.subject,
+      status: log.status ?? log.deliveryStatus ?? 'PENDING',
+      sentAt: log.sentAt ?? log.createdAt ?? new Date().toISOString(),
+      errorMessage: log.errorMessage ?? null,
+    }));
   },
 
   resendEmail: async (logId: number): Promise<void> => {
@@ -147,15 +165,29 @@ const emailService = {
   },
 
   sendEmail: async (data: { to: string; subject: string; bodyHtml: string }): Promise<EmailLog> => {
-    const res = await apiClient.post('/email/send', data);
-    return res.data;
+    const res = await apiClient.post<EmailLogApi>('/email/send', data);
+    return {
+      id: res.data.id,
+      recipientEmail: res.data.recipientEmail,
+      subject: res.data.subject,
+      status: res.data.status ?? res.data.deliveryStatus ?? 'PENDING',
+      sentAt: res.data.sentAt ?? res.data.createdAt ?? new Date().toISOString(),
+      errorMessage: res.data.errorMessage ?? null,
+    };
   },
 
   sendTestEmail: async (recipientEmail: string, templateKey?: string): Promise<EmailLog> => {
     const params: Record<string, string> = { recipientEmail };
     if (templateKey) params.templateKey = templateKey;
-    const res = await apiClient.post('/email/send-test', null, { params });
-    return res.data;
+    const res = await apiClient.post<EmailLogApi>('/email/send-test', null, { params });
+    return {
+      id: res.data.id,
+      recipientEmail: res.data.recipientEmail,
+      subject: res.data.subject,
+      status: res.data.status ?? res.data.deliveryStatus ?? 'PENDING',
+      sentAt: res.data.sentAt ?? res.data.createdAt ?? new Date().toISOString(),
+      errorMessage: res.data.errorMessage ?? null,
+    };
   },
 
   // ── Email Campaigns (Store) ─────────────────────────────────

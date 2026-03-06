@@ -13,6 +13,7 @@ export interface AuthResponse {
   email?: string;
   role?: string;
   storeId?: number;
+  emailVerified?: boolean;
 }
 
 export interface User {
@@ -21,6 +22,7 @@ export interface User {
   name?: string;
   role?: 'SUPER_ADMIN' | 'ADMIN' | 'STAFF' | 'CUSTOMER';
   storeId?: number;
+  emailVerified?: boolean;
 }
 
 export interface AuthContextType {
@@ -28,6 +30,8 @@ export interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  emailVerified: boolean;
   login: (credentials: LoginCredentials) => Promise<AuthResponse>;
   logout: () => void;
+  setEmailVerified: (verified: boolean) => void;
 }

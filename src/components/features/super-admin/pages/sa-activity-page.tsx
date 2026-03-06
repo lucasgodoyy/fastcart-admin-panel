@@ -19,6 +19,9 @@ import {
   Filter,
   ChevronLeft,
   ChevronRight,
+  UserPlus,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 import {
   SaPageHeader,
@@ -37,6 +40,7 @@ import type { ActivityLog } from "@/types/super-admin";
 const activityIcons: Record<string, React.ElementType> = {
   LOGIN: LogIn, LOGOUT: LogOut, CREATE: Edit, UPDATE: Settings,
   DELETE: Trash2, SECURITY: Shield, BILLING: CreditCard, STORE: Store,
+  TENANT_REGISTERED: UserPlus, SUBSCRIPTION_ACTIVATED: CheckCircle, SUBSCRIPTION_CANCELED: XCircle,
   login: LogIn, logout: LogOut, create: Edit, update: Settings,
   delete: Trash2, security: Shield, billing: CreditCard, store: Store,
 };
@@ -44,6 +48,7 @@ const activityIcons: Record<string, React.ElementType> = {
 const activityColors: Record<string, string> = {
   LOGIN: "sa-success", LOGOUT: "sa-text-muted", CREATE: "sa-info", UPDATE: "sa-accent",
   DELETE: "sa-danger", SECURITY: "sa-warning", BILLING: "sa-success", STORE: "sa-info",
+  TENANT_REGISTERED: "sa-info", SUBSCRIPTION_ACTIVATED: "sa-success", SUBSCRIPTION_CANCELED: "sa-danger",
   login: "sa-success", logout: "sa-text-muted", create: "sa-info", update: "sa-accent",
   delete: "sa-danger", security: "sa-warning", billing: "sa-success", store: "sa-info",
 };
@@ -81,6 +86,9 @@ export function SaActivityPage() {
     { key: "DELETE", label: "Remoção" },
     { key: "SECURITY", label: "Segurança" },
     { key: "BILLING", label: "Financeiro" },
+    { key: "TENANT_REGISTERED", label: "Novo Lojista" },
+    { key: "SUBSCRIPTION_ACTIVATED", label: "Assinatura Ativa" },
+    { key: "SUBSCRIPTION_CANCELED", label: "Cancelamento" },
   ];
 
   return (

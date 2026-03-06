@@ -7,6 +7,7 @@ import chatService, {
   ChatMessage,
   PaginatedResult,
   ChatStats,
+  StoreMember,
 } from '@/services/chatService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,19 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
   MessageSquare,
   Plus,
   Loader2,
@@ -39,28 +53,11 @@ import {
   User,
   Clock,
   Users,
-  Headphones,
+  ChevronsUpDown,
+  Check,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-
-/* ── Canais ─────────────────────────────────────────────── */
-type Channel = 'SUPPORT' | 'TEAM';
-
-const channels: { value: Channel; label: string; description: string; icon: React.ReactNode }[] = [
-  {
-    value: 'SUPPORT',
-    label: 'Suporte',
-    description: 'Mensagens entre Super Admin e Lojista',
-    icon: <Headphones className="h-4 w-4" />,
-  },
-  {
-    value: 'TEAM',
-    label: 'Equipe',
-    description: 'Mensagens internas do time da loja',
-    icon: <Users className="h-4 w-4" />,
-  },
-];
 
 const statusFilters = [
   { value: 'ALL', label: 'Todos' },
@@ -83,18 +80,11 @@ function timeAgo(iso: string | null) {
 
 export function MessagesClient() {
   const queryClient = useQueryClient();
-  const [activeChannel, setActiveChannel] = useState<Channel>('SUPPORT');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Reset selection when switching channel
-  useEffect(() => {
-    setSelectedId(null);
-    setNewMessage('');
-  }, [activeChannel]);
 
   // Stats
   const { data: stats } = useQuery<ChatStats>({
@@ -102,14 +92,14 @@ export function MessagesClient() {
     queryFn: chatService.getStats,
   });
 
-  // Conversations list — filtered by channel
+  // Conversations list — TEAM channel only (Lojista ↔ Equipe)
   const { data: convData, isLoading: loadingConvs } = useQuery<PaginatedResult<Conversation>>({
-    queryKey: ['chat-conversations', statusFilter, activeChannel],
+    queryKey: ['chat-conversations', statusFilter],
     queryFn: () =>
       chatService.listConversations({
         size: 50,
         status: statusFilter === 'ALL' ? undefined : statusFilter,
-        channel: activeChannel,
+        channel: 'TEAM',
       }),
   });
 
@@ -147,11 +137,29 @@ export function MessagesClient() {
     initialMessage: '',
   });
 
+  // Store members for autocomplete
+  const { data: storeMembers = [] } = useQuery<StoreMember[]>({
+    queryKey: ['store-members'],
+    queryFn: chatService.listStoreMembers,
+    staleTime: 60_000,
+  });
+
+  const [memberPickerOpen, setMemberPickerOpen] = useState(false);
+
+  const selectMember = (member: StoreMember) => {
+    setForm((prev) => ({
+      ...prev,
+      customerName: member.email.split('@')[0],
+      customerEmail: member.email,
+    }));
+    setMemberPickerOpen(false);
+  };
+
   const createConv = useMutation({
     mutationFn: () =>
       chatService.createConversation({
         ...form,
-        channel: activeChannel,
+        channel: 'TEAM',
       }),
     onSuccess: (conv) => {
       queryClient.invalidateQueries({ queryKey: ['chat-conversations'] });
@@ -183,15 +191,14 @@ export function MessagesClient() {
   const conversations = convData?.content ?? [];
   const messages = messagesData?.content ?? [];
   const selectedConv = conversations.find((c) => c.id === selectedId);
-  const channelInfo = channels.find((c) => c.value === activeChannel)!;
 
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-foreground">Mensagens</h1>
-          <p className="text-sm text-muted-foreground">{channelInfo.description}</p>
+          <h1 className="text-xl font-bold text-foreground">Mensagens — Lojista ↔ Equipe</h1>
+          <p className="text-sm text-muted-foreground">Comunicação interna do time da loja</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
@@ -202,23 +209,61 @@ export function MessagesClient() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Iniciar conversa — {channelInfo.label}</DialogTitle>
+              <DialogTitle>Iniciar conversa — Equipe</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-2">
               <div className="space-y-1.5">
-                <Label>{activeChannel === 'SUPPORT' ? 'Nome do lojista' : 'Nome do membro'}</Label>
-                <Input
-                  value={form.customerName}
-                  onChange={(e) => setForm((p) => ({ ...p, customerName: e.target.value }))}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>E-mail</Label>
-                <Input
-                  type="email"
-                  value={form.customerEmail}
-                  onChange={(e) => setForm((p) => ({ ...p, customerEmail: e.target.value }))}
-                />
+                <Label>Membro da equipe</Label>
+                <Popover open={memberPickerOpen} onOpenChange={setMemberPickerOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={memberPickerOpen}
+                      className="w-full justify-between text-sm font-normal"
+                    >
+                      {form.customerEmail
+                        ? `${form.customerName} (${form.customerEmail})`
+                        : 'Buscar membro por e-mail...'}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Buscar membro por e-mail..." />
+                      <CommandList>
+                        <CommandEmpty>Nenhum membro encontrado.</CommandEmpty>
+                        <CommandGroup className="max-h-48 overflow-y-auto">
+                          {storeMembers.map((member) => (
+                            <CommandItem
+                              key={member.id}
+                              value={member.email}
+                              onSelect={() => selectMember(member)}
+                              className="cursor-pointer"
+                            >
+                              <div className="flex items-center gap-2 flex-1">
+                                <div
+                                  className={cn(
+                                    'h-4 w-4 shrink-0 rounded-sm border flex items-center justify-center',
+                                    form.customerEmail === member.email
+                                      ? 'bg-primary border-primary text-primary-foreground'
+                                      : 'border-muted-foreground/30',
+                                  )}
+                                >
+                                  {form.customerEmail === member.email && <Check className="h-3 w-3" />}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-sm truncate">{member.email}</p>
+                                  <p className="text-xs text-muted-foreground">{member.role === 'ADMIN' ? 'Administrador' : member.role === 'STAFF' ? 'Equipe' : member.role}</p>
+                                </div>
+                              </div>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="space-y-1.5">
                 <Label>Assunto</Label>
@@ -248,25 +293,6 @@ export function MessagesClient() {
             </div>
           </DialogContent>
         </Dialog>
-      </div>
-
-      {/* Channel tabs */}
-      <div className="flex gap-2">
-        {channels.map((ch) => (
-          <button
-            key={ch.value}
-            onClick={() => setActiveChannel(ch.value)}
-            className={cn(
-              'flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors',
-              activeChannel === ch.value
-                ? 'border-primary bg-primary/10 text-primary'
-                : 'border-border bg-card text-muted-foreground hover:bg-muted/50 hover:text-foreground',
-            )}
-          >
-            {ch.icon}
-            {ch.label}
-          </button>
-        ))}
       </div>
 
       {/* Stats bar */}
@@ -324,7 +350,7 @@ export function MessagesClient() {
               </div>
             ) : conversations.length === 0 ? (
               <div className="py-12 text-center text-sm text-muted-foreground">
-                Nenhuma conversa neste canal.
+                Nenhuma conversa.
               </div>
             ) : (
               <div className="divide-y">
@@ -363,7 +389,7 @@ export function MessagesClient() {
         <Card className="flex flex-col overflow-hidden">
           {!selectedId ? (
             <div className="flex-1 flex flex-col items-center justify-center gap-3 text-sm text-muted-foreground">
-              {channelInfo.icon}
+              <Users className="h-5 w-5" />
               <p>Selecione uma conversa para ver as mensagens.</p>
             </div>
           ) : (

@@ -23,6 +23,10 @@ const couponService = {
     });
     return data;
   },
+
+  async delete(id: number): Promise<void> {
+    await apiClient.delete(`/coupons/${id}`);
+  },
 };
 
 export default couponService;

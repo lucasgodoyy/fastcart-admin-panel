@@ -32,9 +32,9 @@ const orderService = {
     return response.data;
   },
 
-  /** Mark an order as dispatched/shipped */
-  dispatch: async (orderId: number): Promise<AdminOrder> => {
-    const response = await apiClient.patch(`/orders/store/${orderId}/dispatch`);
+  /** Mark an order as dispatched/shipped, optionally with tracking code */
+  dispatch: async (orderId: number, trackingCode?: string): Promise<AdminOrder> => {
+    const response = await apiClient.patch(`/orders/store/${orderId}/dispatch`, { trackingCode });
     return response.data;
   },
 

@@ -19,6 +19,7 @@ import {
   Palette,
   ClipboardList,
   MessageSquare,
+  Rocket,
   type LucideIcon,
 } from "lucide-react";
 
@@ -132,10 +133,6 @@ export const saSidebarSections: SASidebarSection[] = [
         title: "Mensagens",
         href: "/super-admin/messages",
         icon: MessageSquare,
-        children: [
-          { title: "SA ↔ Lojista", href: "/super-admin/messages" },
-          { title: "Lojista ↔ Equipe", href: "/super-admin/messages/team" },
-        ],
       },
       {
         title: "E-mails",
@@ -220,6 +217,13 @@ export const saSidebarSections: SASidebarSection[] = [
         title: "Infraestrutura",
         href: "/super-admin/infrastructure",
         icon: Database,
+      },
+      {
+        title: "Roadmap SaaS",
+        href: "/super-admin/roadmap",
+        icon: Rocket,
+        badge: "NEW",
+        badgeVariant: "success",
       },
       {
         title: "Backlog",

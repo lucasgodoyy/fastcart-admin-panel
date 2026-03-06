@@ -60,6 +60,7 @@ export interface UserSummary {
   storeId: number | null;
   lastLoginAt: string | null;
   createdAt: string;
+  emailVerified?: boolean;
 }
 
 export interface UserSession {

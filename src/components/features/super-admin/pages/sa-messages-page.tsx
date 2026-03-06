@@ -41,13 +41,12 @@ import {
   User,
   Clock,
   Users,
-  Headphones,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import apiClient from '@/lib/api';
 
-/* ── Types (reuse from chat) ── */
+/* ── Types ── */
 type Conversation = {
   id: number;
   customerName: string;
@@ -93,23 +92,22 @@ type ChatStats = {
   unreadMessages: number;
 };
 
-/* ── SA Chat API (uses apiClient instead of admin apiClient) ── */
+/* ── SA Chat API (platform-level endpoints) ── */
 const saChatService = {
   listConversations: async (params?: {
     page?: number;
     size?: number;
     status?: string;
-    channel?: string;
   }): Promise<PaginatedResult<Conversation>> => {
-    const res = await apiClient.get('/admin/chat/conversations', { params });
+    const res = await apiClient.get('/super-admin/chat/conversations', { params });
     return res.data;
   },
   listMessages: async (id: number, params?: { page?: number; size?: number }): Promise<PaginatedResult<ChatMessage>> => {
-    const res = await apiClient.get(`/admin/chat/conversations/${id}/messages`, { params });
+    const res = await apiClient.get(`/super-admin/chat/conversations/${id}/messages`, { params });
     return res.data;
   },
   sendMessage: async (id: number, content: string): Promise<Conversation> => {
-    const res = await apiClient.post(`/admin/chat/conversations/${id}/messages`, { content });
+    const res = await apiClient.post(`/super-admin/chat/conversations/${id}/messages`, { content });
     return res.data;
   },
   createConversation: async (data: {
@@ -117,30 +115,22 @@ const saChatService = {
     customerEmail: string;
     subject?: string;
     initialMessage: string;
-    channel?: string;
   }): Promise<Conversation> => {
-    const res = await apiClient.post('/admin/chat/conversations', data);
+    const res = await apiClient.post('/super-admin/chat/conversations', data);
     return res.data;
   },
   updateStatus: async (id: number, status: string): Promise<Conversation> => {
-    const res = await apiClient.put(`/admin/chat/conversations/${id}/status`, { status });
+    const res = await apiClient.put(`/super-admin/chat/conversations/${id}/status`, null, { params: { status } });
     return res.data;
   },
   markAsRead: async (id: number): Promise<void> => {
-    await apiClient.put(`/admin/chat/conversations/${id}/read`);
+    await apiClient.put(`/super-admin/chat/conversations/${id}/read`);
   },
   getStats: async (): Promise<ChatStats> => {
-    const res = await apiClient.get('/admin/chat/stats');
+    const res = await apiClient.get('/super-admin/chat/stats');
     return res.data;
   },
 };
-
-/* ── Channel types ── */
-type Channel = 'SUPPORT' | 'TEAM';
-const channelsConfig: { value: Channel; label: string; description: string; icon: React.ReactNode }[] = [
-  { value: 'SUPPORT', label: 'SA ↔ Lojista', description: 'Mensagens entre Super Admin e lojistas', icon: <Headphones className="h-4 w-4" /> },
-  { value: 'TEAM', label: 'Lojista ↔ Equipe', description: 'Mensagens internas dos times', icon: <Users className="h-4 w-4" /> },
-];
 
 const statusFilters = [
   { value: 'ALL', label: 'Todos' },
@@ -162,17 +152,11 @@ function timeAgo(iso: string | null) {
 
 export function SaMessagesPage() {
   const queryClient = useQueryClient();
-  const [activeChannel, setActiveChannel] = useState<Channel>('SUPPORT');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setSelectedId(null);
-    setNewMessage('');
-  }, [activeChannel]);
 
   const { data: stats, isLoading: loadingStats } = useQuery<ChatStats>({
     queryKey: ['sa-chat-stats'],
@@ -180,12 +164,11 @@ export function SaMessagesPage() {
   });
 
   const { data: convData, isLoading: loadingConvs } = useQuery<PaginatedResult<Conversation>>({
-    queryKey: ['sa-chat-conversations', statusFilter, activeChannel],
+    queryKey: ['sa-chat-conversations', statusFilter],
     queryFn: () =>
       saChatService.listConversations({
         size: 50,
         status: statusFilter === 'ALL' ? undefined : statusFilter,
-        channel: activeChannel,
       }),
   });
 
@@ -212,7 +195,7 @@ export function SaMessagesPage() {
 
   const [form, setForm] = useState({ customerName: '', customerEmail: '', subject: '', initialMessage: '' });
   const createConv = useMutation({
-    mutationFn: () => saChatService.createConversation({ ...form, channel: activeChannel }),
+    mutationFn: () => saChatService.createConversation({ ...form }),
     onSuccess: (conv) => {
       queryClient.invalidateQueries({ queryKey: ['sa-chat-conversations'] });
       queryClient.invalidateQueries({ queryKey: ['sa-chat-stats'] });
@@ -240,14 +223,13 @@ export function SaMessagesPage() {
   const conversations = convData?.content ?? [];
   const messages = messagesData?.content ?? [];
   const selectedConv = conversations.find((c) => c.id === selectedId);
-  const channelInfo = channelsConfig.find((c) => c.value === activeChannel)!;
 
   return (
     <motion.div className="space-y-6" initial="hidden" animate="visible" variants={staggerContainer}>
       <motion.div variants={fadeInUp}>
         <SaPageHeader
-          title="Mensagens"
-          description="Central de mensagens da plataforma"
+          title="Mensagens — SaaS ↔ Equipe"
+          description="Comunicação interna da equipe da plataforma"
           actions={
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
@@ -258,11 +240,11 @@ export function SaMessagesPage() {
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Nova conversa — {channelInfo.label}</DialogTitle>
+                  <DialogTitle>Nova conversa — Equipe</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 pt-2">
                   <div className="space-y-1.5">
-                    <Label>{activeChannel === 'SUPPORT' ? 'Nome do lojista' : 'Nome do membro'}</Label>
+                    <Label>Nome do membro</Label>
                     <Input value={form.customerName} onChange={(e) => setForm((p) => ({ ...p, customerName: e.target.value }))} />
                   </div>
                   <div className="space-y-1.5">
@@ -294,25 +276,6 @@ export function SaMessagesPage() {
         />
       </motion.div>
 
-      {/* Channel tabs */}
-      <motion.div variants={fadeInUp} className="flex gap-2">
-        {channelsConfig.map((ch) => (
-          <button
-            key={ch.value}
-            onClick={() => setActiveChannel(ch.value)}
-            className={cn(
-              'flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors',
-              activeChannel === ch.value
-                ? 'border-primary bg-primary/10 text-primary'
-                : 'border-border bg-card text-muted-foreground hover:bg-muted/50 hover:text-foreground',
-            )}
-          >
-            {ch.icon}
-            {ch.label}
-          </button>
-        ))}
-      </motion.div>
-
       {/* Stats */}
       <motion.div variants={fadeInUp} className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {loadingStats ? (
@@ -328,7 +291,7 @@ export function SaMessagesPage() {
       </motion.div>
 
       {/* Conversation list + messages */}
-      <motion.div variants={fadeInUp} className="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-4 h-[calc(100vh-480px)] min-h-[400px]">
+      <motion.div variants={fadeInUp} className="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-4 h-[calc(100vh-420px)] min-h-[400px]">
         {/* Left panel */}
         <SaCard className="flex flex-col overflow-hidden p-0">
           <div className="p-3 border-b border-border">
@@ -345,7 +308,7 @@ export function SaMessagesPage() {
             {loadingConvs ? (
               <div className="flex items-center justify-center py-12"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
             ) : conversations.length === 0 ? (
-              <div className="py-12 text-center text-sm text-muted-foreground">Nenhuma conversa neste canal.</div>
+              <div className="py-12 text-center text-sm text-muted-foreground">Nenhuma conversa.</div>
             ) : (
               <div className="divide-y divide-border">
                 {conversations.map((conv) => (
@@ -376,7 +339,7 @@ export function SaMessagesPage() {
         <SaCard className="flex flex-col overflow-hidden p-0">
           {!selectedId ? (
             <div className="flex-1 flex flex-col items-center justify-center gap-3 text-sm text-muted-foreground">
-              {channelInfo.icon}
+              <Users className="h-5 w-5" />
               <p>Selecione uma conversa para ver as mensagens.</p>
             </div>
           ) : (
@@ -413,16 +376,16 @@ export function SaMessagesPage() {
                 ) : (
                   <div className="space-y-4">
                     {messages.map((msg) => {
-                      const isAdmin = msg.senderType === 'ADMIN';
+                      const isSA = msg.senderType === 'SUPER_ADMIN';
                       return (
-                        <div key={msg.id} className={cn('flex', isAdmin ? 'justify-end' : 'justify-start')}>
-                          <div className={cn('max-w-[75%] rounded-lg px-3 py-2', isAdmin ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                        <div key={msg.id} className={cn('flex', isSA ? 'justify-end' : 'justify-start')}>
+                          <div className={cn('max-w-[75%] rounded-lg px-3 py-2', isSA ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                             <div className="flex items-center gap-1.5 mb-0.5">
-                              {!isAdmin && <User className="h-3 w-3" />}
+                              {!isSA && <User className="h-3 w-3" />}
                               <span className="text-[10px] font-medium">{msg.senderName}</span>
                             </div>
                             <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                            <p className={cn('text-[10px] mt-1', isAdmin ? 'text-primary-foreground/70' : 'text-muted-foreground')}>
+                            <p className={cn('text-[10px] mt-1', isSA ? 'text-primary-foreground/70' : 'text-muted-foreground')}>
                               {new Date(msg.createdAt).toLocaleString('pt-BR')}
                             </p>
                           </div>

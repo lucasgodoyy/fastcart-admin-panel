@@ -1,21 +1,27 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '@/context/AuthContext';
+import { authService } from '@/services/auth';
 import { LoginCredentials } from '@/types/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, CheckCircle2, XCircle, Loader2, Mail } from 'lucide-react';
 import { t } from '@/lib/admin-language';
+
+type BannerType = 'success' | 'error' | 'info';
 
 export const LoginForm: React.FC = () => {
   const router = useRouter();
-  const { login, isLoading } = useAuth();
+  const searchParams = useSearchParams();
+  const { login, isLoading, setEmailVerified } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [banner, setBanner] = useState<{ type: BannerType; message: string } | null>(null);
+  const [verifying, setVerifying] = useState(false);
 
   const form = useForm<LoginCredentials>({
     defaultValues: {
@@ -23,6 +29,39 @@ export const LoginForm: React.FC = () => {
       password: '',
     },
   });
+
+  // Handle email verification token from URL
+  useEffect(() => {
+    const token = searchParams.get('verify');
+    const registered = searchParams.get('registered');
+
+    if (token) {
+      setVerifying(true);
+      authService.verifyEmail(token)
+        .then(() => {
+          setBanner({
+            type: 'success',
+            message: t('E-mail verificado com sucesso! Faça login para continuar.', 'Email verified successfully! Sign in to continue.'),
+          });
+          setEmailVerified(true);
+        })
+        .catch(() => {
+          setBanner({
+            type: 'error',
+            message: t('Token de verificação inválido ou expirado.', 'Invalid or expired verification token.'),
+          });
+        })
+        .finally(() => setVerifying(false));
+    } else if (registered) {
+      setBanner({
+        type: 'info',
+        message: t(
+          'Conta criada! Verifique seu e-mail para ativar sua conta, depois faça login.',
+          'Account created! Check your email to verify your account, then sign in.'
+        ),
+      });
+    }
+  }, [searchParams, setEmailVerified]);
 
   const handleSubmit = async (credentials: LoginCredentials) => {
     try {
@@ -75,6 +114,25 @@ export const LoginForm: React.FC = () => {
         <CardDescription className="text-center">{t('Entre na sua conta para continuar', 'Sign in to your account to continue')}</CardDescription>
       </CardHeader>
       <CardContent>
+        {/* Verification / Registration banner */}
+        {verifying && (
+          <div className="flex items-center gap-2 p-3 mb-4 rounded-lg bg-muted text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {t('Verificando e-mail...', 'Verifying email...')}
+          </div>
+        )}
+        {banner && !verifying && (
+          <div className={`flex items-start gap-2 p-3 mb-4 rounded-lg text-sm ${
+            banner.type === 'success' ? 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300' :
+            banner.type === 'error' ? 'bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300' :
+            'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
+          }`}>
+            {banner.type === 'success' && <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />}
+            {banner.type === 'error' && <XCircle className="h-4 w-4 mt-0.5 shrink-0" />}
+            {banner.type === 'info' && <Mail className="h-4 w-4 mt-0.5 shrink-0" />}
+            {banner.message}
+          </div>
+        )}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
             <FormField

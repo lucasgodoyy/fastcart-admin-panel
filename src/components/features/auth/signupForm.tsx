@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Mail } from 'lucide-react';
 import { t } from '@/lib/admin-language';
 
 interface SignupFormData {
@@ -22,6 +22,7 @@ export const SignupForm: React.FC = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
 
   const form = useForm<SignupFormData>({
     defaultValues: {
@@ -47,7 +48,7 @@ export const SignupForm: React.FC = () => {
         password: data.password,
         storeName: data.storeName,
       });
-      router.push('/login?registered=true');
+      setRegisteredEmail(data.email);
     } catch (err) {
       const errorObj = err as Record<string, unknown>;
 
@@ -88,6 +89,44 @@ export const SignupForm: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  // Show success state after registration
+  if (registeredEmail) {
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardContent className="pt-8 pb-8 text-center space-y-4">
+          <div className="flex justify-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+              <Mail className="h-7 w-7 text-primary" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-xl font-bold">
+              {t('Verifique seu e-mail', 'Check your email')}
+            </h3>
+            <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+              {t(
+                `Enviamos um link de verificação para ${registeredEmail}. Clique no link para ativar sua conta.`,
+                `We sent a verification link to ${registeredEmail}. Click the link to activate your account.`
+              )}
+            </p>
+          </div>
+          <div className="pt-2 space-y-3">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => router.push('/login')}
+            >
+              {t('Ir para o login', 'Go to login')}
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              {t('Não recebeu? Verifique sua pasta de spam.', "Didn't receive it? Check your spam folder.")}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full max-w-md mx-auto">

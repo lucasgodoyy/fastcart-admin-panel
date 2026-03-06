@@ -11,6 +11,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [emailVerified, setEmailVerified] = useState(false);
 
   useEffect(() => {
     const cookieToken = document.cookie
@@ -23,12 +24,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(storedToken);
       const normalizedRole = normalizeRole(localStorage.getItem('role'));
       const storeIdStr = localStorage.getItem('storeId');
+      const verified = localStorage.getItem('emailVerified') === 'true';
 
+      setEmailVerified(verified);
       setUser({
         id: localStorage.getItem('userId') || 'temp-id',
         email: localStorage.getItem('email') || '',
         role: normalizedRole,
         storeId: storeIdStr ? parseInt(storeIdStr) : undefined,
+        emailVerified: verified,
       });
     }
     setIsLoading(false);
@@ -40,11 +44,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await authService.login(credentials);
       setToken(response.token);
 
+      const verified = response.emailVerified ?? false;
+      setEmailVerified(verified);
+
       setUser({
         id: 'temp-id',
         email: response.email || credentials.email,
         role: normalizeRole(response.role),
         storeId: response.storeId,
+        emailVerified: verified,
       });
       return response;
     } catch (error) {
@@ -54,9 +62,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const handleSetEmailVerified = (verified: boolean) => {
+    setEmailVerified(verified);
+    localStorage.setItem('emailVerified', verified ? 'true' : 'false');
+    if (user) {
+      setUser({ ...user, emailVerified: verified });
+    }
+  };
+
   const logout = () => {
     setUser(null);
     setToken(null);
+    setEmailVerified(false);
     authService.logout();
   };
 
@@ -67,8 +84,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         token,
         isLoading,
         isAuthenticated: !!token,
+        emailVerified,
         login,
         logout,
+        setEmailVerified: handleSetEmailVerified,
       }}
     >
       {children}

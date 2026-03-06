@@ -321,6 +321,22 @@ const CATEGORY_LABELS: Record<string, { label: string; icon: React.ReactNode }> 
   system: { label: 'Sistema', icon: <Bell className="h-4 w-4" /> },
 };
 
+function normalizeTemplateKey(templateKey: string) {
+  const normalized = templateKey.trim().toUpperCase().replace(/-/g, '_');
+
+  const aliases: Record<string, string> = {
+    WELCOME_EMAIL: 'WELCOME',
+    PASSWORD_RECOVERY: 'PASSWORD_RESET',
+    RESET_PASSWORD: 'PASSWORD_RESET',
+    ORDER_CONFIRMATION: 'ORDER_PAID_CONFIRMATION',
+    PAYMENT_CONFIRMED: 'ORDER_PAID_CONFIRMATION',
+    ORDER_SHIPPED: 'ORDER_DISPATCHED_CONFIRMATION',
+    ABANDONED_CART: 'ABANDONED_CART_RECOVERY',
+  };
+
+  return aliases[normalized] ?? normalized;
+}
+
 function statusBadge(status: string) {
   if (status === 'SENT' || status === 'DELIVERED')
     return <Badge variant="outline" className="text-green-600 border-green-300 text-[10px]">Enviado</Badge>;
@@ -394,9 +410,11 @@ export function EmailsClient() {
       for (const key of essentialKeys) {
         const event = EMAIL_EVENTS.find((e) => e.key === key);
         if (!event) continue;
-        const existing = templates.find((t) => t.templateKey === key);
+        const existing = templates.find(
+          (t) => normalizeTemplateKey(t.templateKey) === normalizeTemplateKey(key),
+        );
         if (existing?.active) continue; // already active
-        await emailService.upsertTemplate(key, {
+        await emailService.upsertTemplate(normalizeTemplateKey(key), {
           subject: existing?.subject ?? event.defaultSubject,
           bodyHtml: existing?.bodyHtml ?? event.defaultBody,
           active: true,
@@ -415,7 +433,9 @@ export function EmailsClient() {
   const [editForm, setEditForm] = useState({ subject: '', bodyHtml: '', active: true });
 
   function openTemplateEditor(event: EmailEvent) {
-    const existing = templates.find((t) => t.templateKey === event.key);
+    const existing = templates.find(
+      (t) => normalizeTemplateKey(t.templateKey) === normalizeTemplateKey(event.key),
+    );
     setEditEvent(event);
     setEditForm({
       subject: existing?.subject ?? event.defaultSubject,
@@ -427,7 +447,7 @@ export function EmailsClient() {
 
   const templateMutation = useMutation({
     mutationFn: () =>
-      emailService.upsertTemplate(editEvent!.key, {
+      emailService.upsertTemplate(normalizeTemplateKey(editEvent!.key), {
         subject: editForm.subject,
         bodyHtml: editForm.bodyHtml,
         active: editForm.active,
@@ -465,11 +485,13 @@ export function EmailsClient() {
 
   /* ── Helpers ── */
   function isTemplateActive(key: string) {
-    const t = templates.find((tpl) => tpl.templateKey === key);
+    const normalizedKey = normalizeTemplateKey(key);
+    const t = templates.find((tpl) => normalizeTemplateKey(tpl.templateKey) === normalizedKey);
     return t ? t.active : false;
   }
   function isTemplateConfigured(key: string) {
-    return templates.some((tpl) => tpl.templateKey === key);
+    const normalizedKey = normalizeTemplateKey(key);
+    return templates.some((tpl) => normalizeTemplateKey(tpl.templateKey) === normalizedKey);
   }
 
   const activeCount = EMAIL_EVENTS.filter((e) => isTemplateActive(e.key)).length;
@@ -809,6 +831,7 @@ export function EmailsClient() {
                       <TableHead>Status</TableHead>
                       <TableHead>Destinatário</TableHead>
                       <TableHead>Assunto</TableHead>
+                      <TableHead>Erro</TableHead>
                       <TableHead className="text-right">Data</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -819,6 +842,15 @@ export function EmailsClient() {
                         <TableCell className="text-sm">{log.recipientEmail}</TableCell>
                         <TableCell className="text-sm text-muted-foreground truncate max-w-60">
                           {log.subject}
+                        </TableCell>
+                        <TableCell className="text-xs text-red-600 max-w-80">
+                          {(log.status === 'FAILED' || log.status === 'BOUNCED') && log.errorMessage ? (
+                            <span className="block truncate" title={log.errorMessage}>
+                              {log.errorMessage}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground text-right whitespace-nowrap">
                           {new Date(log.sentAt).toLocaleString('pt-BR')}

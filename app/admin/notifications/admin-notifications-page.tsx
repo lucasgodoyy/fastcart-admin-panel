@@ -180,6 +180,7 @@ export default function AdminNotificationsPage() {
                     <TableHead className="text-xs">{t("Destinatário", "Recipient")}</TableHead>
                     <TableHead className="text-xs">{t("Assunto", "Subject")}</TableHead>
                     <TableHead className="text-xs">Status</TableHead>
+                    <TableHead className="text-xs">{t("Motivo", "Reason")}</TableHead>
                     <TableHead className="text-xs">{t("Enviado", "Sent")}</TableHead>
                     <TableHead className="text-xs">{t("Ações", "Actions")}</TableHead>
                   </TableRow>
@@ -188,7 +189,7 @@ export default function AdminNotificationsPage() {
                   {emailLogs.map((log) => (
                     <TableRow key={log.id}>
                       <TableCell className="text-xs">{log.recipientEmail}</TableCell>
-                      <TableCell className="text-xs max-w-[200px] truncate">{log.subject}</TableCell>
+                      <TableCell className="text-xs max-w-50 truncate">{log.subject}</TableCell>
                       <TableCell>
                         <Badge
                           variant={statusBadge[log.status]?.variant || "outline"}
@@ -196,6 +197,15 @@ export default function AdminNotificationsPage() {
                         >
                           {statusBadge[log.status]?.label || log.status}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs max-w-70">
+                        {(log.status === "FAILED" || log.status === "BOUNCED") && log.errorMessage ? (
+                          <span className="text-destructive block truncate" title={log.errorMessage}>
+                            {log.errorMessage}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">
                         {log.sentAt

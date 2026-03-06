@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie';
 
-const STORAGE_KEYS = ['token', 'email', 'role', 'storeId', 'userId'];
+const STORAGE_KEYS = ['token', 'email', 'role', 'storeId', 'userId', 'emailVerified'];
 
 export function clearAuthSession() {
   if (typeof window === 'undefined') return;

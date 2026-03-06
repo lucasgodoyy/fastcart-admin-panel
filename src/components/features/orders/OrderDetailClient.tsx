@@ -17,9 +17,13 @@ import {
   MapPin,
   Navigation,
   FileText,
+  RotateCcw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -57,6 +61,12 @@ export function OrderDetailClient() {
   const queryClient = useQueryClient();
   const orderId = Number(params.id);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [dispatchDialogOpen, setDispatchDialogOpen] = useState(false);
+  const [trackingCode, setTrackingCode] = useState('');
+  const [refundDialogOpen, setRefundDialogOpen] = useState(false);
+  const [refundAmount, setRefundAmount] = useState('');
+  const [refundReason, setRefundReason] = useState('');
 
   const { data: order, isLoading } = useQuery<AdminOrder>({
     queryKey: ['store-order', orderId],
@@ -65,9 +75,11 @@ export function OrderDetailClient() {
   });
 
   const dispatchMutation = useMutation({
-    mutationFn: () => orderService.dispatch(orderId),
+    mutationFn: (code?: string) => orderService.dispatch(orderId, code || undefined),
     onSuccess: () => {
       toast.success(t('Pedido marcado como enviado!', 'Order marked as shipped!'));
+      setDispatchDialogOpen(false);
+      setTrackingCode('');
       queryClient.invalidateQueries({ queryKey: ['store-order', orderId] });
       queryClient.invalidateQueries({ queryKey: ['store-orders'] });
       queryClient.invalidateQueries({ queryKey: ['store-order-stats'] });
@@ -87,10 +99,11 @@ export function OrderDetailClient() {
   });
 
   const cancelMutation = useMutation({
-    mutationFn: () => orderService.cancel(orderId),
+    mutationFn: (reason?: string) => orderService.cancel(orderId, reason || undefined),
     onSuccess: () => {
       toast.success(t('Pedido cancelado com sucesso!', 'Order cancelled successfully!'));
       setCancelDialogOpen(false);
+      setCancelReason('');
       queryClient.invalidateQueries({ queryKey: ['store-order', orderId] });
       queryClient.invalidateQueries({ queryKey: ['store-orders'] });
       queryClient.invalidateQueries({ queryKey: ['store-order-stats'] });
@@ -98,6 +111,23 @@ export function OrderDetailClient() {
     onError: () => {
       toast.error(t('Erro ao cancelar pedido.', 'Error cancelling order.'));
       setCancelDialogOpen(false);
+    },
+  });
+
+  const refundMutation = useMutation({
+    mutationFn: ({ amountCents, reason }: { amountCents?: number; reason?: string }) =>
+      orderService.refund(orderId, amountCents, reason),
+    onSuccess: () => {
+      toast.success(t('Reembolso processado com sucesso!', 'Refund processed successfully!'));
+      setRefundDialogOpen(false);
+      setRefundAmount('');
+      setRefundReason('');
+      queryClient.invalidateQueries({ queryKey: ['store-order', orderId] });
+      queryClient.invalidateQueries({ queryKey: ['store-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['store-order-stats'] });
+    },
+    onError: () => {
+      toast.error(t('Erro ao processar reembolso.', 'Error processing refund.'));
     },
   });
 
@@ -122,9 +152,11 @@ export function OrderDetailClient() {
 
   const sc = statusConfig[order.status] || statusConfig.PENDING;
   const isPaid = order.paymentStatus.toLowerCase() === 'paid';
+  const isPartiallyRefunded = order.paymentStatus.toLowerCase() === 'partially_refunded';
   const canDispatch = isPaid && order.status !== 'SHIPPED' && order.status !== 'DELIVERED' && order.status !== 'CANCELLED';
   const canDeliver = order.status === 'SHIPPED';
   const canCancel = order.status !== 'CANCELLED' && order.status !== 'DELIVERED';
+  const canRefund = (isPaid || isPartiallyRefunded) && order.status !== 'CANCELLED';
 
   return (
     <div className="p-4 md:p-6 lg:p-8">
@@ -147,12 +179,11 @@ export function OrderDetailClient() {
           <div className="flex items-center gap-2">
             {canDispatch && (
               <Button
-                onClick={() => dispatchMutation.mutate()}
-                disabled={dispatchMutation.isPending}
+                onClick={() => setDispatchDialogOpen(true)}
                 className="gap-2"
               >
                 <Truck className="h-4 w-4" />
-                {dispatchMutation.isPending ? t('Enviando...', 'Dispatching...') : t('Marcar como Enviado', 'Mark as Shipped')}
+                {t('Marcar como Enviado', 'Mark as Shipped')}
               </Button>
             )}
             {canDeliver && (
@@ -164,6 +195,19 @@ export function OrderDetailClient() {
               >
                 <CheckCircle2 className="h-4 w-4" />
                 {deliverMutation.isPending ? t('Processando...', 'Processing...') : t('Marcar como Entregue', 'Mark as Delivered')}
+              </Button>
+            )}
+            {canRefund && (
+              <Button
+                onClick={() => {
+                  setRefundAmount(String(order.totalAmount));
+                  setRefundDialogOpen(true);
+                }}
+                variant="outline"
+                className="gap-2 border-amber-500 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+              >
+                <RotateCcw className="h-4 w-4" />
+                {t('Reembolsar', 'Refund')}
               </Button>
             )}
             {canCancel && (
@@ -180,7 +224,49 @@ export function OrderDetailClient() {
         </div>
       </div>
 
-      {/* Cancel confirmation dialog */}
+      {/* Dispatch dialog with tracking code */}
+      <AlertDialog open={dispatchDialogOpen} onOpenChange={setDispatchDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('Despachar Pedido', 'Dispatch Order')} #{order.id}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t(
+                'O pedido será marcado como enviado. Opcionalmente, informe o código de rastreio.',
+                'The order will be marked as shipped. Optionally provide a tracking code.'
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-3 py-2">
+            <div>
+              <Label htmlFor="tracking-code">{t('Código de rastreio (opcional)', 'Tracking code (optional)')}</Label>
+              <Input
+                id="tracking-code"
+                placeholder="BR123456789XX"
+                value={trackingCode}
+                onChange={(e) => setTrackingCode(e.target.value)}
+              />
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={dispatchMutation.isPending}>
+              {t('Voltar', 'Go Back')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                dispatchMutation.mutate(trackingCode || undefined);
+              }}
+              disabled={dispatchMutation.isPending}
+            >
+              {dispatchMutation.isPending
+                ? t('Enviando...', 'Dispatching...')
+                : t('Confirmar Envio', 'Confirm Dispatch')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Cancel confirmation dialog with reason */}
       <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -197,6 +283,18 @@ export function OrderDetailClient() {
                   )}
             </AlertDialogDescription>
           </AlertDialogHeader>
+          <div className="space-y-3 py-2">
+            <div>
+              <Label htmlFor="cancel-reason">{t('Motivo (opcional)', 'Reason (optional)')}</Label>
+              <Textarea
+                id="cancel-reason"
+                placeholder={t('Ex: Cliente solicitou cancelamento', 'E.g.: Customer requested cancellation')}
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                rows={2}
+              />
+            </div>
+          </div>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={cancelMutation.isPending}>
               {t('Voltar', 'Go Back')}
@@ -204,7 +302,7 @@ export function OrderDetailClient() {
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault();
-                cancelMutation.mutate();
+                cancelMutation.mutate(cancelReason || undefined);
               }}
               disabled={cancelMutation.isPending}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -214,6 +312,74 @@ export function OrderDetailClient() {
                 : isPaid
                   ? t('Cancelar e Reembolsar', 'Cancel & Refund')
                   : t('Cancelar Pedido', 'Cancel Order')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Refund dialog */}
+      <AlertDialog open={refundDialogOpen} onOpenChange={setRefundDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('Reembolsar Pedido', 'Refund Order')} #{order.id}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t(
+                'Informe o valor a ser reembolsado. O total do pedido é ',
+                'Enter the refund amount. The order total is '
+              )}
+              {formatCurrency(order.totalAmount, order.currency)}.
+              {isPartiallyRefunded && (
+                <span className="block mt-1 text-amber-600 font-medium">
+                  {t('Este pedido já possui reembolso parcial.', 'This order already has a partial refund.')}
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-3 py-2">
+            <div>
+              <Label htmlFor="refund-amount">{t('Valor (R$)', 'Amount (R$)')}</Label>
+              <Input
+                id="refund-amount"
+                type="number"
+                step="0.01"
+                min="0.01"
+                max={order.totalAmount}
+                value={refundAmount}
+                onChange={(e) => setRefundAmount(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="refund-reason">{t('Motivo (opcional)', 'Reason (optional)')}</Label>
+              <Textarea
+                id="refund-reason"
+                placeholder={t('Ex: Produto com defeito', 'E.g.: Defective product')}
+                value={refundReason}
+                onChange={(e) => setRefundReason(e.target.value)}
+                rows={2}
+              />
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={refundMutation.isPending}>
+              {t('Voltar', 'Go Back')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                const amount = parseFloat(refundAmount);
+                if (isNaN(amount) || amount <= 0) {
+                  toast.error(t('Informe um valor válido.', 'Enter a valid amount.'));
+                  return;
+                }
+                const amountCents = Math.round(amount * 100);
+                refundMutation.mutate({ amountCents, reason: refundReason || undefined });
+              }}
+              disabled={refundMutation.isPending}
+              className="bg-amber-600 text-white hover:bg-amber-700"
+            >
+              {refundMutation.isPending
+                ? t('Processando...', 'Processing...')
+                : t('Confirmar Reembolso', 'Confirm Refund')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -438,7 +604,7 @@ export function OrderDetailClient() {
 function TimelineItem({ icon, label, date, active }: { icon: React.ReactNode; label: string; date: string; active?: boolean }) {
   return (
     <div className="flex items-start gap-3">
-      <div className="mt-0.5 flex-shrink-0">{icon}</div>
+      <div className="mt-0.5 shrink-0">{icon}</div>
       <div>
         <p className={`text-sm ${active ? 'text-foreground' : 'text-muted-foreground'}`}>{label}</p>
         <p className="text-xs text-muted-foreground">{formatDate(date)}</p>

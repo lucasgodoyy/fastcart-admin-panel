@@ -133,7 +133,15 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
     onSuccess: (response) => {
       window.location.href = response.authorizeUrl;
     },
-    onError: () => toast.error('Falha ao iniciar conexão com Melhor Envio.'),
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || '';
+      if (msg.includes('OAuth não configurado')) {
+        toast.error('OAuth do Melhor Envio não configurado no servidor. Use a opção "Conectar com Token" para conectar diretamente.');
+        setShowTokenInput(true);
+      } else {
+        toast.error('Falha ao iniciar conexão com Melhor Envio. Tente "Conectar com Token".');
+      }
+    },
   });
 
   const connectMelhorEnvioMutation = useMutation({
@@ -188,27 +196,45 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
     }
   }, [queryClient, router, searchParams]);
 
+  /* Handle Melhor Envio OAuth callback redirect from backend */
   useEffect(() => {
+    const melhorEnvioResult = searchParams.get('melhor_envio');
+    if (melhorEnvioResult === 'success') {
+      toast.success('Melhor Envio conectado com sucesso!');
+      queryClient.invalidateQueries({ queryKey: MELHOR_QUERY_KEY });
+      router.replace(window.location.pathname);
+      return;
+    }
+    if (melhorEnvioResult === 'error') {
+      const reason = searchParams.get('reason');
+      const reasonMap: Record<string, string> = {
+        authorization_denied: 'Autorização negada pelo usuário.',
+        missing_code: 'Código de autorização ausente.',
+        missing_state: 'State ausente na resposta.',
+        invalid_state_or_code: 'State ou código inválido.',
+        internal_error: 'Erro interno ao processar callback.',
+      };
+      toast.error(reasonMap[reason ?? ''] ?? 'Falha ao conectar Melhor Envio.');
+      queryClient.invalidateQueries({ queryKey: MELHOR_QUERY_KEY });
+      router.replace(window.location.pathname);
+      return;
+    }
+
+    /* Handle direct OAuth code flow (if frontend is the redirect target) */
     const oauthError = searchParams.get('error');
     const oauthCode = searchParams.get('code');
-    const oauthState = searchParams.get('state');
 
     if (oauthError) {
       toast.error('Autorização do Melhor Envio cancelada ou inválida.');
-      router.replace('/admin/settings/integrations');
+      router.replace(window.location.pathname);
       return;
     }
 
     if (!oauthCode) return;
-    if (oauthState && !oauthState.startsWith('store-')) {
-      toast.error('State inválido no retorno do Melhor Envio.');
-      router.replace('/admin/settings/integrations');
-      return;
-    }
     if (connectMelhorEnvioMutation.isPending) return;
 
     connectMelhorEnvioMutation.mutate(oauthCode);
-  }, [connectMelhorEnvioMutation, router, searchParams]);
+  }, [connectMelhorEnvioMutation, queryClient, router, searchParams]);
 
   const stripeState = getStripeState(stripeStatus);
   const stripeIndicator = getStripeIndicator(stripeState);
@@ -382,71 +408,161 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
         )}
 
         {showMelhorEnvio && (
-        <div className="rounded-lg border border-border bg-card p-5">
-          <div className="mb-4 flex items-center gap-2">
-            <Truck className="h-5 w-5 text-muted-foreground" />
-            <h2 className="text-base font-semibold text-foreground">Melhor Envio</h2>
-          </div>
-
-          <div className="mb-4 text-sm text-muted-foreground">
-            {isLoadingMelhorEnvio
-              ? 'Carregando status...'
-              : melhorEnvioStatus?.connected
-                ? 'Conectado'
-                : 'Não conectado'}
-          </div>
-
-          {melhorEnvioStatus?.connected && (
-            <div className="mb-4 space-y-1 text-xs text-muted-foreground">
-              <p>Conta do provedor: {melhorEnvioStatus.providerAccountId || 'Não informado'}</p>
-              <p>
-                Conectado em:{' '}
-                {melhorEnvioStatus.connectedAt
-                  ? new Date(melhorEnvioStatus.connectedAt).toLocaleString()
-                  : '-'}
-              </p>
-              <p>
-                Expira em:{' '}
-                {melhorEnvioStatus.expiresAt
-                  ? new Date(melhorEnvioStatus.expiresAt).toLocaleString()
-                  : 'Não informado'}
-              </p>
+        <div className="rounded-lg border border-border bg-card overflow-hidden">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-border px-5 py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30">
+                <Truck className="h-4.5 w-4.5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <h2 className="text-sm font-semibold text-foreground">Melhor Envio</h2>
+                <p className="text-xs text-muted-foreground">Frete automático para sua loja</p>
+              </div>
             </div>
-          )}
-
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              onClick={() => openMelhorEnvioAuthorizeMutation.mutate()}
-              disabled={openMelhorEnvioAuthorizeMutation.isPending || connectMelhorEnvioMutation.isPending}
-            >
-              {melhorEnvioStatus?.connected ? 'Reconectar Melhor Envio' : 'Conectar Melhor Envio'}
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={() => setShowTokenInput(!showTokenInput)}
-              disabled={connectMelhorEnvioTokenMutation.isPending}
-            >
-              <KeyRound className="mr-2 h-3.5 w-3.5" />
-              {showTokenInput ? 'Cancelar' : 'Conectar com Token'}
-            </Button>
-
-            {melhorEnvioStatus?.connected && (
-              <Button
-                variant="outline"
-                onClick={() => disconnectMelhorEnvioMutation.mutate()}
-                disabled={disconnectMelhorEnvioMutation.isPending}
+            {!isLoadingMelhorEnvio && (
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${
+                  melhorEnvioStatus?.connected
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800'
+                    : 'bg-muted text-muted-foreground border-border'
+                }`}
               >
-                Desconectar Melhor Envio
-              </Button>
+                {melhorEnvioStatus?.connected ? (
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                ) : (
+                  <XCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                )}
+                {melhorEnvioStatus?.connected ? 'Conectado' : 'Não conectado'}
+              </span>
             )}
           </div>
 
+          {/* Body */}
+          <div className="px-5 py-4">
+            {isLoadingMelhorEnvio ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Verificando status do Melhor Envio...
+              </div>
+            ) : melhorEnvioStatus?.connected ? (
+              <>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Sua conta Melhor Envio está conectada. Cotações de frete e etiquetas funcionando normalmente.
+                </p>
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="flex flex-col items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/30 p-3 text-center">
+                    <CheckCircle2 className="mb-1 h-4 w-4 text-emerald-500" />
+                    <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">Conta</span>
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-500">{melhorEnvioStatus.providerAccountId || 'ID não informado'}</span>
+                  </div>
+                  <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-muted/30 p-3 text-center">
+                    <span className="text-xs font-medium text-muted-foreground">Conectado em</span>
+                    <span className="text-[10px] text-muted-foreground">{melhorEnvioStatus.connectedAt ? new Date(melhorEnvioStatus.connectedAt).toLocaleDateString('pt-BR') : '-'}</span>
+                  </div>
+                  <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-muted/30 p-3 text-center">
+                    <span className="text-xs font-medium text-muted-foreground">Expira em</span>
+                    <span className="text-[10px] text-muted-foreground">{melhorEnvioStatus.expiresAt ? new Date(melhorEnvioStatus.expiresAt).toLocaleDateString('pt-BR') : 'Sem expiração'}</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Conecte sua conta do Melhor Envio para habilitar cotação automática de frete, geração de etiquetas e rastreamento de envios.
+                </p>
+                <div className="mt-4 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-950/30">
+                  <ExternalLink className="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
+                  <div className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed space-y-1">
+                    <p className="font-semibold">Como conectar:</p>
+                    <p>
+                      <strong>Opção 1 — OAuth (recomendado):</strong> Clique em &quot;Conectar Melhor Envio&quot;. Você será
+                      redirecionado para criar conta / autorizar o acesso. Ao autorizar, retornará automaticamente.
+                    </p>
+                    <p>
+                      <strong>Opção 2 — Token direto:</strong> Se já possui uma conta, gere um token em{' '}
+                      <a
+                        href="https://sandbox.melhorenvio.com.br/painel/gerenciar/tokens"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline font-medium hover:text-blue-900 dark:hover:text-blue-200"
+                      >
+                        Painel Melhor Envio → Integrações → Meus Tokens
+                      </a>{' '}
+                      e cole abaixo.
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Actions */}
+          {!isLoadingMelhorEnvio && (
+            <div className="flex flex-wrap items-center gap-2 border-t border-border px-5 py-3 bg-muted/30">
+              <Button
+                size="sm"
+                onClick={() => openMelhorEnvioAuthorizeMutation.mutate()}
+                disabled={openMelhorEnvioAuthorizeMutation.isPending || connectMelhorEnvioMutation.isPending}
+              >
+                {openMelhorEnvioAuthorizeMutation.isPending && (
+                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                )}
+                {melhorEnvioStatus?.connected ? (
+                  <>
+                    <RefreshCw className="mr-2 h-3.5 w-3.5" />
+                    Reconectar
+                  </>
+                ) : (
+                  'Conectar Melhor Envio'
+                )}
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowTokenInput(!showTokenInput)}
+                disabled={connectMelhorEnvioTokenMutation.isPending}
+              >
+                <KeyRound className="mr-2 h-3.5 w-3.5" />
+                {showTokenInput ? 'Cancelar' : 'Conectar com Token'}
+              </Button>
+
+              {melhorEnvioStatus?.connected && (
+                <div className="ml-auto">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => {
+                      if (confirm('Tem certeza que deseja desconectar o Melhor Envio? Cotações de frete pararão de funcionar.')) {
+                        disconnectMelhorEnvioMutation.mutate();
+                      }
+                    }}
+                    disabled={disconnectMelhorEnvioMutation.isPending}
+                  >
+                    <Unplug className="mr-2 h-3.5 w-3.5" />
+                    Desconectar
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Token input area */}
           {showTokenInput && (
-            <div className="mt-3 space-y-2 rounded-lg border border-border bg-muted/30 p-3">
+            <div className="border-t border-border px-5 py-4 space-y-2 bg-muted/10">
               <p className="text-xs text-muted-foreground">
-                Cole o access token gerado no painel do Melhor Envio (sandbox ou produção).
+                Cole o access token gerado no{' '}
+                <a
+                  href="https://sandbox.melhorenvio.com.br/painel/gerenciar/tokens"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline font-medium"
+                >
+                  Painel Melhor Envio
+                </a>
+                . Selecione todas as permissões ao gerar o token.
               </p>
               <textarea
                 value={directToken}
@@ -473,10 +589,6 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
               </Button>
             </div>
           )}
-
-          <p className="mt-3 text-xs text-muted-foreground">
-            O lojista pode criar a conta no Melhor Envio durante o fluxo de autorização.
-          </p>
         </div>
         )}
       </div>

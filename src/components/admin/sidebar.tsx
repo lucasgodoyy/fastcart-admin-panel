@@ -25,8 +25,6 @@ import {
   Zap,
   Link2,
   Headphones,
-  Bell,
-  Mail,
 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -83,7 +81,6 @@ const navigation: NavSection[] = [
       { label: t("Logística", "Fulfillment"), href: "/admin/shipping", icon: <Truck className="h-[18px] w-[18px]" /> },
       { label: t("Mensagens", "Messages"), href: "/admin/chat", icon: <MessageSquare className="h-[18px] w-[18px]" /> },
       { label: t("Suporte", "Support"), href: "/admin/support", icon: <Headphones className="h-[18px] w-[18px]" /> },
-      { label: t("Notificações", "Notifications"), href: "/admin/notifications", icon: <Bell className="h-[18px] w-[18px]" /> },
       { label: t("Clientes", "Customers"), href: "/admin/customers", icon: <Users2 className="h-[18px] w-[18px]" /> },
     ],
   },
@@ -95,8 +92,12 @@ const navigation: NavSection[] = [
         { label: t("Frete grátis", "Free Shipping"), href: "/admin/discounts/free-shipping" },
         { label: t("Campanhas", "Campaigns"), href: "/admin/discounts/promotions" },
       ]},
-      { label: t("Marketing", "Marketing"), href: "/admin/marketing", icon: <Speaker className="h-[18px] w-[18px]" /> },
-      { label: t("E-mail Campanhas", "Email Campaigns"), href: "/admin/marketing/email-campaigns", icon: <Mail className="h-[18px] w-[18px]" /> },
+      { label: t("Marketing", "Marketing"), href: "/admin/marketing", icon: <Speaker className="h-[18px] w-[18px]" />, children: [
+        { label: t("Campanhas", "Campaigns"), href: "/admin/marketing" },
+        { label: t("E-mail", "Email"), href: "/admin/notifications" },
+        { label: t("E-mail Campanhas", "Email Campaigns"), href: "/admin/marketing/email-campaigns" },
+        { label: t("Integrações", "Integrations"), href: "/admin/marketing/integrations" },
+      ]},
       { label: t("Afiliados", "Affiliates"), href: "/admin/marketing/affiliates", icon: <Link2 className="h-[18px] w-[18px]" /> },
     ],
   },

@@ -172,7 +172,14 @@ export function SaUsersPage() {
                           {initials}
                         </div>
                         <div>
-                          <p className="text-[13px] font-semibold text-[hsl(var(--sa-text))]">{displayName}</p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-[13px] font-semibold text-[hsl(var(--sa-text))]">{displayName}</p>
+                            {user.emailVerified ? (
+                              <CheckCircle className="h-3.5 w-3.5 text-green-500" title="E-mail verificado" />
+                            ) : (
+                              <Clock className="h-3.5 w-3.5 text-amber-500" title="E-mail não verificado" />
+                            )}
+                          </div>
                           <p className="text-[11px] text-[hsl(var(--sa-text-muted))]">{user.email}</p>
                         </div>
                       </div>

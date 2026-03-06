@@ -2,15 +2,23 @@
 
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, TicketPercent } from 'lucide-react';
+import { Plus, Search, TicketPercent, Trash2, X, Check, ChevronsUpDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { AxiosError } from 'axios';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { couponService } from '@/services/sales';
+import productService from '@/services/catalog/product';
+import categoryService from '@/services/catalog/categoryService';
 import { Coupon, CouponScopeType, CouponType, CouponUpsertRequest } from '@/types/coupon';
+import { Product } from '@/types/product';
+import { Category } from '@/types/category';
 
 type CouponFormState = {
   code: string;
@@ -115,6 +123,15 @@ export function CouponsClient() {
     onError: (error) => toast.error(resolveApiErrorMessage(error, 'Falha ao alterar status do cupom')),
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => couponService.delete(id),
+    onSuccess: () => {
+      toast.success('Cupom excluído com sucesso');
+      queryClient.invalidateQueries({ queryKey: ['coupons'] });
+    },
+    onError: (error) => toast.error(resolveApiErrorMessage(error, 'Falha ao excluir cupom')),
+  });
+
   const filteredCoupons = useMemo(() => {
     const term = search.trim().toLowerCase();
     if (!term) return coupons;
@@ -204,6 +221,49 @@ export function CouponsClient() {
 
   const isSaving = createMutation.isPending || updateMutation.isPending;
 
+  // ── Product & Category data for scope pickers ──
+  const { data: allProducts = [] } = useQuery<Product[]>({
+    queryKey: ['products-for-coupon'],
+    queryFn: () => productService.listAll(),
+    enabled: isDialogOpen && (form.scopeType === 'SPECIFIC_PRODUCTS' || form.scopeType === 'SPECIFIC_COLLECTIONS'),
+  });
+
+  const { data: allCategories = [] } = useQuery<Category[]>({
+    queryKey: ['categories-for-coupon'],
+    queryFn: () => categoryService.list(),
+    enabled: isDialogOpen && form.scopeType === 'SPECIFIC_CATEGORIES',
+  });
+
+  const selectedIds = useMemo(() => {
+    const raw = form.scopeTargetIds.trim();
+    if (!raw) return [] as number[];
+    return raw.split(',').map(Number).filter((n) => Number.isInteger(n) && n > 0);
+  }, [form.scopeTargetIds]);
+
+  const toggleScopeId = (id: number) => {
+    const current = new Set(selectedIds);
+    if (current.has(id)) current.delete(id);
+    else current.add(id);
+    setForm((prev) => ({ ...prev, scopeTargetIds: Array.from(current).join(',') }));
+  };
+
+  const removeScopeId = (id: number) => {
+    setForm((prev) => ({
+      ...prev,
+      scopeTargetIds: selectedIds.filter((x) => x !== id).join(','),
+    }));
+  };
+
+  const scopeLabel = (id: number): string => {
+    if (form.scopeType === 'SPECIFIC_PRODUCTS' || form.scopeType === 'SPECIFIC_COLLECTIONS') {
+      return allProducts.find((p) => p.id === id)?.name || `Produto #${id}`;
+    }
+    if (form.scopeType === 'SPECIFIC_CATEGORIES') {
+      return allCategories.find((c) => c.id === id)?.name || `Categoria #${id}`;
+    }
+    return `#${id}`;
+  };
+
   return (
     <div className="p-4 md:p-6 lg:p-8">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -292,6 +352,19 @@ export function CouponsClient() {
                       >
                         {coupon.active ? 'Desativar' : 'Ativar'}
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={deleteMutation.isPending}
+                        className="text-destructive hover:bg-destructive/10"
+                        onClick={() => {
+                          if (confirm(`Excluir cupom "${coupon.code}" permanentemente?`)) {
+                            deleteMutation.mutate(coupon.id);
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -306,117 +379,178 @@ export function CouponsClient() {
             <DialogTitle>{editingCoupon ? 'Editar cupom' : 'Criar cupom'}</DialogTitle>
           </DialogHeader>
 
-          <div className="grid gap-3">
-            <Input
-              value={form.code}
-              onChange={(event) => setForm((prev) => ({ ...prev, code: event.target.value }))}
-              placeholder="Código (ex.: BEMVINDO10)"
-            />
+          <div className="grid gap-4">
+            {/* Code */}
+            <div className="space-y-1.5">
+              <Label>Código do cupom</Label>
+              <Input
+                value={form.code}
+                onChange={(event) => setForm((prev) => ({ ...prev, code: event.target.value }))}
+                placeholder="Ex.: BEMVINDO10"
+              />
+            </div>
 
+            {/* Discount Type + Value */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <label className="space-y-1 text-sm">
-                <span className="text-muted-foreground">Tipo de desconto</span>
+              <div className="space-y-1.5">
+                <Label>Tipo de desconto</Label>
                 <select
-                  className="w-full rounded-md border border-input bg-background px-3 py-2"
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   value={form.type}
                   onChange={(event) => setForm((prev) => ({ ...prev, type: event.target.value as CouponType }))}
                 >
-                  <option value="PERCENTAGE">Percentual</option>
-                  <option value="FIXED_AMOUNT">Valor fixo</option>
+                  <option value="PERCENTAGE">Percentual (%)</option>
+                  <option value="FIXED_AMOUNT">Valor fixo (R$)</option>
                 </select>
-              </label>
+              </div>
 
-              <Input
-                type="number"
-                step="0.01"
-                min="0.01"
-                value={form.value}
-                onChange={(event) => setForm((prev) => ({ ...prev, value: event.target.value }))}
-                placeholder={form.type === 'PERCENTAGE' ? 'Valor (%)' : 'Valor (R$)'}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <label className="space-y-1 text-sm">
-                <span className="text-muted-foreground">Escopo</span>
-                <select
-                  className="w-full rounded-md border border-input bg-background px-3 py-2"
-                  value={form.scopeType}
-                  onChange={(event) => setForm((prev) => ({ ...prev, scopeType: event.target.value as CouponScopeType }))}
-                >
-                  <option value="ALL_PRODUCTS">Todos os produtos</option>
-                  <option value="SPECIFIC_PRODUCTS">Produtos específicos</option>
-                  <option value="SPECIFIC_CATEGORIES">Categorias específicas</option>
-                  <option value="SPECIFIC_COLLECTIONS">Coleções específicas</option>
-                </select>
-              </label>
-
-              {form.scopeType !== 'ALL_PRODUCTS' ? (
+              <div className="space-y-1.5">
+                <Label>{form.type === 'PERCENTAGE' ? 'Valor do desconto (%)' : 'Valor do desconto (R$)'}</Label>
                 <Input
-                  value={form.scopeTargetIds}
-                  onChange={(event) => setForm((prev) => ({ ...prev, scopeTargetIds: event.target.value }))}
-                  placeholder="IDs alvo (1,2,3)"
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  value={form.value}
+                  onChange={(event) => setForm((prev) => ({ ...prev, value: event.target.value }))}
+                  placeholder={form.type === 'PERCENTAGE' ? 'Ex.: 10' : 'Ex.: 25.00'}
                 />
-              ) : (
-                <Input value="Todos" disabled />
-              )}
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Input
-                type="number"
-                step="0.01"
-                min="0"
-                value={form.minOrderAmount}
-                onChange={(event) => setForm((prev) => ({ ...prev, minOrderAmount: event.target.value }))}
-                placeholder="Pedido mínimo (opcional)"
-              />
-              <Input
-                type="number"
-                step="0.01"
-                min="0"
-                value={form.maxDiscountAmount}
-                onChange={(event) => setForm((prev) => ({ ...prev, maxDiscountAmount: event.target.value }))}
-                placeholder="Desconto máximo (opcional)"
-              />
+            {/* Scope */}
+            <div className="space-y-1.5">
+              <Label>Escopo de aplicação</Label>
+              <select
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={form.scopeType}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    scopeType: event.target.value as CouponScopeType,
+                    scopeTargetIds: '',
+                  }))
+                }
+              >
+                <option value="ALL_PRODUCTS">Todos os produtos</option>
+                <option value="SPECIFIC_PRODUCTS">Produtos específicos</option>
+                <option value="SPECIFIC_CATEGORIES">Categorias específicas</option>
+                <option value="SPECIFIC_COLLECTIONS">Coleções específicas</option>
+              </select>
             </div>
 
+            {/* Scope Target Picker */}
+            {form.scopeType !== 'ALL_PRODUCTS' && (
+              <div className="space-y-1.5">
+                <Label>
+                  {form.scopeType === 'SPECIFIC_PRODUCTS' || form.scopeType === 'SPECIFIC_COLLECTIONS'
+                    ? 'Selecione os produtos'
+                    : 'Selecione as categorias'}
+                </Label>
+
+                {/* Selected items badges */}
+                {selectedIds.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {selectedIds.map((id) => (
+                      <Badge key={id} variant="secondary" className="gap-1 pr-1">
+                        <span className="text-xs">{scopeLabel(id)}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeScopeId(id)}
+                          className="ml-0.5 rounded-full hover:bg-muted-foreground/20 p-0.5"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+
+                {/* Searchable picker */}
+                <ScopePicker
+                  scopeType={form.scopeType}
+                  products={allProducts}
+                  categories={allCategories}
+                  selectedIds={selectedIds}
+                  onToggle={toggleScopeId}
+                />
+              </div>
+            )}
+
+            {/* Min Order + Max Discount */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Input
-                type="number"
-                min="1"
-                value={form.usageLimit}
-                onChange={(event) => setForm((prev) => ({ ...prev, usageLimit: event.target.value }))}
-                placeholder="Limite de uso (opcional)"
-              />
-              <Input
-                type="number"
-                min="1"
-                value={form.perCustomerLimit}
-                onChange={(event) => setForm((prev) => ({ ...prev, perCustomerLimit: event.target.value }))}
-                placeholder="Limite por cliente (opcional)"
-              />
+              <div className="space-y-1.5">
+                <Label>Pedido mínimo (R$)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={form.minOrderAmount}
+                  onChange={(event) => setForm((prev) => ({ ...prev, minOrderAmount: event.target.value }))}
+                  placeholder="Sem mínimo"
+                />
+                <p className="text-xs text-muted-foreground">Valor mínimo do carrinho para aplicar o cupom</p>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Desconto máximo (R$)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={form.maxDiscountAmount}
+                  onChange={(event) => setForm((prev) => ({ ...prev, maxDiscountAmount: event.target.value }))}
+                  placeholder="Sem limite"
+                />
+                <p className="text-xs text-muted-foreground">Teto do desconto (útil para cupons percentuais)</p>
+              </div>
             </div>
 
+            {/* Usage Limits */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <label className="space-y-1 text-sm">
-                <span className="text-muted-foreground">Início</span>
+              <div className="space-y-1.5">
+                <Label>Limite total de usos</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={form.usageLimit}
+                  onChange={(event) => setForm((prev) => ({ ...prev, usageLimit: event.target.value }))}
+                  placeholder="Ilimitado"
+                />
+                <p className="text-xs text-muted-foreground">Quantas vezes o cupom pode ser usado no total</p>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Limite por cliente</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={form.perCustomerLimit}
+                  onChange={(event) => setForm((prev) => ({ ...prev, perCustomerLimit: event.target.value }))}
+                  placeholder="Ilimitado"
+                />
+                <p className="text-xs text-muted-foreground">Quantas vezes cada cliente pode usar este cupom</p>
+              </div>
+            </div>
+
+            {/* Dates */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Data de início</Label>
                 <Input
                   type="datetime-local"
                   value={form.startsAt}
                   onChange={(event) => setForm((prev) => ({ ...prev, startsAt: event.target.value }))}
                 />
-              </label>
-              <label className="space-y-1 text-sm">
-                <span className="text-muted-foreground">Expiração</span>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Data de expiração</Label>
                 <Input
                   type="datetime-local"
                   value={form.expiresAt}
                   onChange={(event) => setForm((prev) => ({ ...prev, expiresAt: event.target.value }))}
                 />
-              </label>
+              </div>
             </div>
 
+            {/* Checkboxes */}
             <label className="flex items-center gap-2 text-sm text-foreground">
               <input
                 type="checkbox"
@@ -452,5 +586,82 @@ export function CouponsClient() {
         Cupons ligados ao backend em /api/v1/coupons
       </div>
     </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Scope Picker — searchable product/category multi-select
+// ═══════════════════════════════════════════════════════════════
+
+function ScopePicker({
+  scopeType,
+  products,
+  categories,
+  selectedIds,
+  onToggle,
+}: {
+  scopeType: CouponScopeType;
+  products: Product[];
+  categories: Category[];
+  selectedIds: number[];
+  onToggle: (id: number) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+
+  const isProduct = scopeType === 'SPECIFIC_PRODUCTS' || scopeType === 'SPECIFIC_COLLECTIONS';
+  const items = isProduct
+    ? products.map((p) => ({ id: p.id, label: p.name, extra: p.sku ? `SKU: ${p.sku}` : undefined }))
+    : categories.map((c) => ({ id: c.id, label: c.name, extra: c.slug }));
+
+  const filtered = items.filter((item) =>
+    item.label.toLowerCase().includes(search.toLowerCase()) ||
+    (item.extra?.toLowerCase().includes(search.toLowerCase()) ?? false),
+  );
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between text-sm font-normal">
+          {selectedIds.length > 0
+            ? `${selectedIds.length} ${isProduct ? 'produto(s)' : 'categoria(s)'} selecionado(s)`
+            : `Buscar ${isProduct ? 'produtos' : 'categorias'}...`}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder={isProduct ? 'Buscar produto por nome ou SKU...' : 'Buscar categoria por nome...'}
+            value={search}
+            onValueChange={setSearch}
+          />
+          <CommandList>
+            <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
+            <CommandGroup className="max-h-60 overflow-y-auto">
+              {filtered.map((item) => (
+                <CommandItem key={item.id} onSelect={() => onToggle(item.id)} className="cursor-pointer">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div
+                      className={`h-4 w-4 shrink-0 rounded-sm border flex items-center justify-center ${
+                        selectedIds.includes(item.id)
+                          ? 'bg-primary border-primary text-primary-foreground'
+                          : 'border-muted-foreground/30'
+                      }`}
+                    >
+                      {selectedIds.includes(item.id) && <Check className="h-3 w-3" />}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm truncate">{item.label}</p>
+                      {item.extra && <p className="text-xs text-muted-foreground truncate">{item.extra}</p>}
+                    </div>
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }
