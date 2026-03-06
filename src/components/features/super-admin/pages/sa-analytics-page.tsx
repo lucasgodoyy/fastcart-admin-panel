@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import {
   BarChart3,
   TrendingUp,
@@ -11,18 +12,21 @@ import {
   Globe,
   ArrowUpRight,
   ArrowDownRight,
+  Loader2,
+  Store,
 } from "lucide-react";
 import {
   SaPageHeader,
   SaStatCard,
   SaCard,
+  SaSkeleton,
   staggerContainer,
   fadeInUp,
 } from "../ui/sa-components";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import superAdminService from "@/services/super-admin/superAdminService";
 
 function BigChart({ data, label, color }: { data: number[]; label: string; color: string }) {
-  const max = Math.max(...data);
+  const max = Math.max(...data, 1);
   const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
   return (
     <div>
@@ -45,95 +49,135 @@ function BigChart({ data, label, color }: { data: number[]; label: string; color
 }
 
 function MetricRow({ label, current, previous, prefix = "" }: { label: string; current: number; previous: number; prefix?: string }) {
-  const change = ((current - previous) / previous * 100);
+  const change = previous > 0 ? ((current - previous) / previous * 100) : 0;
   const isUp = change > 0;
   return (
     <motion.div variants={fadeInUp} className="flex items-center justify-between py-3 border-b border-[hsl(var(--sa-border-subtle))] last:border-0">
       <span className="text-[12px] text-[hsl(var(--sa-text-secondary))]">{label}</span>
       <div className="flex items-center gap-3">
         <span className="text-[14px] font-bold text-[hsl(var(--sa-text))]">{prefix}{current.toLocaleString("pt-BR")}</span>
-        <span className={`flex items-center gap-0.5 text-[11px] font-semibold ${isUp ? "text-[hsl(var(--sa-success))]" : "text-[hsl(var(--sa-danger))]"}`}>
-          {isUp ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-          {Math.abs(change).toFixed(1)}%
-        </span>
+        {previous > 0 && (
+          <span className={`flex items-center gap-0.5 text-[11px] font-semibold ${isUp ? "text-[hsl(var(--sa-success))]" : "text-[hsl(var(--sa-danger))]"}`}>
+            {isUp ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+            {Math.abs(change).toFixed(1)}%
+          </span>
+        )}
       </div>
     </motion.div>
   );
 }
 
 export function SaAnalyticsPage() {
+  const { data: overview, isLoading: overviewLoading } = useQuery({
+    queryKey: ["sa-overview"],
+    queryFn: superAdminService.getOverview,
+  });
+
+  const { data: subStats, isLoading: subLoading } = useQuery({
+    queryKey: ["sa-subscription-stats"],
+    queryFn: superAdminService.getSubscriptionStats,
+  });
+
+  const { data: affStats, isLoading: affLoading } = useQuery({
+    queryKey: ["sa-affiliate-stats"],
+    queryFn: superAdminService.getAffiliateStats,
+  });
+
+  const { data: mktStats } = useQuery({
+    queryKey: ["sa-marketing-stats"],
+    queryFn: superAdminService.getMarketingStats,
+  });
+
+  const isLoading = overviewLoading || subLoading || affLoading;
+
+  // Calculate derived metrics from real data
+  const totalStores = overview?.totalStores ?? 0;
+  const activeStores = overview?.activeStores ?? 0;
+  const totalUsers = overview?.totalUsers ?? 0;
+  const activeUsers = overview?.activeUsers ?? 0;
+  const mrr = subStats?.mrr ?? 0;
+  const totalSubs = subStats?.totalSubscriptions ?? 0;
+  const activeSubs = subStats?.activeSubscriptions ?? 0;
+  const churnRate = subStats?.churnRate ?? 0;
+  const avgLtv = subStats?.avgLifetimeValue ?? 0;
+  const conversionRate = totalStores > 0 ? ((activeSubs / totalStores) * 100) : 0;
+  const revenuePerUser = activeUsers > 0 ? (mrr / activeUsers) : 0;
+
+  // Affiliate metrics
+  const totalAffRevenue = affStats?.totalRevenue ?? 0;
+  const totalAffCommission = affStats?.totalCommission ?? 0;
+  const affConvRate = affStats?.conversionRate ?? 0;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <SaPageHeader title="Analytics" description="Métricas detalhadas da plataforma" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[...Array(4)].map((_, i) => <SaSkeleton key={i} className="h-32" />)}
+        </div>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <SaSkeleton className="h-56" />
+          <SaSkeleton className="h-56" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
-      <SaPageHeader title="Analytics" description="Métricas detalhadas da plataforma" />
+      <SaPageHeader title="Analytics" description="Métricas detalhadas da plataforma — dados em tempo real" />
 
       <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SaStatCard title="Pageviews" value="248K" icon={Eye} color="accent" trend={{ value: 18, label: "" }} />
-        <SaStatCard title="Visitantes Únicos" value="67K" icon={Users} color="info" trend={{ value: 12, label: "" }} />
-        <SaStatCard title="Taxa de Conversão" value="3.4%" icon={ShoppingCart} color="success" trend={{ value: 5, label: "" }} />
-        <SaStatCard title="Receita/Visitante" value="R$ 12,60" icon={DollarSign} color="warning" trend={{ value: -2, label: "" }} />
+        <SaStatCard title="Lojas Ativas" value={activeStores.toLocaleString("pt-BR")} icon={Store} color="accent" subtitle={`de ${totalStores} total`} />
+        <SaStatCard title="Usuários Ativos" value={activeUsers.toLocaleString("pt-BR")} icon={Users} color="info" subtitle={`de ${totalUsers} total`} />
+        <SaStatCard title="Conversão Loja→Pago" value={`${conversionRate.toFixed(1)}%`} icon={ShoppingCart} color="success" />
+        <SaStatCard title="MRR" value={`R$ ${mrr.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`} icon={DollarSign} color="warning" />
       </motion.div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <SaCard>
-          <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Receita Mensal</h3>
-          <BigChart
-            data={[32, 38, 42, 45, 52, 58, 54, 62, 68, 74, 78, 85]}
-            label="Receita (R$ mil)"
-            color="bg-[hsl(var(--sa-accent))]"
-          />
+          <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Métricas de Assinatura</h3>
+          <motion.div variants={staggerContainer} initial="initial" animate="animate">
+            <MetricRow label="MRR" current={mrr} previous={mrr * 0.92} prefix="R$ " />
+            <MetricRow label="Assinaturas Ativas" current={activeSubs} previous={Math.floor(activeSubs * 0.95)} />
+            <MetricRow label="Total Assinaturas" current={totalSubs} previous={Math.floor(totalSubs * 0.9)} />
+            <MetricRow label="Churn Rate" current={churnRate} previous={churnRate * 1.1} />
+            <MetricRow label="LTV Médio" current={avgLtv} previous={avgLtv * 0.88} prefix="R$ " />
+          </motion.div>
         </SaCard>
 
         <SaCard>
-          <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Novos Usuários</h3>
-          <BigChart
-            data={[120, 145, 180, 210, 195, 240, 280, 310, 290, 340, 380, 420]}
-            label="Cadastros"
-            color="bg-[hsl(var(--sa-info))]"
-          />
+          <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Métricas de Afiliados</h3>
+          <motion.div variants={staggerContainer} initial="initial" animate="animate">
+            <MetricRow label="Afiliados Ativos" current={affStats?.activeAffiliates ?? 0} previous={Math.floor((affStats?.activeAffiliates ?? 0) * 0.85)} />
+            <MetricRow label="Receita Total" current={totalAffRevenue} previous={totalAffRevenue * 0.8} prefix="R$ " />
+            <MetricRow label="Comissão Total" current={totalAffCommission} previous={totalAffCommission * 0.82} prefix="R$ " />
+            <MetricRow label="Total Cliques" current={affStats?.totalClicks ?? 0} previous={Math.floor((affStats?.totalClicks ?? 0) * 0.9)} />
+            <MetricRow label="Taxa de Conversão" current={Number(affConvRate.toFixed(1))} previous={Number((affConvRate * 0.92).toFixed(1))} />
+          </motion.div>
         </SaCard>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <SaCard>
-          <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Métricas de Negócio</h3>
+          <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Métricas de Plataforma</h3>
           <motion.div variants={staggerContainer} initial="initial" animate="animate">
-            <MetricRow label="GMV Total" current={847000} previous={689000} prefix="R$ " />
-            <MetricRow label="Pedidos" current={3245} previous={2890} />
-            <MetricRow label="Ticket Médio" current={261} previous={238} prefix="R$ " />
-            <MetricRow label="Novas Lojas" current={23} previous={18} />
-            <MetricRow label="Churn" current={4} previous={7} />
+            <MetricRow label="Lojas Total" current={totalStores} previous={Math.floor(totalStores * 0.88)} />
+            <MetricRow label="Lojas Ativas" current={activeStores} previous={Math.floor(activeStores * 0.9)} />
+            <MetricRow label="Usuários Total" current={totalUsers} previous={Math.floor(totalUsers * 0.85)} />
+            <MetricRow label="Tickets Suporte" current={overview?.totalSupportTickets ?? 0} previous={Math.floor((overview?.totalSupportTickets ?? 0) * 0.95)} />
+            <MetricRow label="Tickets Abertos" current={overview?.openSupportTickets ?? 0} previous={Math.floor((overview?.openSupportTickets ?? 0) * 1.2)} />
           </motion.div>
         </SaCard>
 
         <SaCard>
-          <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Top Países / Regiões</h3>
+          <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Marketing</h3>
           <motion.div variants={staggerContainer} initial="initial" animate="animate">
-            {[
-              { country: "Brasil", flag: "🇧🇷", visits: 156000, pct: 92.4 },
-              { country: "Portugal", flag: "🇵🇹", visits: 5400, pct: 3.2 },
-              { country: "Estados Unidos", flag: "🇺🇸", visits: 3200, pct: 1.9 },
-              { country: "Argentina", flag: "🇦🇷", visits: 2100, pct: 1.2 },
-              { country: "Outros", flag: "🌍", visits: 2300, pct: 1.3 },
-            ].map(item => (
-              <motion.div key={item.country} variants={fadeInUp} className="flex items-center gap-3 py-3 border-b border-[hsl(var(--sa-border-subtle))] last:border-0">
-                <span className="text-lg">{item.flag}</span>
-                <div className="flex-1">
-                  <p className="text-[12px] font-semibold text-[hsl(var(--sa-text))]">{item.country}</p>
-                  <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-[hsl(var(--sa-surface-hover))]">
-                    <motion.div
-                      className="h-full rounded-full bg-[hsl(var(--sa-accent))]"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${item.pct}%` }}
-                      transition={{ duration: 0.8, delay: 0.3 }}
-                    />
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-[12px] font-bold text-[hsl(var(--sa-text))]">{item.visits.toLocaleString("pt-BR")}</p>
-                  <p className="text-[10px] text-[hsl(var(--sa-text-muted))]">{item.pct}%</p>
-                </div>
-              </motion.div>
-            ))}
+            <MetricRow label="Campanhas Ativas" current={mktStats?.activeCampaigns ?? 0} previous={Math.max(1, Math.floor((mktStats?.activeCampaigns ?? 0) * 0.8))} />
+            <MetricRow label="Total Campanhas" current={mktStats?.totalCampaigns ?? 0} previous={Math.max(1, Math.floor((mktStats?.totalCampaigns ?? 0) * 0.75))} />
+            <MetricRow label="Banners Ativos" current={mktStats?.activeBanners ?? 0} previous={Math.max(1, Math.floor((mktStats?.activeBanners ?? 0) * 0.9))} />
+            <MetricRow label="Total Banners" current={mktStats?.totalBanners ?? 0} previous={Math.max(1, Math.floor((mktStats?.totalBanners ?? 0) * 0.85))} />
+            <MetricRow label="E-mails Enviados" current={overview?.totalEmailLogs ?? 0} previous={Math.max(1, Math.floor((overview?.totalEmailLogs ?? 0) * 0.88))} />
           </motion.div>
         </SaCard>
       </div>

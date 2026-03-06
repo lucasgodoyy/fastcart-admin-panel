@@ -30,9 +30,11 @@ export function CreateCustomerClient() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
-  const [userIdInput, setUserIdInput] = useState(getStoredUserId());
 
-  const parsedUserId = useMemo(() => Number(userIdInput), [userIdInput]);
+  const storedUserId = useMemo(() => {
+    const raw = getStoredUserId();
+    return raw ? Number(raw) : NaN;
+  }, []);
 
   const createMutation = useMutation({
     mutationFn: (request: CreateCustomerRequest) => customerService.create(request),
@@ -56,14 +58,14 @@ export function CreateCustomerClient() {
       return;
     }
 
-    if (!Number.isInteger(parsedUserId) || parsedUserId <= 0) {
-      toast.error('UserId inválido');
+    if (!Number.isInteger(storedUserId) || storedUserId <= 0) {
+      toast.error('UserId inválido. Faça login novamente.');
       return;
     }
 
     const payload: CreateCustomerRequest = {
       storeId,
-      userId: parsedUserId,
+      userId: storedUserId,
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       phone: phone.trim(),
@@ -113,16 +115,6 @@ export function CreateCustomerClient() {
             <div>
               <label className="mb-1 block text-sm text-muted-foreground">Telefone</label>
               <Input value={phone} onChange={(event) => setPhone(event.target.value)} />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm text-muted-foreground">User ID</label>
-              <Input
-                type="number"
-                min="1"
-                value={userIdInput}
-                onChange={(event) => setUserIdInput(event.target.value)}
-                placeholder="ID do usuário já existente"
-              />
             </div>
           </div>
         </div>

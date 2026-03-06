@@ -3,7 +3,7 @@
 import { ReactNode, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { ExternalLink, HelpCircle, Mail, Plus, Search, SlidersHorizontal, Users } from 'lucide-react';
+import { ExternalLink, HelpCircle, Mail, Plus, Search, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { customerService } from '@/services/sales';
@@ -56,7 +56,7 @@ export function CustomerClient() {
     if (!term) return customers;
 
     return customers.filter((customer) => {
-      const values = [customer.firstName, customer.lastName, customer.phone, customer.document]
+      const values = [customer.firstName, customer.lastName, customer.phone, customer.document, (customer as Record<string, unknown>).email as string]
         .filter(Boolean)
         .join(' ')
         .toLowerCase();
@@ -69,10 +69,6 @@ export function CustomerClient() {
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-5 font-semibold text-foreground">Clientes</h1>
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="gap-2">
-            <SlidersHorizontal className="h-4 w-4" />
-            Filtros
-          </Button>
           <Link href="/admin/customers/new">
             <Button className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
               <Plus className="h-4 w-4" />
@@ -88,7 +84,7 @@ export function CustomerClient() {
           <Input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Buscar por nome, telefone ou documento"
+            placeholder="Buscar por nome, e-mail, telefone ou documento"
             className="pl-9"
           />
         </div>

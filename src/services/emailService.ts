@@ -27,6 +27,84 @@ export type EmailLog = {
   errorMessage: string | null;
 };
 
+export type PaginatedResult<T> = {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+};
+
+export type EmailCampaignStats = {
+  totalCampaigns: number;
+  draftCampaigns: number;
+  scheduledCampaigns: number;
+  activeCampaigns: number;
+  sentCampaigns: number;
+  totalRecipients: number;
+  totalDelivered: number;
+  totalOpened: number;
+  totalClicked: number;
+  totalBounced: number;
+  avgOpenRate: number;
+  avgClickRate: number;
+};
+
+export type StoreEmailCampaign = {
+  id: number;
+  storeId: number | null;
+  storeName: string | null;
+  name: string;
+  subject: string;
+  bodyHtml: string;
+  status: string;
+  targetAudience: string | null;
+  segmentFilter: string | null;
+  sendAt: string | null;
+  frequency: string | null;
+  nextSendAt: string | null;
+  lastSentAt: string | null;
+  recurrenceEnd: string | null;
+  timezone: string | null;
+  fromName: string | null;
+  fromEmail: string | null;
+  replyToEmail: string | null;
+  totalRecipients: number;
+  sentCount: number;
+  deliveredCount: number;
+  openedCount: number;
+  clickedCount: number;
+  bouncedCount: number;
+  failedCount: number;
+  unsubscribedCount: number;
+  openRate: number;
+  clickRate: number;
+  bounceRate: number;
+  isPlatform: boolean;
+  createdBy: number | null;
+  createdAt: string;
+  updatedAt: string | null;
+};
+
+export type StoreEmailCampaignUpsert = {
+  name: string;
+  subject: string;
+  bodyHtml: string;
+  status?: string;
+  targetAudience?: string;
+  segmentFilter?: string;
+  sendAt?: string | null;
+  frequency?: string | null;
+  recurrenceEnd?: string | null;
+  timezone?: string;
+  fromName?: string;
+  fromEmail?: string;
+  replyToEmail?: string;
+  recipients?: Array<{ email: string; name?: string }>;
+};
+
 const emailService = {
   getSenderConfig: async (): Promise<EmailSenderConfig> => {
     const res = await apiClient.get('/email/sender-config');
@@ -78,6 +156,50 @@ const emailService = {
     if (templateKey) params.templateKey = templateKey;
     const res = await apiClient.post('/email/send-test', null, { params });
     return res.data;
+  },
+
+  // ── Email Campaigns (Store) ─────────────────────────────────
+  getCampaignStats: async (): Promise<EmailCampaignStats> => {
+    const res = await apiClient.get('/email/campaigns/stats');
+    return res.data;
+  },
+
+  listCampaigns: async (params?: {
+    status?: string;
+    page?: number;
+    size?: number;
+  }): Promise<PaginatedResult<StoreEmailCampaign>> => {
+    const res = await apiClient.get('/email/campaigns', { params });
+    return res.data;
+  },
+
+  getCampaign: async (id: number): Promise<StoreEmailCampaign> => {
+    const res = await apiClient.get(`/email/campaigns/${id}`);
+    return res.data;
+  },
+
+  createCampaign: async (body: StoreEmailCampaignUpsert): Promise<StoreEmailCampaign> => {
+    const res = await apiClient.post('/email/campaigns', body);
+    return res.data;
+  },
+
+  updateCampaign: async (id: number, body: StoreEmailCampaignUpsert): Promise<StoreEmailCampaign> => {
+    const res = await apiClient.put(`/email/campaigns/${id}`, body);
+    return res.data;
+  },
+
+  updateCampaignStatus: async (id: number, status: string): Promise<StoreEmailCampaign> => {
+    const res = await apiClient.patch(`/email/campaigns/${id}/status`, null, { params: { status } });
+    return res.data;
+  },
+
+  sendCampaignNow: async (id: number): Promise<StoreEmailCampaign> => {
+    const res = await apiClient.post(`/email/campaigns/${id}/send`);
+    return res.data;
+  },
+
+  deleteCampaign: async (id: number): Promise<void> => {
+    await apiClient.delete(`/email/campaigns/${id}`);
   },
 };
 

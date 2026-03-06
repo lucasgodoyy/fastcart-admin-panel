@@ -31,6 +31,9 @@ import type {
   SANotification,
   NotificationStats,
   CreateNotificationRequest,
+  EmailCampaign,
+  EmailCampaignStats,
+  EmailCampaignUpsertRequest,
 } from '@/types/super-admin';
 
 // ────────────────────────────────────────────────────────────────
@@ -372,6 +375,50 @@ const superAdminService = {
   createNotification: async (body: CreateNotificationRequest): Promise<SANotification> => {
     const { data } = await apiClient.post<SANotification>('/super-admin/notifications', body);
     return data;
+  },
+
+  // ── Email Campaigns (Platform) ────────────────────────────────
+  getEmailCampaignStats: async (): Promise<EmailCampaignStats> => {
+    const { data } = await apiClient.get<EmailCampaignStats>('/super-admin/email-campaigns/stats');
+    return data;
+  },
+
+  listEmailCampaigns: async (params?: {
+    status?: string;
+    page?: number;
+    size?: number;
+  }): Promise<PaginatedResult<EmailCampaign>> => {
+    const { data } = await apiClient.get<PaginatedResult<EmailCampaign>>('/super-admin/email-campaigns', { params });
+    return data;
+  },
+
+  getEmailCampaign: async (id: number): Promise<EmailCampaign> => {
+    const { data } = await apiClient.get<EmailCampaign>(`/super-admin/email-campaigns/${id}`);
+    return data;
+  },
+
+  createEmailCampaign: async (body: EmailCampaignUpsertRequest): Promise<EmailCampaign> => {
+    const { data } = await apiClient.post<EmailCampaign>('/super-admin/email-campaigns', body);
+    return data;
+  },
+
+  updateEmailCampaign: async (id: number, body: EmailCampaignUpsertRequest): Promise<EmailCampaign> => {
+    const { data } = await apiClient.put<EmailCampaign>(`/super-admin/email-campaigns/${id}`, body);
+    return data;
+  },
+
+  updateEmailCampaignStatus: async (id: number, status: string): Promise<EmailCampaign> => {
+    const { data } = await apiClient.patch<EmailCampaign>(`/super-admin/email-campaigns/${id}/status`, null, { params: { status } });
+    return data;
+  },
+
+  sendEmailCampaignNow: async (id: number): Promise<EmailCampaign> => {
+    const { data } = await apiClient.post<EmailCampaign>(`/super-admin/email-campaigns/${id}/send`);
+    return data;
+  },
+
+  deleteEmailCampaign: async (id: number): Promise<void> => {
+    await apiClient.delete(`/super-admin/email-campaigns/${id}`);
   },
 };
 

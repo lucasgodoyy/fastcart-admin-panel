@@ -1,5 +1,5 @@
-import { ChatClient } from '@/components/features/chat/ChatClient';
+import { MessagesClient } from '@/components/features/chat/MessagesClient';
 
 export default function ChatPage() {
-  return <ChatClient />;
+  return <MessagesClient />;
 }

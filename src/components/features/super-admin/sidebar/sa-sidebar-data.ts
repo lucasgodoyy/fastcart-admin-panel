@@ -17,6 +17,8 @@ import {
   Bell,
   Database,
   Palette,
+  ClipboardList,
+  MessageSquare,
   type LucideIcon,
 } from "lucide-react";
 
@@ -127,11 +129,21 @@ export const saSidebarSections: SASidebarSection[] = [
     label: "Comunicação",
     items: [
       {
+        title: "Mensagens",
+        href: "/super-admin/messages",
+        icon: MessageSquare,
+        children: [
+          { title: "SA ↔ Lojista", href: "/super-admin/messages" },
+          { title: "Lojista ↔ Equipe", href: "/super-admin/messages/team" },
+        ],
+      },
+      {
         title: "E-mails",
         href: "/super-admin/emails",
         icon: Mail,
         children: [
           { title: "Logs de Envio", href: "/super-admin/emails" },
+          { title: "Campanhas", href: "/super-admin/emails/campaigns" },
           { title: "Templates", href: "/super-admin/emails/templates" },
           { title: "Configuração SMTP", href: "/super-admin/emails/config" },
         ],
@@ -208,6 +220,13 @@ export const saSidebarSections: SASidebarSection[] = [
         title: "Infraestrutura",
         href: "/super-admin/infrastructure",
         icon: Database,
+      },
+      {
+        title: "Backlog",
+        href: "/super-admin/backlog",
+        icon: ClipboardList,
+        badge: "DEV",
+        badgeVariant: "warning",
       },
     ],
   },

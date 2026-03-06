@@ -339,6 +339,76 @@ export interface PushTemplateUpsertRequest {
   active?: boolean;
 }
 
+// ── Email Campaigns ────────────────────────────────────────────
+export interface EmailCampaign {
+  id: number;
+  storeId: number | null;
+  storeName: string | null;
+  name: string;
+  subject: string;
+  bodyHtml: string;
+  status: string;
+  targetAudience: string | null;
+  segmentFilter: string | null;
+  sendAt: string | null;
+  frequency: string | null;
+  nextSendAt: string | null;
+  lastSentAt: string | null;
+  recurrenceEnd: string | null;
+  timezone: string | null;
+  fromName: string | null;
+  fromEmail: string | null;
+  replyToEmail: string | null;
+  totalRecipients: number;
+  sentCount: number;
+  deliveredCount: number;
+  openedCount: number;
+  clickedCount: number;
+  bouncedCount: number;
+  failedCount: number;
+  unsubscribedCount: number;
+  openRate: number;
+  clickRate: number;
+  bounceRate: number;
+  isPlatform: boolean;
+  createdBy: number | null;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface EmailCampaignStats {
+  totalCampaigns: number;
+  draftCampaigns: number;
+  scheduledCampaigns: number;
+  activeCampaigns: number;
+  sentCampaigns: number;
+  totalRecipients: number;
+  totalDelivered: number;
+  totalOpened: number;
+  totalClicked: number;
+  totalBounced: number;
+  avgOpenRate: number;
+  avgClickRate: number;
+}
+
+export interface EmailCampaignUpsertRequest {
+  name: string;
+  subject: string;
+  bodyHtml: string;
+  status?: string;
+  targetAudience?: string;
+  segmentFilter?: string;
+  sendAt?: string | null;
+  frequency?: string | null;
+  recurrenceEnd?: string | null;
+  timezone?: string;
+  fromName?: string;
+  fromEmail?: string;
+  replyToEmail?: string;
+  isPlatform?: boolean;
+  recipients?: Array<{ email: string; name?: string }>;
+}
+
 // ── Notifications ──────────────────────────────────────────────
 export interface SANotification {
   id: number;

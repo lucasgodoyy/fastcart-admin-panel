@@ -70,6 +70,7 @@ const chatService = {
     customerEmail: string;
     subject?: string;
     initialMessage: string;
+    channel?: string;
   }): Promise<Conversation> => {
     const res = await apiClient.post('/admin/chat/conversations', data);
     return res.data;

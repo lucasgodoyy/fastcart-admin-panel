@@ -21,3 +21,6 @@ pnpm-debug.log*
 
 # typescript
 *.tsbuildinfo
+
+# build logs
+build_out*.txt

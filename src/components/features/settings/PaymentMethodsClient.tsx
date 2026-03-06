@@ -11,7 +11,6 @@ export function PaymentMethodsClient() {
       title="Meios de pagamento"
       description="Configure as formas de pagamento aceitas na sua loja."
       helpText="Mais sobre meios de pagamento"
-      helpHref="#"
     >
       <div className="rounded-lg border border-border bg-card p-5">
         <div className="flex items-start gap-4">

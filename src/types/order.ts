@@ -17,10 +17,20 @@ export type AdminOrder = {
   couponCode: string | null;
   subtotalAmount: number;
   discountAmount: number;
+  shippingCost: number | null;
   totalAmount: number;
   currency: string;
+  shippingMethod: string | null;
+  shippingCarrier: string | null;
+  trackingCode: string | null;
+  shippingLabelId: string | null;
+  shippingAddressJson: string | null;
+  customerNote: string | null;
   createdAt: string;
   paidAt: string | null;
+  shippedAt: string | null;
+  deliveredAt: string | null;
+  updatedAt: string | null;
   items: OrderItem[];
 };
 

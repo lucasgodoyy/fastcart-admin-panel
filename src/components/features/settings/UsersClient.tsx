@@ -1,12 +1,31 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { SettingsPageLayout } from './SettingsPageLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Shield, UserPlus, ChevronRight, Loader2, User } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Shield, UserPlus, ChevronRight, Loader2, User, Trash2, Eye, EyeOff } from 'lucide-react';
 import storeSettingsService, { StoreUser } from '@/services/storeSettingsService';
 import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
 
 const getStoreId = () => {
   if (typeof window === 'undefined') return null;
@@ -32,7 +51,17 @@ const initials = (email: string) => {
 
 export function UsersClient() {
   const storeId = getStoreId();
+  const queryClient = useQueryClient();
   const { user: currentUser } = useAuth();
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<StoreUser | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [newUser, setNewUser] = useState({
+    email: '',
+    password: '',
+    role: 'ROLE_STAFF',
+  });
 
   const { data: users = [], isLoading } = useQuery<StoreUser[]>({
     queryKey: ['store-users', storeId],
@@ -40,8 +69,62 @@ export function UsersClient() {
     enabled: Boolean(storeId),
   });
 
+  const createMutation = useMutation({
+    mutationFn: (data: { email: string; password: string; role: string; storeId: number }) =>
+      storeSettingsService.createUser(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['store-users', storeId] });
+      toast.success('Usuário adicionado com sucesso!');
+      setAddDialogOpen(false);
+      setNewUser({ email: '', password: '', role: 'ROLE_STAFF' });
+    },
+    onError: (error: any) => {
+      const msg = error?.response?.data?.message || 'Erro ao adicionar usuário.';
+      toast.error(msg);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (userId: number) => storeSettingsService.deleteUser(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['store-users', storeId] });
+      toast.success('Usuário removido.');
+      setDeleteDialogOpen(false);
+      setSelectedUser(null);
+    },
+    onError: () => {
+      toast.error('Erro ao remover usuário.');
+    },
+  });
+
+  const handleAddUser = () => {
+    if (!newUser.email.trim()) {
+      toast.error('E-mail é obrigatório.');
+      return;
+    }
+    if (!newUser.password || newUser.password.length < 6) {
+      toast.error('Senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
+    if (!storeId) {
+      toast.error('Loja não encontrada.');
+      return;
+    }
+    createMutation.mutate({
+      email: newUser.email,
+      password: newUser.password,
+      role: newUser.role,
+      storeId,
+    });
+  };
+
+  const confirmDelete = (user: StoreUser) => {
+    setSelectedUser(user);
+    setDeleteDialogOpen(true);
+  };
+
   return (
-    <SettingsPageLayout title="Usuários e notificações" helpText="Mais sobre permissões para usuários" helpHref="#">
+    <SettingsPageLayout title="Usuários e permissões" helpText="Mais sobre permissões para usuários" helpHref="#">
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -67,7 +150,19 @@ export function UsersClient() {
                   </p>
                   <Badge variant="outline" className="mt-0.5 text-xs">{roleLabel(usr.role)}</Badge>
                 </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center gap-1">
+                  {!isCurrent && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-destructive"
+                      onClick={() => confirmDelete(usr)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </div>
               </div>
             );
           })}
@@ -93,11 +188,105 @@ export function UsersClient() {
       </div>
 
       <div className="flex items-center justify-end">
-        <Button className="gap-2" disabled>
+        <Button className="gap-2" onClick={() => setAddDialogOpen(true)}>
           <UserPlus className="h-4 w-4" />
-          Adicionar (em breve)
+          Adicionar usuário
         </Button>
       </div>
+
+      {/* Add User Dialog */}
+      <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Adicionar usuário</DialogTitle>
+            <DialogDescription>
+              Convide um novo membro para gerenciar sua loja.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">E-mail *</Label>
+              <Input
+                type="email"
+                value={newUser.email}
+                onChange={(e) => setNewUser(prev => ({ ...prev, email: e.target.value }))}
+                placeholder="usuario@email.com"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">Senha temporária *</Label>
+              <div className="relative">
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  value={newUser.password}
+                  onChange={(e) => setNewUser(prev => ({ ...prev, password: e.target.value }))}
+                  placeholder="Mínimo 6 caracteres"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-0.5 h-8 w-8"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+              <p className="text-[11px] text-muted-foreground">O usuário poderá alterar a senha após o primeiro login.</p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">Perfil de acesso</Label>
+              <Select
+                value={newUser.role}
+                onValueChange={(v) => setNewUser(prev => ({ ...prev, role: v }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ROLE_ADMIN">Admin — Acesso total</SelectItem>
+                  <SelectItem value="ROLE_STAFF">Staff — Acesso limitado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddDialogOpen(false)}>Cancelar</Button>
+            <Button onClick={handleAddUser} disabled={createMutation.isPending}>
+              {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Adicionar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Remover usuário</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja remover <strong>{selectedUser?.email}</strong> desta loja?
+              Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>Cancelar</Button>
+            <Button
+              variant="destructive"
+              onClick={() => selectedUser && deleteMutation.mutate(selectedUser.id)}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Remover
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </SettingsPageLayout>
   );
 }

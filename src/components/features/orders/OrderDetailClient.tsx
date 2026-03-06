@@ -14,6 +14,9 @@ import {
   Mail,
   Tag,
   Ban,
+  MapPin,
+  Navigation,
+  FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -254,6 +257,15 @@ export function OrderDetailClient() {
                   <span className="text-green-600">-{formatCurrency(order.discountAmount, order.currency)}</span>
                 </div>
               )}
+              {order.shippingCost != null && order.shippingCost > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    {t('Frete', 'Shipping')}
+                    {order.shippingCarrier && <span className="ml-1 text-xs">({order.shippingCarrier})</span>}
+                  </span>
+                  <span className="text-foreground">{formatCurrency(order.shippingCost, order.currency)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-sm font-bold pt-1 border-t border-border">
                 <span className="text-foreground">{t('Total', 'Total')}</span>
                 <span className="text-foreground">{formatCurrency(order.totalAmount, order.currency)}</span>
@@ -283,7 +295,7 @@ export function OrderDetailClient() {
                 <TimelineItem
                   icon={<Truck className="h-3.5 w-3.5 text-indigo-600" />}
                   label={t('Pedido enviado', 'Order shipped')}
-                  date={order.createdAt}
+                  date={order.shippedAt || order.updatedAt || order.createdAt}
                   active
                 />
               )}
@@ -291,7 +303,7 @@ export function OrderDetailClient() {
                 <TimelineItem
                   icon={<CheckCircle2 className="h-3.5 w-3.5 text-green-600" />}
                   label={t('Pedido entregue', 'Order delivered')}
-                  date={order.createdAt}
+                  date={order.deliveredAt || order.updatedAt || order.createdAt}
                   active
                 />
               )}
@@ -347,6 +359,76 @@ export function OrderDetailClient() {
               )}
             </div>
           </div>
+
+          {/* Shipping */}
+          {(order.shippingMethod || order.shippingCarrier || order.trackingCode || order.shippingAddressJson) && (
+            <div className="rounded-lg border border-border bg-card px-5 py-4">
+              <h2 className="mb-3 text-sm font-semibold text-foreground">{t('Envio', 'Shipping')}</h2>
+              <div className="space-y-2 text-sm">
+                {order.shippingCarrier && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('Transportadora', 'Carrier')}</span>
+                    <span className="flex items-center gap-1 text-foreground">
+                      <Truck className="h-3.5 w-3.5" />
+                      {order.shippingCarrier}
+                    </span>
+                  </div>
+                )}
+                {order.shippingMethod && order.shippingMethod !== 'PICKUP' && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('Método', 'Method')}</span>
+                    <span className="text-foreground">{order.shippingMethod}</span>
+                  </div>
+                )}
+                {order.shippingMethod === 'PICKUP' && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('Método', 'Method')}</span>
+                    <Badge variant="secondary">{t('Retirada', 'Pickup')}</Badge>
+                  </div>
+                )}
+                {order.trackingCode && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('Rastreio', 'Tracking')}</span>
+                    <span className="flex items-center gap-1 text-foreground font-mono text-xs">
+                      <Navigation className="h-3.5 w-3.5" />
+                      {order.trackingCode}
+                    </span>
+                  </div>
+                )}
+                {order.shippingAddressJson && (() => {
+                  try {
+                    const addr = JSON.parse(order.shippingAddressJson);
+                    return (
+                      <div className="pt-2 border-t border-border">
+                        <div className="flex items-start gap-2">
+                          <MapPin className="h-3.5 w-3.5 mt-0.5 text-muted-foreground shrink-0" />
+                          <div className="text-xs text-muted-foreground leading-relaxed">
+                            {addr.address1 && <div>{addr.address1}</div>}
+                            {addr.address2 && <div>{addr.address2}</div>}
+                            <div>
+                              {[addr.city, addr.state, addr.zip].filter(Boolean).join(', ')}
+                            </div>
+                            {addr.country && <div>{addr.country}</div>}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  } catch { return null; }
+                })()}
+              </div>
+            </div>
+          )}
+
+          {/* Customer Note */}
+          {order.customerNote && (
+            <div className="rounded-lg border border-border bg-card px-5 py-4">
+              <h2 className="mb-2 text-sm font-semibold text-foreground flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                {t('Nota do cliente', 'Customer Note')}
+              </h2>
+              <p className="text-sm text-muted-foreground whitespace-pre-wrap">{order.customerNote}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
