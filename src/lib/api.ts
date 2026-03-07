@@ -17,10 +17,6 @@ function resolveApiBaseUrl() {
     if (hostname.includes('rapidocart.com.br')) {
       return 'https://api.rapidocart.com.br/api/v1';
     }
-
-    if (hostname.includes('lojaki.store')) {
-      return 'https://api.lojaki.store/api/v1';
-    }
   }
 
   return 'http://localhost:8080/api/v1';
