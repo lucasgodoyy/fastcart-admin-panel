@@ -1,6 +1,7 @@
 import { LoginForm } from '@/components/features/auth/loginForm';
 import { Zap } from 'lucide-react';
 import { t } from '@/lib/admin-language';
+import { Suspense } from 'react';
 
 export default function LoginPage() {
   return (
@@ -38,7 +39,9 @@ export default function LoginPage() {
             </div>
             <span className="text-lg font-bold tracking-tight text-foreground">Lojaki</span>
           </div>
-          <LoginForm />
+          <Suspense fallback={null}>
+            <LoginForm />
+          </Suspense>
         </div>
       </div>
     </div>

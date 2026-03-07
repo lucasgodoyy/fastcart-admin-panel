@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { SettingsPageLayout } from './SettingsPageLayout';
 import { Input } from '@/components/ui/input';
@@ -56,6 +56,35 @@ export function ContactInfoClient() {
 
   const handleChange = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // ── ViaCEP auto-fill ──
+  const [cepLoading, setCepLoading] = useState(false);
+  const fetchCep = useCallback(async (cep: string) => {
+    const clean = cep.replace(/\D/g, '');
+    if (clean.length !== 8) return;
+    setCepLoading(true);
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${clean}/json/`);
+      const data = await res.json();
+      if (!data.erro) {
+        setForm(prev => ({
+          ...prev,
+          addressStreet: data.logradouro ? `${data.logradouro}, ${data.bairro || ''}` : prev.addressStreet,
+          addressCity: data.localidade || prev.addressCity,
+          addressState: data.uf || prev.addressState,
+          addressCountry: prev.addressCountry || 'BR',
+        }));
+      }
+    } catch { /* ignore */ }
+    setCepLoading(false);
+  }, []);
+
+  const handleCepChange = (value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 8);
+    const formatted = digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits;
+    handleChange('addressZipCode', formatted);
+    if (digits.length === 8) fetchCep(digits);
   };
 
   if (isLoading) {
@@ -126,7 +155,11 @@ export function ContactInfoClient() {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="addressZipCode" className="text-sm font-medium text-foreground">CEP</Label>
-            <Input id="addressZipCode" value={form.addressZipCode} onChange={(e) => handleChange('addressZipCode', e.target.value)} placeholder="00000-000" />
+            <div className="relative">
+              <Input id="addressZipCode" value={form.addressZipCode} onChange={(e) => handleCepChange(e.target.value)} placeholder="00000-000" maxLength={9} />
+              {cepLoading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
+            </div>
+            <p className="text-xs text-muted-foreground">Este CEP é usado como origem para cálculo de frete.</p>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="addressCountry" className="text-sm font-medium text-foreground">País</Label>
