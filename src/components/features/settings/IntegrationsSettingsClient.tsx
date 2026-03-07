@@ -21,17 +21,57 @@ import {
 import { SettingsPageLayout } from './SettingsPageLayout';
 import { Button } from '@/components/ui/button';
 import integrationService from '@/services/integrationService';
-import { MelhorEnvioConnectionStatus, StripeConnectStatus } from '@/types/integration';
+import { MelhorEnvioConnectionStatus, MercadoPagoStatus, StripeConnectStatus } from '@/types/integration';
 
 const STRIPE_QUERY_KEY = ['integration', 'stripe-connect'];
 const MELHOR_QUERY_KEY = ['integration', 'melhor-envio'];
+const MERCADOPAGO_QUERY_KEY = ['integration', 'mercadopago'];
 
 /* ─── Stripe status helpers ─── */
 function getStripeState(status?: StripeConnectStatus) {
   if (!status || !status.connected) return 'NOT_CONNECTED';
   if (status.chargesEnabled && status.payoutsEnabled) return 'ACTIVE';
+  if (status.pendingReview) return 'REVIEW_PENDING';
   if (status.onboardingCompleted) return 'RESTRICTED';
   return 'ONBOARDING_PENDING';
+}
+
+const STRIPE_REQUIREMENT_LABELS: Record<string, string> = {
+  'company.representative.political_exposure': 'Exposicao politica do representante',
+  'company.representative.first_name': 'Nome do representante',
+  'company.representative.last_name': 'Sobrenome do representante',
+  'company.representative.email': 'Email do representante',
+  'company.representative.phone': 'Telefone do representante',
+  'company.representative.dob.day': 'Dia de nascimento do representante',
+  'company.representative.dob.month': 'Mes de nascimento do representante',
+  'company.representative.dob.year': 'Ano de nascimento do representante',
+  'company.representative.address.line1': 'Endereco do representante',
+  'company.representative.address.city': 'Cidade do representante',
+  'company.representative.address.state': 'Estado do representante',
+  'company.representative.address.postal_code': 'CEP do representante',
+  'company.representative.id_number': 'Documento do representante',
+  'company.tax_id': 'CNPJ/Tax ID da empresa',
+  'company.verification.document': 'Documento da empresa',
+  'external_account': 'Conta bancaria',
+};
+
+function prettifyStripeRequirement(value: string) {
+  if (STRIPE_REQUIREMENT_LABELS[value]) return STRIPE_REQUIREMENT_LABELS[value];
+
+  return value
+    .replaceAll('.', ' ')
+    .replaceAll('_', ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function formatStripeDeadline(deadline?: number | null) {
+  if (!deadline) return null;
+
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(deadline * 1000));
 }
 
 function getStripeIndicator(state: string) {
@@ -50,6 +90,14 @@ function getStripeIndicator(state: string) {
         description:
           'O Stripe precisa de informações adicionais para manter os pagamentos ativos. Complete o onboarding para evitar suspensões.',
         badgeClass: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800',
+      };
+    case 'REVIEW_PENDING':
+      return {
+        icon: <Loader2 className="h-5 w-5 text-sky-500 animate-spin" />,
+        label: 'Em analise',
+        description:
+          'A Stripe esta analisando os dados enviados. O botao abaixo permanece disponivel para voce voltar ao fluxo e acompanhar o progresso.',
+        badgeClass: 'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/30 dark:text-sky-300 dark:border-sky-800',
       };
     case 'ONBOARDING_PENDING':
       return {
@@ -85,6 +133,7 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
 
   const showStripe = mode === 'settings' || mode === 'payments';
   const showMelhorEnvio = mode === 'settings' || mode === 'shipping';
+  const showMercadoPago = mode === 'settings' || mode === 'payments';
   const meta = MODE_META[mode];
 
   const {
@@ -103,20 +152,36 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
     enabled: showMelhorEnvio,
   });
 
+  const { data: mercadoPagoStatus, isLoading: isLoadingMercadoPago } = useQuery<MercadoPagoStatus>({
+    queryKey: MERCADOPAGO_QUERY_KEY,
+    queryFn: integrationService.getMercadoPagoStatus,
+    enabled: showMercadoPago,
+  });
+
   const openStripeOnboardingMutation = useMutation({
     mutationFn: integrationService.createStripeOnboardingLink,
     onSuccess: (response) => {
+      console.log('[Stripe UI] Onboarding link received, redirecting to:', response.onboardingUrl);
       window.location.href = response.onboardingUrl;
     },
-    onError: () => toast.error('Falha ao iniciar conexão com Stripe. Tente novamente.'),
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'Erro desconhecido';
+      console.error('[Stripe UI] Onboarding error:', err?.response?.status, err?.response?.data);
+      toast.error(`Falha ao iniciar conexão com Stripe: ${msg}`);
+    },
   });
 
   const openStripeDashboardMutation = useMutation({
     mutationFn: integrationService.createStripeDashboardLink,
     onSuccess: (response) => {
+      console.log('[Stripe UI] Dashboard link received, redirecting to:', response.dashboardUrl);
       window.location.href = response.dashboardUrl;
     },
-    onError: () => toast.error('Falha ao abrir dashboard Stripe.'),
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'Erro desconhecido';
+      console.error('[Stripe UI] Dashboard link error:', err?.response?.status, err?.response?.data);
+      toast.error(`Falha ao abrir dashboard Stripe: ${msg}`);
+    },
   });
 
   const disconnectStripeMutation = useMutation({
@@ -125,7 +190,11 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
       toast.success('Stripe desconectado com sucesso.');
       queryClient.invalidateQueries({ queryKey: STRIPE_QUERY_KEY });
     },
-    onError: () => toast.error('Falha ao desconectar Stripe.'),
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'Erro desconhecido';
+      console.error('[Stripe UI] Disconnect error:', err?.response?.status, err?.response?.data);
+      toast.error(`Falha ao desconectar Stripe: ${msg}`);
+    },
   });
 
   const openMelhorEnvioAuthorizeMutation = useMutation({
@@ -177,12 +246,52 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
     onError: () => toast.error('Token inválido ou expirado. Verifique e tente novamente.'),
   });
 
+  const manualStripeLinkMutation = useMutation({
+    mutationFn: (stripeAccountId: string) => integrationService.manuallyLinkStripeAccount(stripeAccountId),
+    onSuccess: (response) => {
+      toast.success(`Conta Stripe vinculada: ${response.stripeAccountId}`);
+      queryClient.invalidateQueries({ queryKey: STRIPE_QUERY_KEY });
+      setManualStripeAccountId('');
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'Erro desconhecido';
+      toast.error(`Falha ao vincular conta manualmente: ${msg}`);
+    },
+  });
+
   const [showTokenInput, setShowTokenInput] = useState(false);
   const [directToken, setDirectToken] = useState('');
+  const [manualStripeAccountId, setManualStripeAccountId] = useState('');
+
+  const openMercadoPagoAuthorizeMutation = useMutation({
+    mutationFn: integrationService.getMercadoPagoAuthorizeUrl,
+    onSuccess: (response) => {
+      window.location.href = response.authorizeUrl;
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'Erro desconhecido';
+      toast.error(`Falha ao iniciar conexão com Mercado Pago: ${msg}`);
+    },
+  });
+
+  const disconnectMercadoPagoMutation = useMutation({
+    mutationFn: integrationService.disconnectMercadoPago,
+    onSuccess: () => {
+      toast.success('Mercado Pago desconectado com sucesso.');
+      queryClient.invalidateQueries({ queryKey: MERCADOPAGO_QUERY_KEY });
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'Erro desconhecido';
+      toast.error(`Falha ao desconectar Mercado Pago: ${msg}`);
+    },
+  });
 
   useEffect(() => {
     const stripeReturn = searchParams.get('stripe');
     if (stripeReturn === 'return') {
+      console.log('[Stripe UI] ===== STRIPE RETURN DETECTED =====');
+      console.log('[Stripe UI] URL:', window.location.href);
+      console.log('[Stripe UI] Invalidating stripe status query and refetching...');
       toast.success('Retorno do Stripe recebido. Validando status...');
       queryClient.invalidateQueries({ queryKey: STRIPE_QUERY_KEY });
       router.replace('/admin/settings/integrations');
@@ -190,6 +299,8 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
     }
 
     if (stripeReturn === 'refresh') {
+      console.log('[Stripe UI] ===== STRIPE REFRESH DETECTED =====');
+      console.log('[Stripe UI] User needs to complete onboarding');
       toast.info('Complete o onboarding do Stripe para ativar pagamentos.');
       queryClient.invalidateQueries({ queryKey: STRIPE_QUERY_KEY });
       router.replace('/admin/settings/integrations');
@@ -236,9 +347,36 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
     connectMelhorEnvioMutation.mutate(oauthCode);
   }, [connectMelhorEnvioMutation, queryClient, router, searchParams]);
 
+  /* Handle Mercado Pago OAuth callback redirect from backend */
+  useEffect(() => {
+    const mpResult = searchParams.get('mercadopago');
+    if (mpResult === 'success') {
+      toast.success('Mercado Pago conectado com sucesso!');
+      queryClient.invalidateQueries({ queryKey: MERCADOPAGO_QUERY_KEY });
+      router.replace(window.location.pathname);
+    } else if (mpResult === 'error') {
+      const reason = searchParams.get('reason') || 'unknown';
+      const reasonMap: Record<string, string> = {
+        missing_params: 'Parâmetros ausentes na resposta do Mercado Pago.',
+        invalid_state: 'Identificador da loja inválido.',
+        exchange_failed: 'Falha ao trocar código de autorização.',
+      };
+      toast.error(reasonMap[reason] ?? `Falha ao conectar Mercado Pago: ${reason}`);
+      queryClient.invalidateQueries({ queryKey: MERCADOPAGO_QUERY_KEY });
+      router.replace(window.location.pathname);
+    }
+  }, [queryClient, router, searchParams]);
+
   const stripeState = getStripeState(stripeStatus);
   const stripeIndicator = getStripeIndicator(stripeState);
   const isStripeLoading = isLoadingStripe || isRefetchingStripe;
+  const stripeDeadline = formatStripeDeadline(stripeStatus?.currentDeadline);
+  const stripeNeedsAttention = stripeState !== 'ACTIVE' && stripeStatus?.connected;
+  const impactedCapabilities = [
+    !stripeStatus?.chargesEnabled ? 'Pagamentos' : null,
+    !stripeStatus?.payoutsEnabled ? 'Repasses' : null,
+    (!stripeStatus?.chargesEnabled || !stripeStatus?.payoutsEnabled) ? 'Transferencias' : null,
+  ].filter(Boolean) as string[];
 
   return (
     <SettingsPageLayout
@@ -303,11 +441,20 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
                 )}
 
                 {/* Warning banner for restricted / pending */}
-                {(stripeState === 'RESTRICTED' || stripeState === 'ONBOARDING_PENDING') && (
+                {stripeNeedsAttention && (
                   <div className="mt-4 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-950/30">
-                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                    {stripeState === 'REVIEW_PENDING' ? (
+                      <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-sky-600 dark:text-sky-400" />
+                    ) : (
+                      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                    )}
                     <div className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
-                      {stripeState === 'RESTRICTED' ? (
+                      {stripeState === 'REVIEW_PENDING' ? (
+                        <>
+                          <strong>Em analise pela Stripe.</strong> Os documentos foram enviados e a conta continua em progresso.
+                          {stripeDeadline ? ` Vencimento atual: ${stripeDeadline}.` : ''}
+                        </>
+                      ) : stripeState === 'RESTRICTED' ? (
                         <>
                           <strong>Funcionalidades podem ser suspensas.</strong> O Stripe solicitou
                           informações adicionais (ex: documento de identidade, dados bancários). Complete
@@ -323,6 +470,78 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
                     </div>
                   </div>
                 )}
+
+                {stripeStatus?.pendingVerification?.length ? (
+                  <div className="mt-4 rounded-lg border border-sky-200 bg-sky-50 p-3 dark:border-sky-800 dark:bg-sky-950/20">
+                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-sky-700 dark:text-sky-300">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      Em analise
+                    </div>
+                    <p className="mt-2 text-xs text-sky-800 dark:text-sky-200">
+                      Estamos analisando os dados enviados. A Stripe pode levar ate dois dias uteis para concluir.
+                    </p>
+                    <ul className="mt-3 space-y-1 text-xs text-sky-900 dark:text-sky-100">
+                      {stripeStatus.pendingVerification.map((item) => (
+                        <li key={item}>• {prettifyStripeRequirement(item)}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+
+                {stripeStatus?.currentlyDue?.length ? (
+                  <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-950/20">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
+                      Dados necessarios
+                    </div>
+                    <ul className="mt-3 space-y-1 text-xs text-amber-900 dark:text-amber-100">
+                      {stripeStatus.currentlyDue.map((item) => (
+                        <li key={item}>• {prettifyStripeRequirement(item)}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+
+                {impactedCapabilities.length ? (
+                  <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 p-3 dark:border-rose-900 dark:bg-rose-950/20">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-rose-700 dark:text-rose-300">
+                      Funcionalidades impactadas
+                    </div>
+                    <ul className="mt-3 space-y-1 text-xs text-rose-900 dark:text-rose-100">
+                      {impactedCapabilities.map((item) => (
+                        <li key={item}>• {item} suspensos ate a verificacao terminar</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+
+                <div className="mt-4 rounded-lg border border-border bg-muted/30 p-3">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-foreground">
+                    Vinculo manual
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Se voce criar uma conta conectada manualmente no dashboard da Stripe, cole aqui o ID `acct_...` para vincular esta loja.
+                  </p>
+                  <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                    <input
+                      value={manualStripeAccountId}
+                      onChange={(event) => setManualStripeAccountId(event.target.value)}
+                      placeholder="acct_1234567890"
+                      className="h-9 flex-1 rounded-md border border-input bg-background px-3 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={manualStripeLinkMutation.isPending || !manualStripeAccountId.trim().startsWith('acct_')}
+                      onClick={() => manualStripeLinkMutation.mutate(manualStripeAccountId.trim())}
+                    >
+                      {manualStripeLinkMutation.isPending ? (
+                        <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                      ) : null}
+                      Vincular conta manualmente
+                    </Button>
+                  </div>
+                </div>
               </>
             )}
           </div>
@@ -343,7 +562,7 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
                 </Button>
               )}
 
-              {(stripeState === 'ONBOARDING_PENDING' || stripeState === 'RESTRICTED') && (
+              {stripeNeedsAttention && (
                 <Button
                   onClick={() => openStripeOnboardingMutation.mutate()}
                   disabled={openStripeOnboardingMutation.isPending}
@@ -353,7 +572,11 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
                   {openStripeOnboardingMutation.isPending && (
                     <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
                   )}
-                  {stripeState === 'RESTRICTED' ? 'Resolver pendências' : 'Completar cadastro'}
+                  {stripeState === 'REVIEW_PENDING'
+                    ? 'Ver progresso da verificacao'
+                    : stripeState === 'RESTRICTED'
+                      ? 'Continuar verificacao'
+                      : 'Completar cadastro'}
                 </Button>
               )}
 
@@ -591,12 +814,137 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
           )}
         </div>
         )}
+
+        {/* ─── MERCADO PAGO ─── */}
+        {showMercadoPago && (
+        <div className="rounded-lg border border-border bg-card overflow-hidden">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-border px-5 py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-50 dark:bg-sky-950/30">
+                <CreditCard className="h-4.5 w-4.5 text-sky-600 dark:text-sky-400" />
+              </div>
+              <div>
+                <h2 className="text-sm font-semibold text-foreground">Mercado Pago</h2>
+                <p className="text-xs text-muted-foreground">Pagamentos via Pix, cartão e boleto</p>
+              </div>
+            </div>
+            {!isLoadingMercadoPago && (
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${
+                  mercadoPagoStatus?.connected
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800'
+                    : 'bg-muted text-muted-foreground border-border'
+                }`}
+              >
+                {mercadoPagoStatus?.connected ? (
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                ) : (
+                  <XCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                )}
+                {mercadoPagoStatus?.connected ? 'Conectado' : 'Não conectado'}
+              </span>
+            )}
+          </div>
+
+          {/* Body */}
+          <div className="px-5 py-4">
+            {isLoadingMercadoPago ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Verificando status do Mercado Pago...
+              </div>
+            ) : mercadoPagoStatus?.connected ? (
+              <>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Sua conta do Mercado Pago está conectada. Pagamentos via Pix, cartão de crédito/débito e boleto estão habilitados.
+                  A plataforma retém 2% de comissão sobre cada venda.
+                </p>
+                {mercadoPagoStatus.mercadoPagoUserId && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    <span className="font-medium text-foreground">MP User ID:</span>{' '}
+                    {mercadoPagoStatus.mercadoPagoUserId}
+                  </p>
+                )}
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <StatusCard label="Conta conectada" ok={mercadoPagoStatus.hasAccessToken} />
+                  <StatusCard label="Public Key" ok={mercadoPagoStatus.hasPublicKey} />
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Conecte sua conta do Mercado Pago para receber pagamentos via Pix, cartão de crédito/débito e boleto diretamente na sua conta.
+                </p>
+                <div className="mt-4 flex items-start gap-3 rounded-lg border border-sky-200 bg-sky-50 p-3 dark:border-sky-800 dark:bg-sky-950/30">
+                  <ExternalLink className="mt-0.5 h-4 w-4 shrink-0 text-sky-600 dark:text-sky-400" />
+                  <div className="text-xs text-sky-800 dark:text-sky-300 leading-relaxed space-y-1">
+                    <p className="font-semibold">Como funciona:</p>
+                    <p>1. Clique em &quot;Conectar com Mercado Pago&quot; abaixo.</p>
+                    <p>2. Você será redirecionado para o Mercado Pago para autorizar a plataforma.</p>
+                    <p>3. Após autorizar, você voltará automaticamente ao painel.</p>
+                    <p className="text-sky-600 dark:text-sky-400 font-medium">A plataforma retém 2% de comissão sobre cada venda.</p>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Actions */}
+          {!isLoadingMercadoPago && (
+            <div className="flex flex-wrap items-center gap-2 border-t border-border px-5 py-3 bg-muted/30">
+              {!mercadoPagoStatus?.connected && (
+                <Button
+                  size="sm"
+                  onClick={() => openMercadoPagoAuthorizeMutation.mutate()}
+                  disabled={openMercadoPagoAuthorizeMutation.isPending}
+                >
+                  {openMercadoPagoAuthorizeMutation.isPending && (
+                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                  )}
+                  Conectar com Mercado Pago
+                </Button>
+              )}
+
+              {mercadoPagoStatus?.connected && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => queryClient.invalidateQueries({ queryKey: MERCADOPAGO_QUERY_KEY })}
+                  >
+                    <RefreshCw className="mr-2 h-3.5 w-3.5" />
+                    Atualizar status
+                  </Button>
+
+                  <div className="ml-auto">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => {
+                        if (confirm('Tem certeza que deseja desconectar o Mercado Pago? Pagamentos via MP pararão de funcionar.')) {
+                          disconnectMercadoPagoMutation.mutate();
+                        }
+                      }}
+                      disabled={disconnectMercadoPagoMutation.isPending}
+                    >
+                      <Unplug className="mr-2 h-3.5 w-3.5" />
+                      Desconectar
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+        )}
       </div>
 
       {mode === 'settings' && (
         <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
           <ShieldCheck className="h-3.5 w-3.5" />
-          Modelo multi-tenant: cada loja conecta sua própria conta Stripe e Melhor Envio.
+          Modelo multi-tenant: cada loja conecta sua própria conta Stripe, Mercado Pago e Melhor Envio.
         </div>
       )}
     </SettingsPageLayout>
