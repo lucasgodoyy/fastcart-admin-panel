@@ -16,6 +16,8 @@ import {
   Loader2,
   Unplug,
   KeyRound,
+  Bug,
+  ClipboardList,
 } from 'lucide-react';
 
 import { SettingsPageLayout } from './SettingsPageLayout';
@@ -120,6 +122,43 @@ function getStripeIndicator(state: string) {
 
 type IntegrationsMode = 'settings' | 'payments' | 'shipping';
 
+type DiagnosticEntry = {
+  id: string;
+  level: 'info' | 'success' | 'error';
+  title: string;
+  description: string;
+  timestamp: string;
+};
+
+function buildDiagnosticEntry(level: DiagnosticEntry['level'], title: string, description: string): DiagnosticEntry {
+  return {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    level,
+    title,
+    description,
+    timestamp: new Date().toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    }),
+  };
+}
+
+function extractApiError(err: any) {
+  const status = err?.response?.status;
+  const backendMessage = err?.response?.data?.message;
+  const fallbackMessage = err?.message || 'Erro desconhecido';
+  const message = backendMessage || fallbackMessage;
+
+  return {
+    status,
+    message,
+    description: status
+      ? `HTTP ${status} - ${message}`
+      : message,
+  };
+}
+
 const MODE_META: Record<IntegrationsMode, { title: string; description: string }> = {
   settings: { title: 'Integrações', description: 'Conecte pagamentos e frete da loja no modelo SaaS.' },
   payments: { title: 'Pagamentos', description: 'Configure a integração de pagamentos da sua loja.' },
@@ -157,6 +196,18 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
     queryFn: integrationService.getMercadoPagoStatus,
     enabled: showMercadoPago,
   });
+
+  const [mercadoPagoDiagnostics, setMercadoPagoDiagnostics] = useState<DiagnosticEntry[]>([
+    buildDiagnosticEntry(
+      'info',
+      'Pronto para diagnostico',
+      'Os eventos do Mercado Pago aparecerao aqui durante status, autorizacao, callback e desconexao.'
+    ),
+  ]);
+
+  const appendMercadoPagoDiagnostic = (entry: DiagnosticEntry) => {
+    setMercadoPagoDiagnostics((current) => [entry, ...current].slice(0, 8));
+  };
 
   const openStripeOnboardingMutation = useMutation({
     mutationFn: integrationService.createStripeOnboardingLink,
@@ -265,23 +316,71 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
 
   const openMercadoPagoAuthorizeMutation = useMutation({
     mutationFn: integrationService.getMercadoPagoAuthorizeUrl,
+    onMutate: () => {
+      appendMercadoPagoDiagnostic(
+        buildDiagnosticEntry(
+          'info',
+          'Solicitando URL de autorizacao',
+          'Chamando /admin/stores/me/mercadopago/authorize-url para iniciar o OAuth do lojista.'
+        )
+      );
+    },
     onSuccess: (response) => {
+      appendMercadoPagoDiagnostic(
+        buildDiagnosticEntry(
+          'success',
+          'URL de autorizacao gerada',
+          `OAuth iniciado com sucesso. O navegador sera redirecionado para: ${response.authorizeUrl}`
+        )
+      );
       window.location.href = response.authorizeUrl;
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.message || err?.message || 'Erro desconhecido';
+      const details = extractApiError(err);
+      appendMercadoPagoDiagnostic(
+        buildDiagnosticEntry(
+          'error',
+          'Falha ao gerar URL de autorizacao',
+          `${details.description}. Se este erro vier antes do redirecionamento, o problema esta no backend/configuracao da loja, nao no site do Mercado Pago.`
+        )
+      );
       toast.error(`Falha ao iniciar conexão com Mercado Pago: ${msg}`);
     },
   });
 
   const disconnectMercadoPagoMutation = useMutation({
     mutationFn: integrationService.disconnectMercadoPago,
+    onMutate: () => {
+      appendMercadoPagoDiagnostic(
+        buildDiagnosticEntry(
+          'info',
+          'Desconectando Mercado Pago',
+          'Chamando /admin/stores/me/mercadopago/disconnect para limpar a conta conectada da loja.'
+        )
+      );
+    },
     onSuccess: () => {
+      appendMercadoPagoDiagnostic(
+        buildDiagnosticEntry(
+          'success',
+          'Mercado Pago desconectado',
+          'A loja voltou ao estado nao conectado. Agora e possivel repetir o fluxo de autorizacao do zero.'
+        )
+      );
       toast.success('Mercado Pago desconectado com sucesso.');
       queryClient.invalidateQueries({ queryKey: MERCADOPAGO_QUERY_KEY });
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.message || err?.message || 'Erro desconhecido';
+      const details = extractApiError(err);
+      appendMercadoPagoDiagnostic(
+        buildDiagnosticEntry(
+          'error',
+          'Falha ao desconectar',
+          `${details.description}. Confira se o usuario logado ainda tem contexto de loja.`
+        )
+      );
       toast.error(`Falha ao desconectar Mercado Pago: ${msg}`);
     },
   });
@@ -351,6 +450,13 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
   useEffect(() => {
     const mpResult = searchParams.get('mercadopago');
     if (mpResult === 'success') {
+      appendMercadoPagoDiagnostic(
+        buildDiagnosticEntry(
+          'success',
+          'Callback do Mercado Pago concluido',
+          'O navegador retornou do Mercado Pago com sucesso. Atualizando o status salvo da loja agora.'
+        )
+      );
       toast.success('Mercado Pago conectado com sucesso!');
       queryClient.invalidateQueries({ queryKey: MERCADOPAGO_QUERY_KEY });
       router.replace(window.location.pathname);
@@ -361,11 +467,43 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
         invalid_state: 'Identificador da loja inválido.',
         exchange_failed: 'Falha ao trocar código de autorização.',
       };
+      appendMercadoPagoDiagnostic(
+        buildDiagnosticEntry(
+          'error',
+          'Callback retornou com erro',
+          `${reasonMap[reason] ?? `Falha ao conectar Mercado Pago: ${reason}`}. Se a URL abriu no Mercado Pago e so falhou na volta, o problema esta no callback/backend.`
+        )
+      );
       toast.error(reasonMap[reason] ?? `Falha ao conectar Mercado Pago: ${reason}`);
       queryClient.invalidateQueries({ queryKey: MERCADOPAGO_QUERY_KEY });
       router.replace(window.location.pathname);
     }
   }, [queryClient, router, searchParams]);
+
+  useEffect(() => {
+    if (!showMercadoPago || isLoadingMercadoPago) return;
+
+    if (mercadoPagoStatus?.connected) {
+      appendMercadoPagoDiagnostic(
+        buildDiagnosticEntry(
+          'success',
+          'Status carregado: conta conectada',
+          `connected=true, hasAccessToken=${String(mercadoPagoStatus.hasAccessToken)}, hasPublicKey=${String(mercadoPagoStatus.hasPublicKey)}, mercadoPagoUserId=${mercadoPagoStatus.mercadoPagoUserId ?? 'null'}`
+        )
+      );
+      return;
+    }
+
+    if (mercadoPagoStatus) {
+      appendMercadoPagoDiagnostic(
+        buildDiagnosticEntry(
+          'info',
+          'Status carregado: conta nao conectada',
+          `connected=false, status=${mercadoPagoStatus.status}, hasAccessToken=${String(mercadoPagoStatus.hasAccessToken)}, hasPublicKey=${String(mercadoPagoStatus.hasPublicKey)}`
+        )
+      );
+    }
+  }, [showMercadoPago, isLoadingMercadoPago, mercadoPagoStatus]);
 
   const stripeState = getStripeState(stripeStatus);
   const stripeIndicator = getStripeIndicator(stripeState);
@@ -544,6 +682,55 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
                 </div>
               </>
             )}
+
+            <div className="mt-4 rounded-lg border border-border bg-muted/20 p-3">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-foreground">
+                <Bug className="h-3.5 w-3.5" />
+                Diagnostico do Mercado Pago
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
+                Use este painel para ver onde o fluxo falhou: status da loja, requisicao da URL de autorizacao, retorno do callback e mensagens do backend.
+              </p>
+
+              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <div className="rounded-md border border-border bg-background/70 p-2">
+                  <div className="text-[11px] font-medium text-foreground">Origem atual</div>
+                  <div className="mt-1 break-all font-mono text-[11px] text-muted-foreground">
+                    {typeof window !== 'undefined' ? window.location.origin : 'carregando...'}
+                  </div>
+                </div>
+                <div className="rounded-md border border-border bg-background/70 p-2">
+                  <div className="text-[11px] font-medium text-foreground">Proximo passo esperado</div>
+                  <div className="mt-1 text-[11px] text-muted-foreground">
+                    {!mercadoPagoStatus?.connected
+                      ? 'Gerar authorize-url, abrir no navegador e voltar com callback.'
+                      : 'Conta conectada; validar pagamentos ou desconectar para novo teste.'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-3 space-y-2">
+                {mercadoPagoDiagnostics.map((entry) => (
+                  <div
+                    key={entry.id}
+                    className={`rounded-md border p-2 text-xs ${
+                      entry.level === 'error'
+                        ? 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/20'
+                        : entry.level === 'success'
+                          ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/20'
+                          : 'border-border bg-background/70'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 font-medium text-foreground">
+                      <ClipboardList className="h-3.5 w-3.5" />
+                      <span>{entry.title}</span>
+                      <span className="ml-auto text-[10px] text-muted-foreground">{entry.timestamp}</span>
+                    </div>
+                    <p className="mt-1 leading-relaxed text-muted-foreground">{entry.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Actions */}
