@@ -2,11 +2,6 @@ import axios from 'axios';
 import { redirectToLogin } from '@/lib/session';
 
 function resolveApiBaseUrl() {
-  const configuredUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (configuredUrl && configuredUrl.trim()) {
-    return configuredUrl;
-  }
-
   if (typeof window !== 'undefined') {
     const { hostname } = window.location;
 
