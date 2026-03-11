@@ -76,6 +76,12 @@ const storeSettingsService = {
     return response.data;
   },
 
+  /** Update user role */
+  updateUserRole: async (userId: number, role: string): Promise<StoreUser> => {
+    const response = await apiClient.patch(`/admin/users/${userId}/role`, { role });
+    return response.data;
+  },
+
   /** Delete a user */
   deleteUser: async (userId: number): Promise<void> => {
     await apiClient.delete(`/admin/users/${userId}`);

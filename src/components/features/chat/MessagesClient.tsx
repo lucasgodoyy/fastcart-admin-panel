@@ -9,6 +9,7 @@ import chatService, {
   ChatStats,
   StoreMember,
 } from '@/services/chatService';
+import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -80,6 +81,7 @@ function timeAgo(iso: string | null) {
 
 export function MessagesClient() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [newMessage, setNewMessage] = useState('');
@@ -191,14 +193,15 @@ export function MessagesClient() {
   const conversations = convData?.content ?? [];
   const messages = messagesData?.content ?? [];
   const selectedConv = conversations.find((c) => c.id === selectedId);
+  const filteredMembers = storeMembers.filter((m) => m.email !== user?.email);
 
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-foreground">Mensagens — Lojista ↔ Equipe</h1>
-          <p className="text-sm text-muted-foreground">Comunicação interna do time da loja</p>
+          <h1 className="text-xl font-bold text-foreground">Mensagens da Equipe</h1>
+          <p className="text-sm text-muted-foreground">Comunicação interna entre os membros da sua loja</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
@@ -234,7 +237,7 @@ export function MessagesClient() {
                       <CommandList>
                         <CommandEmpty>Nenhum membro encontrado.</CommandEmpty>
                         <CommandGroup className="max-h-48 overflow-y-auto">
-                          {storeMembers.map((member) => (
+                          {filteredMembers.map((member) => (
                             <CommandItem
                               key={member.id}
                               value={member.email}
@@ -475,31 +478,39 @@ export function MessagesClient() {
               </ScrollArea>
 
               {/* Input */}
-              <div className="border-t p-3 flex gap-2">
-                <textarea
-                  placeholder="Digite sua mensagem..."
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey && newMessage.trim()) {
-                      e.preventDefault();
-                      sendMutation.mutate();
-                    }
-                  }}
-                  rows={1}
-                  className="flex-1 resize-none rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                />
-                <Button
-                  size="icon"
-                  disabled={!newMessage.trim() || sendMutation.isPending}
-                  onClick={() => sendMutation.mutate()}
-                >
-                  {sendMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
-                </Button>
+              <div className="border-t px-3 py-3 flex items-end gap-2">
+                <div className="flex-1 rounded-xl border border-input bg-muted/30 px-3 py-2 focus-within:border-ring focus-within:ring-1 focus-within:ring-ring/40 transition-colors">
+                  <textarea
+                    placeholder={selectedConv?.status === 'CLOSED' ? 'Conversa encerrada. Reabra para responder.' : 'Escreva uma mensagem... (Enter para enviar, Shift+Enter para nova linha)'}
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey && newMessage.trim()) {
+                        e.preventDefault();
+                        sendMutation.mutate();
+                      }
+                    }}
+                    rows={2}
+                    disabled={selectedConv?.status === 'CLOSED'}
+                    className="w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50"
+                  />
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-[10px] text-muted-foreground">Enter para enviar · Shift+Enter para nova linha</span>
+                    <Button
+                      size="sm"
+                      className="h-7 gap-1.5 px-3 text-xs"
+                      disabled={!newMessage.trim() || sendMutation.isPending || selectedConv?.status === 'CLOSED'}
+                      onClick={() => sendMutation.mutate()}
+                    >
+                      {sendMutation.isPending ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Send className="h-3.5 w-3.5" />
+                      )}
+                      Enviar
+                    </Button>
+                  </div>
+                </div>
               </div>
             </>
           )}

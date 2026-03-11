@@ -17,13 +17,11 @@ import {
   Speaker,
   Globe,
   CreditCard,
-  Receipt,
   Cog,
   ChevronDown,
   ChevronRight,
   ExternalLink,
   Zap,
-  Link2,
   Headphones,
 } from "lucide-react"
 import { useState } from "react"
@@ -77,11 +75,9 @@ const navigation: NavSection[] = [
         { label: t("Estoque", "Inventory"), href: "/admin/products/inventory" },
         { label: t("Categorias", "Categories"), href: "/admin/products/categories" },
       ]},
+      { label: t("Clientes", "Customers"), href: "/admin/customers", icon: <Users2 className="h-[18px] w-[18px]" /> },
       { label: t("Financeiro", "Finances"), href: "/admin/payments", icon: <Wallet className="h-[18px] w-[18px]" /> },
       { label: t("Logística", "Fulfillment"), href: "/admin/shipping", icon: <Truck className="h-[18px] w-[18px]" /> },
-      { label: t("Mensagens", "Messages"), href: "/admin/chat", icon: <MessageSquare className="h-[18px] w-[18px]" /> },
-      { label: t("Suporte", "Support"), href: "/admin/support", icon: <Headphones className="h-[18px] w-[18px]" /> },
-      { label: t("Clientes", "Customers"), href: "/admin/customers", icon: <Users2 className="h-[18px] w-[18px]" /> },
     ],
   },
   {
@@ -89,16 +85,21 @@ const navigation: NavSection[] = [
     items: [
       { label: t("Promoções", "Promotions"), href: "/admin/discounts", icon: <TicketPercent className="h-[18px] w-[18px]" />, children: [
         { label: t("Cupons", "Coupons"), href: "/admin/discounts/coupons" },
+        { label: t("Promoção", "Promotion"), href: "/admin/discounts/promotions" },
         { label: t("Frete grátis", "Free Shipping"), href: "/admin/discounts/free-shipping" },
-        { label: t("Campanhas", "Campaigns"), href: "/admin/discounts/promotions" },
       ]},
       { label: t("Marketing", "Marketing"), href: "/admin/marketing", icon: <Speaker className="h-[18px] w-[18px]" />, children: [
-        { label: t("Campanhas", "Campaigns"), href: "/admin/marketing" },
-        { label: t("E-mail", "Email"), href: "/admin/notifications" },
-        { label: t("E-mail Campanhas", "Email Campaigns"), href: "/admin/marketing/email-campaigns" },
+        { label: t("E-mail Marketing", "Email Marketing"), href: "/admin/marketing/email-campaigns" },
         { label: t("Integrações", "Integrations"), href: "/admin/marketing/integrations" },
+        { label: t("Afiliados", "Affiliates"), href: "/admin/marketing/affiliates" },
       ]},
-      { label: t("Afiliados", "Affiliates"), href: "/admin/marketing/affiliates", icon: <Link2 className="h-[18px] w-[18px]" /> },
+    ],
+  },
+  {
+    title: t("Comunicação", "Communication"),
+    items: [
+      { label: t("Mensagens", "Messages"), href: "/admin/chat", icon: <MessageSquare className="h-[18px] w-[18px]" /> },
+      { label: t("Suporte", "Support"), href: "/admin/support", icon: <Headphones className="h-[18px] w-[18px]" /> },
     ],
   },
   {
@@ -108,18 +109,9 @@ const navigation: NavSection[] = [
         { label: t("Tema e layout", "Theme & Layout"), href: "/admin/online-store/layout-theme" },
         { label: t("Páginas", "Pages"), href: "/admin/online-store/pages" },
         { label: t("Blog", "Blog"), href: "/admin/online-store/blog" },
-        { label: t("Navegação", "Navigation"), href: "/admin/online-store/menus" },
-        { label: t("Filtros", "Filters"), href: "/admin/online-store/filters" },
         { label: t("Links sociais", "Social Links"), href: "/admin/online-store/social-links" },
-        { label: t("Google Shopping", "Google Shopping"), href: "/admin/online-store/google-shopping" },
         { label: t("Manutenção", "Maintenance"), href: "/admin/online-store/under-construction" },
       ]},
-    ],
-  },
-  {
-    title: t("Conta", "Account"),
-    items: [
-      { label: t("Assinatura", "Billing"), href: "/admin/billing", icon: <Receipt className="h-[18px] w-[18px]" /> },
     ],
   },
 ]
@@ -181,6 +173,10 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
       return `${protocol}//${hostname.replace(/^admin\./, "")}`
     }
 
+    if (hostname.startsWith("www.")) {
+      return `${protocol}//${hostname.replace(/^www\./, "")}`
+    }
+
     return `${protocol}//${hostname}`
   }
 
@@ -203,6 +199,11 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
 
     if (hostname.startsWith("admin.")) {
       const rootDomain = hostname.replace(/^admin\./, "")
+      return `${protocol}//${slug}.${rootDomain}`
+    }
+
+    if (hostname.startsWith("www.")) {
+      const rootDomain = hostname.replace(/^www\./, "")
       return `${protocol}//${slug}.${rootDomain}`
     }
 

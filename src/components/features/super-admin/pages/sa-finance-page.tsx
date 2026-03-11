@@ -36,7 +36,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
+import { useTabFromPath } from "../hooks/use-tab-from-path";
 import { superAdminService } from "@/services/super-admin";
 import type { SubscriptionStats } from "@/types/super-admin";
 
@@ -55,7 +55,7 @@ const txnStatusMap: Record<string, { label: string; color: string }> = {
 };
 
 export function SaFinancePage() {
-  const [tab, setTab] = useState("overview");
+  const [tab, setTab] = useTabFromPath("/super-admin/finance", { overview: "", transactions: "transactions", payouts: "payouts", fees: "fees" }, "overview");
 
   const { data: stats } = useQuery({
     queryKey: ["sa-subscription-stats"],

@@ -6,7 +6,7 @@ import storeSettingsService from '@/services/storeSettingsService';
 import { SettingsPageLayout } from './SettingsPageLayout';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -14,17 +14,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, Plus, Save } from 'lucide-react';
+import { Loader2, Save, Globe, DollarSign, Clock, Lock, Rocket } from 'lucide-react';
 import { toast } from 'sonner';
 
 const CURRENCIES = [
-  { code: 'BRL', label: 'Real Brasileiro (BRL)', flag: '🇧🇷', locale: 'Português' },
-  { code: 'USD', label: 'Dólar Americano (USD)', flag: '🇺🇸', locale: 'English' },
-  { code: 'EUR', label: 'Euro (EUR)', flag: '🇪🇺', locale: 'Multilingual' },
-  { code: 'GBP', label: 'Libra Esterlina (GBP)', flag: '🇬🇧', locale: 'English' },
-  { code: 'ARS', label: 'Peso Argentino (ARS)', flag: '🇦🇷', locale: 'Español' },
-  { code: 'CLP', label: 'Peso Chileno (CLP)', flag: '🇨🇱', locale: 'Español' },
-  { code: 'MXN', label: 'Peso Mexicano (MXN)', flag: '🇲🇽', locale: 'Español' },
+  { code: 'BRL', label: 'Real Brasileiro', symbol: 'R$', flag: '🇧🇷' },
+  { code: 'USD', label: 'Dólar Americano', symbol: '$', flag: '🇺🇸' },
+  { code: 'EUR', label: 'Euro', symbol: '€', flag: '🇪🇺' },
+  { code: 'GBP', label: 'Libra Esterlina', symbol: '£', flag: '🇬🇧' },
+  { code: 'ARS', label: 'Peso Argentino', symbol: '$', flag: '🇦🇷' },
+  { code: 'CLP', label: 'Peso Chileno', symbol: '$', flag: '🇨🇱' },
+  { code: 'MXN', label: 'Peso Mexicano', symbol: '$', flag: '🇲🇽' },
+];
+
+const TIMEZONES = [
+  { value: 'America/Sao_Paulo', label: 'Brasília (UTC-3)' },
+  { value: 'America/Manaus', label: 'Manaus (UTC-4)' },
+  { value: 'America/Belem', label: 'Belém (UTC-3)' },
+  { value: 'America/Recife', label: 'Recife (UTC-3)' },
+  { value: 'America/Fortaleza', label: 'Fortaleza (UTC-3)' },
+  { value: 'America/Noronha', label: 'Fernando de Noronha (UTC-2)' },
 ];
 
 export function LanguagesClient() {
@@ -36,14 +45,12 @@ export function LanguagesClient() {
   });
 
   const [currency, setCurrency] = useState('BRL');
-  const [country, setCountry] = useState('Brasil');
+  const [timezone, setTimezone] = useState('America/Sao_Paulo');
+  const [dirty, setDirty] = useState(false);
 
   useEffect(() => {
     if (store?.storeCurrency) {
       setCurrency(store.storeCurrency);
-    }
-    if (store?.addressCountry) {
-      setCountry(store.addressCountry);
     }
   }, [store]);
 
@@ -52,19 +59,15 @@ export function LanguagesClient() {
       storeSettingsService.updateMyStore({ storeCurrency: currency }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-store'] });
+      setDirty(false);
       toast.success('Configurações salvas!');
     },
     onError: () => toast.error('Erro ao salvar configurações.'),
   });
 
-  const selectedCurrency = CURRENCIES.find((c) => c.code === currency) ?? CURRENCIES[0];
-
   if (isLoading) {
     return (
-      <SettingsPageLayout
-        title="Idiomas e moedas"
-        description="Carregando..."
-      >
+      <SettingsPageLayout title="Idiomas e moeda" description="Carregando...">
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         </div>
@@ -72,82 +75,146 @@ export function LanguagesClient() {
     );
   }
 
+  const selectedCurrency = CURRENCIES.find((c) => c.code === currency) ?? CURRENCIES[0];
+  const selectedTimezone = TIMEZONES.find((t) => t.value === timezone) ?? TIMEZONES[0];
+
   return (
     <SettingsPageLayout
-      title="Idiomas e moedas"
-      description="Chegue mais longe! Configure diferentes moedas para administrar seus produtos e habilite sua loja para vendas em outros países."
-      helpText="Mais sobre idiomas e moedas"
-      helpHref="#"
+      title="Idiomas e moeda"
+      description="Configure o idioma, moeda e fuso horário da sua loja."
     >
-      <div className="rounded-lg border border-border bg-card p-5 space-y-4">
-        <div>
-          <p className="text-sm font-medium text-foreground">Países habilitados</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Defina onde quer que sua loja esteja disponível. Seus clientes poderão escolher em qual navegar.
-          </p>
+      {/* ── Primary Market ── */}
+      <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <div className="border-b border-border px-5 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Globe className="h-4 w-4 text-muted-foreground" />
+            <p className="text-sm font-semibold text-foreground">Mercado primário</p>
+          </div>
+          <Badge variant="secondary" className="text-xs">Padrão</Badge>
         </div>
-
-        <div className="flex items-center justify-between rounded-md border border-border p-3">
-          <div className="flex items-center gap-3">
-            <span className="text-lg">{selectedCurrency.flag}</span>
-            <div>
-              <p className="text-sm font-medium text-foreground">{country || 'Brasil'}</p>
-              <p className="text-xs text-muted-foreground">
-                {selectedCurrency.label} - {selectedCurrency.locale}
-              </p>
-            </div>
+        <div className="p-5 flex items-center gap-4">
+          <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center text-2xl shrink-0">
+            🇧🇷
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-foreground">Brasil</p>
+            <p className="text-xs text-muted-foreground">Português • Real Brasileiro (BRL) • America/Sao_Paulo</p>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Lock className="h-3 w-3" />
+            Fixo no lançamento
           </div>
         </div>
-
-        <Button variant="outline" size="sm" className="gap-1.5" disabled>
-          <Plus className="h-3.5 w-3.5" />
-          Habilitar outro país
-        </Button>
       </div>
 
-      <div className="rounded-lg border border-border bg-card p-5 space-y-4">
-        <div>
-          <p className="text-sm font-medium text-foreground">País padrão da loja</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Defina o idioma e em que moeda os preços devem aparecer para seus clientes ao visitar a loja.
-          </p>
+      {/* ── Currency ── */}
+      <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <div className="border-b border-border px-5 py-4 flex items-center gap-2">
+          <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <p className="text-sm font-semibold text-foreground">Moeda da loja</p>
         </div>
+        <div className="p-5 space-y-4">
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Os preços dos produtos e pedidos serão exibidos nesta moeda para você e seus clientes.
+          </p>
+          <div className="space-y-1.5">
+            <Label className="text-sm font-medium">Moeda principal</Label>
+            <Select
+              value={currency}
+              onValueChange={(v) => { setCurrency(v); setDirty(true); }}
+            >
+              <SelectTrigger className="w-full max-w-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CURRENCIES.map((c) => (
+                  <SelectItem key={c.code} value={c.code}>
+                    {c.flag}&nbsp; {c.label} ({c.code}) {c.symbol}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div className="space-y-1.5">
-          <Label htmlFor="defaultCountry" className="text-sm font-medium text-foreground">País padrão</Label>
-          <Input id="defaultCountry" value={country || 'Brasil'} disabled />
+          {/* Preview */}
+          <div className="rounded-md border border-border bg-muted/30 px-4 py-3 inline-flex items-center gap-3 text-sm">
+            <span className="text-muted-foreground text-xs">Exemplo de preço:</span>
+            <span className="font-semibold text-foreground">
+              {selectedCurrency.symbol} 1.299,90 {selectedCurrency.code}
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="rounded-lg border border-border bg-card p-5 space-y-4">
-        <div>
-          <p className="text-sm font-medium text-foreground">Moeda do administrador</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Defina uma moeda para gerenciar os preços dos seus produtos. Só você verá essa informação.
-          </p>
+      {/* ── Timezone ── */}
+      <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <div className="border-b border-border px-5 py-4 flex items-center gap-2">
+          <Clock className="h-4 w-4 text-muted-foreground" />
+          <p className="text-sm font-semibold text-foreground">Fuso horário e formato de data</p>
         </div>
+        <div className="p-5 space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">Fuso horário</Label>
+              <Select
+                value={timezone}
+                onValueChange={(v) => { setTimezone(v); setDirty(true); }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {TIMEZONES.map((tz) => (
+                    <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">Formato de data</Label>
+              <div className="flex h-9 w-full rounded-md border border-input bg-muted/30 px-3 py-2 text-sm items-center text-muted-foreground">
+                DD/MM/AAAA (padrão Brasil)
+              </div>
+            </div>
+          </div>
+          <div className="rounded-md border border-border bg-muted/30 px-4 py-3 inline-flex items-center gap-3 text-sm">
+            <span className="text-muted-foreground text-xs">Horário atual no fuso:</span>
+            <span className="font-semibold text-foreground tabular-nums">
+              {new Date().toLocaleString('pt-BR', { timeZone: selectedTimezone.value, hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' })}
+            </span>
+          </div>
+        </div>
+      </div>
 
-        <div className="space-y-1.5">
-          <Label className="text-sm font-medium text-foreground">Moeda padrão</Label>
-          <Select value={currency} onValueChange={setCurrency}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {CURRENCIES.map((c) => (
-                <SelectItem key={c.code} value={c.code}>
-                  {c.flag} {c.label}
-                </SelectItem>
+      {/* ── International Markets ── */}
+      <div className="rounded-lg border border-dashed border-border bg-card overflow-hidden">
+        <div className="p-5 flex items-start gap-4">
+          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <Rocket className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-foreground">Mercados internacionais</p>
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+              Expanda sua loja para outros países, moedas e idiomas. Defina preços por mercado, idiomas localizados e métodos de pagamento regionais.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {['🇺🇸 English / USD', '🇲🇽 Español / MXN', '🇦🇷 Español / ARS', '🇵🇹 Português / EUR'].map((tag) => (
+                <span key={tag} className="rounded-full border border-border bg-muted/50 px-2.5 py-0.5 text-xs text-muted-foreground">
+                  {tag}
+                </span>
               ))}
-            </SelectContent>
-          </Select>
+              <span className="rounded-full border border-border bg-muted/50 px-2.5 py-0.5 text-xs text-muted-foreground">+ mais</span>
+            </div>
+          </div>
+          <Badge variant="outline" className="shrink-0 text-xs text-muted-foreground">Em breve</Badge>
         </div>
       </div>
 
+      {/* Save */}
       <div className="flex items-center justify-end">
         <Button
           onClick={() => saveMutation.mutate()}
-          disabled={saveMutation.isPending}
+          disabled={saveMutation.isPending || !dirty}
           className="gap-1.5"
         >
           {saveMutation.isPending ? (
@@ -155,7 +222,7 @@ export function LanguagesClient() {
           ) : (
             <Save className="h-4 w-4" />
           )}
-          Salvar
+          Salvar alterações
         </Button>
       </div>
     </SettingsPageLayout>

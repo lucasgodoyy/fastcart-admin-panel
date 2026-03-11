@@ -33,6 +33,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
+import { useTabFromPath } from "../hooks/use-tab-from-path";
 import superAdminService from "@/services/super-admin/superAdminService";
 import { toast } from "sonner";
 
@@ -66,7 +67,7 @@ function SettingSection({ icon: Icon, title, children }: { icon: React.ElementTy
 
 export function SaSettingsPage() {
   const queryClient = useQueryClient();
-  const [tab, setTab] = useState("general");
+  const [tab, setTab] = useTabFromPath("/super-admin/settings", { general: "", appearance: "appearance", security: "security", notifications: "notifications", integrations: "integrations", infrastructure: "infrastructure" }, "general");
   const [showStripeKey, setShowStripeKey] = useState(false);
 
   // Load real settings from backend

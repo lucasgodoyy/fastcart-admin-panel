@@ -131,7 +131,7 @@ export function SaStoreDetailPage({ storeId }: { storeId: number }) {
                 variant="outline"
                 size="sm"
                 className="rounded-xl text-[12px] border-[hsl(var(--sa-border))] text-[hsl(var(--sa-text-secondary))] hover:bg-[hsl(var(--sa-surface-hover))] gap-2"
-                onClick={() => window.open(`${process.env.NEXT_PUBLIC_STORE_URL || 'http://localhost:3000'}/${store.slug}`, '_blank')}
+                onClick={() => { const h = window.location.hostname; const p = window.location.protocol; let base = h; if (h.startsWith('admin.')) base = h.replace(/^admin\./, ''); else if (h.startsWith('www.')) base = h.replace(/^www\./, ''); else if (h === 'localhost' || h === '127.0.0.1') { window.open(`${p}//${store.slug}.127.0.0.1.nip.io:3000`, '_blank'); return; } window.open(`${p}//${store.slug}.${base}`, '_blank'); }}
               >
                 <ExternalLink className="h-3.5 w-3.5" /> Abrir Loja
               </Button>

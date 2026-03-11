@@ -39,8 +39,28 @@ const colorMap: Record<string, string> = {
   THEME: 'bg-pink-100 text-pink-600 dark:bg-pink-900/40 dark:text-pink-400',
 };
 
-function formatRelativeTime(isoDate: string): string {
-  const diff = Date.now() - new Date(isoDate).getTime();
+function parseValidDate(dateValue: string | null | undefined): Date | null {
+  if (!dateValue) {
+    return null;
+  }
+
+  const date = new Date(dateValue);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatRelativeTime(isoDate: string | null | undefined): string {
+  const date = parseValidDate(isoDate);
+
+  if (!date) {
+    return t('Data indisponivel', 'Date unavailable');
+  }
+
+  const diff = Date.now() - date.getTime();
+
+  if (diff < 0) {
+    return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' }).format(date);
+  }
+
   const minutes = Math.floor(diff / 60_000);
   if (minutes < 1) return t('agora', 'just now');
   if (minutes < 60) return `${minutes}min`;
@@ -48,7 +68,7 @@ function formatRelativeTime(isoDate: string): string {
   if (hours < 24) return `${hours}h`;
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days}d`;
-  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' }).format(new Date(isoDate));
+  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' }).format(date);
 }
 
 export function ActivityFeed() {

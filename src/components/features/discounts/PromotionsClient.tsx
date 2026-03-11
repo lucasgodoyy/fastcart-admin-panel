@@ -2,22 +2,47 @@
 
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Tags } from 'lucide-react';
+import { Plus, Tags, X, Check, ChevronDown, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { AxiosError } from 'axios';
 
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
 import { promotionService } from '@/services/sales';
+import productService from '@/services/catalog/product';
+import categoryService from '@/services/catalog/categoryService';
 import { Promotion, PromotionApplyScopeType, PromotionUpsertRequest } from '@/types/promotion';
+import { Product } from '@/types/product';
+import { Category } from '@/types/category';
 
 type PromotionFormState = {
   name: string;
   buyQuantity: string;
   payQuantity: string;
   buyScopeType: PromotionApplyScopeType;
+  buyScopeTargetIds: number[];
   payScopeType: PromotionApplyScopeType;
+  payScopeTargetIds: number[];
   usageLimit: string;
   startsAt: string;
   expiresAt: string;
@@ -29,12 +54,21 @@ const EMPTY_FORM: PromotionFormState = {
   buyQuantity: '2',
   payQuantity: '1',
   buyScopeType: 'ENTIRE_STORE',
+  buyScopeTargetIds: [],
   payScopeType: 'ENTIRE_STORE',
+  payScopeTargetIds: [],
   usageLimit: '',
   startsAt: '',
   expiresAt: '',
   active: true,
 };
+
+const SCOPE_OPTIONS: { value: PromotionApplyScopeType; label: string }[] = [
+  { value: 'ENTIRE_STORE', label: 'Loja inteira' },
+  { value: 'CATEGORIES', label: 'Categorias específicas' },
+  { value: 'PRODUCTS', label: 'Produtos específicos' },
+  { value: 'BRANDS', label: 'Marcas específicas' },
+];
 
 const resolveApiErrorMessage = (error: unknown, fallback: string): string => {
   const axiosError = error as AxiosError<{ message?: string; error?: string; details?: string }>;
@@ -52,10 +86,28 @@ export function PromotionsClient() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null);
   const [form, setForm] = useState<PromotionFormState>(EMPTY_FORM);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [buyPickerOpen, setBuyPickerOpen] = useState(false);
+  const [payPickerOpen, setPayPickerOpen] = useState(false);
 
   const { data: promotions = [], isLoading } = useQuery<Promotion[]>({
     queryKey: ['promotions'],
     queryFn: promotionService.listAll,
+  });
+
+  const needsProducts = isDialogOpen && (form.buyScopeType === 'PRODUCTS' || form.payScopeType === 'PRODUCTS');
+  const needsCategories = isDialogOpen && (form.buyScopeType === 'CATEGORIES' || form.payScopeType === 'CATEGORIES');
+
+  const { data: allProducts = [] } = useQuery<Product[]>({
+    queryKey: ['products-for-promotion'],
+    queryFn: () => productService.listAll(),
+    enabled: needsProducts,
+  });
+
+  const { data: allCategories = [] } = useQuery<Category[]>({
+    queryKey: ['categories-for-promotion'],
+    queryFn: () => categoryService.list(),
+    enabled: needsCategories,
   });
 
   const createMutation = useMutation({
@@ -84,6 +136,16 @@ export function PromotionsClient() {
     onError: (error) => toast.error(resolveApiErrorMessage(error, 'Falha ao alterar status da promoção')),
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => promotionService.delete(id),
+    onSuccess: () => {
+      toast.success('Promoção removida com sucesso');
+      queryClient.invalidateQueries({ queryKey: ['promotions'] });
+      setDeleteId(null);
+    },
+    onError: (error) => toast.error(resolveApiErrorMessage(error, 'Falha ao remover promoção')),
+  });
+
   const stats = useMemo(() => {
     const activeCount = promotions.filter((promotion) => promotion.active).length;
     return {
@@ -106,7 +168,9 @@ export function PromotionsClient() {
       buyQuantity: String(promotion.buyQuantity),
       payQuantity: String(promotion.payQuantity),
       buyScopeType: promotion.buyScopeType,
+      buyScopeTargetIds: promotion.buyScopeTargetIds ?? [],
       payScopeType: promotion.payScopeType,
+      payScopeTargetIds: promotion.payScopeTargetIds ?? [],
       usageLimit: promotion.usageLimit != null ? String(promotion.usageLimit) : '',
       startsAt: promotion.startsAt ? promotion.startsAt.slice(0, 16) : '',
       expiresAt: promotion.expiresAt ? promotion.expiresAt.slice(0, 16) : '',
@@ -135,15 +199,25 @@ export function PromotionsClient() {
       return null;
     }
 
+    if (form.buyScopeType !== 'ENTIRE_STORE' && form.buyScopeTargetIds.length === 0) {
+      toast.error('Selecione ao menos um item para o escopo de compra');
+      return null;
+    }
+
+    if (form.payScopeType !== 'ENTIRE_STORE' && form.payScopeTargetIds.length === 0) {
+      toast.error('Selecione ao menos um item para o escopo de pagamento');
+      return null;
+    }
+
     return {
       name: form.name.trim(),
       discountType: 'BUY_X_PAY_Y',
       buyQuantity,
       payQuantity,
       buyScopeType: form.buyScopeType,
-      buyScopeTargetIds: null,
+      buyScopeTargetIds: form.buyScopeType !== 'ENTIRE_STORE' ? form.buyScopeTargetIds : null,
       payScopeType: form.payScopeType,
-      payScopeTargetIds: null,
+      payScopeTargetIds: form.payScopeType !== 'ENTIRE_STORE' ? form.payScopeTargetIds : null,
       combineWithPriceDiscounts: true,
       combineWithFreeShipping: false,
       combineWithCartDiscounts: false,
@@ -169,12 +243,37 @@ export function PromotionsClient() {
 
   const isSaving = createMutation.isPending || updateMutation.isPending;
 
+  /* ── scope helpers ── */
+  const toggleId = (field: 'buyScopeTargetIds' | 'payScopeTargetIds', id: number) => {
+    setForm((prev) => {
+      const set = new Set(prev[field]);
+      if (set.has(id)) set.delete(id);
+      else set.add(id);
+      return { ...prev, [field]: Array.from(set) };
+    });
+  };
+
+  const removeId = (field: 'buyScopeTargetIds' | 'payScopeTargetIds', id: number) =>
+    setForm((prev) => ({ ...prev, [field]: prev[field].filter((x) => x !== id) }));
+
+  const scopeItemLabel = (scopeType: PromotionApplyScopeType, id: number): string => {
+    if (scopeType === 'PRODUCTS') return allProducts.find((p) => p.id === id)?.name ?? `Produto #${id}`;
+    if (scopeType === 'CATEGORIES') return allCategories.find((c) => c.id === id)?.name ?? `Categoria #${id}`;
+    return `#${id}`;
+  };
+
+  const pickerItems = (scopeType: PromotionApplyScopeType) => {
+    if (scopeType === 'PRODUCTS') return allProducts.map((p) => ({ id: p.id, label: p.name }));
+    if (scopeType === 'CATEGORIES') return allCategories.map((c) => ({ id: c.id, label: c.name }));
+    return [];
+  };
+
   return (
     <div className="p-4 md:p-6 lg:p-8">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-5 font-semibold text-foreground">Promotions</h1>
-          <p className="text-sm text-muted-foreground">Discounts de regra Buy X Pay Y ligados ao backend.</p>
+          <h1 className="text-5 font-semibold text-foreground">Promoções</h1>
+          <p className="text-sm text-muted-foreground">Descontos por regra Compre X, Pague Y aplicados automaticamente.</p>
         </div>
         <Button className="gap-2" onClick={handleOpenCreate}>
           <Plus className="h-4 w-4" />
@@ -260,6 +359,14 @@ export function PromotionsClient() {
                       >
                         {promotion.active ? 'Desativar' : 'Ativar'}
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-destructive hover:bg-destructive/10"
+                        onClick={() => setDeleteId(promotion.id)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -298,38 +405,143 @@ export function PromotionsClient() {
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <label className="space-y-1 text-sm">
-                <span className="text-muted-foreground">Escopo de compra</span>
-                <select
-                  className="w-full rounded-md border border-input bg-background px-3 py-2"
-                  value={form.buyScopeType}
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, buyScopeType: event.target.value as PromotionApplyScopeType }))
-                  }
-                >
-                  <option value="ENTIRE_STORE">Loja inteira</option>
-                  <option value="CATEGORIES">Categorias</option>
-                  <option value="PRODUCTS">Produtos</option>
-                  <option value="BRANDS">Marcas</option>
-                </select>
-              </label>
-              <label className="space-y-1 text-sm">
-                <span className="text-muted-foreground">Escopo de pagamento</span>
-                <select
-                  className="w-full rounded-md border border-input bg-background px-3 py-2"
-                  value={form.payScopeType}
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, payScopeType: event.target.value as PromotionApplyScopeType }))
-                  }
-                >
-                  <option value="ENTIRE_STORE">Loja inteira</option>
-                  <option value="CATEGORIES">Categorias</option>
-                  <option value="PRODUCTS">Produtos</option>
-                  <option value="BRANDS">Marcas</option>
-                </select>
-              </label>
-            </div>
+            {/* Buy scope select */}
+            <label className="space-y-1 text-sm">
+              <span className="text-muted-foreground">Escopo de compra</span>
+              <select
+                className="w-full rounded-md border border-input bg-background px-3 py-2"
+                value={form.buyScopeType}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, buyScopeType: e.target.value as PromotionApplyScopeType, buyScopeTargetIds: [] }))
+                }
+              >
+                {SCOPE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </label>
+
+            {/* Buy scope picker */}
+            {form.buyScopeType !== 'ENTIRE_STORE' && form.buyScopeType !== 'BRANDS' && (
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-1">
+                  {form.buyScopeTargetIds.map((id) => (
+                    <Badge key={id} variant="secondary" className="gap-1">
+                      {scopeItemLabel(form.buyScopeType, id)}
+                      <button type="button" onClick={() => removeId('buyScopeTargetIds', id)}>
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+                <div className="relative">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-between"
+                    onClick={() => setBuyPickerOpen((v) => !v)}
+                  >
+                    Selecionar {form.buyScopeType === 'CATEGORIES' ? 'categorias' : 'produtos'}
+                    <ChevronDown className="h-4 w-4 opacity-50" />
+                  </Button>
+                  {buyPickerOpen && (
+                    <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-popover shadow-md">
+                      <Command>
+                        <CommandInput placeholder="Buscar..." />
+                        <CommandList className="max-h-44 overflow-y-auto">
+                          <CommandEmpty>Nenhum item encontrado.</CommandEmpty>
+                          <CommandGroup>
+                            {pickerItems(form.buyScopeType).map((item) => (
+                              <CommandItem
+                                key={item.id}
+                                onSelect={() => toggleId('buyScopeTargetIds', item.id)}
+                              >
+                                <Check
+                                  className={`mr-2 h-4 w-4 ${
+                                    form.buyScopeTargetIds.includes(item.id) ? 'opacity-100' : 'opacity-0'
+                                  }`}
+                                />
+                                {item.label}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Pay scope select */}
+            <label className="space-y-1 text-sm">
+              <span className="text-muted-foreground">Escopo de pagamento</span>
+              <select
+                className="w-full rounded-md border border-input bg-background px-3 py-2"
+                value={form.payScopeType}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, payScopeType: e.target.value as PromotionApplyScopeType, payScopeTargetIds: [] }))
+                }
+              >
+                {SCOPE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </label>
+
+            {/* Pay scope picker */}
+            {form.payScopeType !== 'ENTIRE_STORE' && form.payScopeType !== 'BRANDS' && (
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-1">
+                  {form.payScopeTargetIds.map((id) => (
+                    <Badge key={id} variant="secondary" className="gap-1">
+                      {scopeItemLabel(form.payScopeType, id)}
+                      <button type="button" onClick={() => removeId('payScopeTargetIds', id)}>
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+                <div className="relative">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-between"
+                    onClick={() => setPayPickerOpen((v) => !v)}
+                  >
+                    Selecionar {form.payScopeType === 'CATEGORIES' ? 'categorias' : 'produtos'}
+                    <ChevronDown className="h-4 w-4 opacity-50" />
+                  </Button>
+                  {payPickerOpen && (
+                    <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-popover shadow-md">
+                      <Command>
+                        <CommandInput placeholder="Buscar..." />
+                        <CommandList className="max-h-44 overflow-y-auto">
+                          <CommandEmpty>Nenhum item encontrado.</CommandEmpty>
+                          <CommandGroup>
+                            {pickerItems(form.payScopeType).map((item) => (
+                              <CommandItem
+                                key={item.id}
+                                onSelect={() => toggleId('payScopeTargetIds', item.id)}
+                              >
+                                <Check
+                                  className={`mr-2 h-4 w-4 ${
+                                    form.payScopeTargetIds.includes(item.id) ? 'opacity-100' : 'opacity-0'
+                                  }`}
+                                />
+                                {item.label}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             <Input
               type="number"
@@ -381,8 +593,29 @@ export function PromotionsClient() {
 
       <div className="mt-6 flex items-center justify-center gap-2 text-xs text-primary">
         <Tags className="h-3.5 w-3.5" />
-        Promotions ligadas ao backend em /api/v1/promotions
+        Promoções disponíveis via /api/v1/promotions
       </div>
+
+      {/* Delete confirmation */}
+      <AlertDialog open={deleteId !== null} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover promoção?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. A promoção será excluída permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => deleteId !== null && deleteMutation.mutate(deleteId)}
+            >
+              Remover
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

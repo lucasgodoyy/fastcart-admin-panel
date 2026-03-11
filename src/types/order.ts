@@ -13,7 +13,10 @@ export type AdminOrder = {
   customerName: string | null;
   customerEmail: string | null;
   status: OrderStatus;
+  paymentProvider: string | null;
   paymentStatus: string;
+  paymentDebugInfo: string | null;
+  paymentLastWebhookAt: string | null;
   couponCode: string | null;
   subtotalAmount: number;
   discountAmount: number;
@@ -32,6 +35,25 @@ export type AdminOrder = {
   deliveredAt: string | null;
   updatedAt: string | null;
   items: OrderItem[];
+};
+
+export type MercadoPagoDiagnosis = {
+  orderId: number;
+  storeId: number;
+  storeSlug: string;
+  mpUserId: string | null;
+  platformUserId: string | null;
+  sellerTokenType: string;
+  platformTokenType: string;
+  sellerTokenPrefix: string;
+  platformTokenPrefix: string;
+  sandboxMode: boolean;
+  testMode: boolean;
+  platformTokenIsTest: boolean;
+  sellerTokenIsTest: boolean;
+  checkoutEnvironment: string;
+  buyerRequirement: string;
+  checkoutExplanation: string;
 };
 
 export type OrderStats = {

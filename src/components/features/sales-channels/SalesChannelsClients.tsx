@@ -3,11 +3,15 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, ExternalLink, FileText, Pencil, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Separator } from '@/components/ui/separator';
 import {
   Dialog,
   DialogContent,
@@ -551,6 +555,93 @@ export function OnlineStorePagesClient() {
   );
 }
 
+type PageTemplate = {
+  key: string;
+  title: string;
+  description: string;
+  slug: string;
+  content: string;
+};
+
+const SIZE_GUIDE_CONTENT = `Informe as medidas dos seus produtos para seus clientes.
+
+Camisetas
+Tamanho  Peito    Cintura  Quadril
+2PP      73-76    57-60    82-85
+PP       77-82    61-66    86-91
+P        83-88    67-72    92-97
+M        89-94    73-78    98-103
+G        95-101   79-85    104-110
+GG       102-109  86-94    111-117
+2GG      110-118  94-104   118-125
+* Todas as medidas estão em centímetros.
+
+Calças
+Tamanho  Cintura  Quadril  Costura interna
+2PP      57-60    82-85    77.5
+PP       61-66    86-91    78
+P        67-72    92-97    78.5
+M        73-78    98-103   79
+G        79-85    104-110  79.5
+GG       86-94    111-117  80
+2GG      94-104   118-125  80.5
+* Todas as medidas estão em centímetros.`;
+
+const PRIVACY_CONTENT = `Esta Política de Privacidade descreve como coletamos, usamos e protegemos as informações dos nossos clientes, em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018).
+
+1. DADOS COLETADOS
+Coletamos dados como nome, e-mail, telefone, endereço e informações de pagamento para processar pedidos e melhorar sua experiência na loja.
+
+2. USO DOS DADOS
+Usamos seus dados para processar pedidos, enviar atualizações sobre compras, oferecer suporte e, mediante consentimento, enviar comunicações de marketing.
+
+3. COMPARTILHAMENTO
+Seus dados podem ser compartilhados com transportadoras e gateways de pagamento exclusivamente para execução dos pedidos.
+
+4. SEUS DIREITOS
+Você tem direito de acessar, corrigir, deletar e solicitar a portabilidade dos seus dados. Entre em contato conosco para exercer esses direitos.
+
+5. CONTATO
+Para dúvidas sobre esta política, entre em contato pelo e-mail da nossa loja.`;
+
+const PAGE_TEMPLATES: PageTemplate[] = [
+  { key: 'blank', title: 'Página em branco', description: 'Crie sua própria página do zero.', slug: 'pagina', content: '' },
+  { key: 'about', title: 'Quem somos', description: 'Conte a história do seu negócio.', slug: 'quem-somos', content: '' },
+  { key: 'how-to-buy', title: 'Como comprar', description: 'Passos claros do processo de compra.', slug: 'como-comprar', content: '' },
+  { key: 'returns', title: 'Política de devolução', description: 'Tudo sobre trocas e devoluções.', slug: 'politica-de-devolucao', content: '' },
+  { key: 'faq', title: 'Perguntas frequentes', description: 'Economize tempo com respostas rápidas.', slug: 'perguntas-frequentes', content: '' },
+  { key: 'size-guide', title: 'Guia de tamanhos', description: 'Ajude clientes a escolher o tamanho.', slug: 'guia-de-tamanhos', content: SIZE_GUIDE_CONTENT },
+  { key: 'privacy', title: 'Política de Privacidade', description: 'Transparência sobre uso de dados.', slug: 'politica-de-privacidade', content: PRIVACY_CONTENT },
+];
+
+type EditorForm = {
+  title: string;
+  slug: string;
+  content: string;
+  seoTitle: string;
+  seoDescription: string;
+  addToMenu: boolean;
+  active: boolean;
+};
+
+function blankForm(): EditorForm {
+  return { title: '', slug: 'pagina', content: '', seoTitle: '', seoDescription: '', addToMenu: true, active: true };
+}
+
+function slugify(value: string): string {
+  return (
+    value
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9-\s]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '') || 'pagina'
+  );
+}
+
 function OnlineStorePagesEditor({
   initialPages,
   isSaving,
@@ -561,422 +652,443 @@ function OnlineStorePagesEditor({
   onSave: (pages: OnlineStorePageItem[]) => void;
 }) {
   const [pages, setPages] = useState<OnlineStorePageItem[]>(initialPages);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [showAdvancedOptions, setShowAdvancedOptions] = useState(true);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [form, setForm] = useState<EditorForm>(blankForm());
+  const [isTemplateStep, setIsTemplateStep] = useState(false);
+  const [removeIndex, setRemoveIndex] = useState<number | null>(null);
+  const [showSeo, setShowSeo] = useState(false);
+  const [hasUnsaved, setHasUnsaved] = useState(false);
 
-  const SIZE_GUIDE_CONTENT = `Informe as medidas dos seus produtos para seus clientes. Você pode usar uma tabela, por exemplo.
-
-As medidas incluídas são de referência, a ideia é que você possa personalizar com informações dos seus produtos.
-
-Camisetas
-Tamanho\tPeito\tCintura\tQuadril
-2PP\t73-76\t57-60\t82-85
-PP\t77-82\t61-66\t86-91
-P\t83-88\t67-72\t92-97
-M\t89-94\t73-78\t98-103
-G\t95-101\t79-85\t104-110
-GG\t102-109\t86-94\t111-117
-2GG\t110-118\t94-104\t118-125
-* Todas as medidas estão em centímetros.
-
-Calças
-Tamanho\tCintura\tQuadril\tCostura interna
-2PP\t57-60\t82-85\t77.5
-PP\t61-66\t86-91\t78
-P\t67-72\t92-97\t78.5
-M\t73-78\t98-103\t79
-G\t79-85\t104-110\t79.5
-GG\t86-94\t111-117\t80
-2GG\t94-104\t118-125\t80.5
-* Todas as medidas estão em centímetros.
-
-Calçados
-Medição do pé\tBR\tUS
-22.1 cm\t34.5\t5
-22.5 cm\t35.5\t5.5
-22.9 cm\t36\t6
-23.3 cm\t36.5\t6.5
-23.8 cm\t37.5\t7
-24.2 cm\t38\t7.5
-24.6 cm\t38.5\t8
-25.0 cm\t39\t8.5
-25.5 cm\t39.5\t9
-25.9 cm\t40\t9.5
-26.3 cm\t41\t10
-26.7 cm\t41.5\t10.5
-27.1 cm\t42\t11
-27.6 cm\t43\t11.5
-28.0 cm\t43.5\t12
-28.4 cm\t44\t12.5`;
-
-  const PRIVACY_CONTENT = `É sua responsabilidade exclusiva confirmar que a sua Política de Privacidade esteja em conformidade com a LGPD. Os itens inseridos neste modelo de Política de Privacidade são apenas exemplos. É sua responsabilidade exclusiva a definição e a inclusão de todas as finalidades de tratamento, bem como da inclusão de todos os dados que serão coletados do titular, sendo o único responsável em caso de descumprimento das obrigações e dos princípios previstos na LGPD e legislação de proteção de dados aplicável.`;
-
-  type PageTemplate = {
-    key: string;
-    title: string;
-    description: string;
-    slug: string;
-    content: string;
+  const makeUniqueSlug = (baseSlug: string, excludeIndex: number | null) => {
+    const normalized = slugify(baseSlug);
+    const existing = new Set(
+      pages
+        .filter((_, i) => i !== excludeIndex)
+        .map((p) => p.slug.trim().toLowerCase()),
+    );
+    if (!existing.has(normalized)) return normalized;
+    let n = 2;
+    while (existing.has(`${normalized}-${n}`)) n++;
+    return `${normalized}-${n}`;
   };
 
-  const PAGE_TEMPLATES: PageTemplate[] = [
-    {
-      key: 'blank',
-      title: 'Página em branco',
-      description: 'Crie sua própria página do zero.',
-      slug: 'pagina',
-      content: '',
-    },
-    {
-      key: 'about',
-      title: 'Quem somos',
-      description: 'Conte a história do seu negócio e seus protagonistas.',
-      slug: 'quem-somos',
-      content: '',
-    },
-    {
-      key: 'how-to-buy',
-      title: 'Como comprar',
-      description: 'Passos claros e simples do processo de compra.',
-      slug: 'como-comprar',
-      content: '',
-    },
-    {
-      key: 'returns',
-      title: 'Política de devolução',
-      description: 'Tudo sobre trocas e devoluções.',
-      slug: 'politica-de-devolucao',
-      content: '',
-    },
-    {
-      key: 'faq',
-      title: 'Perguntas frequentes',
-      description: 'Economize tempo com respostas rápidas.',
-      slug: 'perguntas-frequentes',
-      content: '',
-    },
-    {
-      key: 'size-guide',
-      title: 'Guia de tamanhos',
-      description: 'Ajude seus clientes a encontrar o tamanho correto.',
-      slug: 'guia-de-tamanhos',
-      content: SIZE_GUIDE_CONTENT,
-    },
-    {
-      key: 'privacy',
-      title: 'Política de Privacidade',
-      description: 'Ajude seus clientes com sua política de privacidade.',
-      slug: 'politica-de-privacidade',
-      content: PRIVACY_CONTENT,
-    },
-  ];
-
-  const [createForm, setCreateForm] = useState<{
-    templateKey: string;
-    title: string;
-    content: string;
-    seoTitle: string;
-    seoDescription: string;
-    slug: string;
-    addToMenu: boolean;
-  }>({
-    templateKey: 'blank',
-    title: '',
-    content: '',
-    seoTitle: '',
-    seoDescription: '',
-    slug: 'pagina',
-    addToMenu: true,
-  });
-
-  const slugify = (value: string) =>
-    value
-      .trim()
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9-\s]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '') || 'pagina';
-
-  const makeUniqueSlug = (baseSlug: string) => {
-    const normalizedBase = slugify(baseSlug);
-    const existing = new Set(pages.map((page) => page.slug.trim().toLowerCase()));
-    if (!existing.has(normalizedBase)) return normalizedBase;
-
-    let index = 2;
-    while (existing.has(`${normalizedBase}-${index}`)) {
-      index += 1;
-    }
-    return `${normalizedBase}-${index}`;
+  const openCreate = () => {
+    setForm(blankForm());
+    setEditingIndex(null);
+    setIsTemplateStep(true);
+    setShowSeo(false);
+    setEditorOpen(true);
   };
 
-  const applyTemplate = (template: PageTemplate) => {
-    setCreateForm({
-      templateKey: template.key,
-      title: template.title === 'Página em branco' ? '' : template.title,
-      content: template.content,
-      seoTitle: template.title === 'Página em branco' ? '' : template.title,
-      seoDescription: '',
-      slug: template.slug,
-      addToMenu: true,
+  const openEdit = (index: number) => {
+    const p = pages[index];
+    setForm({
+      title: p.title,
+      slug: p.slug,
+      content: p.content ?? '',
+      seoTitle: p.seoTitle ?? '',
+      seoDescription: p.seoDescription ?? '',
+      addToMenu: p.addToMenu ?? false,
+      active: p.active,
     });
+    setEditingIndex(index);
+    setIsTemplateStep(false);
+    setShowSeo(false);
+    setEditorOpen(true);
   };
 
-  const openCreateDialog = (templateKey = 'blank') => {
-    const template = PAGE_TEMPLATES.find((item) => item.key === templateKey) ?? PAGE_TEMPLATES[0];
-    applyTemplate(template);
-    setIsCreateDialogOpen(true);
+  const applyTemplate = (tpl: PageTemplate) => {
+    setForm({
+      title: tpl.key === 'blank' ? '' : tpl.title,
+      slug: tpl.slug,
+      content: tpl.content,
+      seoTitle: tpl.key === 'blank' ? '' : tpl.title,
+      seoDescription: '',
+      addToMenu: true,
+      active: true,
+    });
+    setIsTemplateStep(false);
   };
 
-  const handleCreatePage = () => {
-    const title = createForm.title.trim();
+  const updateField = <K extends keyof EditorForm>(key: K, value: EditorForm[K]) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleTitleChange = (value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      title: value,
+      seoTitle: prev.seoTitle && prev.seoTitle !== prev.title ? prev.seoTitle : value,
+      slug:
+        editingIndex === null && (prev.slug === 'pagina' || prev.slug === '')
+          ? slugify(value)
+          : prev.slug,
+    }));
+  };
+
+  const handleSavePage = () => {
+    const title = form.title.trim();
     if (!title) {
       toast.error('Informe o título da página.');
       return;
     }
-
-    const resolvedSlug = makeUniqueSlug(createForm.slug || title);
-    const nextPage: OnlineStorePageItem = {
+    const resolvedSlug = makeUniqueSlug(form.slug || title, editingIndex);
+    const updated: OnlineStorePageItem = {
       title,
       slug: resolvedSlug,
-      content: createForm.content.trim(),
-      seoTitle: createForm.seoTitle.trim(),
-      seoDescription: createForm.seoDescription.trim(),
-      addToMenu: createForm.addToMenu,
-      active: true,
+      content: form.content.trim(),
+      seoTitle: (form.seoTitle || title).trim(),
+      seoDescription: form.seoDescription.trim(),
+      addToMenu: form.addToMenu,
+      active: form.active,
     };
 
-    setPages((prev) => [...prev, nextPage]);
-    setIsCreateDialogOpen(false);
-    toast.success(`Página "${title}" criada.`);
+    const nextPages =
+      editingIndex !== null
+        ? pages.map((p, i) => (i === editingIndex ? updated : p))
+        : [...pages, updated];
+
+    setPages(nextPages);
+    setEditorOpen(false);
+    setHasUnsaved(true);
+    toast.success(editingIndex !== null ? `Página "${title}" atualizada.` : `Página "${title}" criada.`);
+  };
+
+  const confirmRemove = (index: number) => setRemoveIndex(index);
+
+  const handleRemove = () => {
+    if (removeIndex === null) return;
+    const title = pages[removeIndex].title;
+    setPages((prev) => prev.filter((_, i) => i !== removeIndex));
+    setRemoveIndex(null);
+    setHasUnsaved(true);
+    toast.success(`Página "${title}" removida.`);
+  };
+
+  const handleSaveAll = () => {
+    onSave(pages);
+    setHasUnsaved(false);
   };
 
   return (
     <div className="p-4 md:p-6 lg:p-8">
-      <SectionHeader title="Páginas" description="Fale sobre sua marca e compartilhe informações importantes com seus clientes." />
+      <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Páginas</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Fale sobre sua marca e compartilhe informações importantes com seus clientes.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {hasUnsaved && (
+            <span className="text-xs text-amber-500">Alterações não salvas</span>
+          )}
+          <Button type="button" variant="outline" onClick={openCreate}>
+            Criar página
+          </Button>
+          <Button type="button" onClick={handleSaveAll} disabled={isSaving}>
+            {isSaving ? 'Salvando...' : 'Salvar'}
+          </Button>
+        </div>
+      </div>
 
-      <Card className="mb-6">
-        <CardContent className="flex flex-col justify-between gap-4 p-6 md:flex-row md:items-center">
-          <div>
-            <h2 className="text-xl font-semibold text-foreground">Fale sobre sua marca</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Crie páginas de conteúdo para contar sua história, benefícios da marca e como os clientes podem comprar.
-            </p>
-          </div>
-
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button type="button" onClick={() => openCreateDialog('blank')}>Criar página</Button>
-            </DialogTrigger>
-            <DialogContent
-              showCloseButton={false}
-              className="left-auto right-0 top-0 h-screen max-w-[560px] translate-x-0 translate-y-0 rounded-none border-l p-0"
-            >
-              <DialogHeader className="border-b px-6 py-4">
-                <DialogTitle className="text-4 font-semibold">Criar página</DialogTitle>
-              </DialogHeader>
-
-              <div className="max-h-[calc(100vh-84px)] space-y-4 overflow-y-auto px-6 py-5">
-                <div className="space-y-2">
-                  <Label>Modelo</Label>
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    {PAGE_TEMPLATES.map((template) => (
-                      <Button
-                        key={template.key}
-                        type="button"
-                        variant={createForm.templateKey === template.key ? 'default' : 'outline'}
-                        className="justify-between"
-                        onClick={() => applyTemplate(template)}
-                      >
-                        <span className="truncate">{template.title}</span>
-                        <ChevronRight className="h-3.5 w-3.5" />
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="new-page-title">Título</Label>
-                  <Input
-                    id="new-page-title"
-                    placeholder="Nome da sua página"
-                    value={createForm.title}
-                    onChange={(event) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        title: event.target.value,
-                        seoTitle: prev.seoTitle ? prev.seoTitle : event.target.value,
-                        slug: prev.slug === 'pagina' || prev.slug === '' ? slugify(event.target.value) : prev.slug,
-                      }))
-                    }
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="new-page-content">Conteúdo</Label>
-                    <Button type="button" variant="ghost" size="sm" className="text-xs" disabled>
-                      Gerar com IA
-                    </Button>
-                  </div>
-                  <textarea
-                    id="new-page-content"
-                    className="min-h-[180px] w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
-                    value={createForm.content}
-                    onChange={(event) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        content: event.target.value,
-                      }))
-                    }
-                  />
-                </div>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">Design</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3 text-sm text-muted-foreground">
-                    <p>Adicione seções adicionais do editor de design para dar mais personalização à sua página.</p>
-                    <div className="rounded-md border bg-muted/40 p-5 text-center">
-                      <Button type="button" variant="outline" disabled>
-                        Editar o design
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="cursor-pointer" onClick={() => setShowAdvancedOptions((prev) => !prev)}>
-                    <CardTitle className="flex items-center justify-between text-base">
-                      Opções avançadas
-                      <ChevronRight className={`h-4 w-4 transition-transform ${showAdvancedOptions ? 'rotate-90' : ''}`} />
-                    </CardTitle>
-                  </CardHeader>
-
-                  {showAdvancedOptions && (
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="new-page-seo-title">Título SEO</Label>
-                        <Input
-                          id="new-page-seo-title"
-                          placeholder="Título SEO"
-                          value={createForm.seoTitle}
-                          onChange={(event) =>
-                            setCreateForm((prev) => ({ ...prev, seoTitle: event.target.value }))
-                          }
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="new-page-seo-description">Descrição SEO</Label>
-                        <textarea
-                          id="new-page-seo-description"
-                          className="min-h-[96px] w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
-                          value={createForm.seoDescription}
-                          onChange={(event) =>
-                            setCreateForm((prev) => ({ ...prev, seoDescription: event.target.value }))
-                          }
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="new-page-slug">URL da página</Label>
-                        <div className="rounded-md border border-border bg-background px-3 py-2 text-sm text-muted-foreground">
-                          ...ualnuvem.com.br/{createForm.slug || 'pagina'}
-                        </div>
-                        <Input
-                          id="new-page-slug"
-                          placeholder="slug-da-pagina"
-                          value={createForm.slug}
-                          onChange={(event) =>
-                            setCreateForm((prev) => ({ ...prev, slug: slugify(event.target.value) }))
-                          }
-                        />
-                      </div>
-                    </CardContent>
-                  )}
-                </Card>
-
-                <label className="flex items-center gap-2 text-sm text-foreground">
-                  <input
-                    type="checkbox"
-                    checked={createForm.addToMenu}
-                    onChange={(event) =>
-                      setCreateForm((prev) => ({ ...prev, addToMenu: event.target.checked }))
-                    }
-                  />
-                  Criar um link para esta página no menu de navegação da loja
-                </label>
-
-                <div className="flex items-center justify-between border-t pt-4">
-                  <Button type="button" variant="ghost" onClick={() => setIsCreateDialogOpen(false)}>
-                    Cancelar
-                  </Button>
-                  <Button type="button" onClick={handleCreatePage}>
-                    Criar
-                  </Button>
-                </div>
-
-                <div className="pb-2 text-center text-sm text-muted-foreground">
-                  Como criar páginas de conteúdo?
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </CardContent>
-      </Card>
-
+      {/* Page list */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Páginas da loja</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {pages.map((page, index) => (
-            <div key={`${page.slug}-${index}`} className="grid grid-cols-1 gap-2 rounded-md border border-border p-3 md:grid-cols-3">
-              <Input
-                placeholder="Título"
-                value={page.title}
-                onChange={(event) =>
-                  setPages((prev) => prev.map((item, i) => (i === index ? { ...item, title: event.target.value } : item)))
-                }
-              />
-              <Input
-                placeholder="Slug"
-                value={page.slug}
-                onChange={(event) =>
-                  setPages((prev) => prev.map((item, i) => (i === index ? { ...item, slug: event.target.value } : item)))
-                }
-              />
-              <div className="flex items-center justify-between gap-2">
-                <Button
-                  type="button"
-                  variant={page.active ? 'default' : 'outline'}
-                  onClick={() =>
-                    setPages((prev) => prev.map((item, i) => (i === index ? { ...item, active: !item.active } : item)))
-                  }
-                >
-                  {page.active ? 'Ativa' : 'Inativa'}
-                </Button>
-                <Button type="button" variant="ghost" onClick={() => setPages((prev) => prev.filter((_, i) => i !== index))}>
-                  Remover
-                </Button>
-              </div>
+        {pages.length === 0 ? (
+          <CardContent className="flex flex-col items-center justify-center gap-4 py-16 text-center">
+            <FileText className="h-10 w-10 text-muted-foreground/40" />
+            <div>
+              <p className="font-medium text-foreground">Nenhuma página criada</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Crie páginas para contar a história da sua marca.
+              </p>
             </div>
-          ))}
-
-          <div className="flex justify-between pt-2">
-            <Button type="button" variant="outline" onClick={() => openCreateDialog('blank')}>
-              Adicionar página
+            <Button type="button" onClick={openCreate}>
+              Criar primeira página
             </Button>
-            <Button type="button" onClick={() => onSave(pages)} disabled={isSaving}>
-              {isSaving ? 'Salvando...' : 'Salvar páginas'}
-            </Button>
+          </CardContent>
+        ) : (
+          <div className="divide-y divide-border">
+            {pages.map((page, index) => (
+              <div
+                key={`${page.slug}-${index}`}
+                className="flex items-center justify-between gap-4 px-5 py-4"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="truncate font-medium text-foreground">{page.title}</span>
+                    <Badge
+                      variant={page.active ? 'default' : 'secondary'}
+                      className="shrink-0 text-xs"
+                    >
+                      {page.active ? 'Ativa' : 'Inativa'}
+                    </Badge>
+                    {page.addToMenu && (
+                      <Badge variant="outline" className="shrink-0 text-xs">
+                        No menu
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                    /pages/{page.slug}
+                  </p>
+                </div>
+                <div className="flex shrink-0 items-center gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 gap-1.5 px-3 text-xs"
+                    onClick={() => openEdit(index)}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                    Editar
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                    onClick={() => confirmRemove(index)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+            <div className="flex justify-end px-5 py-3">
+              <Button type="button" variant="ghost" size="sm" className="text-xs" onClick={openCreate}>
+                + Adicionar página
+              </Button>
+            </div>
           </div>
-        </CardContent>
+        )}
       </Card>
+
+      {/* Remove confirmation */}
+      <Dialog open={removeIndex !== null} onOpenChange={(open) => { if (!open) setRemoveIndex(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Remover página</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Tem certeza que deseja remover a página{' '}
+            <strong>{removeIndex !== null ? pages[removeIndex]?.title : ''}</strong>? Esta ação não pode ser desfeita.
+          </p>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setRemoveIndex(null)}>Cancelar</Button>
+            <Button variant="destructive" onClick={handleRemove}>Remover</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Editor Sheet */}
+      <Sheet open={editorOpen} onOpenChange={setEditorOpen}>
+        <SheetContent
+          side="right"
+          hideClose
+          className="flex w-full max-w-140 flex-col gap-0 p-0"
+        >
+          {/* Header */}
+          <SheetHeader className="flex flex-row items-center justify-between border-b px-6 py-4">
+            <SheetTitle className="text-base font-semibold">
+              {isTemplateStep ? 'Escolher modelo' : editingIndex !== null ? 'Editar página' : 'Criar página'}
+            </SheetTitle>
+            <div className="flex items-center gap-2">
+              {!isTemplateStep && (
+                <Button type="button" size="sm" onClick={handleSavePage}>
+                  Salvar página
+                </Button>
+              )}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+                onClick={() => setEditorOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </SheetHeader>
+
+          {/* Body */}
+          <div className="flex-1 overflow-y-auto">
+            {isTemplateStep ? (
+              /* Template picker */
+              <div className="space-y-3 px-6 py-5">
+                <p className="text-sm text-muted-foreground">
+                  Escolha um modelo para começar ou crie uma página em branco.
+                </p>
+                <div className="space-y-2">
+                  {PAGE_TEMPLATES.map((tpl) => (
+                    <button
+                      key={tpl.key}
+                      type="button"
+                      className="flex w-full items-center justify-between rounded-lg border border-border bg-background px-4 py-3 text-left transition-colors hover:bg-muted/50"
+                      onClick={() => applyTemplate(tpl)}
+                    >
+                      <div>
+                        <p className="font-medium text-foreground">{tpl.title}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">{tpl.description}</p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              /* Editor */
+              <div className="space-y-6 px-6 py-5">
+                {/* Title */}
+                <div className="space-y-2">
+                  <Label htmlFor="page-title">
+                    Título <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="page-title"
+                    placeholder="Nome da sua página"
+                    value={form.title}
+                    onChange={(e) => handleTitleChange(e.target.value)}
+                  />
+                </div>
+
+                {/* Content */}
+                <div className="space-y-2">
+                  <Label htmlFor="page-content">Conteúdo</Label>
+                  <textarea
+                    id="page-content"
+                    placeholder="Escreva o conteúdo da sua página aqui..."
+                    className="min-h-60 w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm leading-relaxed outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary/20"
+                    value={form.content}
+                    onChange={(e) => updateField('content', e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {form.content.length} caracteres
+                  </p>
+                </div>
+
+                <Separator />
+
+                {/* Visibility */}
+                <div className="space-y-4">
+                  <h3 className="font-medium text-foreground">Visibilidade</h3>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Página ativa</p>
+                      <p className="text-xs text-muted-foreground">
+                        Quando ativa, a página fica visível na loja.
+                      </p>
+                    </div>
+                    <Switch
+                      checked={form.active}
+                      onCheckedChange={(v) => updateField('active', v)}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Adicionar ao menu</p>
+                      <p className="text-xs text-muted-foreground">
+                        Exibe um link para esta página no menu de navegação.
+                      </p>
+                    </div>
+                    <Switch
+                      checked={form.addToMenu}
+                      onCheckedChange={(v) => updateField('addToMenu', v)}
+                    />
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* SEO & URL */}
+                <div className="space-y-4">
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-between text-left"
+                    onClick={() => setShowSeo((prev) => !prev)}
+                  >
+                    <h3 className="font-medium text-foreground">SEO e URL</h3>
+                    <ChevronRight
+                      className={`h-4 w-4 text-muted-foreground transition-transform ${showSeo ? 'rotate-90' : ''}`}
+                    />
+                  </button>
+
+                  {showSeo && (
+                    <div className="space-y-4">
+                      {/* URL preview */}
+                      <div className="rounded-lg border border-border bg-muted/30 px-4 py-3">
+                        <p className="text-xs font-medium text-muted-foreground">URL da página</p>
+                        <div className="mt-1 flex items-center gap-1 text-sm font-medium text-primary">
+                          <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+                          <span className="truncate">
+                            sualore.com.br/pages/{form.slug || 'pagina'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="page-slug">Slug (URL)</Label>
+                        <Input
+                          id="page-slug"
+                          placeholder="slug-da-pagina"
+                          value={form.slug}
+                          onChange={(e) => updateField('slug', slugify(e.target.value))}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Apenas letras minúsculas, números e hífens.
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="page-seo-title">Título SEO</Label>
+                        <Input
+                          id="page-seo-title"
+                          placeholder={form.title || 'Título para mecanismos de busca'}
+                          value={form.seoTitle}
+                          onChange={(e) => updateField('seoTitle', e.target.value)}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          {form.seoTitle.length}/70 caracteres recomendados
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="page-seo-description">Descrição SEO</Label>
+                        <textarea
+                          id="page-seo-description"
+                          placeholder="Descrição que aparece nos resultados de busca..."
+                          className="min-h-24 w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary/20"
+                          value={form.seoDescription}
+                          onChange={(e) => updateField('seoDescription', e.target.value)}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          {form.seoDescription.length}/160 caracteres recomendados
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          {!isTemplateStep && (
+            <div className="flex items-center justify-between border-t px-6 py-4">
+              <Button type="button" variant="ghost" onClick={() => setEditorOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="button" onClick={handleSavePage}>
+                Salvar página
+              </Button>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

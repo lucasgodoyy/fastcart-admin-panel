@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTabFromPath } from "../hooks/use-tab-from-path";
 import { motion } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -71,7 +72,7 @@ const emptyPlanForm: CreateOrUpdatePlanRequest = {
 };
 
 export function SaSubscriptionsPage() {
-  const [tab, setTab] = useState("plans");
+  const [tab, setTab] = useTabFromPath("/super-admin/subscriptions", { plans: "", subscribers: "subscribers", billing: "billing" }, "plans");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
   const [formData, setFormData] = useState<CreateOrUpdatePlanRequest>(emptyPlanForm);

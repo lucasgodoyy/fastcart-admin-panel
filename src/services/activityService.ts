@@ -6,7 +6,7 @@ export interface ActivityLog {
   description: string;
   userName: string;
   userRole: string;
-  performedAt: string;
+  performedAt: string | null;
 }
 
 export interface ActivityLogPage {

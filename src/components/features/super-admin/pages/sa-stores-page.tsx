@@ -124,7 +124,7 @@ export function SaStoresPage() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-[hsl(var(--sa-surface))] border-[hsl(var(--sa-border))]">
                   <DropdownMenuItem className="text-[hsl(var(--sa-text-secondary))] hover:bg-[hsl(var(--sa-surface-hover))] cursor-pointer gap-2"><Eye className="h-3.5 w-3.5" /> Ver Detalhes</DropdownMenuItem>
-                  <DropdownMenuItem className="text-[hsl(var(--sa-text-secondary))] hover:bg-[hsl(var(--sa-surface-hover))] cursor-pointer gap-2"><ExternalLink className="h-3.5 w-3.5" /> Abrir Loja</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => { const h = window.location.hostname; const p = window.location.protocol; let base = h; if (h.startsWith('admin.')) base = h.replace(/^admin\./, ''); else if (h.startsWith('www.')) base = h.replace(/^www\./, ''); else if (h === 'localhost' || h === '127.0.0.1') { window.open(`${p}//${store.slug}.127.0.0.1.nip.io:3000`, '_blank'); return; } window.open(`${p}//${store.slug}.${base}`, '_blank'); }} className="text-[hsl(var(--sa-text-secondary))] hover:bg-[hsl(var(--sa-surface-hover))] cursor-pointer gap-2"><ExternalLink className="h-3.5 w-3.5" /> Abrir Loja</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => toggleMutation.mutate(store.id)} className="text-[hsl(var(--sa-danger))] hover:bg-[hsl(var(--sa-danger-subtle))] cursor-pointer gap-2"><Ban className="h-3.5 w-3.5" /> {store.status === "ACTIVE" ? "Suspender" : "Ativar"}</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

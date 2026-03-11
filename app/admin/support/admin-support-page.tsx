@@ -24,11 +24,11 @@ import type { SupportTicketDetail } from "@/types/super-admin";
 import { toast } from "sonner";
 import { t } from "@/lib/admin-language";
 
-const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  OPEN: { label: "Aberto", variant: "destructive" },
-  IN_PROGRESS: { label: "Em Andamento", variant: "default" },
-  RESOLVED: { label: "Resolvido", variant: "secondary" },
-  CLOSED: { label: "Fechado", variant: "outline" },
+const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline"; color: string }> = {
+  OPEN: { label: "Aberto", variant: "destructive", color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800" },
+  IN_PROGRESS: { label: "Em Andamento", variant: "default", color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800" },
+  RESOLVED: { label: "Resolvido", variant: "secondary", color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800" },
+  CLOSED: { label: "Fechado", variant: "outline", color: "bg-muted text-muted-foreground border-border" },
 };
 
 const statusOptions = ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"];
@@ -108,7 +108,7 @@ export default function AdminSupportPage() {
             <div className="rounded-lg border bg-card p-5">
               <h3 className="text-base font-semibold mb-4">{ticketDetail.subject}</h3>
 
-              <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+              <div className="space-y-4 max-h-125 overflow-y-auto pr-2">
                 {ticketDetail.messages.map((msg) => {
                   const isStore = msg.senderType === "STORE" || msg.senderType === "ADMIN" || msg.senderType === "SUPER_ADMIN";
                   return (
@@ -210,46 +210,58 @@ export default function AdminSupportPage() {
     );
   }
 
+  const openCount = allTickets.filter((t) => t.status === "OPEN").length;
+  const inProgressCount = allTickets.filter((t) => t.status === "IN_PROGRESS").length;
+  const resolvedCount = allTickets.filter((t) => t.status === "RESOLVED").length;
+
   // ── List view ───────────────────────────────────────────────
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-xl font-bold">{t("Suporte", "Support")}</h1>
-        <p className="text-sm text-muted-foreground">{t("Gerencie os tickets de suporte da sua loja", "Manage your store's support tickets")}</p>
+      <div className="flex items-start gap-4">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+          <Headphones className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold">{t("Suporte ao Cliente", "Customer Support")}</h1>
+          <p className="text-sm text-muted-foreground">{t("Gerencie e responda os tickets de suporte da sua loja", "Manage and reply to your store's support tickets")}</p>
+        </div>
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-lg border bg-card p-4">
-          <div className="flex items-center gap-2 text-muted-foreground mb-1">
+      <div className="grid gap-4 sm:grid-cols-4">
+        <div className="rounded-xl border bg-card p-4">
+          <div className="flex items-center gap-2 text-muted-foreground mb-2">
             <AlertCircle className="h-4 w-4" />
-            <span className="text-xs font-medium">{t("Total", "Total")}</span>
+            <span className="text-xs font-medium uppercase tracking-wide">{t("Total", "Total")}</span>
           </div>
           <p className="text-2xl font-bold">{ticketsData?.totalElements ?? 0}</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
-          <div className="flex items-center gap-2 text-muted-foreground mb-1">
-            <Clock className="h-4 w-4" />
-            <span className="text-xs font-medium">{t("Abertos", "Open")}</span>
+        <div className="rounded-xl border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-900/10 p-4">
+          <div className="flex items-center gap-2 text-red-600 dark:text-red-400 mb-2">
+            <AlertCircle className="h-4 w-4" />
+            <span className="text-xs font-medium uppercase tracking-wide">{t("Abertos", "Open")}</span>
           </div>
-          <p className="text-2xl font-bold">
-            {allTickets.filter((t) => t.status === "OPEN").length}
-          </p>
+          <p className="text-2xl font-bold text-red-700 dark:text-red-300">{openCount}</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
-          <div className="flex items-center gap-2 text-muted-foreground mb-1">
-            <CheckCircle2 className="h-4 w-4" />
-            <span className="text-xs font-medium">{t("Resolvidos", "Resolved")}</span>
+        <div className="rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-900/10 p-4">
+          <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 mb-2">
+            <Clock className="h-4 w-4" />
+            <span className="text-xs font-medium uppercase tracking-wide">{t("Em andamento", "In progress")}</span>
           </div>
-          <p className="text-2xl font-bold">
-            {allTickets.filter((t) => t.status === "RESOLVED").length}
-          </p>
+          <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">{inProgressCount}</p>
+        </div>
+        <div className="rounded-xl border border-green-200 bg-green-50 dark:border-green-900/50 dark:bg-green-900/10 p-4">
+          <div className="flex items-center gap-2 text-green-600 dark:text-green-400 mb-2">
+            <CheckCircle2 className="h-4 w-4" />
+            <span className="text-xs font-medium uppercase tracking-wide">{t("Resolvidos", "Resolved")}</span>
+          </div>
+          <p className="text-2xl font-bold text-green-700 dark:text-green-300">{resolvedCount}</p>
         </div>
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[200px] max-w-sm">
+        <div className="relative flex-1 min-w-50 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder={t("Buscar tickets...", "Search tickets...")}
@@ -259,19 +271,24 @@ export default function AdminSupportPage() {
           />
         </div>
         {[
-          { key: "all", label: t("Todos", "All") },
-          { key: "OPEN", label: t("Abertos", "Open") },
-          { key: "IN_PROGRESS", label: t("Em Andamento", "In Progress") },
-          { key: "RESOLVED", label: t("Resolvidos", "Resolved") },
+          { key: "all", label: t("Todos", "All"), count: allTickets.length },
+          { key: "OPEN", label: t("Abertos", "Open"), count: openCount },
+          { key: "IN_PROGRESS", label: t("Em Andamento", "In Progress"), count: inProgressCount },
+          { key: "RESOLVED", label: t("Resolvidos", "Resolved"), count: resolvedCount },
         ].map((f) => (
           <Button
             key={f.key}
             variant={statusFilter === f.key ? "default" : "outline"}
             size="sm"
             onClick={() => setStatusFilter(f.key)}
-            className="text-xs h-8"
+            className="text-xs h-8 gap-1.5"
           >
             {f.label}
+            {f.count > 0 && (
+              <span className={`inline-flex items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                statusFilter === f.key ? "bg-background/20 text-inherit" : "bg-muted text-muted-foreground"
+              }`}>{f.count}</span>
+            )}
           </Button>
         ))}
       </div>
@@ -284,22 +301,26 @@ export default function AdminSupportPage() {
           </div>
         )}
         {!isLoading && filtered.length === 0 && (
-          <div className="text-center py-16 text-muted-foreground text-sm">
-            {t("Nenhum ticket encontrado.", "No tickets found.")}
+          <div className="rounded-xl border border-dashed border-border bg-card py-16 text-center">
+            <Headphones className="mx-auto mb-3 h-9 w-9 text-muted-foreground/40" />
+            <p className="font-medium text-foreground">{t("Nenhum ticket encontrado.", "No tickets found.")}</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t("Ajuste os filtros ou aguarde novas solicitações dos clientes.", "Adjust the filters or wait for new customer requests.")}
+            </p>
           </div>
         )}
         {filtered.map((ticket) => (
           <div
             key={ticket.id}
             onClick={() => setSelectedTicketId(ticket.id)}
-            className="group flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer"
+            className="group flex items-start gap-4 p-5 rounded-xl border bg-card hover:bg-accent/50 transition-colors cursor-pointer"
           >
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <span className="text-xs font-mono text-muted-foreground">#{ticket.id}</span>
-                <Badge variant={statusMap[ticket.status]?.variant || "outline"} className="text-[10px]">
+                <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${statusMap[ticket.status]?.color ?? "bg-muted text-muted-foreground border-border"}`}>
                   {statusMap[ticket.status]?.label || ticket.status}
-                </Badge>
+                </span>
                 {ticket.source && (
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
                     {ticket.source}

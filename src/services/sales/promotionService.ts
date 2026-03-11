@@ -23,6 +23,10 @@ const promotionService = {
     });
     return data;
   },
+
+  async delete(id: number): Promise<void> {
+    await apiClient.delete(`/promotions/${id}`);
+  },
 };
 
 export default promotionService;

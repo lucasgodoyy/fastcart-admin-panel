@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useTabFromPath } from "../hooks/use-tab-from-path";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -34,7 +34,7 @@ const campaignStatusMap: Record<string, { label: string; color: string }> = {
 };
 
 export function SaMarketingPage() {
-  const [tab, setTab] = useState("campaigns");
+  const [tab, setTab] = useTabFromPath("/super-admin/marketing", { campaigns: "", banners: "banners" }, "campaigns");
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["sa-marketing-stats"],

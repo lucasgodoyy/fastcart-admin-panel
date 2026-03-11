@@ -18,6 +18,14 @@ import {
   Navigation,
   FileText,
   RotateCcw,
+  AlertTriangle,
+  CreditCard,
+  Pencil,
+  Save,
+  X,
+  ExternalLink,
+  Copy,
+  Printer,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -35,7 +43,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import orderService from '@/services/sales/orderService';
-import { AdminOrder, OrderStatus } from '@/types/order';
+import { AdminOrder, MercadoPagoDiagnosis, OrderStatus } from '@/types/order';
 import { t } from '@/lib/admin-language';
 import { toast } from 'sonner';
 
@@ -67,11 +75,20 @@ export function OrderDetailClient() {
   const [refundDialogOpen, setRefundDialogOpen] = useState(false);
   const [refundAmount, setRefundAmount] = useState('');
   const [refundReason, setRefundReason] = useState('');
+  const [editingTracking, setEditingTracking] = useState(false);
+  const [editTrackingCode, setEditTrackingCode] = useState('');
+  const [editLabelId, setEditLabelId] = useState('');
 
   const { data: order, isLoading } = useQuery<AdminOrder>({
     queryKey: ['store-order', orderId],
     queryFn: () => orderService.getById(orderId),
     enabled: !isNaN(orderId),
+  });
+
+  const { data: mpDiagnosis, isLoading: isLoadingDiagnosis } = useQuery<MercadoPagoDiagnosis>({
+    queryKey: ['mp-diagnosis', orderId],
+    queryFn: () => orderService.getMercadoPagoDiagnosis(orderId),
+    enabled: !isNaN(orderId) && !!order && order.paymentProvider === 'mercadopago',
   });
 
   const dispatchMutation = useMutation({
@@ -131,6 +148,72 @@ export function OrderDetailClient() {
     },
   });
 
+  const retryCheckoutMutation = useMutation({
+    mutationFn: () => orderService.retryMercadoPagoCheckout(orderId),
+    onSuccess: (data) => {
+      toast.success(t('Link de pagamento gerado!', 'Payment link generated!'));
+      queryClient.invalidateQueries({ queryKey: ['store-order', orderId] });
+      queryClient.invalidateQueries({ queryKey: ['mp-diagnosis', orderId] });
+      window.open(data.checkoutUrl, '_blank');
+    },
+    onError: () => {
+      toast.error(t('Erro ao gerar link de pagamento.', 'Error generating payment link.'));
+    },
+  });
+
+  const updateTrackingMutation = useMutation({
+    mutationFn: ({ trackingCode, shippingLabelId }: { trackingCode?: string; shippingLabelId?: string }) =>
+      orderService.updateTracking(orderId, trackingCode, shippingLabelId),
+    onSuccess: () => {
+      toast.success(t('Rastreio atualizado!', 'Tracking updated!'));
+      setEditingTracking(false);
+      queryClient.invalidateQueries({ queryKey: ['store-order', orderId] });
+    },
+    onError: () => toast.error(t('Erro ao atualizar rastreio.', 'Error updating tracking.')),
+  });
+
+  const createLabelMutation = useMutation({
+    mutationFn: () => orderService.createShippingLabel(orderId),
+    onSuccess: () => {
+      toast.success(t('Etiqueta sendo gerada! Aguarde alguns segundos e recarregue.', 'Label being generated! Wait a few seconds and reload.'));
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['store-order', orderId] });
+      }, 5000);
+    },
+    onError: () => toast.error(t('Erro ao gerar etiqueta.', 'Error generating label.')),
+  });
+
+  const printLabelMutation = useMutation({
+    mutationFn: () => orderService.printLabel(orderId),
+    onSuccess: (data) => {
+      const url = data?.url;
+      if (url) {
+        window.open(url, '_blank');
+      }
+      toast.success(t('Etiqueta enviada para impressão!', 'Label sent to print!'));
+      queryClient.invalidateQueries({ queryKey: ['store-order', orderId] });
+    },
+    onError: () => toast.error(t('Erro ao imprimir etiqueta.', 'Error printing label.')),
+  });
+
+  const syncPaymentMutation = useMutation({
+    mutationFn: () => orderService.syncMercadoPagoPayment(orderId),
+    onSuccess: (data) => {
+      if (data.status === 'synced') {
+        toast.success(t('Pagamento sincronizado! Pedido marcado como PAGO.', 'Payment synced! Order marked as PAID.'));
+      } else if (data.status === 'already_paid') {
+        toast.info(t('Pedido já está pago.', 'Order is already paid.'));
+      } else {
+        toast.info(data.message || t('Nenhum pagamento aprovado encontrado.', 'No approved payment found.'));
+      }
+      queryClient.invalidateQueries({ queryKey: ['store-order', orderId] });
+      queryClient.invalidateQueries({ queryKey: ['mp-diagnosis', orderId] });
+    },
+    onError: () => {
+      toast.error(t('Erro ao sincronizar pagamento.', 'Error syncing payment.'));
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-16">
@@ -153,10 +236,12 @@ export function OrderDetailClient() {
   const sc = statusConfig[order.status] || statusConfig.PENDING;
   const isPaid = order.paymentStatus.toLowerCase() === 'paid';
   const isPartiallyRefunded = order.paymentStatus.toLowerCase() === 'partially_refunded';
+  const isMercadoPagoOrder = order.paymentProvider === 'mercadopago' || order.paymentDebugInfo || order.paymentLastWebhookAt;
   const canDispatch = isPaid && order.status !== 'SHIPPED' && order.status !== 'DELIVERED' && order.status !== 'CANCELLED';
   const canDeliver = order.status === 'SHIPPED';
   const canCancel = order.status !== 'CANCELLED' && order.status !== 'DELIVERED';
   const canRefund = (isPaid || isPartiallyRefunded) && order.status !== 'CANCELLED';
+  const canRetryPayment = !isPaid && order.paymentProvider === 'mercadopago' && order.status !== 'CANCELLED';
 
   return (
     <div className="p-4 md:p-6 lg:p-8">
@@ -177,6 +262,28 @@ export function OrderDetailClient() {
             </span>
           </div>
           <div className="flex items-center gap-2">
+            {canRetryPayment && (
+              <>
+                <Button
+                  onClick={() => syncPaymentMutation.mutate()}
+                  disabled={syncPaymentMutation.isPending}
+                  variant="outline"
+                  className="gap-2 border-green-500 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  {syncPaymentMutation.isPending ? t('Sincronizando...', 'Syncing...') : t('Sincronizar Pagamento', 'Sync Payment')}
+                </Button>
+                <Button
+                  onClick={() => retryCheckoutMutation.mutate()}
+                  disabled={retryCheckoutMutation.isPending}
+                  variant="outline"
+                  className="gap-2 border-blue-500 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                >
+                  <CreditCard className="h-4 w-4" />
+                  {retryCheckoutMutation.isPending ? t('Gerando...', 'Generating...') : t('Tentar Pagamento', 'Retry Payment')}
+                </Button>
+              </>
+            )}
             {canDispatch && (
               <Button
                 onClick={() => setDispatchDialogOpen(true)}
@@ -514,6 +621,12 @@ export function OrderDetailClient() {
                 <span className="text-muted-foreground">{t('Moeda', 'Currency')}</span>
                 <span className="text-foreground uppercase">{order.currency}</span>
               </div>
+              {order.paymentLastWebhookAt && (
+                <div className="flex justify-between gap-4">
+                  <span className="text-muted-foreground">{t('Último webhook MP', 'Last MP webhook')}</span>
+                  <span className="text-right text-foreground">{formatDate(order.paymentLastWebhookAt)}</span>
+                </div>
+              )}
               {order.couponCode && (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t('Cupom', 'Coupon')}</span>
@@ -526,10 +639,91 @@ export function OrderDetailClient() {
             </div>
           </div>
 
+          {isMercadoPagoOrder && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50/70 px-5 py-4 dark:border-amber-900/40 dark:bg-amber-950/20">
+              <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground">
+                <AlertTriangle className="h-4 w-4 text-amber-600" />
+                {t('Diagnóstico Mercado Pago', 'Mercado Pago Diagnostics')}
+              </h2>
+              {mpDiagnosis && (
+                <div className="mb-3 rounded-md border border-amber-300/70 bg-background/70 p-3 text-xs text-foreground">
+                  <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                    <div className="flex justify-between gap-3">
+                      <span className="text-muted-foreground">{t('ID da aplicação', 'App owner ID')}</span>
+                      <span className="font-mono">{mpDiagnosis.platformUserId || '—'}</span>
+                    </div>
+                    <div className="flex justify-between gap-3">
+                      <span className="text-muted-foreground">{t('ID do seller da loja', 'Store seller ID')}</span>
+                      <span className="font-mono">{mpDiagnosis.mpUserId || '—'}</span>
+                    </div>
+                    <div className="flex justify-between gap-3">
+                      <span className="text-muted-foreground">{t('Token da loja', 'Store token')}</span>
+                      <span>{mpDiagnosis.sellerTokenType}</span>
+                    </div>
+                    <div className="flex justify-between gap-3">
+                      <span className="text-muted-foreground">{t('Token da aplicação', 'Platform token')}</span>
+                      <span>{mpDiagnosis.platformTokenType}</span>
+                    </div>
+                    <div className="flex justify-between gap-3">
+                      <span className="text-muted-foreground">{t('Checkout abre em', 'Checkout opens on')}</span>
+                      <span>{mpDiagnosis.checkoutEnvironment === 'sandbox' ? 'sandbox.mercadopago.com.br' : 'www.mercadopago.com.br'}</span>
+                    </div>
+                    <div className="flex justify-between gap-3">
+                      <span className="text-muted-foreground">{t('Modo de teste', 'Test mode')}</span>
+                      <span>{mpDiagnosis.testMode ? t('Sim', 'Yes') : t('Não', 'No')}</span>
+                    </div>
+                  </div>
+                  <p className="mt-3 text-amber-800 dark:text-amber-200">
+                    {mpDiagnosis.checkoutExplanation}
+                  </p>
+                  <p className="mt-2 font-medium text-amber-900 dark:text-amber-100">
+                    {mpDiagnosis.buyerRequirement}
+                  </p>
+                </div>
+              )}
+              {isLoadingDiagnosis && (
+                <p className="mb-3 text-xs text-muted-foreground">
+                  {t('Carregando diagnóstico do Mercado Pago...', 'Loading Mercado Pago diagnosis...')}
+                </p>
+              )}
+              {!order.paymentLastWebhookAt && (
+                <p className="mb-3 text-xs text-amber-700 dark:text-amber-300">
+                  {t(
+                    'Nenhum webhook do Mercado Pago foi registrado para este pedido até agora.',
+                    'No Mercado Pago webhook has been recorded for this order yet.'
+                  )}
+                </p>
+              )}
+              <pre className="overflow-x-auto whitespace-pre-wrap rounded-md bg-background/80 p-3 text-xs leading-5 text-foreground">
+                {order.paymentDebugInfo || t('Sem logs persistidos para este pedido.', 'No persisted logs for this order.')}
+              </pre>
+            </div>
+          )}
+
           {/* Shipping */}
-          {(order.shippingMethod || order.shippingCarrier || order.trackingCode || order.shippingAddressJson) && (
+          {(order.shippingMethod || order.shippingCarrier || order.trackingCode || order.shippingAddressJson || isPaid) && (
             <div className="rounded-lg border border-border bg-card px-5 py-4">
-              <h2 className="mb-3 text-sm font-semibold text-foreground">{t('Envio', 'Shipping')}</h2>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Truck className="h-4 w-4" />
+                  {t('Envio e Rastreio', 'Shipping & Tracking')}
+                </h2>
+                {(order.status === 'SHIPPED' || order.status === 'DELIVERED' || isPaid) && !editingTracking && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 gap-1 text-xs"
+                    onClick={() => {
+                      setEditTrackingCode(order.trackingCode || '');
+                      setEditLabelId(order.shippingLabelId || '');
+                      setEditingTracking(true);
+                    }}
+                  >
+                    <Pencil className="h-3 w-3" />
+                    {t('Editar', 'Edit')}
+                  </Button>
+                )}
+              </div>
               <div className="space-y-2 text-sm">
                 {order.shippingCarrier && (
                   <div className="flex justify-between">
@@ -552,15 +746,134 @@ export function OrderDetailClient() {
                     <Badge variant="secondary">{t('Retirada', 'Pickup')}</Badge>
                   </div>
                 )}
-                {order.trackingCode && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">{t('Rastreio', 'Tracking')}</span>
-                    <span className="flex items-center gap-1 text-foreground font-mono text-xs">
-                      <Navigation className="h-3.5 w-3.5" />
-                      {order.trackingCode}
-                    </span>
+
+                {/* Tracking code - editable */}
+                {editingTracking ? (
+                  <div className="space-y-3 pt-2 border-t border-border">
+                    <div>
+                      <Label htmlFor="edit-tracking" className="text-xs">{t('Código de rastreio', 'Tracking code')}</Label>
+                      <Input
+                        id="edit-tracking"
+                        placeholder="BR123456789XX"
+                        value={editTrackingCode}
+                        onChange={(e) => setEditTrackingCode(e.target.value)}
+                        className="mt-1 h-8 text-xs font-mono"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-label" className="text-xs">{t('ID da etiqueta (Melhor Envio)', 'Label ID (Melhor Envio)')}</Label>
+                      <Input
+                        id="edit-label"
+                        placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                        value={editLabelId}
+                        onChange={(e) => setEditLabelId(e.target.value)}
+                        className="mt-1 h-8 text-xs font-mono"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        className="h-7 gap-1 text-xs"
+                        disabled={updateTrackingMutation.isPending}
+                        onClick={() => updateTrackingMutation.mutate({
+                          trackingCode: editTrackingCode,
+                          shippingLabelId: editLabelId,
+                        })}
+                      >
+                        <Save className="h-3 w-3" />
+                        {updateTrackingMutation.isPending ? t('Salvando...', 'Saving...') : t('Salvar', 'Save')}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 gap-1 text-xs"
+                        onClick={() => setEditingTracking(false)}
+                      >
+                        <X className="h-3 w-3" />
+                        {t('Cancelar', 'Cancel')}
+                      </Button>
+                    </div>
                   </div>
+                ) : (
+                  <>
+                    {order.trackingCode ? (
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">{t('Rastreio', 'Tracking')}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs text-foreground">{order.trackingCode}</span>
+                          <button
+                            className="text-muted-foreground hover:text-foreground transition-colors"
+                            onClick={() => {
+                              navigator.clipboard.writeText(order.trackingCode || '');
+                              toast.success(t('Código copiado!', 'Code copied!'));
+                            }}
+                            title={t('Copiar', 'Copy')}
+                          >
+                            <Copy className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : isPaid && order.status !== 'CANCELLED' ? (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground italic">
+                        <Navigation className="h-3.5 w-3.5" />
+                        {t('Nenhum código de rastreio informado', 'No tracking code set')}
+                      </div>
+                    ) : null}
+
+                    {order.shippingLabelId && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">{t('Etiqueta', 'Label')}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs text-foreground">{order.shippingLabelId.substring(0, 12)}...</span>
+                          <button
+                            className="text-muted-foreground hover:text-foreground transition-colors"
+                            onClick={() => {
+                              navigator.clipboard.writeText(order.shippingLabelId || '');
+                              toast.success(t('ID da etiqueta copiado!', 'Label ID copied!'));
+                            }}
+                            title={t('Copiar ID', 'Copy ID')}
+                          >
+                            <Copy className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Label action buttons */}
+                    {isPaid && order.status !== 'CANCELLED' && order.shippingMethod !== 'PICKUP' && (
+                      <div className="pt-2 border-t border-border flex flex-wrap gap-2">
+                        {!order.shippingLabelId ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 gap-1 text-xs"
+                            disabled={createLabelMutation.isPending}
+                            onClick={() => createLabelMutation.mutate()}
+                          >
+                            <Tag className="h-3 w-3" />
+                            {createLabelMutation.isPending
+                              ? t('Gerando...', 'Generating...')
+                              : t('Gerar Etiqueta', 'Generate Label')}
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 gap-1 text-xs"
+                            disabled={printLabelMutation.isPending}
+                            onClick={() => printLabelMutation.mutate()}
+                          >
+                            <Printer className="h-3 w-3" />
+                            {printLabelMutation.isPending
+                              ? t('Imprimindo...', 'Printing...')
+                              : t('Imprimir Etiqueta', 'Print Label')}
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </>
                 )}
+
                 {order.shippingAddressJson && (() => {
                   try {
                     const addr = JSON.parse(order.shippingAddressJson);

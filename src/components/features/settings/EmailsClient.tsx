@@ -30,8 +30,8 @@ import {
   Clock,
   AlertCircle,
   Settings,
-  Eye,
   Edit,
+  Eye,
   Loader2,
   ShoppingCart,
   UserPlus,
@@ -45,7 +45,9 @@ import {
   Bell,
   Info,
   Zap,
+  ArrowRight,
 } from 'lucide-react';
+import Link from 'next/link';
 import emailService, { EmailSenderConfig, EmailTemplate, EmailLog } from '@/services/emailService';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -352,9 +354,7 @@ function statusBadge(status: string) {
 export function EmailsClient() {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState('automation');
-  const [editEvent, setEditEvent] = useState<EmailEvent | null>(null);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [isQuickSetup, setIsQuickSetup] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<'all' | 'orders' | 'customers' | 'marketing' | 'system'>('all');
   const [composeOpen, setComposeOpen] = useState(false);
   const [composeForm, setComposeForm] = useState({ to: '', subject: '', bodyHtml: '' });
   const [testEmailAddr, setTestEmailAddr] = useState('');
@@ -373,6 +373,22 @@ export function EmailsClient() {
   const { data: logs = [] } = useQuery<EmailLog[]>({
     queryKey: ['email-logs'],
     queryFn: () => emailService.listLogs(undefined, 30),
+  });
+
+  /* ── Inline active toggle ── */
+  const toggleActiveMutation = useMutation({
+    mutationFn: ({ key, active, event }: { key: string; active: boolean; event: EmailEvent }) => {
+      const existing = templates.find(
+        (t) => normalizeTemplateKey(t.templateKey) === normalizeTemplateKey(key),
+      );
+      return emailService.upsertTemplate(normalizeTemplateKey(key), {
+        subject: existing?.subject ?? event.defaultSubject,
+        bodyHtml: existing?.bodyHtml ?? event.defaultBody,
+        active,
+      });
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['email-templates'] }),
+    onError: () => toast.error('Erro ao alterar status do e-mail.'),
   });
 
   /* ── Sender form ── */
@@ -398,7 +414,7 @@ export function EmailsClient() {
     mutationFn: () => emailService.upsertSenderConfig(senderForm),
     onSuccess: () => {
       toast.success('Remetente salvo!');
-      queryClient.invalidateQueries({ queryKey: ['email-sender-config'] });
+      void queryClient.invalidateQueries({ queryKey: ['email-sender-config'] });
     },
     onError: () => toast.error('Erro ao salvar remetente.'),
   });
@@ -413,7 +429,7 @@ export function EmailsClient() {
         const existing = templates.find(
           (t) => normalizeTemplateKey(t.templateKey) === normalizeTemplateKey(key),
         );
-        if (existing?.active) continue; // already active
+        if (existing?.active) continue;
         await emailService.upsertTemplate(normalizeTemplateKey(key), {
           subject: existing?.subject ?? event.defaultSubject,
           bodyHtml: existing?.bodyHtml ?? event.defaultBody,
@@ -423,41 +439,9 @@ export function EmailsClient() {
     },
     onSuccess: () => {
       toast.success('5 automações essenciais ativadas!');
-      queryClient.invalidateQueries({ queryKey: ['email-templates'] });
-      setIsQuickSetup(false);
+      void queryClient.invalidateQueries({ queryKey: ['email-templates'] });
     },
     onError: () => toast.error('Erro. Tente ativar individualmente.'),
-  });
-
-  /* ── Template editor form ── */
-  const [editForm, setEditForm] = useState({ subject: '', bodyHtml: '', active: true });
-
-  function openTemplateEditor(event: EmailEvent) {
-    const existing = templates.find(
-      (t) => normalizeTemplateKey(t.templateKey) === normalizeTemplateKey(event.key),
-    );
-    setEditEvent(event);
-    setEditForm({
-      subject: existing?.subject ?? event.defaultSubject,
-      bodyHtml: existing?.bodyHtml ?? event.defaultBody,
-      active: existing?.active ?? true,
-    });
-    setEditDialogOpen(true);
-  }
-
-  const templateMutation = useMutation({
-    mutationFn: () =>
-      emailService.upsertTemplate(normalizeTemplateKey(editEvent!.key), {
-        subject: editForm.subject,
-        bodyHtml: editForm.bodyHtml,
-        active: editForm.active,
-      }),
-    onSuccess: () => {
-      toast.success('Template salvo!');
-      queryClient.invalidateQueries({ queryKey: ['email-templates'] });
-      setEditDialogOpen(false);
-    },
-    onError: () => toast.error('Erro ao salvar template.'),
   });
 
   /* ── Send test email ── */
@@ -638,79 +622,98 @@ export function EmailsClient() {
             </div>
           </div>
 
-          {(['orders', 'customers', 'marketing', 'system'] as const).map((cat) => {
-            const events = EMAIL_EVENTS.filter((e) => e.category === cat);
-            const catInfo = CATEGORY_LABELS[cat];
-            return (
-              <div key={cat}>
-                <div className="flex items-center gap-2 mb-3">
-                  {catInfo.icon}
-                  <h3 className="text-sm font-semibold text-foreground">{catInfo.label}</h3>
-                  <Badge variant="secondary" className="text-[10px]">{events.length}</Badge>
-                </div>
-                <div className="grid gap-3">
-                  {events.map((event) => {
-                    const configured = isTemplateConfigured(event.key);
-                    const active = isTemplateActive(event.key);
-                    return (
-                      <Card
-                        key={event.key}
-                        className={cn(
-                          'transition-colors',
-                          active && 'border-green-200 dark:border-green-900/50',
+            {/* Category filter */}
+          <div className="flex flex-wrap items-center gap-2">
+            {([['all', 'Todos'], ['orders', 'Pedidos'], ['customers', 'Clientes'], ['marketing', 'Marketing'], ['system', 'Sistema']] as const).map(([val, label]) => (
+              <button
+                key={val}
+                onClick={() => setCategoryFilter(val)}
+                className={cn(
+                  'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+                  categoryFilter === val
+                    ? 'bg-foreground text-background border-foreground'
+                    : 'bg-background text-muted-foreground border-border hover:text-foreground hover:border-foreground/50',
+                )}
+              >
+                {label}
+                {val !== 'all' && (
+                  <span className="ml-1.5 opacity-60">
+                    {EMAIL_EVENTS.filter((e) => e.category === val).length}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Template list */}
+          <div className="rounded-lg border border-border bg-card overflow-hidden divide-y divide-border">
+            {EMAIL_EVENTS
+              .filter((e) => categoryFilter === 'all' || e.category === categoryFilter)
+              .map((event) => {
+                const configured = isTemplateConfigured(event.key);
+                const active = isTemplateActive(event.key);
+                return (
+                  <div
+                    key={event.key}
+                    className={cn(
+                      'flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors',
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        'h-9 w-9 rounded-lg flex items-center justify-center shrink-0',
+                        active
+                          ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                          : 'bg-muted text-muted-foreground',
+                      )}
+                    >
+                      {event.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium text-foreground">{event.label}</p>
+                        {configured && active && (
+                          <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                            Ativo
+                          </span>
                         )}
+                        {configured && !active && (
+                          <span className="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-[10px] font-medium text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
+                            Pausado
+                          </span>
+                        )}
+                        {!configured && (
+                          <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                            Não configurado
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5 truncate">{event.description}</p>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <Switch
+                        checked={active}
+                        onCheckedChange={(checked) =>
+                          toggleActiveMutation.mutate({ key: event.key, active: checked, event })
+                        }
+                        disabled={toggleActiveMutation.isPending}
+                      />
+                      <Link
+                        href={`/admin/settings/emails/${event.key}`}
+                        className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
                       >
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-4">
-                            <div
-                              className={cn(
-                                'h-10 w-10 rounded-lg flex items-center justify-center shrink-0',
-                                active
-                                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                  : 'bg-muted text-muted-foreground',
-                              )}
-                            >
-                              {event.icon}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <p className="text-sm font-medium text-foreground">{event.label}</p>
-                                {configured && active && (
-                                  <Badge variant="outline" className="text-green-600 border-green-300 text-[10px]">
-                                    Ativo
-                                  </Badge>
-                                )}
-                                {configured && !active && (
-                                  <Badge variant="outline" className="text-yellow-600 border-yellow-300 text-[10px]">
-                                    Pausado
-                                  </Badge>
-                                )}
-                                {!configured && (
-                                  <Badge variant="outline" className="text-muted-foreground text-[10px]">
-                                    Não configurado
-                                  </Badge>
-                                )}
-                              </div>
-                              <p className="text-xs text-muted-foreground mt-0.5">{event.description}</p>
-                            </div>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 text-xs gap-1 shrink-0"
-                              onClick={() => openTemplateEditor(event)}
-                            >
-                              {configured ? <Edit className="h-3 w-3" /> : <Zap className="h-3 w-3" />}
-                              {configured ? 'Editar' : 'Ativar'}
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
+                        {configured ? (
+                          <><Edit className="h-3 w-3" /> Editar</>
+                        ) : (
+                          <><Zap className="h-3 w-3" /> Configurar</>
+                        )}
+                        <ArrowRight className="h-3 w-3 ml-0.5 opacity-50" />
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
         </TabsContent>
 
         {/* ═══ Sender Tab ═══ */}
@@ -865,119 +868,6 @@ export function EmailsClient() {
           </Card>
         </TabsContent>
       </Tabs>
-
-      {/* ═══ Template Editor Dialog ═══ */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              {editEvent?.icon}
-              {editEvent?.label}
-            </DialogTitle>
-            <DialogDescription>{editEvent?.description}</DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 pt-2">
-            {/* Active switch */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-              <div>
-                <p className="text-sm font-medium">Ativar esta automação</p>
-                <p className="text-xs text-muted-foreground">
-                  E-mail será enviado automaticamente quando a ação ocorrer.
-                </p>
-              </div>
-              <Switch
-                checked={editForm.active}
-                onCheckedChange={(v) => setEditForm((p) => ({ ...p, active: v }))}
-              />
-            </div>
-
-            {/* Subject */}
-            <div className="space-y-1.5">
-              <Label>Assunto do e-mail</Label>
-              <Input
-                value={editForm.subject}
-                onChange={(e) => setEditForm((p) => ({ ...p, subject: e.target.value }))}
-                placeholder={editEvent?.defaultSubject}
-              />
-            </div>
-
-            {/* Body HTML */}
-            <div className="space-y-1.5">
-              <Label>Conteúdo HTML</Label>
-              <textarea
-                className="w-full h-48 p-3 text-xs font-mono bg-background border rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-ring"
-                value={editForm.bodyHtml}
-                onChange={(e) => setEditForm((p) => ({ ...p, bodyHtml: e.target.value }))}
-              />
-            </div>
-
-            {/* Preview */}
-            <div className="space-y-1.5">
-              <Label className="flex items-center gap-1.5">
-                <Eye className="h-3.5 w-3.5" /> Preview
-              </Label>
-              <div
-                className="border rounded-lg p-4 bg-white text-black text-sm min-h-24"
-                dangerouslySetInnerHTML={{ __html: editForm.bodyHtml }}
-              />
-            </div>
-
-            {/* Variables */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1.5">
-                <Info className="h-3.5 w-3.5" /> Variáveis disponíveis
-              </Label>
-              <div className="grid gap-1.5">
-                {editEvent?.variables.map((v) => (
-                  <div key={v.name} className="flex items-center gap-3 text-xs">
-                    <code
-                      className="rounded bg-muted px-2 py-1 font-mono text-foreground cursor-pointer hover:bg-muted-foreground/20 transition-colors"
-                      onClick={() => {
-                        navigator.clipboard.writeText(`{{ ${v.name} }}`);
-                        toast.success(`{{ ${v.name} }} copiado!`);
-                      }}
-                      title="Clique para copiar"
-                    >
-                      {'{{ '}
-                      {v.name}
-                      {' }}'}
-                    </code>
-                    <span className="text-muted-foreground">{v.desc}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex justify-between pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  if (editEvent) {
-                    setEditForm({
-                      subject: editEvent.defaultSubject,
-                      bodyHtml: editEvent.defaultBody,
-                      active: true,
-                    });
-                    toast.info('Template restaurado ao padrão.');
-                  }
-                }}
-              >
-                Restaurar padrão
-              </Button>
-              <Button
-                onClick={() => templateMutation.mutate()}
-                disabled={templateMutation.isPending || !editForm.subject}
-              >
-                {templateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Salvar template
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* ═══ Compose Email Dialog ═══ */}
       <Dialog open={composeOpen} onOpenChange={setComposeOpen}>

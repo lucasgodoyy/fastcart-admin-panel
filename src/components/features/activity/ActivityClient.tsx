@@ -6,11 +6,21 @@ import { Activity, Search, ChevronLeft, ChevronRight, User2 } from 'lucide-react
 import activityService, { ActivityLogPage } from '@/services/activityService';
 import { t } from '@/lib/admin-language';
 
-function formatDateTime(iso: string) {
+function formatDateTime(iso: string | null | undefined) {
+  if (!iso) {
+    return t('Data indisponivel', 'Date unavailable');
+  }
+
+  const date = new Date(iso);
+
+  if (Number.isNaN(date.getTime())) {
+    return t('Data indisponivel', 'Date unavailable');
+  }
+
   return new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
-  }).format(new Date(iso));
+  }).format(date);
 }
 
 const actionTypeColors: Record<string, string> = {

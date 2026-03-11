@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTabFromPath } from "../hooks/use-tab-from-path";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
@@ -132,7 +133,7 @@ const EMAIL_SCENARIOS: EmailScenario[] = [
 /* ------------------------------------------------------------------ */
 
 export function SaEmailsPage() {
-  const [tab, setTab] = useState("logs");
+  const [tab, setTab] = useTabFromPath("/super-admin/emails", { logs: "", scenarios: "scenarios", templates: "templates", config: "config" }, "logs");
   const [status, setStatus] = useState("ALL");
   const [storeFilter, setStoreFilter] = useState("");
   const [page, setPage] = useState(0);

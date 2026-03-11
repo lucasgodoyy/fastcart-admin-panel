@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useTabFromPath } from "../hooks/use-tab-from-path";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -42,7 +42,7 @@ import type { Affiliate, AffiliateConversion, AffiliatePayout, AffiliateStats } 
 const fmtMoney = (n: number) => `R$ ${n.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
 export function SaAffiliatesPage() {
-  const [tab, setTab] = useState("partners");
+  const [tab, setTab] = useTabFromPath("/super-admin/affiliates", { partners: "", commissions: "commissions", tracking: "tracking" }, "partners");
 
   const { data: stats } = useQuery({
     queryKey: ["sa-affiliate-stats"],

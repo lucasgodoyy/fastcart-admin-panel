@@ -81,31 +81,30 @@ export function CustomFieldsClient() {
 
   // Load custom fields from store settings
   const { data: storeData, isLoading } = useQuery({
-    queryKey: ['store-settings-cf'],
+    queryKey: ['my-store'],
     queryFn: storeSettingsService.getMyStore,
   });
 
   const fields: CustomField[] = (() => {
     if (!storeData) return [];
     try {
-      // Try parsing from the description field which we'll use as a JSON storage
-      const meta = JSON.parse(storeData.description || '{}');
-      if (meta.customFields && Array.isArray(meta.customFields)) return meta.customFields;
+      const parsed = JSON.parse(storeData.checkoutSettingsJson || '{}');
+      if (parsed.customFields && Array.isArray(parsed.customFields)) return parsed.customFields;
     } catch { /* ignore */ }
     return [];
   })();
 
   const saveMutation = useMutation({
     mutationFn: async (updatedFields: CustomField[]) => {
-      let meta: Record<string, unknown> = {};
-      try { meta = JSON.parse(storeData?.description || '{}'); } catch { /* ignore */ }
-      meta.customFields = updatedFields;
+      let existing: Record<string, unknown> = {};
+      try { existing = JSON.parse(storeData?.checkoutSettingsJson || '{}'); } catch { /* ignore */ }
+      const updated = { ...existing, customFields: updatedFields };
       return storeSettingsService.updateMyStore({
-        description: JSON.stringify(meta),
+        checkoutSettingsJson: JSON.stringify(updated),
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['store-settings-cf'] });
+      void queryClient.invalidateQueries({ queryKey: ['my-store'] });
       toast.success('Campos personalizados salvos!');
       setDialogOpen(false);
       setEditingField(null);
@@ -332,7 +331,7 @@ export function CustomFieldsClient() {
               <div className="space-y-1.5">
                 <Label className="text-sm font-medium">Opções (uma por linha)</Label>
                 <textarea
-                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   value={optionsText}
                   onChange={(e) => setOptionsText(e.target.value)}
                   placeholder={"Opção 1\nOpção 2\nOpção 3"}
