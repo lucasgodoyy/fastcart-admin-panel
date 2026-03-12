@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -142,7 +142,7 @@ export function ThemeGalleryClient() {
         <CardContent>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_1.5fr]">
             {/* Preview thumbnail */}
-            <div className="aspect-[4/3] rounded-lg border bg-gradient-to-b from-zinc-100 to-zinc-200 flex items-center justify-center overflow-hidden">
+            <div className="aspect-[4/3] rounded-lg border bg-linear-to-b from-zinc-100 to-zinc-200 flex items-center justify-center overflow-hidden">
               <div className="text-center text-muted-foreground">
                 <Eye className="mx-auto h-8 w-8 mb-2 opacity-40" />
                 <p className="text-xs">Preview da loja</p>
@@ -199,7 +199,7 @@ export function ThemeGalleryClient() {
               <Card key={template.id} className={isCurrent ? 'border-primary ring-1 ring-primary' : ''}>
                 <CardContent className="p-4 space-y-3">
                   {/* Preview */}
-                  <div className="aspect-[4/3] rounded-lg border bg-gradient-to-b from-zinc-50 to-zinc-100 flex items-center justify-center">
+                  <div className="aspect-[4/3] rounded-lg border bg-linear-to-b from-zinc-50 to-zinc-100 flex items-center justify-center">
                     <span className="text-xs text-muted-foreground">
                       {template.status === 'coming_soon' ? 'Em breve' : 'Preview'}
                     </span>

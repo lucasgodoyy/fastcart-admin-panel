@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useTabFromPath } from "../hooks/use-tab-from-path";
 import { motion } from "framer-motion";
@@ -62,7 +62,7 @@ export function SaMarketingPage() {
         title="Marketing"
         description="Campanhas, banners e promoções da plataforma"
         actions={
-          <Button className="bg-gradient-to-r from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] text-white rounded-xl gap-2 text-[12px] shadow-lg shadow-[hsl(var(--sa-accent))]/25 hover:opacity-90">
+          <Button className="bg-linear-to-r from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] text-white rounded-xl gap-2 text-[12px] shadow-lg shadow-[hsl(var(--sa-accent))]/25 hover:opacity-90">
             <Plus className="h-4 w-4" /> Nova Campanha
           </Button>
         }
@@ -156,7 +156,7 @@ export function SaMarketingPage() {
                           <img src={banner.imageUrl} alt={banner.title} className="h-full w-full object-cover" />
                         </div>
                       ) : (
-                        <div className="h-24 rounded-lg bg-gradient-to-br from-[hsl(var(--sa-accent))]/20 to-[hsl(var(--sa-info))]/20 border border-dashed border-[hsl(var(--sa-border-subtle))] flex items-center justify-center mb-3">
+                        <div className="h-24 rounded-lg bg-linear-to-br from-[hsl(var(--sa-accent))]/20 to-[hsl(var(--sa-info))]/20 border border-dashed border-[hsl(var(--sa-border-subtle))] flex items-center justify-center mb-3">
                           <span className="text-[11px] text-[hsl(var(--sa-text-muted))]">Sem imagem</span>
                         </div>
                       )}

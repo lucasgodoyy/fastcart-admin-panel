@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { Bell, Search, ChevronRight, LogOut, User, CheckCheck, Menu, PanelLeftClose, PanelLeftOpen } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
@@ -183,7 +183,7 @@ export function AdminHeader() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-2.5 rounded-lg p-1.5 hover:bg-muted transition-colors outline-none">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70 text-sm font-bold text-primary-foreground">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-primary to-primary/70 text-sm font-bold text-primary-foreground">
                 {user?.email?.slice(0, 1).toUpperCase() || "A"}
               </div>
             </button>

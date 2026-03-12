@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -148,7 +148,7 @@ export default function BlogPage() {
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-white/70 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60">
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-emerald-400 shadow-lg shadow-primary/25 transition-transform group-hover:scale-105">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-primary to-emerald-400 shadow-lg shadow-primary/25 transition-transform group-hover:scale-105">
               <Zap className="h-5 w-5 text-white" fill="white" />
             </div>
             <span className="text-xl font-bold tracking-tight text-gray-900">Lojaki</span>
@@ -161,7 +161,7 @@ export default function BlogPage() {
           </div>
           <div className="flex items-center gap-3">
             <Link href="/login" className="hidden md:block rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 transition-colors">Entrar</Link>
-            <Link href="/signup" className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25">
+            <Link href="/signup" className="group inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-primary to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25">
               Começar grátis <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -171,7 +171,7 @@ export default function BlogPage() {
       {/* ── Hero ── */}
       <section className="relative overflow-hidden pt-32 pb-12 md:pt-40 md:pb-16">
         <div className="absolute inset-0 -z-10">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-primary/8 via-emerald-100/30 to-transparent rounded-full blur-3xl" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-linear-to-b from-primary/8 via-emerald-100/30 to-transparent rounded-full blur-3xl" />
         </div>
         <div className="mx-auto max-w-4xl text-center px-6">
           <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0} className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
@@ -180,7 +180,7 @@ export default function BlogPage() {
           </motion.div>
           <motion.h1 variants={fadeUp} initial="hidden" animate="visible" custom={1} className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
             Dicas e guias para{' '}
-            <span className="bg-gradient-to-r from-primary via-emerald-500 to-teal-500 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-primary via-emerald-500 to-teal-500 bg-clip-text text-transparent">
               vender mais
             </span>
           </motion.h1>
@@ -197,7 +197,7 @@ export default function BlogPage() {
             <Link href={`/blog/${featured.slug}`} className="group block">
               <div className="relative overflow-hidden rounded-3xl border border-gray-100 bg-white transition-all hover:shadow-2xl hover:shadow-gray-200/60">
                 <div className="grid md:grid-cols-2">
-                  <div className={`aspect-[16/10] md:aspect-auto bg-gradient-to-br ${featured.gradient} flex items-center justify-center`}>
+                  <div className={`aspect-[16/10] md:aspect-auto bg-linear-to-br ${featured.gradient} flex items-center justify-center`}>
                     <BookOpen className="h-20 w-20 text-white/30" />
                   </div>
                   <div className="p-8 md:p-10 flex flex-col justify-center">
@@ -260,7 +260,7 @@ export default function BlogPage() {
             >
               <Link href={`/blog/${post.slug}`} className="group block h-full">
                 <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white transition-all hover:shadow-xl hover:shadow-gray-100/80 hover:-translate-y-1">
-                  <div className={`aspect-[16/9] bg-gradient-to-br ${post.gradient} flex items-center justify-center`}>
+                  <div className={`aspect-[16/9] bg-linear-to-br ${post.gradient} flex items-center justify-center`}>
                     <Tag className="h-10 w-10 text-white/20" />
                   </div>
                   <div className="flex flex-1 flex-col p-5">
@@ -298,7 +298,7 @@ export default function BlogPage() {
           </h2>
           <p className="mt-3 text-gray-500">Crie sua loja grátis e aplique tudo que aprendeu aqui.</p>
           <div className="mt-6">
-            <Link href="/signup" className="group inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-emerald-500 px-8 py-4 text-base font-bold text-white shadow-2xl shadow-primary/25 hover:shadow-primary/40 transition-all hover:-translate-y-0.5">
+            <Link href="/signup" className="group inline-flex items-center gap-2 rounded-2xl bg-linear-to-r from-primary to-emerald-500 px-8 py-4 text-base font-bold text-white shadow-2xl shadow-primary/25 hover:shadow-primary/40 transition-all hover:-translate-y-0.5">
               Começar grátis agora
               <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Link>

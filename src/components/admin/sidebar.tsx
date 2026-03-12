@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -56,61 +56,61 @@ interface NavSection {
 const navigation: NavSection[] = [
   {
     items: [
-      { label: t("Painel", "Dashboard"), href: "/admin", icon: <LayoutDashboard className="h-[18px] w-[18px]" /> },
-      { label: t("Estatísticas", "Analytics"), href: "/admin/statistics", icon: <TrendingUp className="h-[18px] w-[18px]" />, children: [
-        { label: t("Visão geral", "Overview"), href: "/admin/statistics" },
+      { label: t("Painel", "Dashboard"), href: "/admin", icon: <LayoutDashboard className="h-4.5 w-4.5" /> },
+      { label: t("EstatÃ­sticas", "Analytics"), href: "/admin/statistics", icon: <TrendingUp className="h-4.5 w-4.5" />, children: [
+        { label: t("VisÃ£o geral", "Overview"), href: "/admin/statistics" },
         { label: t("Pagamentos", "Payments"), href: "/admin/statistics/payments" },
       ]},
     ],
   },
   {
-    title: t("Comércio", "Commerce"),
+    title: t("ComÃ©rcio", "Commerce"),
     items: [
-      { label: t("Pedidos", "Orders"), href: "/admin/sales", icon: <ShoppingBag className="h-[18px] w-[18px]" />, children: [
+      { label: t("Pedidos", "Orders"), href: "/admin/sales", icon: <ShoppingBag className="h-4.5 w-4.5" />, children: [
         { label: t("Todos os pedidos", "All Orders"), href: "/admin/sales" },
         { label: t("Carrinhos abandonados", "Abandoned Carts"), href: "/admin/sales/abandoned-carts" },
       ]},
-      { label: t("Catálogo", "Catalog"), href: "/admin/products", icon: <Package className="h-[18px] w-[18px]" />, children: [
+      { label: t("CatÃ¡logo", "Catalog"), href: "/admin/products", icon: <Package className="h-4.5 w-4.5" />, children: [
         { label: t("Todos os produtos", "All Products"), href: "/admin/products" },
         { label: t("Estoque", "Inventory"), href: "/admin/products/inventory" },
         { label: t("Categorias", "Categories"), href: "/admin/products/categories" },
       ]},
-      { label: t("Clientes", "Customers"), href: "/admin/customers", icon: <Users2 className="h-[18px] w-[18px]" /> },
-      { label: t("Financeiro", "Finances"), href: "/admin/payments", icon: <Wallet className="h-[18px] w-[18px]" /> },
-      { label: t("Logística", "Fulfillment"), href: "/admin/shipping", icon: <Truck className="h-[18px] w-[18px]" /> },
+      { label: t("Clientes", "Customers"), href: "/admin/customers", icon: <Users2 className="h-4.5 w-4.5" /> },
+      { label: t("Financeiro", "Finances"), href: "/admin/payments", icon: <Wallet className="h-4.5 w-4.5" /> },
+      { label: t("LogÃ­stica", "Fulfillment"), href: "/admin/shipping", icon: <Truck className="h-4.5 w-4.5" /> },
     ],
   },
   {
     title: t("Crescimento", "Growth"),
     items: [
-      { label: t("Promoções", "Promotions"), href: "/admin/discounts", icon: <TicketPercent className="h-[18px] w-[18px]" />, children: [
+      { label: t("PromoÃ§Ãµes", "Promotions"), href: "/admin/discounts", icon: <TicketPercent className="h-4.5 w-4.5" />, children: [
         { label: t("Cupons", "Coupons"), href: "/admin/discounts/coupons" },
-        { label: t("Promoção", "Promotion"), href: "/admin/discounts/promotions" },
-        { label: t("Frete grátis", "Free Shipping"), href: "/admin/discounts/free-shipping" },
+        { label: t("PromoÃ§Ã£o", "Promotion"), href: "/admin/discounts/promotions" },
+        { label: t("Frete grÃ¡tis", "Free Shipping"), href: "/admin/discounts/free-shipping" },
       ]},
-      { label: t("Marketing", "Marketing"), href: "/admin/marketing", icon: <Speaker className="h-[18px] w-[18px]" />, children: [
+      { label: t("Marketing", "Marketing"), href: "/admin/marketing", icon: <Speaker className="h-4.5 w-4.5" />, children: [
         { label: t("E-mail Marketing", "Email Marketing"), href: "/admin/marketing/email-campaigns" },
-        { label: t("Integrações", "Integrations"), href: "/admin/marketing/integrations" },
+        { label: t("IntegraÃ§Ãµes", "Integrations"), href: "/admin/marketing/integrations" },
         { label: t("Afiliados", "Affiliates"), href: "/admin/marketing/affiliates" },
       ]},
     ],
   },
   {
-    title: t("Comunicação", "Communication"),
+    title: t("ComunicaÃ§Ã£o", "Communication"),
     items: [
-      { label: t("Mensagens", "Messages"), href: "/admin/chat", icon: <MessageSquare className="h-[18px] w-[18px]" /> },
-      { label: t("Suporte", "Support"), href: "/admin/support", icon: <Headphones className="h-[18px] w-[18px]" /> },
+      { label: t("Mensagens", "Messages"), href: "/admin/chat", icon: <MessageSquare className="h-4.5 w-4.5" /> },
+      { label: t("Suporte", "Support"), href: "/admin/support", icon: <Headphones className="h-4.5 w-4.5" /> },
     ],
   },
   {
     title: t("Canais", "Channels"),
     items: [
-      { label: t("Loja virtual", "Storefront"), href: "/admin/online-store", icon: <Globe className="h-[18px] w-[18px]" />, external: true, children: [
+      { label: t("Loja virtual", "Storefront"), href: "/admin/online-store", icon: <Globe className="h-4.5 w-4.5" />, external: true, children: [
         { label: t("Tema e layout", "Theme & Layout"), href: "/admin/online-store/layout-theme" },
-        { label: t("Páginas", "Pages"), href: "/admin/online-store/pages" },
+        { label: t("PÃ¡ginas", "Pages"), href: "/admin/online-store/pages" },
         { label: t("Blog", "Blog"), href: "/admin/online-store/blog" },
         { label: t("Links sociais", "Social Links"), href: "/admin/online-store/social-links" },
-        { label: t("Manutenção", "Maintenance"), href: "/admin/online-store/under-construction" },
+        { label: t("ManutenÃ§Ã£o", "Maintenance"), href: "/admin/online-store/under-construction" },
       ]},
     ],
   },
@@ -121,8 +121,8 @@ export function AdminSidebar() {
   return (
     <aside
       className={cn(
-        "hidden lg:flex h-full flex-col bg-[var(--sidebar-bg)] overflow-y-auto shrink-0 transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
-        collapsed ? "w-[64px]" : "w-[248px]"
+        "hidden lg:flex h-full flex-col bg-sidebar-bg overflow-y-auto shrink-0 transition-[width] duration-300 ease-in-out",
+        collapsed ? "w-16" : "w-62"
       )}
     >
       <SidebarContent collapsed={collapsed} />
@@ -221,7 +221,7 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
     const slug = (storeData?.slug || "").trim()
     const storefrontBaseUrl = resolveStorefrontBaseUrl()
     if (!slug || !storefrontBaseUrl) {
-      toast.error("Não foi possível montar a URL da loja. Configure Online Store URL.")
+      toast.error("NÃ£o foi possÃ­vel montar a URL da loja. Configure Online Store URL.")
       return
     }
 
@@ -260,13 +260,13 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
 
   return (
     <TooltipProvider delayDuration={0}>
-    <div className="flex h-full flex-col bg-[var(--sidebar-bg)] overflow-y-auto">
+    <div className="flex h-full flex-col bg-sidebar-bg overflow-y-auto">
       {/* Logo */}
       <div className={cn("flex items-center gap-2.5 py-5", collapsed ? "justify-center px-2" : "px-5")}>
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--sidebar-primary)] shrink-0">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary shrink-0">
           <Zap className="h-4.5 w-4.5 text-white" fill="white" />
         </div>
-        {!collapsed && <span className="text-[15px] font-bold tracking-tight text-[var(--sidebar-foreground)]">Lojaki</span>}
+        {!collapsed && <span className="text-[15px] font-bold tracking-tight text-sidebar-foreground">Lojaki</span>}
       </div>
 
       {/* Navigation */}
@@ -274,12 +274,12 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
         {navigation.map((section, sectionIndex) => (
           <div key={sectionIndex}>
             {section.title && !collapsed && (
-              <div className="px-3 pb-1.5 pt-2 text-[11px] font-semibold tracking-wide text-[var(--sidebar-muted)]">
+              <div className="px-3 pb-1.5 pt-2 text-[11px] font-semibold tracking-wide text-sidebar-muted">
                 {section.title}
               </div>
             )}
             {section.title && collapsed && (
-              <div className="my-2 mx-1.5 h-px bg-[var(--sidebar-border)]" />
+              <div className="my-2 mx-1.5 h-px bg-sidebar-border" />
             )}
             <div className="space-y-0.5">
             {section.items.map((item) => {
@@ -300,13 +300,13 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
                     "flex flex-1 items-center rounded-lg transition-all duration-150",
                     collapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2 text-[13px]",
                     active
-                      ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)] font-semibold"
-                      : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]"
+                      ? "bg-sidebar-accent text-sidebar-primary font-semibold"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   )}
                 >
                   <span className={cn(
                     "transition-colors shrink-0",
-                    active ? "text-[var(--sidebar-primary)]" : "text-[var(--sidebar-muted)]"
+                    active ? "text-sidebar-primary" : "text-sidebar-muted"
                   )}>
                     {item.icon}
                   </span>
@@ -314,7 +314,7 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
                     <>
                       <span className="flex-1">{item.label}</span>
                       {item.badge && (
-                        <span className="rounded-full bg-[var(--sidebar-primary)] px-2 py-0.5 text-[10px] font-semibold text-white">
+                        <span className="rounded-full bg-sidebar-primary px-2 py-0.5 text-[10px] font-semibold text-white">
                           {item.badge}
                         </span>
                       )}
@@ -334,14 +334,14 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
                               window.open(item.href, "_blank", "noopener,noreferrer")
                             }
                           }}
-                          className="text-[var(--sidebar-muted)] hover:text-[var(--sidebar-foreground)]"
+                          className="text-sidebar-muted hover:text-sidebar-foreground"
                           aria-label={`Abrir ${item.label}`}
                         >
                           <ExternalLink className="h-3.5 w-3.5" />
                         </button>
                       )}
                       {hasChildren && (
-                        <span className="text-[var(--sidebar-muted)]">
+                        <span className="text-sidebar-muted">
                           {expanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
                         </span>
                       )}
@@ -363,7 +363,7 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
                     )}
                   </div>
                   {hasChildren && expanded && !collapsed && (
-                    <div className="ml-[30px] mt-0.5 space-y-0.5 border-l-2 border-[var(--sidebar-border)] pl-3">
+                    <div className="ml-7.5 mt-0.5 space-y-0.5 border-l-2 border-sidebar-border pl-3">
                       {item.children!.map((child) => {
                         const childActive = pathname === child.href
                         return (
@@ -373,13 +373,13 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
                             className={cn(
                               "block rounded-md px-3 py-1.5 text-[13px] transition-all duration-150",
                               childActive
-                                ? "text-[var(--sidebar-primary)] font-semibold"
-                                : "text-[var(--sidebar-muted)] hover:text-[var(--sidebar-foreground)]"
+                                ? "text-sidebar-primary font-semibold"
+                                : "text-sidebar-muted hover:text-sidebar-foreground"
                             )}
                           >
                             {child.label}
                             {child.badge && (
-                              <span className="ml-2 rounded-full bg-[var(--sidebar-primary)] px-2 py-0.5 text-[10px] font-semibold text-white">
+                              <span className="ml-2 rounded-full bg-sidebar-primary px-2 py-0.5 text-[10px] font-semibold text-white">
                                 {child.badge}
                               </span>
                             )}
@@ -397,7 +397,7 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
       </nav>
 
       {/* Settings at bottom */}
-      <div className={cn("border-t border-[var(--sidebar-border)] py-3 space-y-1", collapsed ? "px-1.5" : "px-3")}>
+      <div className={cn("border-t border-sidebar-border py-3 space-y-1", collapsed ? "px-1.5" : "px-3")}>
         {collapsed ? (
           <>
             <Tooltip>
@@ -407,11 +407,11 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
                   className={cn(
                     "flex items-center justify-center rounded-lg p-2.5 transition-all duration-150",
                     pathname.startsWith("/admin/billing")
-                      ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)] font-semibold"
-                      : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)]"
+                      ? "bg-sidebar-accent text-sidebar-primary font-semibold"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent"
                   )}
                 >
-                  <CreditCard className="h-[18px] w-[18px] text-[var(--sidebar-muted)]" />
+                  <CreditCard className="h-4.5 w-4.5 text-sidebar-muted" />
                 </Link>
               </TooltipTrigger>
               <TooltipContent side="right" sideOffset={8}>{t("Meu Plano", "My Plan")}</TooltipContent>
@@ -423,14 +423,14 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
                   className={cn(
                     "flex items-center justify-center rounded-lg p-2.5 transition-all duration-150",
                     pathname.startsWith("/admin/settings")
-                      ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)] font-semibold"
-                      : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)]"
+                      ? "bg-sidebar-accent text-sidebar-primary font-semibold"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent"
                   )}
                 >
-                  <Cog className="h-[18px] w-[18px] text-[var(--sidebar-muted)]" />
+                  <Cog className="h-4.5 w-4.5 text-sidebar-muted" />
                 </Link>
               </TooltipTrigger>
-              <TooltipContent side="right" sideOffset={8}>{t("Configurações", "Settings")}</TooltipContent>
+              <TooltipContent side="right" sideOffset={8}>{t("ConfiguraÃ§Ãµes", "Settings")}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -448,11 +448,11 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] transition-all duration-150",
                 pathname.startsWith("/admin/billing")
-                  ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)] font-semibold"
-                  : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)]"
+                  ? "bg-sidebar-accent text-sidebar-primary font-semibold"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent"
               )}
             >
-              <CreditCard className="h-[18px] w-[18px] text-[var(--sidebar-muted)]" />
+              <CreditCard className="h-4.5 w-4.5 text-sidebar-muted" />
               <span className="flex-1">{t("Meu Plano", "My Plan")}</span>
             </Link>
             <Link
@@ -460,16 +460,16 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] transition-all duration-150",
                 pathname.startsWith("/admin/settings")
-                  ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)] font-semibold"
-                  : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)]"
+                  ? "bg-sidebar-accent text-sidebar-primary font-semibold"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent"
               )}
             >
-              <Cog className="h-[18px] w-[18px] text-[var(--sidebar-muted)]" />
-              <span className="flex-1">{t("Configurações", "Settings")}</span>
+              <Cog className="h-4.5 w-4.5 text-sidebar-muted" />
+              <span className="flex-1">{t("ConfiguraÃ§Ãµes", "Settings")}</span>
             </Link>
-            <div className="flex items-center gap-3 rounded-lg px-3 py-1 text-[13px] text-[var(--sidebar-foreground)]">
+            <div className="flex items-center gap-3 rounded-lg px-3 py-1 text-[13px] text-sidebar-foreground">
               <AdminThemeToggle />
-              <span className="text-[var(--sidebar-muted)] text-xs">{t("Tema", "Theme")}</span>
+              <span className="text-sidebar-muted text-xs">{t("Tema", "Theme")}</span>
             </div>
           </>
         )}

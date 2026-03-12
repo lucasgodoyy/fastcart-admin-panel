@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -331,7 +331,7 @@ export function MessagesClient() {
       </div>
 
       {/* Messages layout */}
-      <div className="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-4 h-[calc(100vh-440px)] min-h-[400px]">
+      <div className="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-4 h-[calc(100vh-440px)] min-h-100">
         {/* Conversation list */}
         <Card className="flex flex-col overflow-hidden">
           <CardHeader className="p-3 border-b">
@@ -372,7 +372,7 @@ export function MessagesClient() {
                     </div>
                     <p className="text-xs text-muted-foreground truncate">{conv.subject || conv.customerEmail}</p>
                     <div className="flex items-center justify-between mt-1">
-                      <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                      <p className="text-xs text-muted-foreground truncate max-w-50">
                         {conv.lastMessagePreview || 'Sem mensagens'}
                       </p>
                       {conv.unreadAdminCount > 0 && (

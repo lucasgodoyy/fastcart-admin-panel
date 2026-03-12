@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -70,7 +70,7 @@ export function SaStatCard({ title, value, subtitle, icon: Icon, trend, color = 
       whileHover={{ y: -2 }}
     >
       {/* Subtle gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-[hsl(var(--sa-surface-hover))] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="absolute inset-0 bg-linear-to-br from-transparent via-transparent to-[hsl(var(--sa-surface-hover))] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
       <div className="relative z-10">
         <div className="flex items-start justify-between mb-4">

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useRef } from 'react';
 import Link from 'next/link';
@@ -83,7 +83,7 @@ function Navbar() {
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-emerald-400 shadow-lg shadow-primary/25 transition-transform group-hover:scale-105">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-primary to-emerald-400 shadow-lg shadow-primary/25 transition-transform group-hover:scale-105">
             <Zap className="h-5 w-5 text-white" fill="white" />
           </div>
           <span className="text-xl font-bold tracking-tight text-gray-900">Lojaki</span>
@@ -115,7 +115,7 @@ function Navbar() {
           </Link>
           <Link
             href="/signup"
-            className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all hover:-translate-y-0.5"
+            className="group inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-primary to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all hover:-translate-y-0.5"
           >
             Começar grátis
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
@@ -160,8 +160,8 @@ function HeroSection() {
     <section className="relative overflow-hidden pt-32 pb-20 md:pt-40 md:pb-32">
       {/* Background effects */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-to-b from-primary/8 via-emerald-100/40 to-transparent rounded-full blur-3xl" />
-        <div className="absolute top-20 right-0 w-[400px] h-[400px] bg-gradient-to-bl from-teal-100/30 to-transparent rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-linear-to-b from-primary/8 via-emerald-100/40 to-transparent rounded-full blur-3xl" />
+        <div className="absolute top-20 right-0 w-[400px] h-[400px] bg-linear-to-bl from-teal-100/30 to-transparent rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-gradient-to-tr from-emerald-50/50 to-transparent rounded-full blur-3xl" />
         {/* Grid pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb20_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb20_1px,transparent_1px)] bg-[size:4rem_4rem]" />
@@ -191,7 +191,7 @@ function HeroSection() {
           >
             Crie sua loja online{' '}
             <span className="relative">
-              <span className="bg-gradient-to-r from-primary via-emerald-500 to-teal-500 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-primary via-emerald-500 to-teal-500 bg-clip-text text-transparent">
                 em minutos
               </span>
               <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 300 12" fill="none">
@@ -228,9 +228,9 @@ function HeroSection() {
           >
             <Link
               href="/signup"
-              className="group relative inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-emerald-500 px-8 py-4 text-base font-bold text-white shadow-2xl shadow-primary/25 hover:shadow-primary/40 transition-all hover:-translate-y-0.5"
+              className="group relative inline-flex items-center gap-2 rounded-2xl bg-linear-to-r from-primary to-emerald-500 px-8 py-4 text-base font-bold text-white shadow-2xl shadow-primary/25 hover:shadow-primary/40 transition-all hover:-translate-y-0.5"
             >
-              <span className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary to-emerald-500 opacity-0 group-hover:opacity-100 blur-xl transition-opacity" />
+              <span className="absolute inset-0 rounded-2xl bg-linear-to-r from-primary to-emerald-500 opacity-0 group-hover:opacity-100 blur-xl transition-opacity" />
               <span className="relative flex items-center gap-2">
                 Começar grátis
                 <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
@@ -255,11 +255,11 @@ function HeroSection() {
           >
             <div className="flex -space-x-2">
               {[
-                'bg-gradient-to-br from-amber-400 to-orange-500',
-                'bg-gradient-to-br from-blue-400 to-indigo-500',
-                'bg-gradient-to-br from-pink-400 to-rose-500',
-                'bg-gradient-to-br from-emerald-400 to-teal-500',
-                'bg-gradient-to-br from-violet-400 to-purple-500',
+                'bg-linear-to-br from-amber-400 to-orange-500',
+                'bg-linear-to-br from-blue-400 to-indigo-500',
+                'bg-linear-to-br from-pink-400 to-rose-500',
+                'bg-linear-to-br from-emerald-400 to-teal-500',
+                'bg-linear-to-br from-violet-400 to-purple-500',
               ].map((bg, i) => (
                 <div key={i} className={`h-8 w-8 rounded-full ${bg} ring-2 ring-white flex items-center justify-center`}>
                   <Users className="h-3.5 w-3.5 text-white/90" />
@@ -499,7 +499,7 @@ function FeaturesSection() {
     <section id="funcionalidades" ref={ref} className="relative py-24 md:py-32">
       {/* Background decoration */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-gradient-to-bl from-primary/5 to-transparent rounded-full blur-3xl" />
+        <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-linear-to-bl from-primary/5 to-transparent rounded-full blur-3xl" />
       </div>
 
       <div className="mx-auto max-w-7xl px-6">
@@ -516,7 +516,7 @@ function FeaturesSection() {
           </motion.div>
           <motion.h2 variants={fadeUp} custom={1} className="text-3xl font-extrabold tracking-tight text-gray-900 md:text-5xl">
             Tudo que sua loja precisa{' '}
-            <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-primary to-emerald-500 bg-clip-text text-transparent">
               em um só lugar
             </span>
           </motion.h2>
@@ -545,7 +545,7 @@ function FeaturesSection() {
               <h3 className="text-lg font-bold text-gray-900">{feature.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-gray-500">{feature.description}</p>
               {/* Hover gradient line */}
-              <div className={`absolute bottom-0 left-0 h-0.5 w-0 bg-gradient-to-r ${feature.color} transition-all duration-500 group-hover:w-full`} />
+              <div className={`absolute bottom-0 left-0 h-0.5 w-0 bg-linear-to-r ${feature.color} transition-all duration-500 group-hover:w-full`} />
             </motion.div>
           ))}
         </motion.div>
@@ -600,7 +600,7 @@ function HowItWorks() {
           </motion.div>
           <motion.h2 variants={fadeUp} custom={1} className="text-3xl font-extrabold tracking-tight text-gray-900 md:text-5xl">
             Comece a vender em{' '}
-            <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-transparent">3 passos</span>
+            <span className="bg-linear-to-r from-primary to-emerald-500 bg-clip-text text-transparent">3 passos</span>
           </motion.h2>
           <motion.p variants={fadeUp} custom={2} className="mt-4 text-lg text-gray-500">
             Sem complicações. Crie sua loja virtual e comece a faturar.
@@ -618,9 +618,9 @@ function HowItWorks() {
             <motion.div key={step.step} variants={fadeUp} custom={i} className="relative text-center">
               {/* Connector line */}
               {i < steps.length - 1 && (
-                <div className="hidden md:block absolute top-12 left-[60%] w-[80%] h-px bg-gradient-to-r from-gray-200 to-gray-100" />
+                <div className="hidden md:block absolute top-12 left-[60%] w-[80%] h-px bg-linear-to-r from-gray-200 to-gray-100" />
               )}
-              <div className={`relative z-10 mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br ${step.color} shadow-lg`}>
+              <div className={`relative z-10 mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-linear-to-br ${step.color} shadow-lg`}>
                 <step.icon className="h-10 w-10 text-white" />
                 <span className="absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white text-xs font-bold text-gray-900 shadow-md ring-2 ring-gray-50">
                   {step.step}
@@ -662,7 +662,7 @@ function ProductShowcase() {
             </motion.div>
             <motion.h2 variants={fadeUp} custom={1} className="text-3xl font-extrabold tracking-tight text-gray-900 md:text-4xl lg:text-5xl">
               Storefronts profissionais que{' '}
-              <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-primary to-emerald-500 bg-clip-text text-transparent">
                 vendem
               </span>
             </motion.h2>
@@ -736,7 +736,7 @@ function ProductShowcase() {
                     { name: 'Tênis Sport', price: 'R$ 299,90', color: 'from-emerald-200 to-emerald-300' },
                   ].map((product) => (
                     <div key={product.name} className="group cursor-pointer">
-                      <div className={`aspect-[4/5] rounded-xl bg-gradient-to-br ${product.color} mb-2 transition-transform group-hover:scale-[1.02]`} />
+                      <div className={`aspect-[4/5] rounded-xl bg-linear-to-br ${product.color} mb-2 transition-transform group-hover:scale-[1.02]`} />
                       <p className="text-xs font-medium text-gray-900">{product.name}</p>
                       <p className="text-xs text-gray-500">{product.price}</p>
                     </div>
@@ -805,7 +805,7 @@ function IntegrationsSection() {
           </motion.div>
           <motion.h2 variants={fadeUp} custom={1} className="text-3xl font-extrabold tracking-tight text-gray-900 md:text-5xl">
             Conecte com suas{' '}
-            <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-primary to-emerald-500 bg-clip-text text-transparent">
               ferramentas favoritas
             </span>
           </motion.h2>
@@ -875,7 +875,7 @@ function TestimonialsSection() {
   return (
     <section ref={ref} className="relative py-24 md:py-32">
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-r from-primary/3 via-emerald-100/20 to-primary/3 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-linear-to-r from-primary/3 via-emerald-100/20 to-primary/3 rounded-full blur-3xl" />
       </div>
 
       <div className="mx-auto max-w-7xl px-6">
@@ -891,7 +891,7 @@ function TestimonialsSection() {
           </motion.div>
           <motion.h2 variants={fadeUp} custom={1} className="text-3xl font-extrabold tracking-tight text-gray-900 md:text-5xl">
             Quem usa,{' '}
-            <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-primary to-emerald-500 bg-clip-text text-transparent">
               recomenda
             </span>
           </motion.h2>
@@ -917,7 +917,7 @@ function TestimonialsSection() {
               </div>
               <p className="text-sm leading-relaxed text-gray-600 mb-6">&ldquo;{t.quote}&rdquo;</p>
               <div className="flex items-center gap-3">
-                <div className={`h-10 w-10 rounded-full bg-gradient-to-br ${t.color} flex items-center justify-center`}>
+                <div className={`h-10 w-10 rounded-full bg-linear-to-br ${t.color} flex items-center justify-center`}>
                   <span className="text-xs font-bold text-white">{t.initials}</span>
                 </div>
                 <div>
@@ -1006,7 +1006,7 @@ function PricingSection() {
           </motion.div>
           <motion.h2 variants={fadeUp} custom={1} className="text-3xl font-extrabold tracking-tight text-gray-900 md:text-5xl">
             Escolha o plano{' '}
-            <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-primary to-emerald-500 bg-clip-text text-transparent">
               ideal para você
             </span>
           </motion.h2>
@@ -1033,7 +1033,7 @@ function PricingSection() {
               }`}
             >
               {plan.popular && (
-                <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-primary to-emerald-500 px-4 py-1 text-[11px] font-bold text-white shadow-lg shadow-primary/25">
+                <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-linear-to-r from-primary to-emerald-500 px-4 py-1 text-[11px] font-bold text-white shadow-lg shadow-primary/25">
                   Mais popular
                 </span>
               )}
@@ -1063,7 +1063,7 @@ function PricingSection() {
                 href="/signup"
                 className={`flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition-all ${
                   plan.popular
-                    ? 'bg-gradient-to-r from-primary to-emerald-500 text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5'
+                    ? 'bg-linear-to-r from-primary to-emerald-500 text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5'
                     : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
                 }`}
               >
@@ -1091,7 +1091,7 @@ function FinalCTA() {
           variants={fadeIn}
           initial="hidden"
           animate={inView ? 'visible' : 'hidden'}
-          className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-8 py-16 md:px-16 md:py-24 text-center"
+          className="relative overflow-hidden rounded-3xl bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 px-8 py-16 md:px-16 md:py-24 text-center"
         >
           {/* Background effects */}
           <div className="absolute inset-0 -z-0">
@@ -1109,7 +1109,7 @@ function FinalCTA() {
               className="text-3xl font-extrabold text-white md:text-5xl lg:text-6xl"
             >
               Pronto para criar sua{' '}
-              <span className="bg-gradient-to-r from-primary to-emerald-400 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-primary to-emerald-400 bg-clip-text text-transparent">
                 loja online?
               </span>
             </motion.h2>
@@ -1131,9 +1131,9 @@ function FinalCTA() {
             >
               <Link
                 href="/signup"
-                className="group relative inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-emerald-500 px-8 py-4 text-base font-bold text-white shadow-2xl shadow-primary/30 hover:shadow-primary/50 transition-all hover:-translate-y-0.5"
+                className="group relative inline-flex items-center gap-2 rounded-2xl bg-linear-to-r from-primary to-emerald-500 px-8 py-4 text-base font-bold text-white shadow-2xl shadow-primary/30 hover:shadow-primary/50 transition-all hover:-translate-y-0.5"
               >
-                <span className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary to-emerald-500 opacity-0 group-hover:opacity-100 blur-xl transition-opacity" />
+                <span className="absolute inset-0 rounded-2xl bg-linear-to-r from-primary to-emerald-500 opacity-0 group-hover:opacity-100 blur-xl transition-opacity" />
                 <span className="relative flex items-center gap-2">
                   Começar grátis agora
                   <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
@@ -1192,7 +1192,7 @@ function Footer() {
           {/* Brand */}
           <div className="md:col-span-2">
             <Link href="/" className="flex items-center gap-2.5 mb-4">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-emerald-400 shadow-lg shadow-primary/25">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-primary to-emerald-400 shadow-lg shadow-primary/25">
                 <Zap className="h-5 w-5 text-white" fill="white" />
               </div>
               <span className="text-xl font-bold tracking-tight text-gray-900">Lojaki</span>

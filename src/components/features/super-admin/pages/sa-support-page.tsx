@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -135,7 +135,7 @@ export function SaSupportPage() {
                   {ticketDetail.subject}
                 </h3>
 
-                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                <div className="space-y-4 max-h-125 overflow-y-auto pr-2">
                   {ticketDetail.messages.map((msg) => {
                     const isAdmin = msg.senderType === "SUPER_ADMIN" || msg.senderType === "STORE" || msg.senderType === "ADMIN";
                     return (
@@ -186,7 +186,7 @@ export function SaSupportPage() {
                           message: replyText.trim(),
                         })
                       }
-                      className="bg-gradient-to-r from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] text-white rounded-xl gap-2 text-[12px] shadow-lg shadow-[hsl(var(--sa-accent))]/25 hover:opacity-90"
+                      className="bg-linear-to-r from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] text-white rounded-xl gap-2 text-[12px] shadow-lg shadow-[hsl(var(--sa-accent))]/25 hover:opacity-90"
                     >
                       <Send className="h-3.5 w-3.5" />
                       {replyMutation.isPending ? "Enviando..." : "Enviar Resposta"}
@@ -276,7 +276,7 @@ export function SaSupportPage() {
 
       {/* Filters */}
       <motion.div variants={fadeInUp} initial="initial" animate="animate" className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[200px] max-w-sm">
+        <div className="relative flex-1 min-w-50 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--sa-text-muted))]" />
           <Input
             placeholder="Buscar tickets..."

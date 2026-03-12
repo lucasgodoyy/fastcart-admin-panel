@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { motion, useInView } from 'framer-motion';
@@ -168,7 +168,7 @@ export default function FeaturesPage() {
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-white/70 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60">
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-emerald-400 shadow-lg shadow-primary/25 transition-transform group-hover:scale-105">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-primary to-emerald-400 shadow-lg shadow-primary/25 transition-transform group-hover:scale-105">
               <Zap className="h-5 w-5 text-white" fill="white" />
             </div>
             <span className="text-xl font-bold tracking-tight text-gray-900">Lojaki</span>
@@ -180,7 +180,7 @@ export default function FeaturesPage() {
           </div>
           <div className="flex items-center gap-3">
             <Link href="/login" className="hidden md:block rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 transition-colors">Entrar</Link>
-            <Link href="/signup" className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all hover:-translate-y-0.5">
+            <Link href="/signup" className="group inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-primary to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all hover:-translate-y-0.5">
               Começar grátis <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
           </div>
@@ -190,7 +190,7 @@ export default function FeaturesPage() {
       {/* ── Hero ── */}
       <section className="relative overflow-hidden pt-32 pb-20 md:pt-40 md:pb-28">
         <div className="absolute inset-0 -z-10">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-to-b from-primary/8 via-emerald-100/40 to-transparent rounded-full blur-3xl" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-linear-to-b from-primary/8 via-emerald-100/40 to-transparent rounded-full blur-3xl" />
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb20_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb20_1px,transparent_1px)] bg-[size:4rem_4rem]" />
         </div>
         <div className="mx-auto max-w-4xl text-center px-6">
@@ -200,7 +200,7 @@ export default function FeaturesPage() {
           </motion.div>
           <motion.h1 variants={fadeUp} initial="hidden" animate="visible" custom={1} className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
             Ferramentas profissionais para{' '}
-            <span className="bg-gradient-to-r from-primary via-emerald-500 to-teal-500 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-primary via-emerald-500 to-teal-500 bg-clip-text text-transparent">
               seu e-commerce
             </span>
           </motion.h1>
@@ -249,13 +249,13 @@ export default function FeaturesPage() {
         <div className="mx-auto max-w-4xl text-center">
           <h2 className="text-3xl font-extrabold text-gray-900 md:text-5xl">
             Pronto para{' '}
-            <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-transparent">começar?</span>
+            <span className="bg-linear-to-r from-primary to-emerald-500 bg-clip-text text-transparent">começar?</span>
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-gray-500">
             Crie sua loja grátis e explore todas as funcionalidades. Sem cartão de crédito.
           </p>
           <div className="mt-8">
-            <Link href="/signup" className="group inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-emerald-500 px-8 py-4 text-base font-bold text-white shadow-2xl shadow-primary/25 hover:shadow-primary/40 transition-all hover:-translate-y-0.5">
+            <Link href="/signup" className="group inline-flex items-center gap-2 rounded-2xl bg-linear-to-r from-primary to-emerald-500 px-8 py-4 text-base font-bold text-white shadow-2xl shadow-primary/25 hover:shadow-primary/40 transition-all hover:-translate-y-0.5">
               Começar grátis agora
               <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Link>

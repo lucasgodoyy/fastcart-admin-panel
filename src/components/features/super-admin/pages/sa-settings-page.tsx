@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -103,7 +103,7 @@ export function SaSettingsPage() {
         title="Configurações"
         description="Configurações gerais da plataforma, integrações e infraestrutura"
         actions={
-          <Button onClick={handleSave} className="bg-gradient-to-r from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] text-white rounded-xl gap-2 text-[12px] shadow-lg shadow-[hsl(var(--sa-accent))]/25 hover:opacity-90">
+          <Button onClick={handleSave} className="bg-linear-to-r from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] text-white rounded-xl gap-2 text-[12px] shadow-lg shadow-[hsl(var(--sa-accent))]/25 hover:opacity-90">
             <Save className="h-4 w-4" /> Salvar Alterações
           </Button>
         }

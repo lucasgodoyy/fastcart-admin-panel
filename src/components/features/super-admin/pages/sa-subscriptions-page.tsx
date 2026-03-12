@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useTabFromPath } from "../hooks/use-tab-from-path";
@@ -195,7 +195,7 @@ export function SaSubscriptionsPage() {
                   key={plan.id}
                   variants={fadeInUp}
                   whileHover={{ y: -6, scale: 1.02 }}
-                  className={`relative rounded-2xl border ${isPopular ? "border-[hsl(var(--sa-accent))] sa-pulse-glow" : "border-[hsl(var(--sa-border-subtle))]"} bg-gradient-to-b ${gradient} p-6 transition-all`}
+                  className={`relative rounded-2xl border ${isPopular ? "border-[hsl(var(--sa-accent))] sa-pulse-glow" : "border-[hsl(var(--sa-border-subtle))]"} bg-linear-to-b ${gradient} p-6 transition-all`}
                 >
                   {isPopular && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[hsl(var(--sa-accent))] px-3 py-1 text-[10px] font-bold text-white">
@@ -390,7 +390,7 @@ export function SaSubscriptionsPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="plan-features">Features (uma por linha)</Label>
-              <textarea id="plan-features" className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" value={featuresText} onChange={(e) => setFeaturesText(e.target.value)} placeholder={"Até 100 produtos\nSuporte por email\nDomínio customizado"} />
+              <textarea id="plan-features" className="flex min-h-25 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" value={featuresText} onChange={(e) => setFeaturesText(e.target.value)} placeholder={"Até 100 produtos\nSuporte por email\nDomínio customizado"} />
             </div>
             <div className="flex items-center gap-3">
               <Switch id="plan-active" checked={formData.active ?? true} onCheckedChange={(checked) => setFormData({ ...formData, active: checked })} />

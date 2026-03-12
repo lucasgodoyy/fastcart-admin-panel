@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -431,7 +431,7 @@ export function SaBacklogPage() {
       <motion.div variants={fadeInUp} initial="initial" animate="animate">
         <SaCard>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+            <div className="flex items-center gap-2 flex-1 min-w-50">
               <Search className="h-4 w-4 text-[hsl(var(--sa-text-muted))]" />
               <Input placeholder="Buscar por título, descrição ou arquivo..." value={search} onChange={e => setSearch(e.target.value)} className="h-8 text-[12px] bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))]" />
             </div>

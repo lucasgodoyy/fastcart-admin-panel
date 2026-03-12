@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -978,7 +978,7 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
                 value={directToken}
                 onChange={(e) => setDirectToken(e.target.value)}
                 placeholder="eyJ0eXAiOiJKV1QiLCJhbGciOi..."
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs font-mono min-h-[60px] resize-y placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs font-mono min-h-15 resize-y placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               />
               <Button
                 size="sm"

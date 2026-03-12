@@ -1,4 +1,4 @@
-import { SignupForm } from '@/components/features/auth/signupForm';
+﻿import { SignupForm } from '@/components/features/auth/signupForm';
 import { Zap } from 'lucide-react';
 import { t } from '@/lib/admin-language';
 
@@ -6,7 +6,7 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left brand panel */}
-      <div className="hidden lg:flex lg:w-[45%] bg-gradient-to-br from-primary via-primary/90 to-primary/70 flex-col justify-between p-12 text-primary-foreground">
+      <div className="hidden lg:flex lg:w-[45%] bg-linear-to-br from-primary via-primary/90 to-primary/70 flex-col justify-between p-12 text-primary-foreground">
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm">
             <Zap className="h-5 w-5 text-white" fill="white" />

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -640,7 +640,7 @@ function LinksTab() {
                     <TableCell>
                       <CopyCode code={l.slug} />
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate">{l.destinationUrl}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground max-w-50 truncate">{l.destinationUrl}</TableCell>
                     <TableCell className="text-sm">{l.totalClicks.toLocaleString("pt-BR")}</TableCell>
                     <TableCell className="text-sm font-semibold">{l.totalConversions}</TableCell>
                     <TableCell>

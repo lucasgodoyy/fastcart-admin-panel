@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -168,7 +168,7 @@ export function SaShell({ children }: { children: React.ReactNode }) {
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-2 rounded-xl px-2 py-1.5 hover:bg-[hsl(var(--sa-surface-hover))] transition-colors outline-none">
                   <Avatar className="h-8 w-8 border-2 border-[hsl(var(--sa-accent))/0.3]">
-                    <AvatarFallback className="bg-gradient-to-br from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] text-white text-xs font-bold">
+                    <AvatarFallback className="bg-linear-to-br from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] text-white text-xs font-bold">
                       {user?.email?.slice(0, 1).toUpperCase() || "S"}
                     </AvatarFallback>
                   </Avatar>

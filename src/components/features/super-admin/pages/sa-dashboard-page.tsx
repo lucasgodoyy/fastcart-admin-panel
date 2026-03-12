@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -163,7 +163,7 @@ export function SaDashboardPage() {
                 </div>
               </div>
             </div>
-            <div className="h-1 bg-gradient-to-r from-[hsl(var(--sa-accent))] via-[hsl(var(--sa-info))] to-[hsl(var(--sa-success))]" />
+            <div className="h-1 bg-linear-to-r from-[hsl(var(--sa-accent))] via-[hsl(var(--sa-info))] to-[hsl(var(--sa-success))]" />
           </SaCard>
 
           <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid grid-cols-2 sm:grid-cols-4 gap-3">

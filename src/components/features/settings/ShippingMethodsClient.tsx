@@ -254,7 +254,7 @@ export function ShippingMethodsClient() {
           >
             {tab.label}
             {tab.activeBadge !== undefined && (
-              <span className="inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-medium px-1">
+              <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-medium px-1">
                 {tab.activeBadge}
               </span>
             )}

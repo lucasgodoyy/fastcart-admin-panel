@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -55,12 +55,12 @@ function NavItem({ item, pathname, expanded, onToggle, collapsed }: {
       {active && (
         <motion.div
           layoutId="sa-active-indicator"
-          className="absolute inset-0 rounded-xl bg-gradient-to-r from-[hsl(var(--sa-accent))/0.15] to-[hsl(var(--sa-info))/0.08] border border-[hsl(var(--sa-accent))/0.2]"
+          className="absolute inset-0 rounded-xl bg-linear-to-r from-[hsl(var(--sa-accent))/0.15] to-[hsl(var(--sa-info))/0.08] border border-[hsl(var(--sa-accent))/0.2]"
           transition={{ type: "spring", stiffness: 350, damping: 30 }}
         />
       )}
 
-      <Icon className={cn("relative z-10 h-[18px] w-[18px] shrink-0 transition-colors", active ? "text-[hsl(var(--sa-accent))]" : "text-[hsl(var(--sa-text-muted))] group-hover:text-[hsl(var(--sa-text-secondary))]")} />
+      <Icon className={cn("relative z-10 h-4.5 w-4.5 shrink-0 transition-colors", active ? "text-[hsl(var(--sa-accent))]" : "text-[hsl(var(--sa-text-muted))] group-hover:text-[hsl(var(--sa-text-secondary))]")} />
 
       {!collapsed && (
         <>
@@ -93,7 +93,7 @@ function NavItem({ item, pathname, expanded, onToggle, collapsed }: {
               transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
               className="overflow-hidden"
             >
-              <div className="ml-[18px] mt-1 space-y-0.5 border-l border-[hsl(var(--sa-border-subtle))] pl-4">
+              <div className="ml-4.5 mt-1 space-y-0.5 border-l border-[hsl(var(--sa-border-subtle))] pl-4">
                 {item.children!.map(child => {
                   const childActive = isActive(pathname, child.href);
                   return (
@@ -221,7 +221,7 @@ export function SaSidebar({ collapsed = false }: { collapsed?: boolean }) {
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 border-b border-[hsl(var(--sa-border-subtle))] px-5">
         <motion.div
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] shadow-lg shadow-[hsl(var(--sa-accent))/0.2]"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] shadow-lg shadow-[hsl(var(--sa-accent))/0.2]"
           whileHover={{ scale: 1.08, rotate: 5 }}
           whileTap={{ scale: 0.95 }}
         >

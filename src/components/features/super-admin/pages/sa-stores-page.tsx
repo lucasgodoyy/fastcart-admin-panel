@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -89,7 +89,7 @@ export function SaStoresPage() {
       </motion.div>
 
       <motion.div variants={fadeInUp} initial="initial" animate="animate">
-        <SaCard className="!p-4">
+        <SaCard className="p-4!">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--sa-text-muted))]" />
@@ -112,7 +112,7 @@ export function SaStoresPage() {
           <motion.div key={store.id} variants={fadeInUp} whileHover={{ y: -4 }} className="group relative rounded-2xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-5 hover:border-[hsl(var(--sa-border))] transition-all">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[hsl(var(--sa-accent-subtle))] to-[hsl(var(--sa-info-subtle))] text-[hsl(var(--sa-accent))] font-bold text-sm">{store.name.charAt(0)}</div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-[hsl(var(--sa-accent-subtle))] to-[hsl(var(--sa-info-subtle))] text-[hsl(var(--sa-accent))] font-bold text-sm">{store.name.charAt(0)}</div>
                 <div>
                   <h4 className="text-[13px] font-semibold text-[hsl(var(--sa-text))]">{store.name}</h4>
                   <p className="text-[11px] text-[hsl(var(--sa-text-muted))]">/{store.slug}</p>

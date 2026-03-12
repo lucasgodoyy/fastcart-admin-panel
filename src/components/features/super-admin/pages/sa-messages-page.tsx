@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
@@ -291,7 +291,7 @@ export function SaMessagesPage() {
       </motion.div>
 
       {/* Conversation list + messages */}
-      <motion.div variants={fadeInUp} className="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-4 h-[calc(100vh-420px)] min-h-[400px]">
+      <motion.div variants={fadeInUp} className="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-4 h-[calc(100vh-420px)] min-h-100">
         {/* Left panel */}
         <SaCard className="flex flex-col overflow-hidden p-0">
           <div className="p-3 border-b border-border">
@@ -323,7 +323,7 @@ export function SaMessagesPage() {
                     </div>
                     <p className="text-xs text-muted-foreground truncate">{conv.subject || conv.customerEmail}</p>
                     <div className="flex items-center justify-between mt-1">
-                      <p className="text-xs text-muted-foreground truncate max-w-[200px]">{conv.lastMessagePreview || 'Sem mensagens'}</p>
+                      <p className="text-xs text-muted-foreground truncate max-w-50">{conv.lastMessagePreview || 'Sem mensagens'}</p>
                       {conv.unreadAdminCount > 0 && (
                         <Badge variant="default" className="h-4 px-1 text-[10px] rounded-full">{conv.unreadAdminCount}</Badge>
                       )}

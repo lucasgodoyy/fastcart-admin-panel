@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState, type ComponentType } from "react";
 import { motion } from "framer-motion";
@@ -115,7 +115,7 @@ export function SaRolesPage() {
       </motion.div>
 
       <motion.div variants={fadeInUp} initial="initial" animate="animate">
-        <SaCard className="!p-4">
+        <SaCard className="p-4!">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--sa-text-muted))]" />
@@ -169,7 +169,7 @@ export function SaRolesPage() {
                   >
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] text-white text-[11px] font-bold">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] text-white text-[11px] font-bold">
                           {userName.split(" ").map((namePart) => namePart[0]).join("").slice(0, 2)}
                         </div>
                         <div>

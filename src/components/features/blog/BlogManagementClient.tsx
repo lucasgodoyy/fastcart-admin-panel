@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -175,7 +175,7 @@ export function BlogManagementClient() {
             <Label htmlFor="blog-content">Conteúdo</Label>
             <textarea
               id="blog-content"
-              className="min-h-[220px] w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              className="min-h-55 w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
               value={form.content}
               onChange={(event) => setForm((prev) => ({ ...prev, content: event.target.value }))}
             />
@@ -185,7 +185,7 @@ export function BlogManagementClient() {
             <Label htmlFor="blog-summary">Resumo (opcional)</Label>
             <textarea
               id="blog-summary"
-              className="min-h-[92px] w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              className="min-h-23 w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
               value={form.summary}
               onChange={(event) => setForm((prev) => ({ ...prev, summary: event.target.value }))}
             />
@@ -226,7 +226,7 @@ export function BlogManagementClient() {
             <Label htmlFor="blog-seo-description">Descrição SEO</Label>
             <textarea
               id="blog-seo-description"
-              className="min-h-[92px] w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              className="min-h-23 w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
               value={form.seoDescription}
               onChange={(event) => setForm((prev) => ({ ...prev, seoDescription: event.target.value }))}
             />

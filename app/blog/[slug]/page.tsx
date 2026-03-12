@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -90,14 +90,14 @@ export default function BlogPostPage() {
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-white/70 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60">
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-emerald-400 shadow-lg shadow-primary/25">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-primary to-emerald-400 shadow-lg shadow-primary/25">
               <Zap className="h-5 w-5 text-white" fill="white" />
             </div>
             <span className="text-xl font-bold tracking-tight text-gray-900">Lojaki</span>
           </Link>
           <div className="flex items-center gap-3">
             <Link href="/blog" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Blog</Link>
-            <Link href="/signup" className="rounded-xl bg-gradient-to-r from-primary to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25">
+            <Link href="/signup" className="rounded-xl bg-linear-to-r from-primary to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25">
               Começar grátis
             </Link>
           </div>
@@ -107,7 +107,7 @@ export default function BlogPostPage() {
       {/* Article */}
       <article className="pt-28 pb-20">
         {/* Header */}
-        <div className={`relative overflow-hidden bg-gradient-to-br ${article.gradient} py-16 md:py-24`}>
+        <div className={`relative overflow-hidden bg-linear-to-br ${article.gradient} py-16 md:py-24`}>
           <div className="absolute inset-0 bg-black/10" />
           <div className="relative mx-auto max-w-3xl px-6 text-center text-white">
             <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0}>
@@ -151,7 +151,7 @@ export default function BlogPostPage() {
           <h2 className="text-2xl font-extrabold text-gray-900 md:text-3xl">Pronto para criar sua loja?</h2>
           <p className="mt-3 text-gray-500">Comece grátis e ponha em prática tudo que você leu.</p>
           <div className="mt-6 flex items-center justify-center gap-4">
-            <Link href="/signup" className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-emerald-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-primary/25 hover:shadow-xl transition-all">
+            <Link href="/signup" className="group inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-primary to-emerald-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-primary/25 hover:shadow-xl transition-all">
               Começar grátis <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link href="/blog" className="rounded-xl border border-gray-200 bg-white px-6 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">

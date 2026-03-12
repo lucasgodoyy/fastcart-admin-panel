@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -196,7 +196,7 @@ export function SaFinancePage() {
                     </div>
                     <div className="h-2 w-full overflow-hidden rounded-full bg-[hsl(var(--sa-surface-hover))]">
                       <motion.div
-                        className="h-full rounded-full bg-gradient-to-r from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))]"
+                        className="h-full rounded-full bg-linear-to-r from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))]"
                         initial={{ width: 0 }}
                         animate={{ width: `${item.pct}%` }}
                         transition={{ duration: 0.8, delay: 0.3 + i * 0.15 }}

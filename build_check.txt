@@ -1,0 +1,134 @@
+﻿
+> fastcart-admin-panel@0.1.0 build C:\Users\ehluc\IdeaProjects\fastcart-admin-panel
+> next build
+
+Γû▓ Next.js 16.1.4 (Turbopack)
+- Environments: .env.production
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 68s
+  Running TypeScript ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/103) ...
+  Generating static pages using 7 workers (25/103) 
+  Generating static pages using 7 workers (51/103) 
+  Generating static pages using 7 workers (77/103) 
+Γ£ô Generating static pages using 7 workers (103/103) in 13.6s
+  Finalizing page optimization ...
+
+Route (app)
+Γöî Γùï /
+Γö£ Γùï /_not-found
+Γö£ Γùï /admin
+Γö£ Γùï /admin/activity
+Γö£ Γùï /admin/billing
+Γö£ Γùï /admin/chat
+Γö£ Γùï /admin/customers
+Γö£ ╞Æ /admin/customers/[id]
+Γö£ Γùï /admin/customers/new
+Γö£ Γùï /admin/discounts
+Γö£ Γùï /admin/discounts/coupons
+Γö£ Γùï /admin/discounts/free-shipping
+Γö£ Γùï /admin/discounts/promotions
+Γö£ Γùï /admin/marketing
+Γö£ Γùï /admin/marketing/affiliates
+Γö£ Γùï /admin/marketing/email-campaigns
+Γö£ Γùï /admin/marketing/integrations
+Γö£ Γùï /admin/notifications
+Γö£ Γùï /admin/online-store
+Γö£ Γùï /admin/online-store/blog
+Γö£ Γùï /admin/online-store/filters
+Γö£ Γùï /admin/online-store/google-shopping
+Γö£ Γùï /admin/online-store/layout-editor
+Γö£ Γùï /admin/online-store/layout-theme
+Γö£ Γùï /admin/online-store/menus
+Γö£ Γùï /admin/online-store/pages
+Γö£ Γùï /admin/online-store/social-links
+Γö£ Γùï /admin/online-store/under-construction
+Γö£ Γùï /admin/payments
+Γö£ Γùï /admin/products
+Γö£ ╞Æ /admin/products/[id]
+Γö£ Γùï /admin/products/categories
+Γö£ Γùï /admin/products/inventory
+Γö£ Γùï /admin/products/new
+Γö£ Γùï /admin/sales
+Γö£ ╞Æ /admin/sales/[id]
+Γö£ Γùï /admin/sales/abandoned-carts
+Γö£ Γùï /admin/settings
+Γö£ Γùï /admin/settings/checkout
+Γö£ Γùï /admin/settings/contact-info
+Γö£ Γùï /admin/settings/custom-fields
+Γö£ Γùï /admin/settings/distribution-centers
+Γö£ Γùï /admin/settings/domains
+Γö£ Γùï /admin/settings/emails
+Γö£ ╞Æ /admin/settings/emails/[templateKey]
+Γö£ Γùï /admin/settings/integrations
+Γö£ Γùï /admin/settings/languages
+Γö£ Γùï /admin/settings/messages
+Γö£ Γùï /admin/settings/notifications
+Γö£ Γùï /admin/settings/payment-methods
+Γö£ Γùï /admin/settings/redirects
+Γö£ Γùï /admin/settings/shipping-methods
+Γö£ Γùï /admin/settings/users
+Γö£ Γùï /admin/shipping
+Γö£ Γùï /admin/statistics
+Γö£ Γùï /admin/statistics/payments
+Γö£ Γùï /admin/support
+Γö£ Γùï /blog
+Γö£ ╞Æ /blog/[slug]
+Γö£ Γùï /features
+Γö£ Γùï /forgot-password
+Γö£ Γùï /login
+Γö£ Γùï /pricing
+Γö£ Γùï /signup
+Γö£ Γùï /super-admin
+Γö£ Γùï /super-admin/activity
+Γö£ Γùï /super-admin/affiliates
+Γö£ Γùï /super-admin/affiliates/commissions
+Γö£ Γùï /super-admin/affiliates/partners
+Γö£ Γùï /super-admin/affiliates/tracking
+Γö£ Γùï /super-admin/analytics
+Γö£ Γùï /super-admin/appearance
+Γö£ Γùï /super-admin/backlog
+Γö£ Γùï /super-admin/domains
+Γö£ Γùï /super-admin/emails
+Γö£ Γùï /super-admin/emails/campaigns
+Γö£ Γùï /super-admin/emails/config
+Γö£ Γùï /super-admin/emails/templates
+Γö£ Γùï /super-admin/finance
+Γö£ Γùï /super-admin/finance/fees
+Γö£ Γùï /super-admin/finance/payouts
+Γö£ Γùï /super-admin/finance/transactions
+Γö£ Γùï /super-admin/infrastructure
+Γö£ Γùï /super-admin/marketing
+Γö£ Γùï /super-admin/marketing/banners
+Γö£ Γùï /super-admin/marketing/push
+Γö£ Γùï /super-admin/messages
+Γö£ Γùï /super-admin/messages/team
+Γö£ Γùï /super-admin/notifications
+Γö£ Γùï /super-admin/reports
+Γö£ Γùï /super-admin/reports/export
+Γö£ Γùï /super-admin/reports/growth
+Γö£ Γùï /super-admin/roadmap
+Γö£ Γùï /super-admin/security
+Γö£ Γùï /super-admin/settings
+Γö£ Γùï /super-admin/settings/api-keys
+Γö£ Γùï /super-admin/settings/integrations
+Γö£ Γùï /super-admin/stores
+Γö£ ╞Æ /super-admin/stores/[id]
+Γö£ Γùï /super-admin/stores/approvals
+Γö£ Γùï /super-admin/stores/performance
+Γö£ Γùï /super-admin/subscriptions
+Γö£ Γùï /super-admin/subscriptions/billing
+Γö£ Γùï /super-admin/subscriptions/subscribers
+Γö£ Γùï /super-admin/support
+Γö£ Γùï /super-admin/users
+Γö£ Γùï /super-admin/users/roles
+Γöö Γùï /super-admin/users/sessions
+
+
+╞Æ Proxy (Middleware)
+
+Γùï  (Static)   prerendered as static content
+╞Æ  (Dynamic)  server-rendered on demand
+
