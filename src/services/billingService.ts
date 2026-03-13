@@ -1,10 +1,16 @@
 import apiClient from '@/lib/api';
-import { StoreBillingResponse } from '@/types/billing';
+import { StoreBillingResponse, PlanLimits } from '@/types/billing';
 
 const billingService = {
   /** Get billing info: current subscription + available plans */
   getBilling: async (): Promise<StoreBillingResponse> => {
     const response = await apiClient.get('/admin/billing');
+    return response.data;
+  },
+
+  /** Get current plan usage vs limits */
+  getPlanLimits: async (): Promise<PlanLimits> => {
+    const response = await apiClient.get('/admin/billing/plan-limits');
     return response.data;
   },
 

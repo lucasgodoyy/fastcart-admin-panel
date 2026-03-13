@@ -1,5 +1,5 @@
 import apiClient from '@/lib/api';
-import { LoginCredentials, AuthResponse, ResetPasswordRequest } from '@/types/auth';
+import { LoginCredentials, AuthResponse, RequestPasswordResetPayload, ResetPasswordRequest } from '@/types/auth';
 import { normalizeRole } from '@/lib/auth-role';
 import { redirectToLogin } from '@/lib/session';
 import Cookies from 'js-cookie';
@@ -53,6 +53,10 @@ export const authService = {
 
   resendVerification: async (email: string): Promise<void> => {
     await apiClient.post('/auth/resend-verification', { email });
+  },
+
+  requestPasswordReset: async (payload: RequestPasswordResetPayload): Promise<void> => {
+    await apiClient.post('/auth/reset-password/request', payload);
   },
 
   resetPassword: async (payload: ResetPasswordRequest): Promise<void> => {

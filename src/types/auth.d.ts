@@ -3,9 +3,13 @@ export interface LoginCredentials {
   password: string;
 }
 
-export interface ResetPasswordRequest {
+export interface RequestPasswordResetPayload {
   email: string;
-  newPassword: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  password: string;
 }
 
 export interface AuthResponse {

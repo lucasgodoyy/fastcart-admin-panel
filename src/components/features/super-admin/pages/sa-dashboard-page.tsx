@@ -111,7 +111,7 @@ export function SaDashboardPage() {
 
   const recentActivity = activityData?.content ?? [];
   const topStores = topStoresData?.content ?? [];
-  const mrr = subStats?.mrr ?? 0;
+  const mrr = subStats?.mrrCents ?? 0;
   const arr = mrr * 12;
 
   return (
@@ -245,9 +245,8 @@ export function SaDashboardPage() {
             <div className="space-y-4">
               <HealthBar label="Assinaturas Ativas" value={subStats?.activeSubscriptions ?? 0} suffix="" color="success" />
               <HealthBar label="Em Trial" value={subStats?.trialSubscriptions ?? 0} suffix="" color="info" />
-              <HealthBar label="Canceladas" value={subStats?.cancelledSubscriptions ?? 0} suffix="" color="danger" />
+              <HealthBar label="Canceladas" value={subStats?.canceledSubscriptions ?? 0} suffix="" color="danger" />
               <HealthBar label="Churn Rate" value={Number((subStats?.churnRate ?? 0).toFixed(1))} suffix="%" color={subStats && subStats.churnRate < 5 ? "success" : "warning"} />
-              <HealthBar label="LTV Médio" value={subStats?.avgLifetimeValue ?? 0} suffix="" color="info" />
             </div>
           </SaCard>
         </motion.div>

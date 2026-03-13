@@ -169,7 +169,7 @@ export function SaReportsPage() {
 
   const totalStores = overview?.totalStores ?? 0;
   const activeSubs = subStats?.activeSubscriptions ?? 0;
-  const mrr = subStats?.mrr ?? 0;
+  const mrr = subStats?.mrrCents ?? 0;
   const churnRate = subStats?.churnRate ?? 0;
 
   const exportItems = [
@@ -273,8 +273,8 @@ export function SaReportsPage() {
               {[
                 { name: "Crescimento de lojas", desc: `${overview?.activeStores ?? 0} ativas de ${totalStores} cadastradas`, exportFn: () => exportStores("csv") },
                 { name: "Crescimento de usuários", desc: `${overview?.activeUsers ?? 0} ativos de ${overview?.totalUsers ?? 0} registrados`, exportFn: () => exportUsers("csv") },
-                { name: "Assinaturas", desc: `MRR: R$ ${mrr.toLocaleString("pt-BR", { minimumFractionDigits: 2 })} | LTV: R$ ${(subStats?.avgLifetimeValue ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`, exportFn: () => exportSubscriptions("csv") },
-                { name: "Conversão trial → pago", desc: `${subStats?.trialSubscriptions ?? 0} em trial | ${subStats?.cancelledSubscriptions ?? 0} cancelados`, exportFn: () => exportSubscriptions("csv") },
+                { name: "Assinaturas", desc: `MRR: R$ ${mrr.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`, exportFn: () => exportSubscriptions("csv") },
+                { name: "Conversão trial → pago", desc: `${subStats?.trialSubscriptions ?? 0} em trial | ${subStats?.canceledSubscriptions ?? 0} cancelados`, exportFn: () => exportSubscriptions("csv") },
               ].map((report) => (
                 <motion.div key={report.name} variants={fadeInUp}>
                   <SaCard>

@@ -95,11 +95,11 @@ export function SaAnalyticsPage() {
   const activeStores = overview?.activeStores ?? 0;
   const totalUsers = overview?.totalUsers ?? 0;
   const activeUsers = overview?.activeUsers ?? 0;
-  const mrr = subStats?.mrr ?? 0;
+  const mrr = subStats?.mrrCents ?? 0;
   const totalSubs = subStats?.totalSubscriptions ?? 0;
   const activeSubs = subStats?.activeSubscriptions ?? 0;
   const churnRate = subStats?.churnRate ?? 0;
-  const avgLtv = subStats?.avgLifetimeValue ?? 0;
+  const avgLtv = 0;
   const conversionRate = totalStores > 0 ? ((activeSubs / totalStores) * 100) : 0;
   const revenuePerUser = activeUsers > 0 ? (mrr / activeUsers) : 0;
 

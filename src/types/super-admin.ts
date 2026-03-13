@@ -163,54 +163,76 @@ export interface SubscriptionPlan {
   id: number;
   name: string;
   slug: string;
-  monthlyPrice: number;
-  annualPrice: number | null;
-  maxProducts: number;
+  description: string | null;
+  priceCents: number;
+  annualPriceCents: number | null;
+  currency: string;
+  billingPeriod: string;
+  sortOrder: number;
+  isPopular: boolean;
+  isActive: boolean;
   maxStores: number;
+  maxProducts: number | null;
   maxStaff: number;
-  featuresJson: string;
-  stripePriceIdMonthly: string | null;
-  stripePriceIdAnnual: string | null;
-  active: boolean;
+  trialPeriodDays: number;
+  features: string[];
+  stripeProductId: string | null;
+  stripePriceId: string | null;
+  annualStripePriceId: string | null;
+  subscriberCount: number;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateOrUpdatePlanRequest {
   name: string;
   slug: string;
-  monthlyPrice: number;
-  annualPrice?: number | null;
-  maxProducts: number;
-  maxStores: number;
-  maxStaff: number;
-  featuresJson: string;
-  stripePriceIdMonthly?: string | null;
-  stripePriceIdAnnual?: string | null;
-  active?: boolean;
+  description?: string | null;
+  priceCents: number;
+  annualPriceCents?: number | null;
+  billingPeriod?: string;
+  sortOrder?: number;
+  isPopular?: boolean;
+  isActive?: boolean;
+  maxStores?: number;
+  maxProducts?: number | null;
+  maxStaff?: number;
+  trialPeriodDays?: number;
+  features?: string[];
+  stripeProductId?: string | null;
+  stripePriceId?: string | null;
+  annualStripePriceId?: string | null;
 }
 
 export interface StoreSubscription {
   id: number;
   storeId: number;
   storeName: string;
-  storeEmail: string;
+  storeSlug: string;
   planId: number;
   planName: string;
+  planSlug: string;
+  planPriceCents: number;
   status: string;
-  currentPeriodStart: string;
-  currentPeriodEnd: string;
-  monthlyPrice: number;
+  stripeCustomerId: string | null;
+  stripeSubscriptionId: string | null;
+  currentPeriodStart: string | null;
+  currentPeriodEnd: string | null;
+  trialEnd: string | null;
+  canceledAt: string | null;
+  blockedAt: string | null;
+  blockReason: string | null;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface SubscriptionStats {
-  totalSubscriptions: number;
   activeSubscriptions: number;
   trialSubscriptions: number;
-  cancelledSubscriptions: number;
-  mrr: number;
+  canceledSubscriptions: number;
+  totalSubscriptions: number;
+  mrrCents: number;
   churnRate: number;
-  avgLifetimeValue: number;
 }
 
 // ── Affiliates ─────────────────────────────────────────────────

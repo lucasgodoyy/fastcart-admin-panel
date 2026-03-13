@@ -21,11 +21,14 @@ export type AvailablePlan = {
   slug: string;
   description: string;
   priceCents: number;
+  annualPriceCents: number | null;
   currency: string;
   billingPeriod: string;
   isPopular: boolean;
   maxStores: number;
   maxProducts: number | null;
+  maxStaff: number;
+  trialPeriodDays: number;
   features: string[];
   isCurrent: boolean;
 };
@@ -33,4 +36,15 @@ export type AvailablePlan = {
 export type StoreBillingResponse = {
   currentSubscription: CurrentSubscription | null;
   availablePlans: AvailablePlan[];
+};
+
+export type PlanLimits = {
+  planSlug: string;
+  planName: string;
+  subscriptionStatus: string;
+  maxProducts: number | null;
+  maxStaff: number;
+  maxStores: number;
+  currentProducts: number;
+  currentStaff: number;
 };

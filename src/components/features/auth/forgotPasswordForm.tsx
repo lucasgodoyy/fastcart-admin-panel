@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { Eye, EyeOff } from 'lucide-react';
 import { authService } from '@/services/auth';
@@ -17,6 +18,9 @@ type ForgotPasswordFormValues = {
 };
 
 export const ForgotPasswordForm: React.FC = () => {
+  const searchParams = useSearchParams();
+  const resetToken = searchParams.get('token')?.trim() ?? '';
+  const isResetMode = resetToken.length > 0;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -33,19 +37,37 @@ export const ForgotPasswordForm: React.FC = () => {
   const onSubmit = async (values: ForgotPasswordFormValues) => {
     setSuccessMessage(null);
 
-    if (values.newPassword !== values.confirmPassword) {
-      form.setError('confirmPassword', {
-        message: t('As senhas não coincidem.', 'Passwords do not match.'),
-      });
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
+      if (!isResetMode) {
+        await authService.requestPasswordReset({
+          email: values.email,
+        });
+
+        setSuccessMessage(t(
+          'Se existir uma conta para este e-mail, enviamos um link para redefinição de senha.',
+          'If an account exists for this email, we have sent a password reset link.'
+        ));
+
+        form.reset({
+          email: values.email,
+          newPassword: '',
+          confirmPassword: '',
+        });
+        return;
+      }
+
+      if (values.newPassword !== values.confirmPassword) {
+        form.setError('confirmPassword', {
+          message: t('As senhas não coincidem.', 'Passwords do not match.'),
+        });
+        return;
+      }
+
       await authService.resetPassword({
-        email: values.email,
-        newPassword: values.newPassword,
+        token: resetToken,
+        password: values.newPassword,
       });
 
       setSuccessMessage(t(
@@ -54,12 +76,13 @@ export const ForgotPasswordForm: React.FC = () => {
       ));
 
       form.reset({
-        email: values.email,
+        email: '',
         newPassword: '',
         confirmPassword: '',
       });
     } catch (err) {
       const errorObj = err as Record<string, unknown>;
+      const targetField = isResetMode ? 'newPassword' : 'email';
 
       if (
         typeof err === 'object' &&
@@ -70,8 +93,8 @@ export const ForgotPasswordForm: React.FC = () => {
       ) {
         const response = errorObj.response as Record<string, unknown>;
         const data = response.data as Record<string, unknown> | undefined;
-        form.setError('email', {
-          message: (data?.message as string) || t('Não foi possível redefinir a senha.', 'Unable to reset password.'),
+        form.setError(targetField, {
+          message: (data?.message as string) || t('Não foi possível concluir a solicitação.', 'Unable to complete the request.'),
         });
       } else if (
         typeof err === 'object' &&
@@ -79,11 +102,11 @@ export const ForgotPasswordForm: React.FC = () => {
         'request' in errorObj &&
         errorObj.request
       ) {
-        form.setError('email', {
+        form.setError(targetField, {
           message: t('Não foi possível conectar ao servidor. Verifique sua conexão.', 'Server is unreachable. Please check your connection.'),
         });
       } else {
-        form.setError('email', {
+        form.setError(targetField, {
           message: t('Ocorreu um erro inesperado. Tente novamente mais tarde.', 'An unexpected error occurred. Please try again later.'),
         });
       }
@@ -97,106 +120,114 @@ export const ForgotPasswordForm: React.FC = () => {
       <CardHeader className="space-y-2 pb-6">
         <CardTitle className="text-2xl font-bold text-center">{t('Esqueceu sua senha?', 'Forgot your password?')}</CardTitle>
         <CardDescription className="text-center">
-          {t('Informe seu e-mail e defina uma nova senha.', 'Enter your email and set a new password.')}
+          {isResetMode
+            ? t('Defina sua nova senha para concluir a recuperação de acesso.', 'Set your new password to complete account recovery.')
+            : t('Informe seu e-mail para receber um link seguro de redefinição.', 'Enter your email to receive a secure reset link.')}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-            <FormField
-              control={form.control}
-              name="email"
-              rules={{
-                required: t('E-mail é obrigatório', 'Email is required'),
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: t('Endereço de e-mail inválido', 'Invalid email address'),
-                },
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('Endereço de e-mail', 'Email Address')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="name@company.com"
-                      disabled={isSubmitting}
-                      autoComplete="email"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {!isResetMode ? (
+              <FormField
+                control={form.control}
+                name="email"
+                rules={{
+                  required: t('E-mail é obrigatório', 'Email is required'),
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: t('Endereço de e-mail inválido', 'Invalid email address'),
+                  },
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Endereço de e-mail', 'Email Address')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="name@company.com"
+                        disabled={isSubmitting}
+                        autoComplete="email"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ) : null}
 
-            <FormField
-              control={form.control}
-              name="newPassword"
-              rules={{
-                required: t('Nova senha é obrigatória', 'New password is required'),
-                minLength: {
-                  value: 6,
-                  message: t('A senha deve ter pelo menos 6 caracteres', 'Password must be at least 6 characters'),
-                },
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex justify-between items-center">
-                    <FormLabel>{t('Nova senha', 'New password')}</FormLabel>
-                    <button
-                      type="button"
-                      onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="text-xs text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  <FormControl>
-                    <Input
-                      type={showNewPassword ? 'text' : 'password'}
-                      placeholder="••••••••"
-                      disabled={isSubmitting}
-                      autoComplete="new-password"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {isResetMode ? (
+              <>
+                <FormField
+                  control={form.control}
+                  name="newPassword"
+                  rules={{
+                    required: t('Nova senha é obrigatória', 'New password is required'),
+                    minLength: {
+                      value: 8,
+                      message: t('A senha deve ter pelo menos 8 caracteres', 'Password must be at least 8 characters'),
+                    },
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex justify-between items-center">
+                        <FormLabel>{t('Nova senha', 'New password')}</FormLabel>
+                        <button
+                          type="button"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                          className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                        >
+                          {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      <FormControl>
+                        <Input
+                          type={showNewPassword ? 'text' : 'password'}
+                          placeholder="••••••••"
+                          disabled={isSubmitting}
+                          autoComplete="new-password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="confirmPassword"
-              rules={{
-                required: t('Confirme sua senha', 'Confirm your password'),
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex justify-between items-center">
-                    <FormLabel>{t('Confirmar nova senha', 'Confirm new password')}</FormLabel>
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="text-xs text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  <FormControl>
-                    <Input
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      placeholder="••••••••"
-                      disabled={isSubmitting}
-                      autoComplete="new-password"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  rules={{
+                    required: t('Confirme sua senha', 'Confirm your password'),
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex justify-between items-center">
+                        <FormLabel>{t('Confirmar nova senha', 'Confirm new password')}</FormLabel>
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                        >
+                          {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      <FormControl>
+                        <Input
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          placeholder="••••••••"
+                          disabled={isSubmitting}
+                          autoComplete="new-password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            ) : null}
 
             {successMessage ? (
               <div className="rounded-md border border-border bg-muted px-3 py-2 text-sm text-foreground">
@@ -210,7 +241,13 @@ export const ForgotPasswordForm: React.FC = () => {
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
               size="lg"
             >
-              {isSubmitting ? t('Redefinindo...', 'Resetting...') : t('Redefinir senha', 'Reset password')}
+              {isSubmitting
+                ? isResetMode
+                  ? t('Redefinindo...', 'Resetting...')
+                  : t('Enviando...', 'Sending...')
+                : isResetMode
+                  ? t('Redefinir senha', 'Reset password')
+                  : t('Enviar link de redefinição', 'Send reset link')}
             </Button>
           </form>
         </Form>

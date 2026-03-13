@@ -62,7 +62,7 @@ export function SaFinancePage() {
     queryFn: superAdminService.getSubscriptionStats,
   });
 
-  const mrr = stats?.mrr ?? 0;
+  const mrr = stats?.mrrCents ?? 0;
   const arr = mrr * 12;
 
   return (
@@ -81,7 +81,7 @@ export function SaFinancePage() {
         <SaStatCard title="MRR (Assinaturas)" value={fmtMoney(mrr)} icon={DollarSign} color="success" trend={{ value: 0, label: "" }} subtitle="Recorrente" />
         <SaStatCard title="ARR Projetado" value={fmtMoney(arr)} icon={Receipt} color="accent" />
         <SaStatCard title="Assinaturas Ativas" value={String(stats?.activeSubscriptions ?? 0)} icon={Banknote} color="warning" />
-        <SaStatCard title="Cancelamentos" value={String(stats?.cancelledSubscriptions ?? 0)} icon={CreditCard} color="danger" subtitle={`Churn ${(stats?.churnRate ?? 0).toFixed(1)}%`} />
+        <SaStatCard title="Cancelamentos" value={String(stats?.canceledSubscriptions ?? 0)} icon={CreditCard} color="danger" subtitle={`Churn ${(stats?.churnRate ?? 0).toFixed(1)}%`} />
       </motion.div>
 
       <Tabs value={tab} onValueChange={setTab}>
@@ -111,7 +111,7 @@ export function SaFinancePage() {
                   { label: "ARR Projetado", value: fmtMoney(arr), color: "sa-accent" },
                   { label: "Assinaturas Ativas", value: String(stats?.activeSubscriptions ?? 0), color: "sa-info" },
                   { label: "Em Trial", value: String(stats?.trialSubscriptions ?? 0), color: "sa-warning" },
-                  { label: "Canceladas", value: String(stats?.cancelledSubscriptions ?? 0), color: "sa-danger" },
+                  { label: "Canceladas", value: String(stats?.canceledSubscriptions ?? 0), color: "sa-danger" },
                 ].map(item => (
                   <motion.div key={item.label} variants={fadeInUp} className="flex items-center justify-between py-3 border-b border-[hsl(var(--sa-border-subtle))] last:border-0">
                     <span className="text-[12px] text-[hsl(var(--sa-text-secondary))]">{item.label}</span>
