@@ -193,6 +193,7 @@ export function OrderListClient() {
               <th className="px-4 py-2.5 text-xs font-medium uppercase text-muted-foreground">{t('Status', 'Status')}</th>
               <th className="px-4 py-2.5 text-xs font-medium uppercase text-muted-foreground">{t('Pagamento', 'Payment')}</th>
               <th className="px-4 py-2.5 text-xs font-medium uppercase text-muted-foreground">{t('Total', 'Total')}</th>
+              <th className="px-4 py-2.5 text-xs font-medium uppercase text-muted-foreground">{t('Envio', 'Shipping')}</th>
               <th className="px-4 py-2.5 text-xs font-medium uppercase text-muted-foreground">{t('Data', 'Date')}</th>
               <th className="px-4 py-2.5 text-xs font-medium uppercase text-muted-foreground"></th>
             </tr>
@@ -200,14 +201,14 @@ export function OrderListClient() {
           <tbody>
             {isLoading && (
               <tr>
-                <td colSpan={7} className="px-4 py-12 text-center text-sm text-muted-foreground">
+                <td colSpan={8} className="px-4 py-12 text-center text-sm text-muted-foreground">
                   {t('Carregando pedidos...', 'Loading orders...')}
                 </td>
               </tr>
             )}
             {!isLoading && filteredOrders.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-12 text-center text-sm text-muted-foreground">
+                <td colSpan={8} className="px-4 py-12 text-center text-sm text-muted-foreground">
                   {t('Nenhum pedido encontrado.', 'No orders found.')}
                 </td>
               </tr>
@@ -238,6 +239,23 @@ export function OrderListClient() {
                   </td>
                   <td className="px-4 py-3 text-sm font-medium text-foreground">
                     {formatCurrency(order.totalAmount, order.currency)}
+                  </td>
+                  <td className="px-4 py-3">
+                    {order.trackingCode ? (
+                      <div>
+                        <span className="font-mono text-xs text-foreground">{order.trackingCode}</span>
+                        {order.shippingCarrier && (
+                          <div className="text-xs text-muted-foreground">{order.shippingCarrier}</div>
+                        )}
+                      </div>
+                    ) : order.paymentStatus?.toLowerCase() === 'paid' && order.status !== 'CANCELLED' && order.status !== 'DELIVERED' ? (
+                      <Badge variant="outline" className="text-xs gap-1">
+                        <Clock className="h-3 w-3" />
+                        {t('Aguardando', 'Awaiting')}
+                      </Badge>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-sm text-muted-foreground">
                     {formatDate(order.createdAt)}

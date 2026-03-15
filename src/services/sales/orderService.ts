@@ -95,6 +95,37 @@ const orderService = {
     const response = await apiClient.post(`/orders/store/${orderId}/print-label`);
     return response.data;
   },
+
+  /** Update internal merchant notes on an order (never shown to customer) */
+  updateInternalNotes: async (orderId: number, notes: string): Promise<AdminOrder> => {
+    const response = await apiClient.patch(`/orders/store/${orderId}/internal-notes`, { notes });
+    return response.data;
+  },
+
+  // ─── Draft Orders ──────────────────────────────────────────────────────────
+
+  /** Create a draft order */
+  createDraft: async (name?: string): Promise<AdminOrder> => {
+    const response = await apiClient.post('/orders/store/drafts', { name });
+    return response.data;
+  },
+
+  /** List draft orders */
+  listDrafts: async (): Promise<AdminOrder[]> => {
+    const response = await apiClient.get('/orders/store/drafts');
+    return response.data;
+  },
+
+  /** Convert a draft to a live order */
+  convertDraft: async (orderId: number): Promise<AdminOrder> => {
+    const response = await apiClient.patch(`/orders/store/${orderId}/convert-draft`);
+    return response.data;
+  },
+
+  /** Discard (delete) a draft order */
+  discardDraft: async (orderId: number): Promise<void> => {
+    await apiClient.delete(`/orders/store/${orderId}/draft`);
+  },
 };
 
 export default orderService;

@@ -572,7 +572,7 @@ export function SaEmailCampaignsPage() {
               <div className="space-y-1.5">
                 <Label className="text-[12px]">Nome do Remetente</Label>
                 <Input
-                  placeholder="Lojaki"
+                  placeholder="RapidoCart"
                   value={form.fromName ?? ""}
                   onChange={e => setForm(p => ({ ...p, fromName: e.target.value || undefined }))}
                 />
@@ -580,7 +580,7 @@ export function SaEmailCampaignsPage() {
               <div className="space-y-1.5">
                 <Label className="text-[12px]">E-mail do Remetente</Label>
                 <Input
-                  placeholder="noreply@lojaki.store"
+                  placeholder="noreply@rapidocart.com.br"
                   value={form.fromEmail ?? ""}
                   onChange={e => setForm(p => ({ ...p, fromEmail: e.target.value || undefined }))}
                 />
@@ -588,7 +588,7 @@ export function SaEmailCampaignsPage() {
               <div className="space-y-1.5">
                 <Label className="text-[12px]">Reply-To</Label>
                 <Input
-                  placeholder="suporte@lojaki.store"
+                  placeholder="suporte@rapidocart.com.br"
                   value={form.replyToEmail ?? ""}
                   onChange={e => setForm(p => ({ ...p, replyToEmail: e.target.value || undefined }))}
                 />

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
@@ -9,6 +9,8 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { categoryService, product as productService } from '@/services/catalog';
+import inventoryMovementService, { type InventoryMovement } from '@/services/catalog/inventoryMovementService';
+import { Package } from 'lucide-react';
 import { Category } from '@/types/category';
 import { CreateProductRequest, Product } from '@/types/product';
 
@@ -74,10 +76,17 @@ const mapProductToForm = (product: Product): CreateProductRequest => ({
 export function EditProductClient({ productId }: EditProductClientProps) {
   const router = useRouter();
   const [form, setForm] = useState<CreateProductRequest>(initialForm);
+  const [showMovements, setShowMovements] = useState(false);
 
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ['categories', 'edit-product'],
     queryFn: () => categoryService.list(),
+  });
+
+  const { data: movements = [] } = useQuery<InventoryMovement[]>({
+    queryKey: ['inventory-movements', productId],
+    queryFn: () => inventoryMovementService.listByProduct(productId),
+    enabled: showMovements,
   });
 
   const { data: product, isLoading: isLoadingProduct } = useQuery<Product>({
@@ -351,6 +360,74 @@ export function EditProductClient({ productId }: EditProductClientProps) {
               </option>
             ))}
           </select>
+        </div>
+
+        {/* Inventory Movements */}
+        <div className="rounded-lg border border-border bg-card overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setShowMovements((v) => !v)}
+            className="w-full flex items-center justify-between p-6 text-left"
+          >
+            <div className="flex items-center gap-2">
+              <Package className="h-4 w-4 text-muted-foreground" />
+              <h2 className="text-base font-semibold text-foreground">Histórico de Estoque</h2>
+            </div>
+            <span className="text-xs text-muted-foreground">{showMovements ? 'Ocultar' : 'Ver histórico'}</span>
+          </button>
+          {showMovements && (
+            <div className="px-6 pb-6">
+              {movements.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nenhuma movimentacao registrada.</p>
+              ) : (
+                <div className="overflow-x-auto rounded-md border border-border">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="bg-muted text-muted-foreground">
+                        <th className="text-left px-3 py-2 font-medium">Tipo</th>
+                        <th className="text-right px-3 py-2 font-medium">Antes</th>
+                        <th className="text-right px-3 py-2 font-medium">Depois</th>
+                        <th className="text-right px-3 py-2 font-medium">Delta</th>
+                        <th className="text-left px-3 py-2 font-medium">Motivo</th>
+                        <th className="text-left px-3 py-2 font-medium">Ref.</th>
+                        <th className="text-left px-3 py-2 font-medium">Data</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {movements.map((m) => (
+                        <tr key={m.id} className="hover:bg-muted/50 transition-colors">
+                          <td className="px-3 py-2">
+                            <span className={[
+                              'inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold',
+                              m.movementType === 'DEDUCTION' ? 'bg-red-50 text-red-700' :
+                              m.movementType === 'RESTORE' ? 'bg-emerald-50 text-emerald-700' :
+                              'bg-blue-50 text-blue-700',
+                            ].join(' ')}>
+                              {m.movementType === 'DEDUCTION' ? 'Deducao' :
+                               m.movementType === 'RESTORE' ? 'Reposicao' : 'Manual'}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2 text-right tabular-nums">{m.quantityBefore}</td>
+                          <td className="px-3 py-2 text-right tabular-nums">{m.quantityAfter}</td>
+                          <td className={[
+                            'px-3 py-2 text-right tabular-nums font-semibold',
+                            m.quantityDelta < 0 ? 'text-red-600' : 'text-emerald-600',
+                          ].join(' ')}>
+                            {m.quantityDelta > 0 ? '+' + m.quantityDelta : m.quantityDelta}
+                          </td>
+                          <td className="px-3 py-2 max-w-[160px] truncate text-muted-foreground">{m.reason ?? '-'}</td>
+                          <td className="px-3 py-2 max-w-[100px] truncate text-muted-foreground">{m.referenceId ?? '-'}</td>
+                          <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">
+                            {new Date(m.createdAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </form>
     </div>

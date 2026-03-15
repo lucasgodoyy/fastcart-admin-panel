@@ -131,10 +131,10 @@ export function SaDashboardPage() {
 
       {/* ── KPI Grid ── */}
       <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <SaStatCard title="Lojas Ativas" value={val(data?.activeStores)} subtitle={`${val(data?.totalStores)} total`} icon={Building2} color="accent" trend={{ value: 12, label: "vs mês anterior" }} />
-        <SaStatCard title="Usuários" value={val(data?.totalUsers)} subtitle={`${val(data?.activeUsers)} ativos`} icon={Users} color="info" trend={{ value: 8, label: "vs mês anterior" }} />
-        <SaStatCard title="Tickets Abertos" value={val(data?.openSupportTickets)} subtitle={`${val(data?.totalSupportTickets)} total`} icon={Mail} color="warning" trend={{ value: -5, label: "vs mês anterior" }} />
-        <SaStatCard title="E-mails Enviados" value={val(data?.totalEmailLogs)} subtitle={`${val(data?.failedEmailLogs)} falhas`} icon={Mail} color="success" trend={{ value: 15, label: "vs mês anterior" }} />
+        <SaStatCard title="Lojas Ativas" value={val(data?.activeStores)} subtitle={`${val(data?.totalStores)} total`} icon={Building2} color="accent" />
+        <SaStatCard title="Usuários" value={val(data?.totalUsers)} subtitle={`${val(data?.activeUsers)} ativos`} icon={Users} color="info" />
+        <SaStatCard title="Tickets Abertos" value={val(data?.openSupportTickets)} subtitle={`${val(data?.totalSupportTickets)} total`} icon={Mail} color="warning" />
+        <SaStatCard title="E-mails Enviados" value={val(data?.totalEmailLogs)} subtitle={`${val(data?.failedEmailLogs)} falhas`} icon={Mail} color="success" />
       </motion.div>
 
       {/* ── Revenue + Chart row ── */}

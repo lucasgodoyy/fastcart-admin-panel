@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { ForgotPasswordForm } from '@/components/features/auth/forgotPasswordForm';
 import { Zap } from 'lucide-react';
 import { t } from '@/lib/admin-language';
@@ -36,7 +37,9 @@ export default function ForgotPasswordPage() {
             </div>
             <span className="text-lg font-bold tracking-tight text-foreground">Lojaki</span>
           </div>
-          <ForgotPasswordForm />
+          <Suspense fallback={<div className="rounded-lg border bg-card p-6 text-sm text-muted-foreground">Carregando...</div>}>
+            <ForgotPasswordForm />
+          </Suspense>
         </div>
       </div>
     </div>

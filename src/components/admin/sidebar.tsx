@@ -23,6 +23,7 @@ import {
   ExternalLink,
   Zap,
   Headphones,
+  Plug,
 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -57,46 +58,50 @@ const navigation: NavSection[] = [
   {
     items: [
       { label: t("Painel", "Dashboard"), href: "/admin", icon: <LayoutDashboard className="h-4.5 w-4.5" /> },
-      { label: t("EstatÃ­sticas", "Analytics"), href: "/admin/statistics", icon: <TrendingUp className="h-4.5 w-4.5" />, children: [
-        { label: t("VisÃ£o geral", "Overview"), href: "/admin/statistics" },
+      { label: t("Estatísticas", "Analytics"), href: "/admin/statistics", icon: <TrendingUp className="h-4.5 w-4.5" />, children: [
+        { label: t("Visão geral", "Overview"), href: "/admin/statistics" },
         { label: t("Pagamentos", "Payments"), href: "/admin/statistics/payments" },
       ]},
     ],
   },
   {
-    title: t("ComÃ©rcio", "Commerce"),
+    title: t("Comércio", "Commerce"),
     items: [
       { label: t("Pedidos", "Orders"), href: "/admin/sales", icon: <ShoppingBag className="h-4.5 w-4.5" />, children: [
         { label: t("Todos os pedidos", "All Orders"), href: "/admin/sales" },
+        { label: t("Rascunhos", "Drafts"), href: "/admin/sales/drafts" },
         { label: t("Carrinhos abandonados", "Abandoned Carts"), href: "/admin/sales/abandoned-carts" },
       ]},
-      { label: t("CatÃ¡logo", "Catalog"), href: "/admin/products", icon: <Package className="h-4.5 w-4.5" />, children: [
+      { label: t("Catálogo", "Catalog"), href: "/admin/products", icon: <Package className="h-4.5 w-4.5" />, children: [
         { label: t("Todos os produtos", "All Products"), href: "/admin/products" },
         { label: t("Estoque", "Inventory"), href: "/admin/products/inventory" },
         { label: t("Categorias", "Categories"), href: "/admin/products/categories" },
       ]},
-      { label: t("Clientes", "Customers"), href: "/admin/customers", icon: <Users2 className="h-4.5 w-4.5" /> },
+      { label: t("Clientes", "Customers"), href: "/admin/customers", icon: <Users2 className="h-4.5 w-4.5" />, children: [
+        { label: t("Todos os clientes", "All Customers"), href: "/admin/customers" },
+        { label: t("Avaliações", "Reviews"), href: "/admin/customers/reviews" },
+      ] },
       { label: t("Financeiro", "Finances"), href: "/admin/payments", icon: <Wallet className="h-4.5 w-4.5" /> },
-      { label: t("LogÃ­stica", "Fulfillment"), href: "/admin/shipping", icon: <Truck className="h-4.5 w-4.5" /> },
+      { label: t("Logística", "Fulfillment"), href: "/admin/shipping", icon: <Truck className="h-4.5 w-4.5" /> },
     ],
   },
   {
     title: t("Crescimento", "Growth"),
     items: [
-      { label: t("PromoÃ§Ãµes", "Promotions"), href: "/admin/discounts", icon: <TicketPercent className="h-4.5 w-4.5" />, children: [
+      { label: t("Promoções", "Promotions"), href: "/admin/discounts", icon: <TicketPercent className="h-4.5 w-4.5" />, children: [
         { label: t("Cupons", "Coupons"), href: "/admin/discounts/coupons" },
-        { label: t("PromoÃ§Ã£o", "Promotion"), href: "/admin/discounts/promotions" },
-        { label: t("Frete grÃ¡tis", "Free Shipping"), href: "/admin/discounts/free-shipping" },
+        { label: t("Promoção", "Promotion"), href: "/admin/discounts/promotions" },
+        { label: t("Frete grátis", "Free Shipping"), href: "/admin/discounts/free-shipping" },
       ]},
       { label: t("Marketing", "Marketing"), href: "/admin/marketing", icon: <Speaker className="h-4.5 w-4.5" />, children: [
         { label: t("E-mail Marketing", "Email Marketing"), href: "/admin/marketing/email-campaigns" },
-        { label: t("IntegraÃ§Ãµes", "Integrations"), href: "/admin/marketing/integrations" },
+        { label: t("Integrações", "Integrations"), href: "/admin/marketing/integrations" },
         { label: t("Afiliados", "Affiliates"), href: "/admin/marketing/affiliates" },
       ]},
     ],
   },
   {
-    title: t("ComunicaÃ§Ã£o", "Communication"),
+    title: t("Comunicação", "Communication"),
     items: [
       { label: t("Mensagens", "Messages"), href: "/admin/chat", icon: <MessageSquare className="h-4.5 w-4.5" /> },
       { label: t("Suporte", "Support"), href: "/admin/support", icon: <Headphones className="h-4.5 w-4.5" /> },
@@ -107,14 +112,23 @@ const navigation: NavSection[] = [
     items: [
       { label: t("Loja virtual", "Storefront"), href: "/admin/online-store", icon: <Globe className="h-4.5 w-4.5" />, external: true, children: [
         { label: t("Tema e layout", "Theme & Layout"), href: "/admin/online-store/layout-theme" },
-        { label: t("PÃ¡ginas", "Pages"), href: "/admin/online-store/pages" },
+        { label: t("Páginas", "Pages"), href: "/admin/online-store/pages" },
         { label: t("Blog", "Blog"), href: "/admin/online-store/blog" },
         { label: t("Links sociais", "Social Links"), href: "/admin/online-store/social-links" },
-        { label: t("ManutenÃ§Ã£o", "Maintenance"), href: "/admin/online-store/under-construction" },
+        { label: t("Manutenção", "Maintenance"), href: "/admin/online-store/under-construction" },
       ]},
     ],
-  },
-]
+  },  {
+    title: t("Integrações", "Integrations"),
+    items: [
+      { label: t("Integrações", "Integrations"), href: "/admin/integrations", icon: <Plug className="h-4.5 w-4.5" />, children: [
+        { label: t("Todas", "All"), href: "/admin/integrations" },
+        { label: "Google Analytics", href: "/admin/integrations/google-analytics" },
+        { label: "Facebook Pixel", href: "/admin/integrations/facebook-pixel" },
+        { label: t("Domínios", "Domains"), href: "/admin/integrations/domains" },
+      ]},
+    ],
+  },]
 
 export function AdminSidebar() {
   const { collapsed } = useMobileSidebar()
@@ -221,7 +235,7 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
     const slug = (storeData?.slug || "").trim()
     const storefrontBaseUrl = resolveStorefrontBaseUrl()
     if (!slug || !storefrontBaseUrl) {
-      toast.error("NÃ£o foi possÃ­vel montar a URL da loja. Configure Online Store URL.")
+      toast.error("Não foi possível montar a URL da loja. Configure Online Store URL.")
       return
     }
 
@@ -430,7 +444,7 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
                   <Cog className="h-4.5 w-4.5 text-sidebar-muted" />
                 </Link>
               </TooltipTrigger>
-              <TooltipContent side="right" sideOffset={8}>{t("ConfiguraÃ§Ãµes", "Settings")}</TooltipContent>
+              <TooltipContent side="right" sideOffset={8}>{t("Configurações", "Settings")}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -465,7 +479,7 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
               )}
             >
               <Cog className="h-4.5 w-4.5 text-sidebar-muted" />
-              <span className="flex-1">{t("ConfiguraÃ§Ãµes", "Settings")}</span>
+              <span className="flex-1">{t("Configurações", "Settings")}</span>
             </Link>
             <div className="flex items-center gap-3 rounded-lg px-3 py-1 text-[13px] text-sidebar-foreground">
               <AdminThemeToggle />

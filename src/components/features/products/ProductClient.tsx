@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useMemo, useState } from 'react';
+import { ReactNode, useRef, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -9,12 +9,14 @@ import {
   ChevronLeft,
   CirclePlus,
   Copy,
+  Download,
   ExternalLink,
   HelpCircle,
   Plus,
   Search,
   SlidersHorizontal,
   Trash2,
+  Upload,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -153,6 +155,51 @@ export function ProductClient() {
   const [draftFilters, setDraftFilters] = useState<DrawerFilters>(EMPTY_DRAWER_FILTERS);
   const [duplicateSource, setDuplicateSource] = useState<Product | null>(null);
   const [duplicateName, setDuplicateName] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+  const csvInputRef = useRef<HTMLInputElement>(null);
+
+  const handleExportCsv = async () => {
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const { default: apiClient } = await import('@/lib/api');
+      const response = await apiClient.get('/products/store/export/csv', {
+        responseType: 'blob',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const url = URL.createObjectURL(new Blob([response.data], { type: 'text/csv;charset=utf-8;' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `produtos_${new Date().toISOString().slice(0, 10)}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success('Exportação concluída!');
+    } catch {
+      toast.error('Erro ao exportar produtos.');
+    }
+  };
+
+  const handleImportCsv = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+    setIsImporting(true);
+    try {
+      const { default: apiClient } = await import('@/lib/api');
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await apiClient.post('/products/store/import/csv', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const { created, skipped, errors } = response.data as { created: number; skipped: number; errors: string[] };
+      toast.success(`Importação concluída: ${created} criado(s), ${skipped} ignorado(s).`);
+      if (errors.length > 0) toast.warning(`${errors.length} linha(s) com erro.`);
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+    } catch {
+      toast.error('Erro ao importar o arquivo CSV.');
+    } finally {
+      setIsImporting(false);
+    }
+  };
 
   const queryFilters = useMemo<ProductListFilters>(() => {
     const searchTerm = search.trim();
@@ -261,6 +308,26 @@ export function ProductClient() {
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-5 font-semibold text-foreground">Produtos</h1>
         <div className="flex items-center gap-3">
+          <Button variant="outline" className="gap-2" onClick={handleExportCsv}>
+            <Download className="h-4 w-4" />
+            Exportar CSV
+          </Button>
+          <Button
+            variant="outline"
+            className="gap-2"
+            disabled={isImporting}
+            onClick={() => csvInputRef.current?.click()}
+          >
+            <Upload className="h-4 w-4" />
+            {isImporting ? 'Importando...' : 'Importar CSV'}
+          </Button>
+          <input
+            ref={csvInputRef}
+            type="file"
+            accept=".csv"
+            className="hidden"
+            onChange={handleImportCsv}
+          />
           <Button variant="outline" className="gap-2" onClick={openFilterDrawer}>
             <SlidersHorizontal className="h-4 w-4" />
             Filtrar

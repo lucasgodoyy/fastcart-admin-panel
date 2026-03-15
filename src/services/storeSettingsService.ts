@@ -21,6 +21,17 @@ export type StoreSettings = {
   customerMessageJson: string | null;
   stripeAccountId: string | null;
   stripeConnected: boolean;
+  cashOnDeliveryEnabled: boolean;
+  manualPaymentEnabled: boolean;
+  manualPaymentLabel: string | null;
+  manualPaymentInstructions: string | null;
+  whatsappNumber: string | null;
+  whatsappMessage: string | null;
+  whatsappEnabled: boolean;
+  messengerUrl: string | null;
+  messengerEnabled: boolean;
+  minOrderValue: number | null;
+  catalogMode: boolean;
   createdAt: string;
 };
 
@@ -41,6 +52,17 @@ export type UpdateStoreSettingsRequest = {
   active?: boolean;
   checkoutSettingsJson?: string;
   customerMessageJson?: string;
+  cashOnDeliveryEnabled?: boolean;
+  manualPaymentEnabled?: boolean;
+  manualPaymentLabel?: string;
+  manualPaymentInstructions?: string;
+  whatsappNumber?: string;
+  whatsappMessage?: string;
+  whatsappEnabled?: boolean;
+  messengerUrl?: string;
+  messengerEnabled?: boolean;
+  minOrderValue?: number;
+  catalogMode?: boolean;
 };
 
 export type StoreUser = {

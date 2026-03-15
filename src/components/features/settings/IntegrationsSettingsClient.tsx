@@ -421,7 +421,9 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
         authorization_denied: 'Autorização negada pelo usuário.',
         missing_code: 'Código de autorização ausente.',
         missing_state: 'State ausente na resposta.',
+        invalid_state: 'State inválido ou expirado. Tente conectar novamente.',
         invalid_state_or_code: 'State ou código inválido.',
+        token_exchange_failed: 'Falha ao trocar código por token no Melhor Envio. Tente novamente.',
         internal_error: 'Erro interno ao processar callback.',
       };
       toast.error(reasonMap[reason ?? ''] ?? 'Falha ao conectar Melhor Envio.');

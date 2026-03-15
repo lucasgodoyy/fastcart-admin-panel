@@ -15,8 +15,10 @@ import {
   Truck,
   CheckCircle2,
   XCircle,
+  Eye,
 } from 'lucide-react';
 import orderService from '@/services/sales/orderService';
+import apiClient from '@/lib/api';
 import { DashboardStats } from '@/types/order';
 import { t } from '@/lib/admin-language';
 
@@ -34,6 +36,13 @@ const periods = [
 
 export function StatisticsOverviewClient() {
   const [period, setPeriod] = useState('30d');
+
+  const { data: topProducts = [] } = useQuery<Array<{ productId: number; productName: string | null; viewCount: number }>>({    queryKey: ['top-products-analytics'],
+    queryFn: async () => {
+      const r = await apiClient.get('/admin/analytics/top-products?limit=10');
+      return r.data;
+    },
+  });
 
   const { data: stats, isLoading } = useQuery<DashboardStats>({
     queryKey: ['statistics-overview', period],
@@ -138,6 +147,37 @@ export function StatisticsOverviewClient() {
           );
         })()}
       </div>
+
+      {/* Top Viewed Products */}
+      {topProducts.length > 0 && (
+        <div className="rounded-lg border border-border bg-card p-5 mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Eye className="h-4 w-4 text-muted-foreground" />
+            <h2 className="text-sm font-semibold text-foreground">{t('Produtos Mais Visualizados', 'Most Viewed Products')}</h2>
+          </div>
+          <div className="space-y-2">
+            {topProducts.map((p, i) => {
+              const max = topProducts[0]?.viewCount || 1;
+              const pct = Math.round((p.viewCount / max) * 100);
+              return (
+                <div key={p.productId} className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground w-4 text-right">{i + 1}</span>
+                  <Link
+                    href={`/admin/products/${p.productId}`}
+                    className="flex-1 text-xs text-foreground hover:text-primary transition-colors truncate min-w-0"
+                  >
+                    {p.productName || `Produto #${p.productId}`}
+                  </Link>
+                  <div className="w-24 h-2 rounded-full bg-muted/60 overflow-hidden">
+                    <div className="h-full rounded-full bg-primary/70" style={{ width: `${pct}%` }} />
+                  </div>
+                  <span className="text-xs text-muted-foreground w-14 text-right tabular-nums">{p.viewCount.toLocaleString('pt-BR')} views</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Quick Links */}
       <div className="grid gap-4 md:grid-cols-2">

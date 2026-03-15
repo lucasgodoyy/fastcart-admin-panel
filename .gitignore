@@ -24,3 +24,8 @@ pnpm-debug.log*
 
 # build logs
 build_out*.txt
+build_check.txt
+
+# app logs
+*.log
+admin.log

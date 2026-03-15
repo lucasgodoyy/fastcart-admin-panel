@@ -16,6 +16,7 @@ import {
   ArrowRightLeft,
   Link2,
   Plug,
+  Settings2,
 } from 'lucide-react';
 import { t } from '@/lib/admin-language';
 
@@ -104,6 +105,12 @@ const settingsItems: SettingsItem[] = [
     description: t('Stripe Connect e Melhor Envio.', 'Stripe Connect and Melhor Envio.'),
     href: '/admin/settings/integrations',
     icon: <Plug className="h-5 w-5" />,
+  },
+  {
+    label: t('Funcionalidades da loja', 'Store features'),
+    description: t('WhatsApp, pagamento manual, modo catálogo e mais.', 'WhatsApp, manual payment, catalog mode, and more.'),
+    href: '/admin/settings/features',
+    icon: <Settings2 className="h-5 w-5" />,
   },
 ];
 

@@ -16,6 +16,10 @@ export interface StoreInfo {
   active: boolean;
   checkoutSettingsJson: string | null;
   customerMessageJson: string | null;
+  googleAnalyticsId: string | null;
+  facebookPixelId: string | null;
+  subdomain: string | null;
+  customDomain: string | null;
 }
 
 export interface UpdateStoreRequest {
@@ -30,6 +34,10 @@ export interface UpdateStoreRequest {
   addressCountry?: string;
   checkoutSettingsJson?: string;
   customerMessageJson?: string;
+  googleAnalyticsId?: string;
+  facebookPixelId?: string;
+  subdomain?: string;
+  customDomain?: string;
 }
 
 // ── Typed settings interfaces ──

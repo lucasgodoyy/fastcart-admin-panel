@@ -29,6 +29,9 @@ export type AdminOrder = {
   shippingLabelId: string | null;
   shippingAddressJson: string | null;
   customerNote: string | null;
+  internalNotes: string | null;
+  isDraft: boolean;
+  draftName: string | null;
   createdAt: string;
   paidAt: string | null;
   shippedAt: string | null;

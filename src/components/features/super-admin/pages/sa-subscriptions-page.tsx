@@ -1,11 +1,11 @@
 ﻿"use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useTabFromPath } from "../hooks/use-tab-from-path";
 import { motion } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  CreditCard,
   Crown,
   Gem,
   Rocket,
@@ -27,13 +27,11 @@ import {
   SaCard,
   SaTableCard,
   SaStatusBadge,
+  SaEmptyState,
   staggerContainer,
   fadeInUp,
 } from "../ui/sa-components";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -59,11 +57,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { superAdminService } from "@/services/super-admin";
-import type {
-  SubscriptionPlan,
-  StoreSubscription,
-  CreateOrUpdatePlanRequest,
-} from "@/types/super-admin";
+import type { SubscriptionPlan, StoreSubscription } from "@/types/super-admin";
 
 const planIcons: Record<string, React.ElementType> = {
   gratuito: Sparkles,
@@ -84,31 +78,12 @@ const planGradients: Record<string, string> = {
   pro: "from-[hsl(var(--sa-success-subtle))] to-[hsl(var(--sa-surface))]",
 };
 
-const emptyPlanForm: CreateOrUpdatePlanRequest = {
-  name: "",
-  slug: "",
-  description: "",
-  priceCents: 0,
-  annualPriceCents: null,
-  maxProducts: 100,
-  maxStores: 1,
-  maxStaff: 2,
-  trialPeriodDays: 0,
-  features: [],
-  isActive: true,
-  isPopular: false,
-};
-
 export function SaSubscriptionsPage() {
   const [tab, setTab] = useTabFromPath(
     "/super-admin/subscriptions",
     { plans: "", subscribers: "subscribers", billing: "billing" },
     "plans",
   );
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
-  const [formData, setFormData] = useState<CreateOrUpdatePlanRequest>(emptyPlanForm);
-  const [featuresText, setFeaturesText] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [changePlanSub, setChangePlanSub] = useState<StoreSubscription | null>(null);
   const [selectedPlanId, setSelectedPlanId] = useState<string>("");
@@ -128,21 +103,6 @@ export function SaSubscriptionsPage() {
     queryFn: superAdminService.getSubscriptionStats,
   });
 
-  const createMutation = useMutation({
-    mutationFn: (body: CreateOrUpdatePlanRequest) => superAdminService.createPlan(body),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sa-plans"] });
-      closeDialog();
-    },
-  });
-  const updateMutation = useMutation({
-    mutationFn: ({ id, body }: { id: number; body: CreateOrUpdatePlanRequest }) =>
-      superAdminService.updatePlan(id, body),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sa-plans"] });
-      closeDialog();
-    },
-  });
   const deleteMutation = useMutation({
     mutationFn: (id: number) => superAdminService.deletePlan(id),
     onSuccess: () => {
@@ -175,51 +135,6 @@ export function SaSubscriptionsPage() {
     `R$ ${((cents ?? 0) / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
   const fmt = (n?: number) => (n ?? 0).toLocaleString("pt-BR");
 
-  function openCreate() {
-    setEditingPlan(null);
-    setFormData({ ...emptyPlanForm });
-    setFeaturesText("");
-    setDialogOpen(true);
-  }
-  function openEdit(plan: SubscriptionPlan) {
-    setEditingPlan(plan);
-    setFormData({
-      name: plan.name,
-      slug: plan.slug,
-      description: plan.description ?? "",
-      priceCents: plan.priceCents,
-      annualPriceCents: plan.annualPriceCents,
-      maxProducts: plan.maxProducts ?? 0,
-      maxStores: plan.maxStores,
-      maxStaff: plan.maxStaff,
-      trialPeriodDays: plan.trialPeriodDays,
-      features: plan.features,
-      isActive: plan.isActive,
-      isPopular: plan.isPopular,
-      stripeProductId: plan.stripeProductId ?? undefined,
-      stripePriceId: plan.stripePriceId ?? undefined,
-      annualStripePriceId: plan.annualStripePriceId ?? undefined,
-    });
-    setFeaturesText((plan.features ?? []).join("\n"));
-    setDialogOpen(true);
-  }
-  function closeDialog() {
-    setDialogOpen(false);
-    setEditingPlan(null);
-    setFormData({ ...emptyPlanForm });
-    setFeaturesText("");
-  }
-  function handleSave() {
-    const features = featuresText
-      .split("\n")
-      .map((f) => f.trim())
-      .filter(Boolean);
-    const body: CreateOrUpdatePlanRequest = { ...formData, features };
-    if (editingPlan) updateMutation.mutate({ id: editingPlan.id, body });
-    else createMutation.mutate(body);
-  }
-  const isSaving = createMutation.isPending || updateMutation.isPending;
-
   return (
     <div className="space-y-8">
       <SaPageHeader
@@ -228,13 +143,12 @@ export function SaSubscriptionsPage() {
         actions={
           <div className="flex gap-2">
             <Button
-              onClick={openCreate}
+              asChild
               className="bg-[hsl(var(--sa-success))] hover:bg-[hsl(var(--sa-success))]/90 text-white rounded-xl gap-2"
             >
+              <Link href="/super-admin/subscriptions/plans/new">
               <Plus className="h-4 w-4" /> Novo Plano
-            </Button>
-            <Button className="bg-[hsl(var(--sa-accent))] hover:bg-[hsl(var(--sa-accent-hover))] text-white rounded-xl gap-2">
-              <CreditCard className="h-4 w-4" /> Configurar Stripe
+              </Link>
             </Button>
           </div>
         }
@@ -298,113 +212,142 @@ export function SaSubscriptionsPage() {
 
         {/* ── Plans Tab ─────────────────────────────────────────────── */}
         <TabsContent value="plans" className="mt-6">
-          <motion.div
-            variants={staggerContainer}
-            initial="initial"
-            animate="animate"
-            className="grid gap-5 md:grid-cols-2 xl:grid-cols-4"
-          >
-            {plans.map((plan) => {
-              const slug = plan.slug?.toLowerCase() ?? plan.name.toLowerCase();
-              const Icon = planIcons[slug] ?? Sparkles;
-              const color = planColors[slug] ?? "sa-text-secondary";
-              const gradient = planGradients[slug] ?? planGradients.gratuito;
-              return (
-                <motion.div
-                  key={plan.id}
-                  variants={fadeInUp}
-                  whileHover={{ y: -6, scale: 1.02 }}
-                  className={`relative rounded-2xl border ${
-                    plan.isPopular
-                      ? "border-[hsl(var(--sa-accent))] sa-pulse-glow"
-                      : "border-[hsl(var(--sa-border-subtle))]"
-                  } bg-linear-to-b ${gradient} p-6 transition-all`}
-                >
-                  {plan.isPopular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[hsl(var(--sa-accent))] px-3 py-1 text-[10px] font-bold text-white">
-                      MAIS POPULAR
-                    </div>
-                  )}
-                  <div className="mb-4">
-                    <div
-                      className={`inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--${color}-subtle))] mb-3`}
-                    >
-                      <Icon className={`h-5 w-5 text-[hsl(var(--${color}))]`} />
-                    </div>
-                    <h3 className="text-[16px] font-bold text-[hsl(var(--sa-text))]">{plan.name}</h3>
-                    <div className="flex items-baseline gap-1 mt-1">
-                      <span className="text-[26px] font-bold text-[hsl(var(--sa-text))]">
-                        {fmtCents(plan.priceCents)}
-                      </span>
-                      <span className="text-[11px] text-[hsl(var(--sa-text-muted))]">/mês</span>
-                    </div>
-                    {plan.annualPriceCents != null && (
-                      <p className="text-[11px] text-[hsl(var(--sa-success))] mt-0.5">
-                        ou {fmtCents(plan.annualPriceCents)}/ano
-                      </p>
+          {plans.length === 0 ? (
+            <SaEmptyState
+              icon={Sparkles}
+              title="Nenhum plano cadastrado"
+              description="Crie o primeiro plano de assinatura para começar a configurar o catálogo SaaS da plataforma."
+            />
+          ) : (
+            <motion.div
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+              className="grid gap-5 md:grid-cols-2 xl:grid-cols-4"
+            >
+              {plans.map((plan) => {
+                const slug = plan.slug?.toLowerCase() ?? plan.name.toLowerCase();
+                const Icon = planIcons[slug] ?? Sparkles;
+                const color = planColors[slug] ?? "sa-text-secondary";
+                const gradient = planGradients[slug] ?? planGradients.gratuito;
+                return (
+                  <motion.div
+                    key={plan.id}
+                    variants={fadeInUp}
+                    whileHover={{ y: -6, scale: 1.01 }}
+                    className={`relative rounded-3xl border ${
+                      plan.isPopular
+                        ? "border-[hsl(var(--sa-accent))] shadow-[0_24px_60px_-32px_hsl(var(--sa-accent)/0.55)]"
+                        : "border-[hsl(var(--sa-border-subtle))]"
+                    } bg-linear-to-b ${gradient} p-6 transition-all`}
+                  >
+                    <div className="absolute inset-x-0 top-0 h-24 rounded-t-3xl bg-linear-to-r from-white/8 via-white/2 to-transparent pointer-events-none" />
+                    {plan.isPopular && (
+                      <div className="absolute -top-3 left-6 rounded-full bg-[hsl(var(--sa-accent))] px-3 py-1 text-[10px] font-bold tracking-[0.16em] text-white">
+                        MAIS POPULAR
+                      </div>
                     )}
-                    <div className="flex gap-3 mt-2 text-[11px] text-[hsl(var(--sa-text-muted))]">
-                      <span>{plan.maxProducts == null ? "∞" : plan.maxProducts} produtos</span>
-                      <span>·</span>
-                      <span>{plan.maxStaff >= 999 ? "∞" : plan.maxStaff} membros</span>
-                      <span>·</span>
-                      <span>{plan.subscriberCount} assinantes</span>
+                    <div className="relative mb-5">
+                      <div className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[hsl(var(--sa-surface))]/80 backdrop-blur-sm">
+                        <Icon className={`h-5 w-5 text-[hsl(var(--${color}))]`} />
+                      </div>
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <h3 className="text-[18px] font-bold text-[hsl(var(--sa-text))]">{plan.name}</h3>
+                          <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--sa-text-muted))]">
+                            slug {plan.slug}
+                          </p>
+                        </div>
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${plan.isActive ? "bg-emerald-500/12 text-emerald-300" : "bg-white/8 text-[hsl(var(--sa-text-muted))]"}`}
+                        >
+                          {plan.isActive ? "Ativo" : "Inativo"}
+                        </span>
+                      </div>
+                      <div className="mt-4 flex items-end gap-2">
+                        <span className="text-[28px] font-bold text-[hsl(var(--sa-text))]">
+                          {fmtCents(plan.priceCents)}
+                        </span>
+                        <span className="pb-1 text-[11px] text-[hsl(var(--sa-text-muted))]">/mês</span>
+                      </div>
+                      {plan.annualPriceCents != null && (
+                        <p className="mt-1 text-[11px] text-[hsl(var(--sa-success))]">
+                          anual {fmtCents(plan.annualPriceCents)}
+                        </p>
+                      )}
                     </div>
-                  </div>
-                  <ul className="space-y-1.5 mb-5">
-                    {(plan.features ?? []).slice(0, 6).map((f: string) => (
-                      <li
-                        key={f}
-                        className="flex items-center gap-2 text-[11px] text-[hsl(var(--sa-text-secondary))]"
-                      >
-                        <Check className="h-3 w-3 text-[hsl(var(--sa-success))] shrink-0" />
-                        {f}
-                      </li>
-                    ))}
-                    {(plan.features ?? []).length > 6 && (
-                      <li className="text-[10px] text-[hsl(var(--sa-text-muted))] pl-5">
-                        +{plan.features.length - 6} mais
-                      </li>
-                    )}
-                  </ul>
-                  <div className="flex items-center justify-between pt-3 border-t border-[hsl(var(--sa-border-subtle))]">
-                    <span
-                      className={`text-[10px] font-semibold ${plan.isActive ? "text-[hsl(var(--sa-success))]" : "text-[hsl(var(--sa-text-muted))]"}`}
-                    >
-                      {plan.isActive ? "● Ativo" : "○ Inativo"}
-                    </span>
-                    <div className="flex items-center gap-1">
+
+                    <div className="grid grid-cols-3 gap-2 rounded-2xl border border-white/8 bg-black/10 p-3 text-center backdrop-blur-sm">
+                      <div>
+                        <p className="text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--sa-text-muted))]">Produtos</p>
+                        <p className="mt-1 text-[14px] font-semibold text-[hsl(var(--sa-text))]">
+                          {plan.maxProducts == null ? "Ilimitado" : fmt(plan.maxProducts)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--sa-text-muted))]">Membros</p>
+                        <p className="mt-1 text-[14px] font-semibold text-[hsl(var(--sa-text))]">
+                          {plan.maxStaff >= 999 ? "Ilimitado" : fmt(plan.maxStaff)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--sa-text-muted))]">Assinantes</p>
+                        <p className="mt-1 text-[14px] font-semibold text-[hsl(var(--sa-text))]">{fmt(plan.subscriberCount)}</p>
+                      </div>
+                    </div>
+
+                    <ul className="mt-5 space-y-2">
+                      {(plan.features ?? []).slice(0, 4).map((feature) => (
+                        <li
+                          key={feature}
+                          className="flex items-center gap-2 text-[11px] text-[hsl(var(--sa-text-secondary))]"
+                        >
+                          <Check className="h-3.5 w-3.5 shrink-0 text-[hsl(var(--sa-success))]" />
+                          <span className="line-clamp-1">{feature}</span>
+                        </li>
+                      ))}
+                      {(plan.features ?? []).length > 4 && (
+                        <li className="pl-5 text-[10px] text-[hsl(var(--sa-text-muted))]">
+                          +{plan.features.length - 4} benefícios adicionais
+                        </li>
+                      )}
+                    </ul>
+
+                    <div className="mt-6 flex items-center justify-between gap-2 border-t border-white/8 pt-4">
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-[hsl(var(--sa-text-muted))] hover:text-[hsl(var(--sa-warning))] p-1 h-auto"
+                        className="text-[hsl(var(--sa-text-muted))] hover:text-[hsl(var(--sa-warning))]"
                         title={plan.isActive ? "Desativar" : "Ativar"}
                         onClick={() => toggleMutation.mutate(plan.id)}
                       >
                         <Power className="h-3.5 w-3.5" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-[hsl(var(--sa-accent))] hover:text-[hsl(var(--sa-accent-hover))] p-1 h-auto"
-                        onClick={() => openEdit(plan)}
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-500 hover:text-red-400 p-1 h-auto"
-                        onClick={() => setDeleteConfirmId(plan.id)}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-400 hover:text-red-300"
+                          onClick={() => setDeleteConfirmId(plan.id)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          asChild
+                          size="sm"
+                          className="rounded-xl bg-[hsl(var(--sa-accent))] px-3 text-white hover:bg-[hsl(var(--sa-accent-hover))]"
+                        >
+                          <Link href={`/super-admin/subscriptions/plans/${plan.id}`}>
+                            <Pencil className="h-3.5 w-3.5" /> Editar
+                          </Link>
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </motion.div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          )}
         </TabsContent>
 
         {/* ── Subscribers Tab ────────────────────────────────────────── */}
@@ -538,8 +481,8 @@ export function SaSubscriptionsPage() {
                   <span className="text-[12px] text-[hsl(var(--sa-text-secondary))]">Modo</span>
                   <span className="text-[12px] text-[hsl(var(--sa-text-muted))]">Test</span>
                 </div>
-                <Button className="w-full bg-[hsl(var(--sa-accent))] hover:bg-[hsl(var(--sa-accent-hover))] text-white rounded-xl mt-2">
-                  Conectar Stripe
+                <Button disabled className="mt-2 w-full rounded-xl bg-[hsl(var(--sa-accent))] text-white opacity-60">
+                  Stripe em breve
                 </Button>
               </div>
             </SaCard>
@@ -590,194 +533,6 @@ export function SaSubscriptionsPage() {
           </motion.div>
         </TabsContent>
       </Tabs>
-
-      {/* ── Create / Edit Plan Dialog ──────────────────────────────── */}
-      <Dialog open={dialogOpen} onOpenChange={(open) => !open && closeDialog()}>
-        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editingPlan ? "Editar Plano" : "Criar Novo Plano"}</DialogTitle>
-            <DialogDescription>
-              {editingPlan
-                ? "Atualize as informações do plano de assinatura."
-                : "Preencha os dados para criar um novo plano de assinatura."}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="plan-name">Nome</Label>
-                <Input
-                  id="plan-name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Ex: Plus"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="plan-slug">Slug</Label>
-                <Input
-                  id="plan-slug"
-                  value={formData.slug}
-                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                  placeholder="Ex: plus"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="plan-desc">Descrição</Label>
-              <Input
-                id="plan-desc"
-                value={formData.description ?? ""}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Breve descrição do plano"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="plan-price">Preço Mensal (centavos)</Label>
-                <Input
-                  id="plan-price"
-                  type="number"
-                  value={formData.priceCents}
-                  onChange={(e) =>
-                    setFormData({ ...formData, priceCents: parseInt(e.target.value) || 0 })
-                  }
-                  placeholder="Ex: 9900 = R$99"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="plan-annual">Preço Anual (centavos)</Label>
-                <Input
-                  id="plan-annual"
-                  type="number"
-                  value={formData.annualPriceCents ?? ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      annualPriceCents: e.target.value ? parseInt(e.target.value) : null,
-                    })
-                  }
-                  placeholder="Opcional"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="plan-products">Máx. Produtos</Label>
-                <Input
-                  id="plan-products"
-                  type="number"
-                  value={formData.maxProducts ?? ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      maxProducts: e.target.value ? parseInt(e.target.value) : undefined,
-                    })
-                  }
-                  placeholder="Vazio = ilimitado"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="plan-stores">Máx. Lojas</Label>
-                <Input
-                  id="plan-stores"
-                  type="number"
-                  value={formData.maxStores ?? 1}
-                  onChange={(e) =>
-                    setFormData({ ...formData, maxStores: parseInt(e.target.value) || 1 })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="plan-staff">Máx. Membros</Label>
-                <Input
-                  id="plan-staff"
-                  type="number"
-                  value={formData.maxStaff ?? 1}
-                  onChange={(e) =>
-                    setFormData({ ...formData, maxStaff: parseInt(e.target.value) || 1 })
-                  }
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="plan-trial">Dias de Trial</Label>
-              <Input
-                id="plan-trial"
-                type="number"
-                value={formData.trialPeriodDays ?? 0}
-                onChange={(e) =>
-                  setFormData({ ...formData, trialPeriodDays: parseInt(e.target.value) || 0 })
-                }
-                placeholder="0 = sem trial"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="plan-stripe-monthly">Stripe Price ID (Mensal)</Label>
-                <Input
-                  id="plan-stripe-monthly"
-                  value={formData.stripePriceId ?? ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, stripePriceId: e.target.value || undefined })
-                  }
-                  placeholder="price_..."
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="plan-stripe-annual">Stripe Price ID (Anual)</Label>
-                <Input
-                  id="plan-stripe-annual"
-                  value={formData.annualStripePriceId ?? ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, annualStripePriceId: e.target.value || undefined })
-                  }
-                  placeholder="price_..."
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="plan-features">Features (uma por linha)</Label>
-              <textarea
-                id="plan-features"
-                className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                value={featuresText}
-                onChange={(e) => setFeaturesText(e.target.value)}
-                placeholder={"Até 500 produtos\nDomínio próprio\nPIX automático"}
-              />
-            </div>
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-3">
-                <Switch
-                  id="plan-active"
-                  checked={formData.isActive ?? true}
-                  onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
-                />
-                <Label htmlFor="plan-active">Plano ativo</Label>
-              </div>
-              <div className="flex items-center gap-3">
-                <Switch
-                  id="plan-popular"
-                  checked={formData.isPopular ?? false}
-                  onCheckedChange={(checked) => setFormData({ ...formData, isPopular: checked })}
-                />
-                <Label htmlFor="plan-popular">Mais popular</Label>
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={closeDialog} disabled={isSaving}>
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={isSaving || !formData.name || !formData.slug}
-            >
-              {isSaving ? "Salvando..." : editingPlan ? "Salvar Alterações" : "Criar Plano"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* ── Change Plan Dialog ─────────────────────────────────────── */}
       <Dialog

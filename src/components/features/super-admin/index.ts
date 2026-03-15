@@ -26,6 +26,7 @@ export { SaSessionsPage } from "./pages/sa-sessions-page";
 export { SaStoresPage } from "./pages/sa-stores-page";
 export { SaStoreDetailPage } from "./pages/sa-store-detail-page";
 export { SaSubscriptionsPage } from "./pages/sa-subscriptions-page";
+export { SaSubscriptionPlanEditorPage } from "./pages/sa-subscription-plan-editor-page";
 export { SaAffiliatesPage } from "./pages/sa-affiliates-page";
 export { SaEmailsPage } from "./pages/sa-emails-page";
 export { SaEmailCampaignsPage } from "./pages/sa-email-campaigns-page";

@@ -532,7 +532,7 @@ export function SaEmailsPage() {
               <Send className="h-4 w-4" /> Enviar e-mail da plataforma
             </DialogTitle>
             <DialogDescription>
-              Envie um e-mail como Super Admin para lojistas ou qualquer destinatário. Sai de <strong>noreply@lojaki.store</strong>.
+              Envie um e-mail como Super Admin para lojistas ou qualquer destinatário. Sai de <strong>noreply@rapidocart.com.br</strong>.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-2">
@@ -543,6 +543,7 @@ export function SaEmailsPage() {
                 placeholder="lojista@email.com"
                 value={composeForm.to}
                 onChange={(e) => setComposeForm(p => ({ ...p, to: e.target.value }))}
+                className="bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9"
               />
             </div>
             <div className="space-y-1.5">
@@ -551,12 +552,13 @@ export function SaEmailsPage() {
                 placeholder="Assunto do e-mail"
                 value={composeForm.subject}
                 onChange={(e) => setComposeForm(p => ({ ...p, subject: e.target.value }))}
+                className="bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9"
               />
             </div>
             <div className="space-y-1.5">
               <Label>Conteúdo HTML</Label>
               <textarea
-                className="w-full h-40 p-3 text-xs font-mono bg-background border rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-ring"
+                className="w-full h-40 p-3 text-xs font-mono bg-[hsl(var(--sa-bg))] border border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-[hsl(var(--sa-accent))]"
                 placeholder="<p>Olá lojista! Temos uma novidade para você.</p>"
                 value={composeForm.bodyHtml}
                 onChange={(e) => setComposeForm(p => ({ ...p, bodyHtml: e.target.value }))}
