@@ -42,7 +42,6 @@ apiClient.interceptors.response.use(
       redirectToLogin();
     }
     if (error.response?.status === 403) {
-      console.warn('[API Warning] Forbidden (no permission):', error.config?.url);
     }
     return Promise.reject(error);
   }

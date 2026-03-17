@@ -304,6 +304,35 @@ export interface AffiliatePayout {
   createdAt: string;
 }
 
+export interface AffiliateLink {
+  id: number;
+  affiliateId: number | null;
+  affiliateName: string | null;
+  storeId: number | null;
+  slug: string;
+  destinationUrl: string;
+  utmSource: string | null;
+  utmMedium: string | null;
+  utmCampaign: string | null;
+  totalClicks: number;
+  totalConversions: number;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface AffiliateSettings {
+  id: number | null;
+  storeId: number | null;
+  enabled: boolean;
+  commissionRate: number;
+  cookieDays: number;
+  minPayout: number;
+  payoutDay: number;
+  autoApprove: boolean;
+  termsUrl: string | null;
+  updatedAt: string | null;
+}
+
 // ── Marketing ──────────────────────────────────────────────────
 export interface MarketingStats {
   totalCampaigns: number;
@@ -453,4 +482,34 @@ export interface CreateNotificationRequest {
   title: string;
   message: string;
   storeId?: number | null;
+}
+
+// ── Error Logs ─────────────────────────────────────────────────
+export interface PlatformErrorLog {
+  id: number;
+  severity: string;
+  errorType: string;
+  message: string;
+  stackTrace: string | null;
+  requestMethod: string | null;
+  requestPath: string | null;
+  requestQuery: string | null;
+  userId: number | null;
+  storeId: number | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  resolved: boolean;
+  resolvedBy: number | null;
+  resolvedAt: string | null;
+  notes: string | null;
+  createdAt: string;
+}
+
+export interface ErrorLogStats {
+  totalErrors: number;
+  unresolvedErrors: number;
+  errorsLast24h: number;
+  criticalUnresolved: number;
+  errorCount: number;
+  warnCount: number;
 }

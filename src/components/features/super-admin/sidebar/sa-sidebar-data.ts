@@ -11,6 +11,8 @@ import {
   MessageSquare,
   Palette,
   Bell,
+  Handshake,
+  Bug,
   type LucideIcon,
 } from "lucide-react";
 
@@ -100,6 +102,18 @@ export const saSidebarSections: SASidebarSection[] = [
         href: "/super-admin/emails/campaigns",
         icon: Mail,
       },
+      {
+        title: "Afiliados",
+        href: "/super-admin/affiliates",
+        icon: Handshake,
+        children: [
+          { title: "Parceiros", href: "/super-admin/affiliates" },
+          { title: "Comissões", href: "/super-admin/affiliates/commissions" },
+          { title: "Pagamentos", href: "/super-admin/affiliates/payouts" },
+          { title: "Tracking", href: "/super-admin/affiliates/tracking" },
+          { title: "Configurações", href: "/super-admin/affiliates/settings" },
+        ],
+      },
     ],
   },
   {
@@ -134,6 +148,11 @@ export const saSidebarSections: SASidebarSection[] = [
   {
     label: "Plataforma",
     items: [
+      {
+        title: "Logs de Erro",
+        href: "/super-admin/error-logs",
+        icon: Bug,
+      },
       {
         title: "Configurações",
         href: "/super-admin/settings",

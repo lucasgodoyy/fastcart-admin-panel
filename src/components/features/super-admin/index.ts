@@ -45,3 +45,4 @@ export { SaReportsPage } from "./pages/sa-reports-page";
 export { SaBacklogPage } from "./pages/sa-backlog-page";
 export { SaRoadmapPage } from "./pages/sa-roadmap-page";
 export { SaMessagesPage } from "./pages/sa-messages-page";
+export { SaErrorLogsPage } from "./pages/sa-error-logs-page";

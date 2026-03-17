@@ -21,6 +21,8 @@ import type {
   AffiliateStats,
   AffiliateConversion,
   AffiliatePayout,
+  AffiliateLink,
+  AffiliateSettings,
   MarketingStats,
   MarketingCampaign,
   CampaignUpsertRequest,
@@ -34,6 +36,8 @@ import type {
   EmailCampaign,
   EmailCampaignStats,
   EmailCampaignUpsertRequest,
+  PlatformErrorLog,
+  ErrorLogStats,
 } from '@/types/super-admin';
 
 // ────────────────────────────────────────────────────────────────
@@ -292,6 +296,112 @@ const superAdminService = {
     return data;
   },
 
+  getAffiliateById: async (id: number): Promise<Affiliate> => {
+    const { data } = await apiClient.get<Affiliate>(`/super-admin/affiliates/${id}`);
+    return data;
+  },
+
+  createAffiliate: async (storeId: number, body: {
+    name: string;
+    email: string;
+    phone?: string;
+    document?: string;
+    referralCode?: string;
+    commissionRate?: number;
+    pixKey?: string;
+    bankInfo?: string;
+    notes?: string;
+  }): Promise<Affiliate> => {
+    const { data } = await apiClient.post<Affiliate>('/super-admin/affiliates', body, { params: { storeId } });
+    return data;
+  },
+
+  updateAffiliate: async (id: number, body: {
+    name?: string;
+    phone?: string;
+    document?: string;
+    commissionRate?: number;
+    status?: string;
+    pixKey?: string;
+    bankInfo?: string;
+    notes?: string;
+  }): Promise<Affiliate> => {
+    const { data } = await apiClient.put<Affiliate>(`/super-admin/affiliates/${id}`, body);
+    return data;
+  },
+
+  approveAffiliate: async (id: number): Promise<Affiliate> => {
+    const { data } = await apiClient.put<Affiliate>(`/super-admin/affiliates/${id}/approve`);
+    return data;
+  },
+
+  suspendAffiliate: async (id: number): Promise<Affiliate> => {
+    const { data } = await apiClient.put<Affiliate>(`/super-admin/affiliates/${id}/suspend`);
+    return data;
+  },
+
+  listAffiliateLinks: async (params?: {
+    affiliateId?: number;
+    storeId?: number;
+    page?: number;
+    size?: number;
+  }): Promise<PaginatedResult<AffiliateLink>> => {
+    const { data } = await apiClient.get<PaginatedResult<AffiliateLink>>('/super-admin/affiliates/links', { params });
+    return data;
+  },
+
+  approveAffiliateConversion: async (id: number): Promise<AffiliateConversion> => {
+    const { data } = await apiClient.put<AffiliateConversion>(`/super-admin/affiliates/conversions/${id}/approve`);
+    return data;
+  },
+
+  rejectAffiliateConversion: async (id: number, reason?: string): Promise<AffiliateConversion> => {
+    const { data } = await apiClient.put<AffiliateConversion>(
+      `/super-admin/affiliates/conversions/${id}/reject`,
+      null,
+      { params: reason ? { reason } : undefined },
+    );
+    return data;
+  },
+
+  createAffiliatePayout: async (body: {
+    affiliateId: number;
+    amount: number;
+    method?: string;
+    reference?: string;
+    notes?: string;
+  }): Promise<AffiliatePayout> => {
+    const { data } = await apiClient.post<AffiliatePayout>('/super-admin/affiliates/payouts', body);
+    return data;
+  },
+
+  markAffiliatePayoutPaid: async (id: number): Promise<AffiliatePayout> => {
+    const { data } = await apiClient.put<AffiliatePayout>(`/super-admin/affiliates/payouts/${id}/paid`);
+    return data;
+  },
+
+  getAffiliateSettings: async (storeId?: number): Promise<AffiliateSettings> => {
+    const { data } = await apiClient.get<AffiliateSettings>('/super-admin/affiliates/settings', {
+      params: storeId ? { storeId } : undefined,
+    });
+    return data;
+  },
+
+  updateAffiliateSettings: async (storeId: number, body: {
+    enabled?: boolean;
+    commissionRate?: number;
+    cookieDays?: number;
+    minPayout?: number;
+    payoutDay?: number;
+    autoApprove?: boolean;
+    termsUrl?: string;
+  }): Promise<AffiliateSettings> => {
+    const { data } = await apiClient.put<AffiliateSettings>('/super-admin/affiliates/settings', body, {
+      params: { storeId },
+    });
+    return data;
+  },
+
   // ── Marketing ─────────────────────────────────────────────────
   getMarketingStats: async (): Promise<MarketingStats> => {
     const { data } = await apiClient.get<MarketingStats>('/super-admin/marketing/stats');
@@ -419,6 +529,33 @@ const superAdminService = {
 
   deleteEmailCampaign: async (id: number): Promise<void> => {
     await apiClient.delete(`/super-admin/email-campaigns/${id}`);
+  },
+
+  // ── Error Logs ────────────────────────────────────────────────
+  listErrorLogs: async (params?: {
+    severity?: string;
+    resolved?: boolean;
+    search?: string;
+    page?: number;
+    size?: number;
+  }): Promise<PaginatedResult<PlatformErrorLog>> => {
+    const { data } = await apiClient.get<PaginatedResult<PlatformErrorLog>>('/super-admin/error-logs', { params });
+    return data;
+  },
+
+  getErrorLogStats: async (): Promise<ErrorLogStats> => {
+    const { data } = await apiClient.get<ErrorLogStats>('/super-admin/error-logs/stats');
+    return data;
+  },
+
+  resolveErrorLog: async (id: number): Promise<PlatformErrorLog> => {
+    const { data } = await apiClient.put<PlatformErrorLog>(`/super-admin/error-logs/${id}/resolve`);
+    return data;
+  },
+
+  addErrorLogNote: async (id: number, notes: string): Promise<PlatformErrorLog> => {
+    const { data } = await apiClient.put<PlatformErrorLog>(`/super-admin/error-logs/${id}/notes`, { notes });
+    return data;
   },
 };
 

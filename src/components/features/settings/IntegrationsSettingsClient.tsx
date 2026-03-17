@@ -212,12 +212,10 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
   const openStripeOnboardingMutation = useMutation({
     mutationFn: integrationService.createStripeOnboardingLink,
     onSuccess: (response) => {
-      console.log('[Stripe UI] Onboarding link received, redirecting to:', response.onboardingUrl);
       window.location.href = response.onboardingUrl;
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.message || err?.message || 'Erro desconhecido';
-      console.error('[Stripe UI] Onboarding error:', err?.response?.status, err?.response?.data);
       toast.error(`Falha ao iniciar conexão com Stripe: ${msg}`);
     },
   });
@@ -225,12 +223,10 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
   const openStripeDashboardMutation = useMutation({
     mutationFn: integrationService.createStripeDashboardLink,
     onSuccess: (response) => {
-      console.log('[Stripe UI] Dashboard link received, redirecting to:', response.dashboardUrl);
       window.location.href = response.dashboardUrl;
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.message || err?.message || 'Erro desconhecido';
-      console.error('[Stripe UI] Dashboard link error:', err?.response?.status, err?.response?.data);
       toast.error(`Falha ao abrir dashboard Stripe: ${msg}`);
     },
   });
@@ -388,9 +384,6 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
   useEffect(() => {
     const stripeReturn = searchParams.get('stripe');
     if (stripeReturn === 'return') {
-      console.log('[Stripe UI] ===== STRIPE RETURN DETECTED =====');
-      console.log('[Stripe UI] URL:', window.location.href);
-      console.log('[Stripe UI] Invalidating stripe status query and refetching...');
       toast.success('Retorno do Stripe recebido. Validando status...');
       queryClient.invalidateQueries({ queryKey: STRIPE_QUERY_KEY });
       router.replace('/admin/settings/integrations');
@@ -398,8 +391,6 @@ export function IntegrationsSettingsClient({ mode = 'settings' }: { mode?: Integ
     }
 
     if (stripeReturn === 'refresh') {
-      console.log('[Stripe UI] ===== STRIPE REFRESH DETECTED =====');
-      console.log('[Stripe UI] User needs to complete onboarding');
       toast.info('Complete o onboarding do Stripe para ativar pagamentos.');
       queryClient.invalidateQueries({ queryKey: STRIPE_QUERY_KEY });
       router.replace('/admin/settings/integrations');
