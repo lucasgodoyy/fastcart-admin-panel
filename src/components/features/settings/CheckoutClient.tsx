@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, CreditCard, User, MessageSquare, ShieldCheck, Palette, Info, Heart, Gift, TicketPercent, TimerReset } from 'lucide-react';
+import { Loader2, CreditCard, User, MessageSquare, ShieldCheck, Palette, Info, Heart, Gift, TicketPercent, TimerReset, Percent } from 'lucide-react';
 import storeSettingsService, { StoreSettings } from '@/services/storeSettingsService';
 import productService from '@/services/catalog/product';
 import { toast } from 'sonner';
@@ -44,6 +44,8 @@ type CheckoutSettings = {
   countdownTitle: string;
   countdownMessage: string;
   countdownEndsAt: string;
+  pixDiscountPercent: number;
+  boletoDiscountPercent: number;
 };
 
 const DEFAULTS: CheckoutSettings = {
@@ -77,6 +79,8 @@ const DEFAULTS: CheckoutSettings = {
   countdownTitle: 'Oferta termina em',
   countdownMessage: '',
   countdownEndsAt: '',
+  pixDiscountPercent: 0,
+  boletoDiscountPercent: 0,
 };
 
 const toNumberOrNull = (value: unknown): number | null => {
@@ -172,6 +176,8 @@ function parseSettings(json: string | null | undefined): CheckoutSettings {
       countdownTitle: toString(raw.countdownTitle, DEFAULTS.countdownTitle),
       countdownMessage: toString(raw.countdownMessage),
       countdownEndsAt: toString(raw.countdownEndsAt),
+      pixDiscountPercent: toNumber(raw.pixDiscountPercent, DEFAULTS.pixDiscountPercent),
+      boletoDiscountPercent: toNumber(raw.boletoDiscountPercent, DEFAULTS.boletoDiscountPercent),
     };
   } catch {
     return { ...DEFAULTS };
@@ -531,6 +537,31 @@ export function CheckoutClient() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      </div>
+
+      {/* ── 7. Payment method discounts ── */}
+      <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <div className="border-b border-border px-5 py-4 flex items-center gap-2">
+          <Percent className="h-4 w-4 text-green-600" />
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Desconto por forma de pagamento</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">Ofereça desconto para Pix ou boleto. Deixe 0 para desativar.</p>
+          </div>
+        </div>
+        <div className="p-5 space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">Desconto Pix (%)</Label>
+              <Input type="number" min="0" max="30" step="0.5" value={form.pixDiscountPercent} onChange={(e) => set('pixDiscountPercent', Number(e.target.value || 0))} placeholder="0" />
+              <p className="text-xs text-muted-foreground">Ex: 5 = 5% de desconto no valor total ao pagar com Pix</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">Desconto Boleto (%)</Label>
+              <Input type="number" min="0" max="30" step="0.5" value={form.boletoDiscountPercent} onChange={(e) => set('boletoDiscountPercent', Number(e.target.value || 0))} placeholder="0" />
+              <p className="text-xs text-muted-foreground">Ex: 3 = 3% de desconto ao pagar com boleto</p>
+            </div>
           </div>
         </div>
       </div>

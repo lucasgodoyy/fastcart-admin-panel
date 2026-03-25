@@ -64,7 +64,7 @@ export function SaStatCard({ title, value, subtitle, icon: Icon, trend, color = 
     <motion.div
       variants={fadeInUp}
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-5 transition-all hover:border-[hsl(var(--sa-border))] hover:shadow-lg hover:shadow-black/10",
+        "group relative overflow-hidden rounded-2xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-5 transition-all hover:border-[hsl(var(--sa-border))] hover:shadow-lg hover:shadow-[hsl(var(--sa-accent))]/8",
         className
       )}
       whileHover={{ y: -2 }}

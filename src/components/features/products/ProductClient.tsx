@@ -1,17 +1,20 @@
-'use client';
+﻿'use client';
 
-import { ReactNode, useRef, useMemo, useState } from 'react';
+import { ReactNode, useRef, useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
+  ArrowUpDown,
   Camera,
+  Check,
   ChevronLeft,
   CirclePlus,
   Copy,
   Download,
   ExternalLink,
   HelpCircle,
+  LayoutList,
   Plus,
   Search,
   SlidersHorizontal,
@@ -40,7 +43,7 @@ type FilterOption<T extends string> = {
   label: string;
 };
 
-type DrawerFilters = Omit<ProductListFilters, 'search' | 'brandId'>;
+type DrawerFilters = Omit<ProductListFilters, 'search' | 'brandId' | 'sortBy' | 'sortOrder'>;
 
 const EMPTY_DRAWER_FILTERS: DrawerFilters = {
   categoryId: undefined,
@@ -50,6 +53,25 @@ const EMPTY_DRAWER_FILTERS: DrawerFilters = {
   shippingPromotion: undefined,
   weightDimensions: undefined,
 };
+
+type SortOption = {
+  key: string;
+  label: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  href?: string;
+};
+
+const SORT_OPTIONS: SortOption[] = [
+  { key: 'newest',      label: 'Mais novo',     sortBy: 'createdAt',   sortOrder: 'desc' },
+  { key: 'oldest',      label: 'Mais antigo',   sortBy: 'createdAt',   sortOrder: 'asc' },
+  { key: 'price-asc',  label: 'Menor preÃ§o',   sortBy: 'price',       sortOrder: 'asc' },
+  { key: 'price-desc', label: 'Maior preÃ§o',   sortBy: 'price',       sortOrder: 'desc' },
+  { key: 'az',         label: 'A â€“ Z',         sortBy: 'name',        sortOrder: 'asc' },
+  { key: 'za',         label: 'Z â€“ A',         sortBy: 'name',        sortOrder: 'desc' },
+  { key: 'best',       label: 'Mais vendidos', sortBy: 'bestSelling', sortOrder: 'desc' },
+  { key: 'manual',     label: 'Ordem manual',  href: '/admin/products/organize' },
+];
 
 const STOCK_OPTIONS: FilterOption<NonNullable<DrawerFilters['stockStatus']>>[] = [
   { value: null, label: 'Todos' },
@@ -61,26 +83,26 @@ const STOCK_OPTIONS: FilterOption<NonNullable<DrawerFilters['stockStatus']>>[] =
 const PRICE_OPTIONS: FilterOption<NonNullable<DrawerFilters['priceType']>>[] = [
   { value: null, label: 'Todos' },
   { value: 'PROMOTIONAL', label: 'Promocional' },
-  { value: 'NON_PROMOTIONAL', label: 'Não promocional' },
+  { value: 'NON_PROMOTIONAL', label: 'NÃ£o promocional' },
 ];
 
 const VISIBILITY_OPTIONS: FilterOption<NonNullable<DrawerFilters['visibility']>>[] = [
   { value: null, label: 'Todos' },
-  { value: 'VISIBLE', label: 'Visíveis' },
+  { value: 'VISIBLE', label: 'VisÃ­veis' },
   { value: 'HIDDEN', label: 'Ocultos' },
 ];
 
 const SHIPPING_OPTIONS: FilterOption<NonNullable<DrawerFilters['shippingPromotion']>>[] = [
   { value: null, label: 'Todos' },
-  { value: 'FREE_SHIPPING', label: 'Com envio grátis' },
-  { value: 'NO_FREE_SHIPPING', label: 'Sem envio grátis' },
+  { value: 'FREE_SHIPPING', label: 'Com envio grÃ¡tis' },
+  { value: 'NO_FREE_SHIPPING', label: 'Sem envio grÃ¡tis' },
 ];
 
 const WEIGHT_DIMENSIONS_OPTIONS: FilterOption<NonNullable<DrawerFilters['weightDimensions']>>[] = [
   { value: null, label: 'Todos' },
-  { value: 'WITHOUT_DIMENSIONS', label: 'Sem dimensões' },
+  { value: 'WITHOUT_DIMENSIONS', label: 'Sem dimensÃµes' },
   { value: 'WITHOUT_WEIGHT', label: 'Sem peso' },
-  { value: 'WITHOUT_WEIGHT_AND_DIMENSIONS', label: 'Sem peso nem dimensões' },
+  { value: 'WITHOUT_WEIGHT_AND_DIMENSIONS', label: 'Sem peso nem dimensÃµes' },
 ];
 
 const formatMoney = (value: number, currency = 'BRL') =>
@@ -90,9 +112,9 @@ const formatMoney = (value: number, currency = 'BRL') =>
     minimumFractionDigits: 2,
   }).format(Number(value || 0));
 
-const buildDuplicatePayload = (product: Product, name: string): CreateProductRequest => ({
-  sku: null,
-  name,
+const buildProductPayload = (product: Product, overrides?: Partial<CreateProductRequest>): CreateProductRequest => ({
+  sku: product.sku || null,
+  name: product.name,
   description: product.description || '',
   price: Number(product.price || 0),
   compareAtPrice: product.compareAtPrice ?? null,
@@ -118,6 +140,7 @@ const buildDuplicatePayload = (product: Product, name: string): CreateProductReq
   productType: product.productType ?? 'PHYSICAL',
   videoUrl: product.videoUrl ?? undefined,
   isNew: product.isNew,
+  ...overrides,
 });
 
 type ActionIconButtonProps = {
@@ -147,16 +170,74 @@ function ActionIconButton({ label, onClick, disabled, children }: ActionIconButt
   );
 }
 
+type InlinePriceInputProps = {
+  product: Product;
+  field: 'price' | 'salePrice';
+  onSave: (product: Product, newValue: number | null) => void;
+};
+
+function InlinePriceInput({ product, field, onSave }: InlinePriceInputProps) {
+  const currentValue = field === 'price' ? product.price : (product.salePrice ?? null);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState('');
+
+  const startEdit = () => {
+    setDraft(currentValue != null ? String(Number(currentValue)) : '');
+    setEditing(true);
+  };
+
+  const commit = () => {
+    setEditing(false);
+    const parsed = draft === '' ? null : parseFloat(draft.replace(',', '.'));
+    if (parsed === null && field === 'price') return; // price is required
+    const newVal = parsed !== null && !isNaN(parsed) ? parsed : null;
+    const original = currentValue != null ? Number(currentValue) : null;
+    if (newVal !== original) {
+      onSave(product, newVal);
+    }
+  };
+
+  if (editing) {
+    return (
+      <input
+        autoFocus
+        type="number"
+        step="0.01"
+        min="0"
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') setEditing(false); }}
+        className="w-24 rounded border border-primary bg-background px-1.5 py-0.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
+      />
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={startEdit}
+      title="Clique para editar"
+      className="cursor-text rounded px-1 py-0.5 text-sm text-foreground hover:bg-muted/60 hover:ring-1 hover:ring-border"
+    >
+      {currentValue != null ? formatMoney(Number(currentValue), product.currency || 'BRL') : <span className="text-muted-foreground">â€”</span>}
+    </button>
+  );
+}
+
 export function ProductClient() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const [activeSort, setActiveSort] = useState<string>('newest');
   const [appliedFilters, setAppliedFilters] = useState<DrawerFilters>(EMPTY_DRAWER_FILTERS);
   const [draftFilters, setDraftFilters] = useState<DrawerFilters>(EMPTY_DRAWER_FILTERS);
   const [duplicateSource, setDuplicateSource] = useState<Product | null>(null);
   const [duplicateName, setDuplicateName] = useState('');
   const [isImporting, setIsImporting] = useState(false);
   const csvInputRef = useRef<HTMLInputElement>(null);
+  const sortMenuRef = useRef<HTMLDivElement>(null);
 
   const handleExportCsv = async () => {
     try {
@@ -172,7 +253,7 @@ export function ProductClient() {
       link.download = `produtos_${new Date().toISOString().slice(0, 10)}.csv`;
       link.click();
       URL.revokeObjectURL(url);
-      toast.success('Exportação concluída!');
+      toast.success('ExportaÃ§Ã£o concluÃ­da!');
     } catch {
       toast.error('Erro ao exportar produtos.');
     }
@@ -191,7 +272,7 @@ export function ProductClient() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       const { created, skipped, errors } = response.data as { created: number; skipped: number; errors: string[] };
-      toast.success(`Importação concluída: ${created} criado(s), ${skipped} ignorado(s).`);
+      toast.success(`ImportaÃ§Ã£o concluÃ­da: ${created} criado(s), ${skipped} ignorado(s).`);
       if (errors.length > 0) toast.warning(`${errors.length} linha(s) com erro.`);
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
     } catch {
@@ -201,13 +282,17 @@ export function ProductClient() {
     }
   };
 
+  const currentSortOption = SORT_OPTIONS.find((o) => o.key === activeSort) ?? SORT_OPTIONS[0];
+
   const queryFilters = useMemo<ProductListFilters>(() => {
     const searchTerm = search.trim();
     return {
       ...appliedFilters,
       search: searchTerm || undefined,
+      sortBy: currentSortOption.sortBy,
+      sortOrder: currentSortOption.sortOrder,
     };
-  }, [appliedFilters, search]);
+  }, [appliedFilters, search, currentSortOption]);
 
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: [...QUERY_KEY, queryFilters],
@@ -225,7 +310,7 @@ export function ProductClient() {
       toast.success('Produto removido');
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
     },
-    onError: () => toast.error('Não foi possível remover o produto'),
+    onError: () => toast.error('NÃ£o foi possÃ­vel remover o produto'),
   });
 
   const duplicateMutation = useMutation({
@@ -236,11 +321,26 @@ export function ProductClient() {
       setDuplicateSource(null);
       setDuplicateName('');
     },
-    onError: () => toast.error('Não foi possível duplicar o produto'),
+    onError: () => toast.error('NÃ£o foi possÃ­vel duplicar o produto'),
   });
 
+  const priceMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: CreateProductRequest }) =>
+      productService.update(id, payload),
+    onSuccess: () => {
+      toast.success('PreÃ§o atualizado');
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+    },
+    onError: () => toast.error('NÃ£o foi possÃ­vel atualizar o preÃ§o'),
+  });
+
+  const handlePriceSave = useCallback((product: Product, field: 'price' | 'salePrice', newValue: number | null) => {
+    const payload = buildProductPayload(product, { [field]: newValue });
+    priceMutation.mutate({ id: product.id, payload });
+  }, [priceMutation]);
+
   const handleDelete = (product: Product) => {
-    const confirmed = window.confirm(`Eliminar o produto \"${product.name}\"?`);
+    const confirmed = window.confirm(`Eliminar o produto "${product.name}"?`);
     if (confirmed) {
       deleteMutation.mutate(product.id);
     }
@@ -248,7 +348,7 @@ export function ProductClient() {
 
   const handleOpenDuplicate = (product: Product) => {
     setDuplicateSource(product);
-    setDuplicateName(`${product.name} - (cópia)`);
+    setDuplicateName(`${product.name} - (cÃ³pia)`);
   };
 
   const handleConfirmDuplicate = () => {
@@ -258,8 +358,7 @@ export function ProductClient() {
       toast.error('Nome do novo produto deve ter ao menos 3 caracteres');
       return;
     }
-
-    duplicateMutation.mutate(buildDuplicatePayload(duplicateSource, name));
+    duplicateMutation.mutate(buildProductPayload(duplicateSource, { sku: null, name }));
   };
 
   const openFilterDrawer = () => {
@@ -274,6 +373,12 @@ export function ProductClient() {
 
   const clearDraftFilters = () => {
     setDraftFilters(EMPTY_DRAWER_FILTERS);
+  };
+
+  const handleSortSelect = (option: SortOption) => {
+    if (option.href) return; // navigation handled by <Link>
+    setActiveSort(option.key);
+    setIsSortOpen(false);
   };
 
   const renderFilterOptions = <T extends string>(
@@ -341,7 +446,7 @@ export function ProductClient() {
         </div>
       </div>
 
-      <div className="mb-2 flex items-center gap-3">
+      <div className="mb-2 flex items-center gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -350,6 +455,68 @@ export function ProductClient() {
             placeholder="Buscar por nome, SKU, marca ou categoria"
             className="pl-9"
           />
+        </div>
+
+        {/* Sort menu */}
+        <div className="relative" ref={sortMenuRef}>
+          <button
+            type="button"
+            onClick={() => setIsSortOpen((v) => !v)}
+            title="Ordenar"
+            className={[
+              'flex items-center gap-1.5 rounded-md border px-3 py-2 text-sm font-medium transition-colors',
+              isSortOpen
+                ? 'border-primary bg-primary/10 text-primary'
+                : 'border-border bg-background text-foreground hover:bg-muted/50',
+            ].join(' ')}
+          >
+            <ArrowUpDown className="h-4 w-4" />
+            <span className="hidden sm:inline">{currentSortOption.label}</span>
+          </button>
+
+          {isSortOpen && (
+            <>
+              {/* backdrop */}
+              <div
+                className="fixed inset-0 z-10"
+                onClick={() => setIsSortOpen(false)}
+              />
+              <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-md border border-border bg-card p-1 shadow-lg">
+                {SORT_OPTIONS.map((option) => {
+                  const isActive = option.key === activeSort;
+                  if (option.href) {
+                    return (
+                      <Link
+                        key={option.key}
+                        href={option.href}
+                        onClick={() => setIsSortOpen(false)}
+                        className="flex items-center gap-2 w-full rounded-sm px-2.5 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                      >
+                        <LayoutList className="h-3.5 w-3.5 shrink-0" />
+                        {option.label}
+                      </Link>
+                    );
+                  }
+                  return (
+                    <button
+                      key={option.key}
+                      type="button"
+                      onClick={() => handleSortSelect(option)}
+                      className={[
+                        'flex items-center gap-2 w-full rounded-sm px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-muted',
+                        isActive ? 'font-semibold text-foreground' : 'text-muted-foreground',
+                      ].join(' ')}
+                    >
+                      <span className="h-3.5 w-3.5 shrink-0">
+                        {isActive && <Check className="h-3.5 w-3.5 text-primary" />}
+                      </span>
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -361,9 +528,9 @@ export function ProductClient() {
             <tr className="border-b border-border bg-muted/30 text-left">
               <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">Produto</th>
               <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">Estoque</th>
-              <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">Preço</th>
+              <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">PreÃ§o</th>
               <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">Promo</th>
-              <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">Ações</th>
+              <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">AÃ§Ãµes</th>
             </tr>
           </thead>
           <tbody>
@@ -388,8 +555,16 @@ export function ProductClient() {
                 <tr key={product.id} className="border-b border-border transition-colors hover:bg-muted/40">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-md border border-border bg-muted">
-                        <Camera className="h-4 w-4 text-muted-foreground" />
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted">
+                        {product.primaryImageUrl ? (
+                          <img
+                            src={product.primaryImageUrl}
+                            alt={product.name}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <Camera className="h-4 w-4 text-muted-foreground" />
+                        )}
                       </div>
                       <div>
                         <Link
@@ -402,14 +577,28 @@ export function ProductClient() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-sm text-foreground">
-                    {product.infiniteStock ? '∞' : product.stock}
+                  <td className="px-4 py-3 text-sm">
+                    {product.infiniteStock ? (
+                      <span className="text-muted-foreground">âˆž Infinito</span>
+                    ) : (
+                      <span className={product.stock === 0 ? 'text-destructive' : 'text-foreground'}>
+                        {product.stock}
+                      </span>
+                    )}
                   </td>
-                  <td className="px-4 py-3 text-sm text-foreground">
-                    {formatMoney(product.price, product.currency || 'BRL')}
+                  <td className="px-4 py-3">
+                    <InlinePriceInput
+                      product={product}
+                      field="price"
+                      onSave={(p, v) => v !== null && handlePriceSave(p, 'price', v)}
+                    />
                   </td>
-                  <td className="px-4 py-3 text-sm text-foreground">
-                    {product.salePrice ? formatMoney(product.salePrice, product.currency || 'BRL') : '-'}
+                  <td className="px-4 py-3">
+                    <InlinePriceInput
+                      product={product}
+                      field="salePrice"
+                      onSave={(p, v) => handlePriceSave(p, 'salePrice', v)}
+                    />
                   </td>
                   <td className="px-4 py-3 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
@@ -516,28 +705,28 @@ export function ProductClient() {
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm font-medium text-foreground">Tipo de preço</p>
+                <p className="text-sm font-medium text-foreground">Tipo de preÃ§o</p>
                 {renderFilterOptions(draftFilters.priceType, PRICE_OPTIONS, (value) =>
                   setDraftFilters((prev) => ({ ...prev, priceType: value }))
                 )}
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm font-medium text-foreground">Visível na loja</p>
+                <p className="text-sm font-medium text-foreground">VisÃ­vel na loja</p>
                 {renderFilterOptions(draftFilters.visibility, VISIBILITY_OPTIONS, (value) =>
                   setDraftFilters((prev) => ({ ...prev, visibility: value }))
                 )}
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm font-medium text-foreground">Promoção de envio</p>
+                <p className="text-sm font-medium text-foreground">PromoÃ§Ã£o de envio</p>
                 {renderFilterOptions(draftFilters.shippingPromotion, SHIPPING_OPTIONS, (value) =>
                   setDraftFilters((prev) => ({ ...prev, shippingPromotion: value }))
                 )}
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm font-medium text-foreground">Peso e dimensões</p>
+                <p className="text-sm font-medium text-foreground">Peso e dimensÃµes</p>
                 {renderFilterOptions(draftFilters.weightDimensions, WEIGHT_DIMENSIONS_OPTIONS, (value) =>
                   setDraftFilters((prev) => ({ ...prev, weightDimensions: value }))
                 )}
@@ -556,7 +745,7 @@ export function ProductClient() {
                     <span className="block text-xs text-primary/90">Adicione diferentes atributos aos seus produtos</span>
                   </span>
                 </div>
-                <span className="text-primary">›</span>
+                <span className="text-primary">â€º</span>
               </button>
             </div>
 

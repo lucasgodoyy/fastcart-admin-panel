@@ -7,6 +7,15 @@ import { SaPageHeader, SaCard, fadeInUp, staggerContainer } from "../ui/sa-compo
 
 const THEMES = [
   {
+    id: "light",
+    name: "Clean Light",
+    description: "Branco vibrante com esmeralda e azul — clareza e cores vivas.",
+    accent: "160 84% 36%",
+    info: "210 100% 50%",
+    bg: "145 20% 97%",
+    surface: "0 0% 100%",
+  },
+  {
     id: "dark-neon",
     name: "Dark Neon",
     description: "Neon verde com fundo escuro — o padrão da plataforma.",
@@ -64,7 +73,7 @@ export function SaAppearancePage() {
         variants={staggerContainer}
         initial="initial"
         animate="animate"
-        className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+        className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
       >
         {THEMES.map((theme) => {
           const isActive = activeTheme === theme.id;
@@ -91,11 +100,11 @@ export function SaAppearancePage() {
                   {/* Theme preview swatches */}
                   <div className="mb-4 flex gap-2">
                     <div
-                      className="h-16 flex-1 rounded-lg border border-white/5"
+                      className="h-16 flex-1 rounded-lg border border-black/5"
                       style={{ background: `hsl(${theme.bg})` }}
                     />
                     <div
-                      className="h-16 w-12 rounded-lg border border-white/5"
+                      className="h-16 w-12 rounded-lg border border-black/5"
                       style={{ background: `hsl(${theme.surface})` }}
                     />
                     <div
@@ -131,7 +140,7 @@ export function SaAppearancePage() {
                     {[theme.accent, theme.info, theme.bg, theme.surface].map((c, i) => (
                       <div
                         key={i}
-                        className="h-3.5 w-3.5 rounded-full border border-white/10"
+                        className="h-3.5 w-3.5 rounded-full border border-black/10"
                         style={{ background: `hsl(${c})` }}
                       />
                     ))}

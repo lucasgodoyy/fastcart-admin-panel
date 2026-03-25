@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import {
   Search,
   Package,
@@ -12,11 +13,16 @@ import {
   XCircle,
   CreditCard,
   Eye,
+  Tag,
+  Loader2,
+  Download,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import apiClient from '@/lib/api';
 import orderService from '@/services/sales/orderService';
+import shippingLabelsService from '@/services/shippingLabelsService';
 import { AdminOrder, OrderStats, OrderStatus } from '@/types/order';
 import { t } from '@/lib/admin-language';
 
@@ -49,12 +55,48 @@ function formatDate(iso: string) {
 type FilterTab = 'all' | 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
 
 export function OrderListClient() {
+  const qc = useQueryClient();
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<FilterTab>('all');
+  const [generatingLabelId, setGeneratingLabelId] = useState<number | null>(null);
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportCsv = async () => {
+    setExporting(true);
+    try {
+      const res = await apiClient.get('/orders/store/export/csv', { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `pedidos_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success(t('CSV exportado com sucesso!', 'CSV exported successfully!'));
+    } catch {
+      toast.error(t('Erro ao exportar CSV.', 'Error exporting CSV.'));
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const { data: orders = [], isLoading } = useQuery<AdminOrder[]>({
     queryKey: ['store-orders'],
     queryFn: () => orderService.listStoreOrders(),
+  });
+
+  const generateLabelMutation = useMutation({
+    mutationFn: (orderId: number) => shippingLabelsService.generate([String(orderId)]),
+    onSuccess: () => {
+      toast.success(t('Etiqueta gerada! Acesse Logística para imprimir.', 'Label generated! Go to Logistics to print.'));
+      qc.invalidateQueries({ queryKey: ['store-orders'] });
+      setGeneratingLabelId(null);
+    },
+    onError: () => {
+      toast.error(t('Erro ao gerar etiqueta. Verifique se o Melhor Envio está conectado em Logística.', 'Error generating label. Check if Melhor Envio is connected in Logistics.'));
+      setGeneratingLabelId(null);
+    },
   });
 
   const { data: stats } = useQuery<OrderStats>({
@@ -117,6 +159,10 @@ export function OrderListClient() {
             {t('Gerencie todos os pedidos da sua loja.', 'Manage all orders for your store.')}
           </p>
         </div>
+        <Button variant="outline" size="sm" className="gap-1.5" disabled={exporting} onClick={handleExportCsv}>
+          {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+          {t('Exportar CSV', 'Export CSV')}
+        </Button>
       </div>
 
       {/* KPI Cards */}
@@ -217,7 +263,12 @@ export function OrderListClient() {
               const sc = statusConfig[order.status] || statusConfig.PENDING;
               return (
                 <tr key={order.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
-                  <td className="px-4 py-3 text-sm font-medium text-foreground">#{order.id}</td>
+                  <td className="px-4 py-3 text-sm font-medium text-foreground">
+                    #{order.id}
+                    {order.orderOrigin === 'POS' && (
+                      <Badge variant="outline" className="ml-1.5 text-[10px] px-1.5 py-0">PDV</Badge>
+                    )}
+                  </td>
                   <td className="px-4 py-3">
                     <div className="text-sm font-medium text-foreground">{order.customerName || '—'}</div>
                     <div className="text-xs text-muted-foreground">{order.customerEmail || ''}</div>
@@ -261,12 +312,45 @@ export function OrderListClient() {
                     {formatDate(order.createdAt)}
                   </td>
                   <td className="px-4 py-3">
-                    <Link href={`/admin/sales/${order.id}`}>
-                      <Button variant="ghost" size="sm" className="gap-1.5 text-xs">
-                        <Eye className="h-3.5 w-3.5" />
-                        {t('Ver', 'View')}
-                      </Button>
-                    </Link>
+                    <div className="flex items-center gap-1">
+                      {order.paymentStatus?.toLowerCase() === 'paid' &&
+                        !order.shippingLabelId &&
+                        order.status !== 'CANCELLED' &&
+                        order.status !== 'DELIVERED' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1 text-xs h-7 px-2"
+                          title={t('Gerar Etiqueta no Melhor Envio', 'Generate Shipping Label')}
+                          disabled={generatingLabelId === order.id}
+                          onClick={() => {
+                            setGeneratingLabelId(order.id);
+                            generateLabelMutation.mutate(order.id);
+                          }}
+                        >
+                          {generatingLabelId === order.id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Tag className="h-3.5 w-3.5" />
+                          )}
+                          <span className="hidden sm:inline">{t('Etiqueta', 'Label')}</span>
+                        </Button>
+                      )}
+                      {order.shippingLabelId && (
+                        <Link href="/admin/shipping">
+                          <Button variant="ghost" size="sm" className="gap-1 text-xs h-7 px-2 text-green-600 hover:text-green-700">
+                            <Tag className="h-3.5 w-3.5" />
+                            <span className="hidden sm:inline">{t('Ver Etiqueta', 'View Label')}</span>
+                          </Button>
+                        </Link>
+                      )}
+                      <Link href={`/admin/sales/${order.id}`}>
+                        <Button variant="ghost" size="sm" className="gap-1.5 text-xs">
+                          <Eye className="h-3.5 w-3.5" />
+                          {t('Ver', 'View')}
+                        </Button>
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               );

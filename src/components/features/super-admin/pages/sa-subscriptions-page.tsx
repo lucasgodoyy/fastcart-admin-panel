@@ -241,7 +241,7 @@ export function SaSubscriptionsPage() {
                         : "border-[hsl(var(--sa-border-subtle))]"
                     } bg-linear-to-b ${gradient} p-6 transition-all`}
                   >
-                    <div className="absolute inset-x-0 top-0 h-24 rounded-t-3xl bg-linear-to-r from-white/8 via-white/2 to-transparent pointer-events-none" />
+                    <div className="absolute inset-x-0 top-0 h-24 rounded-t-3xl bg-linear-to-r from-[hsl(var(--sa-accent))]/8 via-[hsl(var(--sa-accent))]/3 to-transparent pointer-events-none" />
                     {plan.isPopular && (
                       <div className="absolute -top-3 left-6 rounded-full bg-[hsl(var(--sa-accent))] px-3 py-1 text-[10px] font-bold tracking-[0.16em] text-white">
                         MAIS POPULAR
@@ -259,7 +259,7 @@ export function SaSubscriptionsPage() {
                           </p>
                         </div>
                         <span
-                          className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${plan.isActive ? "bg-emerald-500/12 text-emerald-300" : "bg-white/8 text-[hsl(var(--sa-text-muted))]"}`}
+                          className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${plan.isActive ? "bg-[hsl(var(--sa-success-subtle))] text-[hsl(var(--sa-success))]" : "bg-[hsl(var(--sa-surface-hover))] text-[hsl(var(--sa-text-muted))]"}`}
                         >
                           {plan.isActive ? "Ativo" : "Inativo"}
                         </span>
@@ -277,7 +277,7 @@ export function SaSubscriptionsPage() {
                       )}
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2 rounded-2xl border border-white/8 bg-black/10 p-3 text-center backdrop-blur-sm">
+                    <div className="grid grid-cols-3 gap-2 rounded-2xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg-secondary))]/60 p-3 text-center backdrop-blur-sm">
                       <div>
                         <p className="text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--sa-text-muted))]">Produtos</p>
                         <p className="mt-1 text-[14px] font-semibold text-[hsl(var(--sa-text))]">
@@ -313,7 +313,7 @@ export function SaSubscriptionsPage() {
                       )}
                     </ul>
 
-                    <div className="mt-6 flex items-center justify-between gap-2 border-t border-white/8 pt-4">
+                    <div className="mt-6 flex items-center justify-between gap-2 border-t border-[hsl(var(--sa-border-subtle))] pt-4">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -327,7 +327,7 @@ export function SaSubscriptionsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-red-400 hover:text-red-300"
+                          className="text-[hsl(var(--sa-danger))] hover:text-[hsl(var(--sa-danger))]/80"
                           onClick={() => setDeleteConfirmId(plan.id)}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -404,7 +404,7 @@ export function SaSubscriptionsPage() {
                       <TableCell>
                         <SaStatusBadge status={sub.status} />
                         {sub.blockedAt && (
-                          <p className="text-[10px] text-red-500 mt-0.5">{sub.blockReason}</p>
+                          <p className="text-[10px] text-[hsl(var(--sa-danger))] mt-0.5">{sub.blockReason}</p>
                         )}
                       </TableCell>
                       <TableCell className="text-[12px] font-bold text-[hsl(var(--sa-success))]">
@@ -434,7 +434,7 @@ export function SaSubscriptionsPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-7 px-2 text-[11px] text-red-500 hover:bg-red-500/10"
+                            className="h-7 px-2 text-[11px] text-[hsl(var(--sa-danger))] hover:bg-[hsl(var(--sa-danger-subtle))]"
                             title="Cancelar assinatura"
                             onClick={() => cancelMutation.mutate(sub.storeId)}
                             disabled={cancelMutation.isPending}

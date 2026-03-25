@@ -262,7 +262,7 @@ export function SaMessagesPage() {
                       onChange={(e) => setForm((p) => ({ ...p, initialMessage: e.target.value }))}
                       placeholder="Escreva a primeira mensagem..."
                       rows={3}
-                      className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                    className="flex w-full rounded-md border border-[hsl(var(--sa-border))] bg-[hsl(var(--sa-bg))] px-3 py-2 text-sm text-[hsl(var(--sa-text))] shadow-xs outline-none placeholder:text-[hsl(var(--sa-text-muted))] focus-visible:border-[hsl(var(--sa-accent))] focus-visible:ring-[3px] focus-visible:ring-[hsl(var(--sa-accent))]/20"
                     />
                   </div>
                   <Button className="w-full" onClick={() => createConv.mutate()} disabled={!form.customerName || !form.customerEmail || !form.initialMessage || createConv.isPending}>
@@ -294,9 +294,9 @@ export function SaMessagesPage() {
       <motion.div variants={fadeInUp} className="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-4 h-[calc(100vh-420px)] min-h-100">
         {/* Left panel */}
         <SaCard className="flex flex-col overflow-hidden p-0">
-          <div className="p-3 border-b border-border">
+          <div className="p-3 border-b border-[hsl(var(--sa-border-subtle))]">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-8 text-xs border-[hsl(var(--sa-border))] bg-[hsl(var(--sa-bg))] text-[hsl(var(--sa-text-secondary))]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {statusFilters.map((f) => (
                   <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
@@ -306,24 +306,24 @@ export function SaMessagesPage() {
           </div>
           <ScrollArea className="flex-1">
             {loadingConvs ? (
-              <div className="flex items-center justify-center py-12"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+              <div className="flex items-center justify-center py-12"><Loader2 className="h-5 w-5 animate-spin text-[hsl(var(--sa-text-muted))]" /></div>
             ) : conversations.length === 0 ? (
-              <div className="py-12 text-center text-sm text-muted-foreground">Nenhuma conversa.</div>
+              <div className="py-12 text-center text-sm text-[hsl(var(--sa-text-muted))]">Nenhuma conversa.</div>
             ) : (
-              <div className="divide-y divide-border">
+              <div className="divide-y divide-[hsl(var(--sa-border-subtle))]">
                 {conversations.map((conv) => (
                   <button
                     key={conv.id}
                     onClick={() => setSelectedId(conv.id)}
-                    className={cn('w-full text-left p-3 hover:bg-muted/50 transition-colors', selectedId === conv.id && 'bg-muted')}
+                    className={cn('w-full text-left p-3 hover:bg-[hsl(var(--sa-surface-hover))] transition-colors', selectedId === conv.id && 'bg-[hsl(var(--sa-accent-subtle))]')}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium truncate">{conv.customerName}</span>
-                      <span className="text-[10px] text-muted-foreground">{timeAgo(conv.lastMessageAt)}</span>
+                      <span className="text-sm font-medium truncate text-[hsl(var(--sa-text))]">{conv.customerName}</span>
+                      <span className="text-[10px] text-[hsl(var(--sa-text-muted))]">{timeAgo(conv.lastMessageAt)}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground truncate">{conv.subject || conv.customerEmail}</p>
+                    <p className="text-xs text-[hsl(var(--sa-text-muted))] truncate">{conv.subject || conv.customerEmail}</p>
                     <div className="flex items-center justify-between mt-1">
-                      <p className="text-xs text-muted-foreground truncate max-w-50">{conv.lastMessagePreview || 'Sem mensagens'}</p>
+                      <p className="text-xs text-[hsl(var(--sa-text-muted))] truncate max-w-50">{conv.lastMessagePreview || 'Sem mensagens'}</p>
                       {conv.unreadAdminCount > 0 && (
                         <Badge variant="default" className="h-4 px-1 text-[10px] rounded-full">{conv.unreadAdminCount}</Badge>
                       )}
@@ -338,16 +338,16 @@ export function SaMessagesPage() {
         {/* Right panel */}
         <SaCard className="flex flex-col overflow-hidden p-0">
           {!selectedId ? (
-            <div className="flex-1 flex flex-col items-center justify-center gap-3 text-sm text-muted-foreground">
+            <div className="flex-1 flex flex-col items-center justify-center gap-3 text-sm text-[hsl(var(--sa-text-muted))]">
               <Users className="h-5 w-5" />
               <p>Selecione uma conversa para ver as mensagens.</p>
             </div>
           ) : (
             <>
-              <div className="p-3 border-b border-border flex items-center justify-between gap-4">
+              <div className="p-3 border-b border-[hsl(var(--sa-border-subtle))] flex items-center justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium truncate">{selectedConv?.customerName}</p>
-                  <p className="text-xs text-muted-foreground truncate">{selectedConv?.subject || selectedConv?.customerEmail}</p>
+                  <p className="text-sm font-medium truncate text-[hsl(var(--sa-text))]">{selectedConv?.customerName}</p>
+                  <p className="text-xs text-[hsl(var(--sa-text-muted))] truncate">{selectedConv?.subject || selectedConv?.customerEmail}</p>
                 </div>
                 <div className="flex gap-1.5 shrink-0">
                   {selectedConv?.status !== 'CLOSED' && (
@@ -370,22 +370,22 @@ export function SaMessagesPage() {
 
               <ScrollArea className="flex-1 p-4">
                 {loadingMessages ? (
-                  <div className="flex items-center justify-center py-12"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+                  <div className="flex items-center justify-center py-12"><Loader2 className="h-5 w-5 animate-spin text-[hsl(var(--sa-text-muted))]" /></div>
                 ) : messages.length === 0 ? (
-                  <div className="py-12 text-center text-sm text-muted-foreground">Nenhuma mensagem nesta conversa.</div>
+                  <div className="py-12 text-center text-sm text-[hsl(var(--sa-text-muted))]">Nenhuma mensagem nesta conversa.</div>
                 ) : (
                   <div className="space-y-4">
                     {messages.map((msg) => {
                       const isSA = msg.senderType === 'SUPER_ADMIN';
                       return (
                         <div key={msg.id} className={cn('flex', isSA ? 'justify-end' : 'justify-start')}>
-                          <div className={cn('max-w-[75%] rounded-lg px-3 py-2', isSA ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                          <div className={cn('max-w-[75%] rounded-lg px-3 py-2', isSA ? 'bg-[hsl(var(--sa-accent))] text-white' : 'bg-[hsl(var(--sa-surface-hover))] text-[hsl(var(--sa-text))]')}>
                             <div className="flex items-center gap-1.5 mb-0.5">
                               {!isSA && <User className="h-3 w-3" />}
                               <span className="text-[10px] font-medium">{msg.senderName}</span>
                             </div>
                             <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                            <p className={cn('text-[10px] mt-1', isSA ? 'text-primary-foreground/70' : 'text-muted-foreground')}>
+                            <p className={cn('text-[10px] mt-1', isSA ? 'text-white/70' : 'text-[hsl(var(--sa-text-muted))]')}>
                               {new Date(msg.createdAt).toLocaleString('pt-BR')}
                             </p>
                           </div>
@@ -397,7 +397,7 @@ export function SaMessagesPage() {
                 )}
               </ScrollArea>
 
-              <div className="border-t border-border p-3 flex gap-2">
+              <div className="border-t border-[hsl(var(--sa-border-subtle))] p-3 flex gap-2">
                 <textarea
                   placeholder="Digite sua mensagem..."
                   value={newMessage}
@@ -409,7 +409,7 @@ export function SaMessagesPage() {
                     }
                   }}
                   rows={1}
-                  className="flex-1 resize-none rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                  className="flex-1 resize-none rounded-md border border-[hsl(var(--sa-border))] bg-[hsl(var(--sa-bg))] px-3 py-2 text-sm text-[hsl(var(--sa-text))] shadow-xs outline-none placeholder:text-[hsl(var(--sa-text-muted))] focus-visible:border-[hsl(var(--sa-accent))] focus-visible:ring-[3px] focus-visible:ring-[hsl(var(--sa-accent))]/20"
                 />
                 <Button size="icon" disabled={!newMessage.trim() || sendMutation.isPending} onClick={() => sendMutation.mutate()}>
                   {sendMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}

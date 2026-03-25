@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, MessageCircle, CreditCard, ShoppingBag, DollarSign } from 'lucide-react';
+import { Loader2, MessageCircle, CreditCard, ShoppingBag, DollarSign, Package, Eye, Lock, Video, BarChart3, Code } from 'lucide-react';
 import storeSettingsService, { StoreSettings } from '@/services/storeSettingsService';
 import { toast } from 'sonner';
 
@@ -31,6 +31,14 @@ export function StoreFeaturesClient() {
     manualPaymentInstructions: '',
     minOrderValue: '',
     catalogMode: false,
+    lowStockThreshold: '5',
+    hotjarId: '',
+    googleAdsId: '',
+    externalChatScript: '',
+    storePasswordEnabled: false,
+    storePassword: '',
+    floatingVideoEnabled: false,
+    floatingVideoUrl: '',
   });
 
   useEffect(() => {
@@ -47,6 +55,14 @@ export function StoreFeaturesClient() {
         manualPaymentInstructions: store.manualPaymentInstructions ?? '',
         minOrderValue: store.minOrderValue != null ? String(store.minOrderValue) : '',
         catalogMode: store.catalogMode ?? false,
+        lowStockThreshold: store.lowStockThreshold != null ? String(store.lowStockThreshold) : '5',
+        hotjarId: store.hotjarId ?? '',
+        googleAdsId: store.googleAdsId ?? '',
+        externalChatScript: store.externalChatScript ?? '',
+        storePasswordEnabled: store.storePasswordEnabled ?? false,
+        storePassword: store.storePassword ?? '',
+        floatingVideoEnabled: store.floatingVideoEnabled ?? false,
+        floatingVideoUrl: store.floatingVideoUrl ?? '',
       });
     }
   }, [store]);
@@ -65,6 +81,14 @@ export function StoreFeaturesClient() {
         manualPaymentInstructions: form.manualPaymentInstructions || undefined,
         minOrderValue: form.minOrderValue ? Number(form.minOrderValue) : undefined,
         catalogMode: form.catalogMode,
+        lowStockThreshold: form.lowStockThreshold ? Number(form.lowStockThreshold) : 5,
+        hotjarId: form.hotjarId || undefined,
+        googleAdsId: form.googleAdsId || undefined,
+        externalChatScript: form.externalChatScript || undefined,
+        storePasswordEnabled: form.storePasswordEnabled,
+        storePassword: form.storePassword || undefined,
+        floatingVideoEnabled: form.floatingVideoEnabled,
+        floatingVideoUrl: form.floatingVideoUrl || undefined,
       }),
     onSuccess: () => {
       toast.success('Funcionalidades salvas com sucesso!');
@@ -242,6 +266,151 @@ export function StoreFeaturesClient() {
             onCheckedChange={(v) => setForm((f) => ({ ...f, catalogMode: v }))}
           />
         </div>
+      </div>
+
+      {/* Low Stock Threshold */}
+      <div className="rounded-lg border border-border bg-card p-5 space-y-3">
+        <div className="flex items-center gap-3">
+          <Package className="h-5 w-5 text-muted-foreground" />
+          <div>
+            <p className="text-sm font-medium">Alerta de estoque baixo</p>
+            <p className="text-xs text-muted-foreground">
+              Receba uma notificação quando produtos atingirem esta quantidade. 0 = desativado.
+            </p>
+          </div>
+        </div>
+        <div className="max-w-xs">
+          <Input
+            type="number"
+            placeholder="5"
+            min="0"
+            step="1"
+            value={form.lowStockThreshold}
+            onChange={(e) => setForm((f) => ({ ...f, lowStockThreshold: e.target.value }))}
+          />
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* Hotjar */}
+      <div className="rounded-lg border border-border bg-card p-5 space-y-4">
+        <div className="flex items-center gap-3">
+          <BarChart3 className="h-5 w-5 text-orange-500" />
+          <div>
+            <p className="text-sm font-medium">Hotjar</p>
+            <p className="text-xs text-muted-foreground">Mapas de calor e gravação de sessões.</p>
+          </div>
+        </div>
+        <div className="pl-8 space-y-1.5">
+          <Label className="text-xs">Site ID</Label>
+          <Input
+            placeholder="1234567"
+            value={form.hotjarId}
+            onChange={(e) => setForm((f) => ({ ...f, hotjarId: e.target.value }))}
+          />
+          <p className="text-xs text-muted-foreground">Encontre em Hotjar → Settings → Sites & Organizations.</p>
+        </div>
+      </div>
+
+      {/* Google Ads */}
+      <div className="rounded-lg border border-border bg-card p-5 space-y-4">
+        <div className="flex items-center gap-3">
+          <BarChart3 className="h-5 w-5 text-blue-500" />
+          <div>
+            <p className="text-sm font-medium">Google Ads</p>
+            <p className="text-xs text-muted-foreground">Rastreamento de conversões do Google Ads.</p>
+          </div>
+        </div>
+        <div className="pl-8 space-y-1.5">
+          <Label className="text-xs">Conversion ID</Label>
+          <Input
+            placeholder="AW-1234567890"
+            value={form.googleAdsId}
+            onChange={(e) => setForm((f) => ({ ...f, googleAdsId: e.target.value }))}
+          />
+          <p className="text-xs text-muted-foreground">Formato: AW-XXXXXXXXXX. Encontre em Google Ads → Ferramentas → Conversões.</p>
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* External Chat Widget */}
+      <div className="rounded-lg border border-border bg-card p-5 space-y-4">
+        <div className="flex items-center gap-3">
+          <Code className="h-5 w-5 text-muted-foreground" />
+          <div>
+            <p className="text-sm font-medium">Widget de Chat Externo</p>
+            <p className="text-xs text-muted-foreground">Tawk.to, Jivochat, Crisp ou qualquer chat. Cole o script aqui.</p>
+          </div>
+        </div>
+        <div className="pl-8 space-y-1.5">
+          <Label className="text-xs">Script do chat</Label>
+          <textarea
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm font-mono placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            rows={4}
+            placeholder={'<script src="https://embed.tawk.to/..."></script>'}
+            value={form.externalChatScript}
+            onChange={(e) => setForm((f) => ({ ...f, externalChatScript: e.target.value }))}
+          />
+          <p className="text-xs text-muted-foreground">O script será injetado automaticamente na sua loja.</p>
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* Store Password Protection */}
+      <div className="rounded-lg border border-border bg-card p-5 space-y-4">
+        <div className="flex items-center gap-3">
+          <Lock className="h-5 w-5 text-muted-foreground" />
+          <div className="flex-1">
+            <p className="text-sm font-medium">Proteger loja com senha</p>
+            <p className="text-xs text-muted-foreground">Visitantes precisam digitar uma senha para acessar. Ideal para pré-lançamento.</p>
+          </div>
+          <Switch
+            checked={form.storePasswordEnabled}
+            onCheckedChange={(v) => setForm((f) => ({ ...f, storePasswordEnabled: v }))}
+          />
+        </div>
+        {form.storePasswordEnabled && (
+          <div className="space-y-3 pl-8">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Senha de acesso</Label>
+              <Input
+                placeholder="senha123"
+                value={form.storePassword}
+                onChange={(e) => setForm((f) => ({ ...f, storePassword: e.target.value }))}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Floating Video */}
+      <div className="rounded-lg border border-border bg-card p-5 space-y-4">
+        <div className="flex items-center gap-3">
+          <Video className="h-5 w-5 text-muted-foreground" />
+          <div className="flex-1">
+            <p className="text-sm font-medium">Vídeo flutuante</p>
+            <p className="text-xs text-muted-foreground">Exibe um vídeo em miniatura flutuante na loja. YouTube ou MP4.</p>
+          </div>
+          <Switch
+            checked={form.floatingVideoEnabled}
+            onCheckedChange={(v) => setForm((f) => ({ ...f, floatingVideoEnabled: v }))}
+          />
+        </div>
+        {form.floatingVideoEnabled && (
+          <div className="space-y-3 pl-8">
+            <div className="space-y-1.5">
+              <Label className="text-xs">URL do vídeo</Label>
+              <Input
+                placeholder="https://www.youtube.com/watch?v=..."
+                value={form.floatingVideoUrl}
+                onChange={(e) => setForm((f) => ({ ...f, floatingVideoUrl: e.target.value }))}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end pt-2">

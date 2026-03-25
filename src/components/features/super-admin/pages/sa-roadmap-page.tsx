@@ -172,8 +172,8 @@ const SEED_DATA: Omit<RoadmapFeature, "id">[] = [
   { moduleId: "deploy", phase: "DEPLOY", area: "Infrastructure", title: "Store frontend em Vercel", description: "Deploy do Next.js da store no Vercel", effort: "1h", status: "NOT_STARTED" },
   { moduleId: "deploy", phase: "DEPLOY", area: "Infrastructure", title: "Admin frontend em Vercel", description: "Deploy do Next.js admin panel no Vercel", effort: "1h", status: "NOT_STARTED" },
   { moduleId: "deploy", phase: "DEPLOY", area: "Infrastructure", title: "CDN para imagens (S3 + CloudFront)", description: "Configurar upload de imagens no S3 com CDN CloudFront", effort: "3h", status: "NOT_STARTED" },
-  { moduleId: "deploy", phase: "DEPLOY", area: "Infrastructure", title: "Domínio customizado + SSL (lojaki.store)", description: "Registrar domínio e configurar certificado SSL", effort: "1h", status: "NOT_STARTED" },
-  { moduleId: "deploy", phase: "DEPLOY", area: "Infrastructure", title: "DNS wildcard para subdomínios (*.lojaki.store)", description: "Configurar wildcard DNS para lojas em subdomínios", effort: "1h", status: "NOT_STARTED" },
+  { moduleId: "deploy", phase: "DEPLOY", area: "Infrastructure", title: "Domínio customizado + SSL (rapidocart.com.br)", description: "Registrar domínio e configurar certificado SSL", effort: "1h", status: "NOT_STARTED" },
+  { moduleId: "deploy", phase: "DEPLOY", area: "Infrastructure", title: "DNS wildcard para subdomínios (*.rapidocart.com.br)", description: "Configurar wildcard DNS para lojas em subdomínios", effort: "1h", status: "NOT_STARTED" },
   // Env vars
   { moduleId: "deploy", phase: "DEPLOY", area: "Infrastructure", title: "Configurar todas env vars de produção", description: "JWT_SECRET, DB_*, STRIPE keys, MELHOR_ENVIO, RESEND, URLs", effort: "1h", status: "NOT_STARTED" },
   // Stripe
@@ -184,7 +184,7 @@ const SEED_DATA: Omit<RoadmapFeature, "id">[] = [
   { moduleId: "deploy", phase: "DEPLOY", area: "Manual", title: "Melhor Envio: mudar para produção", description: "Trocar sandbox por melhorenvio.com.br, re-autenticar token", effort: "30min", status: "NOT_STARTED" },
   { moduleId: "deploy", phase: "DEPLOY", area: "Manual", title: "Melhor Envio: validar cotação com CEP real", description: "Testar cotação de frete com endereços reais", effort: "30min", status: "NOT_STARTED" },
   // Emails
-  { moduleId: "deploy", phase: "DEPLOY", area: "Infrastructure", title: "Configurar domínio de envio no Resend", description: "noreply@lojaki.store com SPF/DKIM/DMARC verificados", effort: "1h", status: "NOT_STARTED" },
+  { moduleId: "deploy", phase: "DEPLOY", area: "Infrastructure", title: "Configurar domínio de envio no Resend", description: "noreply@rapidocart.com.br com SPF/DKIM/DMARC verificados", effort: "1h", status: "NOT_STARTED" },
   { moduleId: "deploy", phase: "DEPLOY", area: "Infrastructure", title: "Configurar webhooks Resend de produção", description: "Webhook URL apontando para backend de produção", effort: "30min", status: "NOT_STARTED" },
   // Segurança
   { moduleId: "security", phase: "DEPLOY", area: "Backend", title: "Proteger endpoint POST /users/super-admin", description: "Desabilitar ou proteger com @PreAuthorize('SUPER_ADMIN')", effort: "15min", status: "NOT_STARTED" },
@@ -345,7 +345,7 @@ export function SaRoadmapPage() {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = `lojaki-roadmap-${new Date().toISOString().split("T")[0]}.json`; a.click();
+    a.href = url; a.download = `rapidocart-roadmap-${new Date().toISOString().split("T")[0]}.json`; a.click();
     URL.revokeObjectURL(url);
     toast.success("Roadmap exportado");
   }, [features]);
@@ -444,7 +444,7 @@ export function SaRoadmapPage() {
               <Rocket className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h2 className="text-[16px] font-bold text-[hsl(var(--sa-text))]">Plataforma Lojaki</h2>
+              <h2 className="text-[16px] font-bold text-[hsl(var(--sa-text))]">Plataforma RapidoCart</h2>
               <p className="text-[11px] text-[hsl(var(--sa-text-muted))]">
                 {stats.platformPct}% pronto — {stats.donePlatformFeatures}/{stats.totalPlatformFeatures} features do catálogo implementadas
               </p>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '@/context/AuthContext';
@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Eye, EyeOff, CheckCircle2, XCircle, Loader2, Mail } from 'lucide-react';
 import { t } from '@/lib/admin-language';
+import Script from 'next/script';
 
 type BannerType = 'success' | 'error' | 'info';
 
@@ -22,6 +23,7 @@ export const LoginForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [banner, setBanner] = useState<{ type: BannerType; message: string } | null>(null);
   const [verifying, setVerifying] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const form = useForm<LoginCredentials>({
     defaultValues: {
@@ -62,6 +64,55 @@ export const LoginForm: React.FC = () => {
       });
     }
   }, [searchParams, setEmailVerified]);
+
+  const handleGoogleCallback = useCallback(async (response: { credential?: string }) => {
+    if (!response.credential) return;
+    setGoogleLoading(true);
+    try {
+      const authRes = await authService.oauthLogin('google', response.credential);
+      const redirectPath = authRes.role === 'SUPER_ADMIN' ? '/super-admin' : '/admin';
+      router.push(redirectPath);
+    } catch {
+      setBanner({
+        type: 'error',
+        message: t('Falha ao entrar com Google. Tente novamente.', 'Failed to sign in with Google. Try again.'),
+      });
+    } finally {
+      setGoogleLoading(false);
+    }
+  }, [router]);
+
+  useEffect(() => {
+    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID;
+    if (!googleClientId || typeof window === 'undefined') return;
+    const initGoogle = () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const win = window as any;
+      if (!win.google) return;
+      const google = win.google;
+      google.accounts.id.initialize({
+        client_id: googleClientId,
+        callback: handleGoogleCallback,
+      });
+      const btnEl = document.getElementById('google-signin-btn');
+      if (btnEl) {
+        google.accounts.id.renderButton(btnEl, {
+          theme: 'outline',
+          size: 'large',
+          width: '100%',
+          text: 'signin_with',
+          locale: 'pt-BR',
+        });
+      }
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const win = window as any;
+    if (win.google) {
+      initGoogle();
+    } else {
+      win.__googleSignInInit = initGoogle;
+    }
+  }, [handleGoogleCallback]);
 
   const handleSubmit = async (credentials: LoginCredentials) => {
     try {
@@ -212,6 +263,34 @@ export const LoginForm: React.FC = () => {
             </Button>
           </form>
         </Form>
+
+        {process.env.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID && (
+          <>
+            <div className="relative my-5">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">{t('ou', 'or')}</span>
+              </div>
+            </div>
+            <div id="google-signin-btn" className="flex justify-center" />
+            {googleLoading && (
+              <div className="flex items-center justify-center gap-2 mt-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {t('Entrando com Google...', 'Signing in with Google...')}
+              </div>
+            )}
+            <Script
+              src="https://accounts.google.com/gsi/client"
+              strategy="afterInteractive"
+              onLoad={() => {
+                const init = (window as any).__googleSignInInit;
+                if (typeof init === 'function') (init as () => void)();
+              }}
+            />
+          </>
+        )}
 
         <div className="flex justify-between items-center text-sm mt-6 pt-6 border-t">
           <a href="/forgot-password" className="text-muted-foreground hover:text-primary transition-colors">

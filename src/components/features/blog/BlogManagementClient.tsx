@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import blogService from '@/services/blogService';
+import aiService from '@/services/aiService';
+import { Sparkles } from 'lucide-react';
 import { BlogPost, BlogPostUpsertRequest } from '@/types/blog';
 
 const QUERY_KEY = ['blog-posts'];
@@ -172,7 +174,34 @@ export function BlogManagementClient() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="blog-content">Conteúdo</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="blog-content">Conteúdo</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={!form.title?.trim()}
+                onClick={async () => {
+                  if (!form.title?.trim()) return;
+                  try {
+                    toast.loading('Gerando post com IA...', { id: 'ai-blog' });
+                    const res = await aiService.generateBlogPost({
+                      productName: form.title,
+                      language: 'pt',
+                      tone: 'professional',
+                    });
+                    setForm((prev) => ({ ...prev, content: res.content }));
+                    toast.success(`Post gerado! (${res.usedThisMonth}/${res.monthlyLimit} usados)`, { id: 'ai-blog' });
+                  } catch {
+                    toast.error('Erro ao gerar post com IA', { id: 'ai-blog' });
+                  }
+                }}
+                className="gap-1 text-xs"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                Gerar com IA
+              </Button>
+            </div>
             <textarea
               id="blog-content"
               className="min-h-55 w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"

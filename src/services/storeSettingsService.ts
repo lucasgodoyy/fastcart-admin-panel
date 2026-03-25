@@ -21,10 +21,16 @@ export type StoreSettings = {
   customerMessageJson: string | null;
   stripeAccountId: string | null;
   stripeConnected: boolean;
+  mercadopagoConnected: boolean;
   cashOnDeliveryEnabled: boolean;
   manualPaymentEnabled: boolean;
   manualPaymentLabel: string | null;
   manualPaymentInstructions: string | null;
+  pixDirectEnabled: boolean;
+  pixKey: string | null;
+  pixKeyType: string | null;
+  mpMaxInstallments: number;
+  mpInterestByCustomer: boolean;
   whatsappNumber: string | null;
   whatsappMessage: string | null;
   whatsappEnabled: boolean;
@@ -32,6 +38,36 @@ export type StoreSettings = {
   messengerEnabled: boolean;
   minOrderValue: number | null;
   catalogMode: boolean;
+  lowStockThreshold: number;
+  hotjarId: string | null;
+  googleAdsId: string | null;
+  externalChatScript: string | null;
+  storePasswordEnabled: boolean;
+  storePassword: string | null;
+  floatingVideoEnabled: boolean;
+  floatingVideoUrl: string | null;
+
+  // Business Data
+  seoTitle: string | null;
+  seoDescription: string | null;
+  timezone: string | null;
+  businessSector: string | null;
+  useNameForSeo: boolean;
+  phoneCountryCode: string | null;
+
+  // Fiscal Data
+  fiscalName: string | null;
+  fiscalCpfCnpj: string | null;
+  fiscalCep: string | null;
+  fiscalAddressStreet: string | null;
+  fiscalAddressNumber: string | null;
+  fiscalAddressComplement: string | null;
+  fiscalAddressNeighborhood: string | null;
+  fiscalAddressCity: string | null;
+  fiscalAddressState: string | null;
+  fiscalAddressCountry: string | null;
+  fiscalDataComplete: boolean;
+
   createdAt: string;
 };
 
@@ -56,6 +92,11 @@ export type UpdateStoreSettingsRequest = {
   manualPaymentEnabled?: boolean;
   manualPaymentLabel?: string;
   manualPaymentInstructions?: string;
+  pixDirectEnabled?: boolean;
+  pixKey?: string;
+  pixKeyType?: string;
+  mpMaxInstallments?: number;
+  mpInterestByCustomer?: boolean;
   whatsappNumber?: string;
   whatsappMessage?: string;
   whatsappEnabled?: boolean;
@@ -63,6 +104,35 @@ export type UpdateStoreSettingsRequest = {
   messengerEnabled?: boolean;
   minOrderValue?: number;
   catalogMode?: boolean;
+  lowStockThreshold?: number;
+  hotjarId?: string;
+  googleAdsId?: string;
+  externalChatScript?: string;
+  storePasswordEnabled?: boolean;
+  storePassword?: string;
+  floatingVideoEnabled?: boolean;
+  floatingVideoUrl?: string;
+
+  // Business Data
+  seoTitle?: string;
+  seoDescription?: string;
+  timezone?: string;
+  businessSector?: string;
+  useNameForSeo?: boolean;
+  phoneCountryCode?: string;
+
+  // Fiscal Data
+  fiscalName?: string;
+  fiscalCpfCnpj?: string;
+  fiscalCep?: string;
+  fiscalAddressStreet?: string;
+  fiscalAddressNumber?: string;
+  fiscalAddressComplement?: string;
+  fiscalAddressNeighborhood?: string;
+  fiscalAddressCity?: string;
+  fiscalAddressState?: string;
+  fiscalAddressCountry?: string;
+  fiscalDataComplete?: boolean;
 };
 
 export type StoreUser = {

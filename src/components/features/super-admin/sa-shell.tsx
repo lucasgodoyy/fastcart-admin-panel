@@ -50,6 +50,7 @@ export function SaShell({ children }: { children: React.ReactNode }) {
     const cls =
       themeId === "ocean" ? "sa-theme-ocean" :
       themeId === "forest" ? "sa-theme-forest" :
+      themeId === "light" ? "sa-theme-light" :
       "super-admin-theme";
     setThemeClass(cls);
     document.body.className = document.body.className
@@ -81,8 +82,8 @@ export function SaShell({ children }: { children: React.ReactNode }) {
     <div className={`${themeClass} min-h-screen bg-[hsl(var(--sa-bg))] text-[hsl(var(--sa-text))]`}>
       {/* Ambient background effects */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-[40%] -right-[20%] h-[80vh] w-[60vw] rounded-full bg-[hsl(var(--sa-accent))] opacity-[0.02] blur-[120px]" />
-        <div className="absolute -bottom-[30%] -left-[15%] h-[70vh] w-[50vw] rounded-full bg-[hsl(var(--sa-info))] opacity-[0.015] blur-[100px]" />
+        <div className="absolute -top-[40%] -right-[20%] h-[80vh] w-[60vw] rounded-full bg-[hsl(var(--sa-accent))] opacity-[0.03] blur-[120px]" />
+        <div className="absolute -bottom-[30%] -left-[15%] h-[70vh] w-[50vw] rounded-full bg-[hsl(var(--sa-info))] opacity-[0.02] blur-[100px]" />
       </div>
 
       {/* Desktop sidebar */}
@@ -187,7 +188,7 @@ export function SaShell({ children }: { children: React.ReactNode }) {
               >
                 <DropdownMenuLabel className="text-[hsl(var(--sa-text-secondary))]">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium text-[hsl(var(--sa-text))]">{user?.email || "admin@lojaki.com"}</p>
+                    <p className="text-sm font-medium text-[hsl(var(--sa-text))]">{user?.email || "admin@rapidocart.com.br"}</p>
                     <p className="text-xs text-[hsl(var(--sa-text-muted))]">SUPER_ADMIN</p>
                   </div>
                 </DropdownMenuLabel>

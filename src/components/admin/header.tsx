@@ -191,7 +191,7 @@ export function AdminHeader() {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium">{user?.email || "admin@lojaki.com"}</p>
+                <p className="text-sm font-medium">{user?.email || "admin@rapidocart.com.br"}</p>
                 <p className="text-xs text-muted-foreground">{user?.role || "ADMIN"}</p>
               </div>
             </DropdownMenuLabel>

@@ -28,9 +28,9 @@ export function SaDomainsPage() {
 
   // Platform domains (always present)
   const platformDomains = [
-    { host: "lojaki.com", type: "Plataforma", ssl: "Válido", status: "ACTIVE" as const },
-    { host: "admin.lojaki.com", type: "Admin Panel", ssl: "Válido", status: "ACTIVE" as const },
-    { host: "api.lojaki.com", type: "API", ssl: "Válido", status: "ACTIVE" as const },
+    { host: "rapidocart.com.br", type: "Plataforma", ssl: "Válido", status: "ACTIVE" as const },
+    { host: "admin.rapidocart.com.br", type: "Admin Panel", ssl: "Válido", status: "ACTIVE" as const },
+    { host: "api.rapidocart.com.br", type: "API", ssl: "Válido", status: "ACTIVE" as const },
   ];
 
   if (isLoading) {

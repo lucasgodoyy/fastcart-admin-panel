@@ -1,7 +1,7 @@
 import apiClient from '@/lib/api';
 
 /* ── Scope type constants (match backend PromotionApplyScopeType enum) ── */
-export const SHIPPING_SCOPE_TYPES = ['ENTIRE_STORE', 'CATEGORIES', 'PRODUCTS'] as const;
+export const SHIPPING_SCOPE_TYPES = ['ENTIRE_STORE', 'CATEGORIES', 'PRODUCTS', 'BRANDS'] as const;
 export type ShippingApplyScopeType = (typeof SHIPPING_SCOPE_TYPES)[number];
 
 /* ── Zone type constants (match backend DeliveryZoneType enum) ── */

@@ -38,6 +38,7 @@ export { SaSupportPage } from "./pages/sa-support-page";
 export { SaMarketingPage } from "./pages/sa-marketing-page";
 export { SaNotificationsPage } from "./pages/sa-notifications-page";
 export { SaSecurityPage } from "./pages/sa-security-page";
+export { SaMetaAdsConfigPage } from "./pages/sa-meta-ads-config-page";
 export { SaAppearancePage } from "./pages/sa-appearance-page";
 export { SaDomainsPage } from "./pages/sa-domains-page";
 export { SaInfrastructurePage } from "./pages/sa-infrastructure-page";

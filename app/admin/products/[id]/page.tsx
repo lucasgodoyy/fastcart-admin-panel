@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { EditProductClient } from '@/components/features/products/EditProductClient';
+import { ProductFormClient } from '@/components/features/products/ProductFormClient';
 
 type EditProductPageProps = {
   params: Promise<{ id: string }>;
@@ -13,5 +13,5 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
     notFound();
   }
 
-  return <EditProductClient productId={productId} />;
+  return <ProductFormClient mode="edit" productId={productId} />;
 }

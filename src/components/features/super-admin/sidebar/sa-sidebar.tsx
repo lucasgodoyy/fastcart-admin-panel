@@ -45,7 +45,7 @@ function NavItem({ item, pathname, expanded, onToggle, collapsed }: {
       className={cn(
         "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium cursor-pointer select-none transition-colors duration-200",
         active
-          ? "text-white"
+          ? "text-[hsl(var(--sa-accent))] font-semibold"
           : "text-[hsl(var(--sa-text-secondary))] hover:text-[hsl(var(--sa-text))] hover:bg-[hsl(var(--sa-surface-hover))]"
       )}
       whileHover={{ x: 2 }}
@@ -234,7 +234,7 @@ export function SaSidebar({ collapsed = false }: { collapsed?: boolean }) {
             exit={{ opacity: 0 }}
           >
             <Link href="/super-admin" className="flex flex-col">
-              <span className="text-[14px] font-bold text-[hsl(var(--sa-text))]">Lojaki</span>
+              <span className="text-[14px] font-bold text-[hsl(var(--sa-text))]">RapidoCart</span>
               <span className="text-[10px] font-medium text-[hsl(var(--sa-text-muted))]">Super Admin</span>
             </Link>
           </motion.div>

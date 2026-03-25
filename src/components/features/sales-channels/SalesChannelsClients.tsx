@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { ChevronRight, ExternalLink, FileText, Pencil, Trash2, X } from 'lucide-react';
+import { ChevronDown, ChevronRight, ChevronUp, ExternalLink, FileText, GripVertical, Pencil, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -1104,6 +1104,7 @@ export function OnlineStoreMenusClient() {
     <OnlineStoreMenusEditor
       key={JSON.stringify(settings.menus)}
       initialMenus={settings.menus}
+      existingPages={settings.pages}
       isSaving={isSaving}
       onSave={(menus) => save({ menus })}
     />
@@ -1112,16 +1113,18 @@ export function OnlineStoreMenusClient() {
 
 function OnlineStoreMenusEditor({
   initialMenus,
+  existingPages,
   isSaving,
   onSave,
 }: {
   initialMenus: OnlineStoreMenuItem[];
+  existingPages: OnlineStorePageItem[];
   isSaving: boolean;
   onSave: (menus: OnlineStoreMenuItem[]) => void;
 }) {
-  type MenuTarget = 'home' | 'contact' | 'blog' | 'categories' | 'url';
+  type MenuTarget = 'home' | 'contact' | 'blog' | 'categories' | 'page' | 'product' | 'url';
 
-  const MENU_TARGET_URLS: Record<Exclude<MenuTarget, 'url'>, string> = {
+  const FIXED_TARGET_URLS: Record<Exclude<MenuTarget, 'url' | 'page' | 'product'>, string> = {
     home: '/',
     contact: '/contact',
     blog: '/blog',
@@ -1130,34 +1133,54 @@ function OnlineStoreMenusEditor({
 
   const MENU_TARGET_OPTIONS: Array<{ value: MenuTarget; label: string }> = [
     { value: 'home', label: 'Home' },
-    { value: 'contact', label: 'Contato' },
-    { value: 'blog', label: 'Blog' },
+    { value: 'page', label: 'Página da loja' },
     { value: 'categories', label: 'Categorias' },
-    { value: 'url', label: 'URL' },
+    { value: 'product', label: 'Produto' },
+    { value: 'blog', label: 'Blog' },
+    { value: 'contact', label: 'Contato' },
+    { value: 'url', label: 'URL externa' },
   ];
 
   const inferTargetFromUrl = (url: string): MenuTarget => {
     const normalized = url.trim().toLowerCase();
-    const found = (Object.entries(MENU_TARGET_URLS) as Array<[Exclude<MenuTarget, 'url'>, string]>).find(
+    if (normalized.startsWith('/pages/')) return 'page';
+    if (normalized.startsWith('/produtos/') || normalized.startsWith('/products/')) return 'product';
+    const fixed = (Object.entries(FIXED_TARGET_URLS) as Array<[Exclude<MenuTarget, 'url' | 'page' | 'product'>, string]>).find(
       ([, targetUrl]) => targetUrl.toLowerCase() === normalized
     );
-    return found ? found[0] : 'url';
+    return fixed ? fixed[0] : 'url';
   };
 
-  const resolveUrlByTarget = (target: MenuTarget, customUrl?: string) => {
-    if (target === 'url') {
-      return (customUrl || '').trim();
-    }
-    return MENU_TARGET_URLS[target];
+  const resolveUrlByTarget = (target: MenuTarget, customUrl?: string, pageSlug?: string) => {
+    if (target === 'url') return (customUrl || '').trim();
+    if (target === 'page') return pageSlug ? `/pages/${pageSlug}` : '';
+    if (target === 'product') return (customUrl || '').trim();
+    return FIXED_TARGET_URLS[target as keyof typeof FIXED_TARGET_URLS] ?? '';
+  };
+
+  const extractPageSlugFromUrl = (url: string): string => {
+    const match = url.match(/^\/pages\/(.+)$/i);
+    return match ? match[1] : '';
   };
 
   const [menus, setMenus] = useState<OnlineStoreMenuItem[]>(initialMenus);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [createForm, setCreateForm] = useState<{ label: string; target: MenuTarget; customUrl: string }>({
+  const [createForm, setCreateForm] = useState<{
+    label: string;
+    target: MenuTarget;
+    customUrl: string;
+    pageSlug: string;
+  }>({
     label: '',
     target: 'home',
     customUrl: '',
+    pageSlug: '',
   });
+
+  const activePages = useMemo(
+    () => existingPages.filter((p) => p.active !== false && p.slug && p.title),
+    [existingPages]
+  );
 
   const buildPersistedMenus = (source: OnlineStoreMenuItem[]) =>
     source
@@ -1178,23 +1201,28 @@ function OnlineStoreMenusEditor({
     });
   };
 
+  const moveItem = (index: number, direction: 'up' | 'down') => {
+    const swapIndex = direction === 'up' ? index - 1 : index + 1;
+    updateMenus((prev) => {
+      if (swapIndex < 0 || swapIndex >= prev.length) return prev;
+      const next = [...prev];
+      [next[index], next[swapIndex]] = [next[swapIndex], next[index]];
+      return next;
+    }, true);
+  };
+
   const resetCreateForm = () => {
-    setCreateForm({
-      label: '',
-      target: 'home',
-      customUrl: '',
-    });
+    setCreateForm({ label: '', target: 'home', customUrl: '', pageSlug: '' });
   };
 
   const handleAddMenu = () => {
     const label = createForm.label.trim();
-    const url = resolveUrlByTarget(createForm.target, createForm.customUrl);
+    const url = resolveUrlByTarget(createForm.target, createForm.customUrl, createForm.pageSlug);
 
     if (!label) {
       toast.error('Informe o nome do link');
       return;
     }
-
     if (!url) {
       toast.error('Informe para onde o link deve levar');
       return;
@@ -1209,103 +1237,191 @@ function OnlineStoreMenusEditor({
     <div className="p-4 md:p-6 lg:p-8">
       <SectionHeader title="Menus" description="Defina os links de navegação da sua loja online." />
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-lg">Menu principal</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {menus.map((menu, index) => (
-            <div key={`${menu.label}-${index}`} className="grid grid-cols-1 gap-2 rounded-md border border-border p-3 md:grid-cols-5">
-              <Input
-                placeholder="Nome"
-                value={menu.label}
-                onChange={(event) =>
-                  updateMenus((prev) => prev.map((item, i) => (i === index ? { ...item, label: event.target.value } : item)))
-                }
-                onBlur={() => onSave(buildPersistedMenus(menus))}
-              />
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button type="button" variant="outline" size="sm" onClick={resetCreateForm}>
+                + Novo link
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Novo link de menu</DialogTitle>
+              </DialogHeader>
 
-              <select
-                className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-                value={inferTargetFromUrl(menu.url)}
-                onChange={(event) => {
-                  const target = event.target.value as MenuTarget;
-                  const nextUrl = target === 'url' ? '' : resolveUrlByTarget(target);
-                  updateMenus((prev) => prev.map((item, i) => (i === index ? { ...item, url: nextUrl } : item)), true);
-                }}
-              >
-                {MENU_TARGET_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              <div className="space-y-4 pt-1">
+                <div>
+                  <Label>Nome exibido</Label>
+                  <Input
+                    className="mt-1.5"
+                    value={createForm.label}
+                    onChange={(event) => setCreateForm((prev) => ({ ...prev, label: event.target.value }))}
+                    placeholder="Ex.: Início"
+                    autoFocus
+                  />
+                </div>
 
-              {inferTargetFromUrl(menu.url) === 'url' ? (
-                <Input
-                  placeholder="https://... ou /minha-pagina"
-                  value={menu.url}
-                  onChange={(event) =>
-                    updateMenus((prev) => prev.map((item, i) => (i === index ? { ...item, url: event.target.value } : item)))
-                  }
-                  onBlur={() => onSave(buildPersistedMenus(menus))}
-                />
-              ) : (
-                <Input value={menu.url} readOnly className="bg-muted text-muted-foreground" />
-              )}
+                <div>
+                  <Label>Destino</Label>
+                  <select
+                    className="mt-1.5 h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                    value={createForm.target}
+                    onChange={(event) => {
+                      const target = event.target.value as MenuTarget;
+                      setCreateForm((prev) => ({ ...prev, target, customUrl: '', pageSlug: '' }));
+                    }}
+                  >
+                    {MENU_TARGET_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-              <label className="inline-flex h-9 items-center gap-2 px-2 text-sm text-muted-foreground">
-                <input
-                  type="checkbox"
-                  checked={menu.active !== false}
-                  onChange={(event) =>
-                    updateMenus((prev) => prev.map((item, i) => (i === index ? { ...item, active: event.target.checked } : item)), true)
-                  }
-                />
-                Exibir
-              </label>
-
-              <div className="flex justify-end">
-                <Button type="button" variant="ghost" onClick={() => updateMenus((prev) => prev.filter((_, i) => i !== index), true)}>
-                  Remover
-                </Button>
-              </div>
-            </div>
-          ))}
-
-          <div className="flex justify-between pt-2">
-            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-              <DialogTrigger asChild>
-                <Button type="button" variant="outline" onClick={resetCreateForm}>
-                  Novo link
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-lg">
-                <DialogHeader>
-                  <DialogTitle>Novo link</DialogTitle>
-                </DialogHeader>
-
-                <div className="space-y-4">
+                {createForm.target === 'page' && (
                   <div>
-                    <Label>Nome</Label>
+                    <Label>Escolher página</Label>
+                    {activePages.length === 0 ? (
+                      <p className="mt-1.5 text-xs text-muted-foreground">
+                        Nenhuma página ativa cadastrada. Crie páginas na aba <strong>Páginas</strong>.
+                      </p>
+                    ) : (
+                      <select
+                        className="mt-1.5 h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                        value={createForm.pageSlug}
+                        onChange={(event) => {
+                          const slug = event.target.value;
+                          const page = activePages.find((p) => p.slug === slug);
+                          setCreateForm((prev) => ({
+                            ...prev,
+                            pageSlug: slug,
+                            label: prev.label || (page?.title ?? ''),
+                          }));
+                        }}
+                      >
+                        <option value="">Selecione uma página...</option>
+                        {activePages.map((page) => (
+                          <option key={page.slug} value={page.slug}>
+                            {page.title}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                    {createForm.pageSlug && (
+                      <p className="mt-1 text-xs text-muted-foreground">URL: /pages/{createForm.pageSlug}</p>
+                    )}
+                  </div>
+                )}
+
+                {createForm.target === 'product' && (
+                  <div>
+                    <Label>URL do produto</Label>
                     <Input
                       className="mt-1.5"
-                      value={createForm.label}
-                      onChange={(event) => setCreateForm((prev) => ({ ...prev, label: event.target.value }))}
-                      placeholder="Ex.: Início"
+                      value={createForm.customUrl}
+                      onChange={(event) => setCreateForm((prev) => ({ ...prev, customUrl: event.target.value }))}
+                      placeholder="/produtos/meu-produto"
                     />
                   </div>
+                )}
 
+                {createForm.target === 'url' && (
                   <div>
-                    <Label>Leva a</Label>
-                    <select
-                      className="mt-1.5 h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
-                      value={createForm.target}
+                    <Label>URL</Label>
+                    <Input
+                      className="mt-1.5"
+                      value={createForm.customUrl}
+                      onChange={(event) => setCreateForm((prev) => ({ ...prev, customUrl: event.target.value }))}
+                      placeholder="https://... ou /pagina-custom"
+                    />
+                  </div>
+                )}
+
+                {!['url', 'page', 'product'].includes(createForm.target) && (
+                  <p className="text-xs text-muted-foreground">
+                    URL: {resolveUrlByTarget(createForm.target)}
+                  </p>
+                )}
+
+                <div className="flex justify-end gap-2 pt-1">
+                  <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button type="button" onClick={handleAddMenu} disabled={isSaving}>
+                    Adicionar
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </CardHeader>
+        <CardContent>
+          {menus.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-12 text-center">
+              <GripVertical className="mb-3 h-8 w-8 text-muted-foreground/40" />
+              <p className="text-sm font-medium text-foreground">Nenhum link no menu</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Adicione links para Home, páginas, categorias, produtos ou URLs externas.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {menus.map((menu, index) => {
+                const target = inferTargetFromUrl(menu.url);
+                const isEditable = target === 'url' || target === 'product';
+
+                return (
+                  <div
+                    key={`${menu.label}-${index}`}
+                    className="flex items-center gap-2 rounded-md border border-border bg-card p-2.5"
+                  >
+                    {/* Reorder buttons */}
+                    <div className="flex flex-col gap-0.5">
+                      <button
+                        type="button"
+                        disabled={index === 0}
+                        onClick={() => moveItem(index, 'up')}
+                        className="rounded p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30"
+                        aria-label="Mover para cima"
+                      >
+                        <ChevronUp className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={index === menus.length - 1}
+                        onClick={() => moveItem(index, 'down')}
+                        className="rounded p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30"
+                        aria-label="Mover para baixo"
+                      >
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+
+                    {/* Label */}
+                    <Input
+                      className="h-8 min-w-0 flex-1 text-sm"
+                      placeholder="Nome"
+                      value={menu.label}
                       onChange={(event) =>
-                        setCreateForm((prev) => ({
-                          ...prev,
-                          target: event.target.value as MenuTarget,
-                        }))
+                        updateMenus((prev) => prev.map((item, i) => (i === index ? { ...item, label: event.target.value } : item)))
                       }
+                      onBlur={() => onSave(buildPersistedMenus(menus))}
+                    />
+
+                    {/* Target selector */}
+                    <select
+                      className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+                      value={target}
+                      onChange={(event) => {
+                        const newTarget = event.target.value as MenuTarget;
+                        const nextUrl = newTarget === 'url' || newTarget === 'product' ? '' : resolveUrlByTarget(newTarget);
+                        updateMenus(
+                          (prev) => prev.map((item, i) => (i === index ? { ...item, url: nextUrl } : item)),
+                          newTarget !== 'url' && newTarget !== 'product' && newTarget !== 'page'
+                        );
+                      }}
                     >
                       {MENU_TARGET_OPTIONS.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -1313,34 +1429,77 @@ function OnlineStoreMenusEditor({
                         </option>
                       ))}
                     </select>
-                  </div>
 
-                  {createForm.target === 'url' && (
-                    <div>
-                      <Label>URL</Label>
+                    {/* URL/Page/Product field */}
+                    {target === 'page' ? (
+                      <select
+                        className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+                        value={extractPageSlugFromUrl(menu.url)}
+                        onChange={(event) => {
+                          const slug = event.target.value;
+                          updateMenus(
+                            (prev) => prev.map((item, i) => (i === index ? { ...item, url: slug ? `/pages/${slug}` : '' } : item)),
+                            true
+                          );
+                        }}
+                      >
+                        <option value="">Selecione...</option>
+                        {activePages.map((page) => (
+                          <option key={page.slug} value={page.slug}>
+                            {page.title}
+                          </option>
+                        ))}
+                      </select>
+                    ) : isEditable ? (
                       <Input
-                        className="mt-1.5"
-                        value={createForm.customUrl}
-                        onChange={(event) => setCreateForm((prev) => ({ ...prev, customUrl: event.target.value }))}
-                        placeholder="https://... ou /pagina-custom"
+                        className="h-8 min-w-0 flex-1 text-xs"
+                        placeholder={target === 'product' ? '/produtos/slug' : 'https://...'}
+                        value={menu.url}
+                        onChange={(event) =>
+                          updateMenus((prev) => prev.map((item, i) => (i === index ? { ...item, url: event.target.value } : item)))
+                        }
+                        onBlur={() => onSave(buildPersistedMenus(menus))}
                       />
-                    </div>
-                  )}
+                    ) : (
+                      <span className="flex-1 truncate rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
+                        {menu.url}
+                      </span>
+                    )}
 
-                  <div className="flex justify-end gap-2">
-                    <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                      Cancelar
-                    </Button>
-                    <Button type="button" onClick={handleAddMenu} disabled={isSaving}>
-                      Adicionar
-                    </Button>
+                    {/* Active toggle */}
+                    <label className="flex cursor-pointer items-center gap-1 text-xs text-muted-foreground">
+                      <input
+                        type="checkbox"
+                        className="h-3.5 w-3.5"
+                        checked={menu.active !== false}
+                        onChange={(event) =>
+                          updateMenus(
+                            (prev) => prev.map((item, i) => (i === index ? { ...item, active: event.target.checked } : item)),
+                            true
+                          )
+                        }
+                      />
+                      Exibir
+                    </label>
+
+                    {/* Remove */}
+                    <button
+                      type="button"
+                      onClick={() => updateMenus((prev) => prev.filter((_, i) => i !== index), true)}
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                      aria-label="Remover link"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
                   </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+                );
+              })}
+            </div>
+          )}
 
+          <div className="flex justify-end pt-4">
             <Button type="button" onClick={() => onSave(buildPersistedMenus(menus))} disabled={isSaving}>
-              Salvar menus
+              {isSaving ? 'Salvando...' : 'Salvar menus'}
             </Button>
           </div>
         </CardContent>

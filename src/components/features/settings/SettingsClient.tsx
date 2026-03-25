@@ -17,6 +17,9 @@ import {
   Link2,
   Plug,
   Settings2,
+  Building2,
+  Shield,
+  Receipt,
 } from 'lucide-react';
 import { t } from '@/lib/admin-language';
 
@@ -28,6 +31,30 @@ interface SettingsItem {
 }
 
 const settingsItems: SettingsItem[] = [
+  {
+    label: t('Dados do negócio', 'Business data'),
+    description: t('Nome da loja, descrição SEO, telefone, fuso horário e ramo.', 'Store name, SEO description, phone, timezone and sector.'),
+    href: '/admin/settings/business-data',
+    icon: <Building2 className="h-5 w-5" />,
+  },
+  {
+    label: t('Dados da conta', 'Account settings'),
+    description: t('Nome, e-mail e senha de acesso.', 'Name, email and access password.'),
+    href: '/admin/settings/account',
+    icon: <User className="h-5 w-5" />,
+  },
+  {
+    label: t('Segurança', 'Security'),
+    description: t('Autenticação de 2 fatores e sessões ativas.', 'Two-factor authentication and active sessions.'),
+    href: '/admin/settings/security',
+    icon: <Shield className="h-5 w-5" />,
+  },
+  {
+    label: t('Dados fiscais', 'Fiscal data'),
+    description: t('CPF/CNPJ e endereço para emissão de notas fiscais.', 'Tax ID and address for invoice issuance.'),
+    href: '/admin/settings/fiscal-data',
+    icon: <Receipt className="h-5 w-5" />,
+  },
   {
     label: t('Informações de contato', 'Contact info'),
     description: t('Dados da empresa, e-mail e endereço.', 'Company details, email, and address.'),

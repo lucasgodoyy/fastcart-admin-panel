@@ -132,7 +132,7 @@ export function SaErrorLogsPage() {
       <SaCard className="p-4">
         <div className="flex flex-wrap gap-3">
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--sa-text-muted))]" />
             <Input
               placeholder="Buscar por mensagem, tipo ou path..."
               value={search}
@@ -140,7 +140,7 @@ export function SaErrorLogsPage() {
                 setSearch(e.target.value);
                 setPage(0);
               }}
-              className="pl-9"
+              className="pl-9 border-[hsl(var(--sa-border))] bg-[hsl(var(--sa-bg))] text-[hsl(var(--sa-text))] placeholder:text-[hsl(var(--sa-text-muted))]"
             />
           </div>
           <Select
@@ -187,7 +187,7 @@ export function SaErrorLogsPage() {
         className="space-y-2"
       >
         {isLoading ? (
-          <SaCard className="p-8 text-center text-muted-foreground">
+          <SaCard className="p-8 text-center text-[hsl(var(--sa-text-muted))]">
             Carregando...
           </SaCard>
         ) : !logs?.content?.length ? (
@@ -207,17 +207,17 @@ export function SaErrorLogsPage() {
                         status={log.severity}
                         map={SEVERITY_MAP}
                       />
-                      <span className="text-xs font-mono text-muted-foreground">
+                      <span className="text-xs font-mono text-[hsl(var(--sa-text-muted))]">
                         {log.errorType}
                       </span>
                       {log.resolved && (
-                        <span className="text-xs text-green-600 flex items-center gap-1">
+                        <span className="text-xs text-[hsl(var(--sa-success))] flex items-center gap-1">
                           <CheckCircle2 className="h-3 w-3" /> Resolvido
                         </span>
                       )}
                     </div>
-                    <p className="text-sm font-medium truncate">{log.message}</p>
-                    <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                    <p className="text-sm font-medium truncate text-[hsl(var(--sa-text))]">{log.message}</p>
+                    <div className="flex items-center gap-3 mt-1 text-xs text-[hsl(var(--sa-text-muted))]">
                       {log.requestMethod && (
                         <span className="font-mono">
                           {log.requestMethod} {log.requestPath}
@@ -255,12 +255,12 @@ export function SaErrorLogsPage() {
                   </div>
                 </div>
                 {expandedId === log.id && log.stackTrace && (
-                  <div className="mt-3 pt-3 border-t">
-                    <pre className="text-xs font-mono bg-muted p-3 rounded-md overflow-x-auto max-h-[300px] overflow-y-auto whitespace-pre-wrap">
+                  <div className="mt-3 pt-3 border-t border-[hsl(var(--sa-border-subtle))]">
+                    <pre className="text-xs font-mono bg-[hsl(var(--sa-bg-secondary))] text-[hsl(var(--sa-text-secondary))] p-3 rounded-md overflow-x-auto max-h-[300px] overflow-y-auto whitespace-pre-wrap">
                       {log.stackTrace}
                     </pre>
                     {log.notes && (
-                      <p className="mt-2 text-sm text-muted-foreground">
+                      <p className="mt-2 text-sm text-[hsl(var(--sa-text-muted))]">
                         <strong>Notas:</strong> {log.notes}
                       </p>
                     )}
@@ -275,7 +275,7 @@ export function SaErrorLogsPage() {
       {/* Pagination */}
       {logs && logs.totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm text-[hsl(var(--sa-text-muted))]">
             Página {page + 1} de {logs.totalPages} ({logs.totalElements} erros)
           </span>
           <div className="flex gap-2">

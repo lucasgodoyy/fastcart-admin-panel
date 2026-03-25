@@ -86,7 +86,7 @@ function Navbar() {
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-primary to-emerald-400 shadow-lg shadow-primary/25 transition-transform group-hover:scale-105">
             <Zap className="h-5 w-5 text-white" fill="white" />
           </div>
-          <span className="text-xl font-bold tracking-tight text-gray-900">Lojaki</span>
+          <span className="text-xl font-bold tracking-tight text-gray-900">RapidoCart</span>
         </Link>
 
         {/* Desktop nav */}
@@ -296,7 +296,7 @@ function HeroSection() {
                 <div className="h-3 w-3 rounded-full bg-green-400" />
               </div>
               <div className="ml-4 flex-1 rounded-lg bg-gray-50 px-4 py-1.5 text-xs text-gray-400 font-mono">
-                app.lojaki.com/admin/dashboard
+                app.rapidocart.com.br/admin/dashboard
               </div>
             </div>
             {/* Dashboard mockup content */}
@@ -307,7 +307,7 @@ function HeroSection() {
                   <div className="h-7 w-7 rounded-lg bg-emerald-500 flex items-center justify-center">
                     <Zap className="h-4 w-4 text-white" />
                   </div>
-                  <span className="text-sm font-bold text-white">Lojaki</span>
+                  <span className="text-sm font-bold text-white">RapidoCart</span>
                 </div>
                 {['Dashboard', 'Produtos', 'Pedidos', 'Clientes', 'Marketing'].map((item, i) => (
                   <div
@@ -418,8 +418,14 @@ function TrustBar() {
   ];
 
   return (
-    <section ref={ref} className="relative border-y border-gray-100 bg-gray-50/50">
-      <div className="mx-auto max-w-7xl px-6 py-12">
+    <section ref={ref} className="relative bg-gradient-to-br from-emerald-700 via-green-600 to-teal-700 overflow-hidden">
+      {/* Decorative shapes */}
+      <div className="absolute inset-0 -z-0">
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-emerald-500/20 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 right-1/3 w-[400px] h-[400px] bg-teal-400/15 rounded-full blur-[100px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff06_1px,transparent_1px),linear-gradient(to_bottom,#ffffff06_1px,transparent_1px)] bg-[size:3rem_3rem]" />
+      </div>
+      <div className="relative z-10 mx-auto max-w-7xl px-6 py-16 md:py-20">
         <motion.div
           variants={stagger}
           initial="hidden"
@@ -428,8 +434,8 @@ function TrustBar() {
         >
           {stats.map((stat, i) => (
             <motion.div key={stat.label} variants={fadeUp} custom={i} className="text-center">
-              <p className="text-3xl font-extrabold text-gray-900 md:text-4xl">{stat.value}</p>
-              <p className="mt-1 text-sm text-gray-500">{stat.label}</p>
+              <p className="text-3xl font-extrabold text-white md:text-4xl">{stat.value}</p>
+              <p className="mt-1 text-sm text-emerald-100">{stat.label}</p>
             </motion.div>
           ))}
         </motion.div>
@@ -585,7 +591,13 @@ function HowItWorks() {
   ];
 
   return (
-    <section id="como-funciona" ref={ref} className="relative py-24 md:py-32 bg-gray-50/50">
+    <section id="como-funciona" ref={ref} className="relative py-24 md:py-32 bg-gradient-to-br from-emerald-800 via-green-700 to-teal-800 overflow-hidden">
+      {/* Background effects */}
+      <div className="absolute inset-0">
+        <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-emerald-500/15 rounded-full blur-[140px]" />
+        <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-teal-400/10 rounded-full blur-[100px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff06_1px,transparent_1px),linear-gradient(to_bottom,#ffffff06_1px,transparent_1px)] bg-[size:3rem_3rem]" />
+      </div>
       <div className="mx-auto max-w-7xl px-6">
         {/* Header */}
         <motion.div
@@ -594,15 +606,15 @@ function HowItWorks() {
           animate={inView ? 'visible' : 'hidden'}
           className="mx-auto max-w-3xl text-center mb-16"
         >
-          <motion.div variants={fadeUp} className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
+          <motion.div variants={fadeUp} className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium text-emerald-100">
             <Sparkles className="h-3.5 w-3.5" />
             Simples e rápido
           </motion.div>
-          <motion.h2 variants={fadeUp} custom={1} className="text-3xl font-extrabold tracking-tight text-gray-900 md:text-5xl">
+          <motion.h2 variants={fadeUp} custom={1} className="text-3xl font-extrabold tracking-tight text-white md:text-5xl">
             Comece a vender em{' '}
-            <span className="bg-linear-to-r from-primary to-emerald-500 bg-clip-text text-transparent">3 passos</span>
+            <span className="text-emerald-200">3 passos</span>
           </motion.h2>
-          <motion.p variants={fadeUp} custom={2} className="mt-4 text-lg text-gray-500">
+          <motion.p variants={fadeUp} custom={2} className="mt-4 text-lg text-emerald-100/80">
             Sem complicações. Crie sua loja virtual e comece a faturar.
           </motion.p>
         </motion.div>
@@ -618,16 +630,16 @@ function HowItWorks() {
             <motion.div key={step.step} variants={fadeUp} custom={i} className="relative text-center">
               {/* Connector line */}
               {i < steps.length - 1 && (
-                <div className="hidden md:block absolute top-12 left-[60%] w-[80%] h-px bg-linear-to-r from-gray-200 to-gray-100" />
+                <div className="hidden md:block absolute top-12 left-[60%] w-[80%] h-px bg-linear-to-r from-white/20 to-white/5" />
               )}
-              <div className={`relative z-10 mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-linear-to-br ${step.color} shadow-lg`}>
+              <div className={`relative z-10 mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-white/15 backdrop-blur-sm border border-white/20 shadow-lg`}>
                 <step.icon className="h-10 w-10 text-white" />
-                <span className="absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white text-xs font-bold text-gray-900 shadow-md ring-2 ring-gray-50">
+                <span className="absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white text-xs font-bold text-emerald-800 shadow-md">
                   {step.step}
                 </span>
               </div>
-              <h3 className="text-xl font-bold text-gray-900">{step.title}</h3>
-              <p className="mt-2 mx-auto max-w-xs text-sm text-gray-500 leading-relaxed">{step.description}</p>
+              <h3 className="text-xl font-bold text-white">{step.title}</h3>
+              <p className="mt-2 mx-auto max-w-xs text-sm text-emerald-100/80 leading-relaxed">{step.description}</p>
             </motion.div>
           ))}
         </motion.div>
@@ -714,7 +726,7 @@ function ProductShowcase() {
                   <div className="h-3 w-3 rounded-full bg-green-400" />
                 </div>
                 <div className="ml-4 flex-1 rounded-lg bg-gray-50 px-4 py-1.5 text-xs text-gray-400 font-mono">
-                  minhaloja.lojaki.com
+                  minhaloja.rapidocart.com.br
                 </div>
               </div>
               {/* Store content */}
@@ -791,25 +803,31 @@ function IntegrationsSection() {
   ];
 
   return (
-    <section ref={ref} className="relative py-24 md:py-32 bg-gray-50/50">
-      <div className="mx-auto max-w-7xl px-6">
+    <section ref={ref} className="relative py-24 md:py-32 bg-gradient-to-br from-green-700 via-emerald-600 to-teal-700 overflow-hidden">
+      {/* Background effects */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-1/3 w-[500px] h-[500px] bg-emerald-400/15 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-teal-400/10 rounded-full blur-[80px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff06_1px,transparent_1px),linear-gradient(to_bottom,#ffffff06_1px,transparent_1px)] bg-[size:3rem_3rem]" />
+      </div>
+      <div className="relative z-10 mx-auto max-w-7xl px-6">
         <motion.div
           variants={stagger}
           initial="hidden"
           animate={inView ? 'visible' : 'hidden'}
           className="mx-auto max-w-3xl text-center mb-16"
         >
-          <motion.div variants={fadeUp} className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
+          <motion.div variants={fadeUp} className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium text-emerald-100">
             <Shield className="h-3.5 w-3.5" />
             Integrações
           </motion.div>
-          <motion.h2 variants={fadeUp} custom={1} className="text-3xl font-extrabold tracking-tight text-gray-900 md:text-5xl">
+          <motion.h2 variants={fadeUp} custom={1} className="text-3xl font-extrabold tracking-tight text-white md:text-5xl">
             Conecte com suas{' '}
-            <span className="bg-linear-to-r from-primary to-emerald-500 bg-clip-text text-transparent">
+            <span className="text-emerald-200">
               ferramentas favoritas
             </span>
           </motion.h2>
-          <motion.p variants={fadeUp} custom={2} className="mt-4 text-lg text-gray-500">
+          <motion.p variants={fadeUp} custom={2} className="mt-4 text-lg text-emerald-100/80">
             Pagamentos, envios, marketing e mais — tudo integrado nativamente.
           </motion.p>
         </motion.div>
@@ -825,15 +843,15 @@ function IntegrationsSection() {
               key={integration.name}
               variants={scaleIn}
               custom={i}
-              className="group flex flex-col items-center justify-center gap-2 rounded-2xl border border-gray-100 bg-white p-5 transition-all hover:shadow-lg hover:shadow-gray-100/80 hover:-translate-y-1 hover:border-primary/20"
+              className="group flex flex-col items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 backdrop-blur-sm p-5 transition-all hover:bg-white/20 hover:-translate-y-1 hover:border-white/25"
             >
-              <div className="h-10 w-10 rounded-xl bg-gray-50 flex items-center justify-center group-hover:bg-primary/5 transition-colors">
-                <span className="text-lg font-bold text-gray-300 group-hover:text-primary transition-colors">
+              <div className="h-10 w-10 rounded-xl bg-white/15 flex items-center justify-center group-hover:bg-white/25 transition-colors">
+                <span className="text-lg font-bold text-white/70 group-hover:text-white transition-colors">
                   {integration.name.charAt(0)}
                 </span>
               </div>
-              <p className="text-xs font-semibold text-gray-900 text-center">{integration.name}</p>
-              <span className="text-[10px] text-gray-400">{integration.category}</span>
+              <p className="text-xs font-semibold text-white text-center">{integration.name}</p>
+              <span className="text-[10px] text-emerald-200/70">{integration.category}</span>
             </motion.div>
           ))}
         </motion.div>
@@ -850,7 +868,7 @@ function TestimonialsSection() {
 
   const testimonials = [
     {
-      quote: 'Migrei minha loja para a Lojaki e em 2 semanas já tinha dobrado minha conversão. A plataforma é incrivelmente intuitiva.',
+      quote: 'Migrei minha loja para a RapidoCart e em 2 semanas já tinha dobrado minha conversão. A plataforma é incrivelmente intuitiva.',
       name: 'Ana Beatriz Costa',
       role: 'Fundadora, Bella Store',
       initials: 'AC',
@@ -864,7 +882,7 @@ function TestimonialsSection() {
       color: 'from-blue-400 to-indigo-500',
     },
     {
-      quote: 'Com a Lojaki consegui colocar minha loja no ar em um dia. O checkout integrado com PIX foi um game changer.',
+      quote: 'Com a RapidoCart consegui colocar minha loja no ar em um dia. O checkout integrado com PIX foi um game changer.',
       name: 'Juliana Ferreira',
       role: 'Proprietária, JF Acessórios',
       initials: 'JF',
@@ -992,7 +1010,13 @@ function PricingSection() {
   ];
 
   return (
-    <section id="planos" ref={ref} className="relative py-24 md:py-32 bg-gray-50/50">
+    <section id="planos" ref={ref} className="relative py-24 md:py-32 bg-gradient-to-br from-emerald-800 via-green-700 to-teal-800 overflow-hidden">
+      {/* Background effects */}
+      <div className="absolute inset-0">
+        <div className="absolute top-1/3 left-0 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[140px]" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-teal-400/10 rounded-full blur-[120px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff06_1px,transparent_1px),linear-gradient(to_bottom,#ffffff06_1px,transparent_1px)] bg-[size:3rem_3rem]" />
+      </div>
       <div className="mx-auto max-w-7xl px-6">
         <motion.div
           variants={stagger}
@@ -1000,17 +1024,17 @@ function PricingSection() {
           animate={inView ? 'visible' : 'hidden'}
           className="mx-auto max-w-3xl text-center mb-16"
         >
-          <motion.div variants={fadeUp} className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
+          <motion.div variants={fadeUp} className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium text-emerald-100">
             <Sparkles className="h-3.5 w-3.5" />
             Planos
           </motion.div>
-          <motion.h2 variants={fadeUp} custom={1} className="text-3xl font-extrabold tracking-tight text-gray-900 md:text-5xl">
+          <motion.h2 variants={fadeUp} custom={1} className="text-3xl font-extrabold tracking-tight text-white md:text-5xl">
             Escolha o plano{' '}
-            <span className="bg-linear-to-r from-primary to-emerald-500 bg-clip-text text-transparent">
+            <span className="text-emerald-200">
               ideal para você
             </span>
           </motion.h2>
-          <motion.p variants={fadeUp} custom={2} className="mt-4 text-lg text-gray-500">
+          <motion.p variants={fadeUp} custom={2} className="mt-4 text-lg text-emerald-100/80">
             Comece grátis. Escale quando precisar. Sem surpresas.
           </motion.p>
         </motion.div>
@@ -1120,7 +1144,7 @@ function FinalCTA() {
               custom={1}
               className="mx-auto mt-4 max-w-xl text-lg text-gray-400"
             >
-              Junte-se a milhares de lojistas que já vendem com a Lojaki. Comece grátis — não precisa de cartão.
+              Junte-se a milhares de lojistas que já vendem com a RapidoCart. Comece grátis — não precisa de cartão.
             </motion.p>
             <motion.div
               variants={fadeUp}
@@ -1195,7 +1219,7 @@ function Footer() {
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-primary to-emerald-400 shadow-lg shadow-primary/25">
                 <Zap className="h-5 w-5 text-white" fill="white" />
               </div>
-              <span className="text-xl font-bold tracking-tight text-gray-900">Lojaki</span>
+              <span className="text-xl font-bold tracking-tight text-gray-900">RapidoCart</span>
             </Link>
             <p className="text-sm text-gray-500 leading-relaxed max-w-xs">
               A plataforma de e-commerce mais simples do Brasil. Crie, gerencie e escale sua loja online.
@@ -1221,7 +1245,7 @@ function Footer() {
 
         <div className="mt-12 flex flex-col md:flex-row items-center justify-between gap-4 border-t border-gray-100 pt-8">
           <p className="text-xs text-gray-400">
-            © {new Date().getFullYear()} Lojaki. Todos os direitos reservados.
+            © {new Date().getFullYear()} RapidoCart. Todos os direitos reservados.
           </p>
           <div className="flex items-center gap-4 text-xs text-gray-400">
             <span>Feito com ❤️ no Brasil</span>

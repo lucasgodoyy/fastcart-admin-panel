@@ -24,6 +24,19 @@ import {
   Zap,
   Headphones,
   Plug,
+  RotateCcw,
+  Star,
+  HelpCircle,
+  Timer,
+  TrendingUp as TrendingUpIcon,
+  RefreshCw,
+  FileText,
+  AppWindow,
+  Monitor,
+  Mail,
+  Share2,
+  Music,
+  Search,
 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -61,6 +74,9 @@ const navigation: NavSection[] = [
       { label: t("Estatísticas", "Analytics"), href: "/admin/statistics", icon: <TrendingUp className="h-4.5 w-4.5" />, children: [
         { label: t("Visão geral", "Overview"), href: "/admin/statistics" },
         { label: t("Pagamentos", "Payments"), href: "/admin/statistics/payments" },
+        { label: t("Tráfego", "Traffic"), href: "/admin/statistics/traffic" },
+        { label: t("Produtos", "Products"), href: "/admin/statistics/products" },
+        { label: t("Logística", "Shipping"), href: "/admin/statistics/shipping" },
       ]},
     ],
   },
@@ -70,8 +86,11 @@ const navigation: NavSection[] = [
       { label: t("Pedidos", "Orders"), href: "/admin/sales", icon: <ShoppingBag className="h-4.5 w-4.5" />, children: [
         { label: t("Todos os pedidos", "All Orders"), href: "/admin/sales" },
         { label: t("Rascunhos", "Drafts"), href: "/admin/sales/drafts" },
+        { label: t("Pedidos manuais", "Manual Orders"), href: "/admin/sales/manual" },
         { label: t("Carrinhos abandonados", "Abandoned Carts"), href: "/admin/sales/abandoned-carts" },
+        { label: t("Devoluções", "Returns"), href: "/admin/sales/returns" },
       ]},
+      { label: t("PDV", "POS"), href: "/admin/pos", icon: <Monitor className="h-4.5 w-4.5" /> },
       { label: t("Catálogo", "Catalog"), href: "/admin/products", icon: <Package className="h-4.5 w-4.5" />, children: [
         { label: t("Todos os produtos", "All Products"), href: "/admin/products" },
         { label: t("Estoque", "Inventory"), href: "/admin/products/inventory" },
@@ -86,18 +105,47 @@ const navigation: NavSection[] = [
     ],
   },
   {
-    title: t("Crescimento", "Growth"),
+    title: t("Canais de Venda", "Sales Channels"),
+    items: [
+      { label: t("Loja Virtual", "Online Store"), href: "/admin/online-store", icon: <Globe className="h-4.5 w-4.5" />, external: true, children: [
+        { label: t("Tema e layout", "Theme & Layout"), href: "/admin/online-store/layout-theme" },
+        { label: t("Editor de layout", "Layout Editor"), href: "/admin/online-store/layout-editor" },
+        { label: t("Páginas", "Pages"), href: "/admin/online-store/pages" },
+        { label: t("Menus", "Menus"), href: "/admin/online-store/menus" },
+        { label: t("Filtros", "Filters"), href: "/admin/online-store/filters" },
+        { label: t("Blog", "Blog"), href: "/admin/online-store/blog" },
+        { label: t("Links sociais", "Social Links"), href: "/admin/online-store/social-links" },
+        { label: t("Manutenção", "Maintenance"), href: "/admin/online-store/under-construction" },
+      ]},
+      { label: t("Facebook e Instagram", "Facebook & Instagram"), href: "/admin/marketing/meta-ads", icon: <Share2 className="h-4.5 w-4.5" />, children: [
+        { label: t("Loja e Catálogo", "Store & Catalog"), href: "/admin/marketing/meta-ads" },
+        { label: "Facebook Pixel", href: "/admin/integrations/facebook-pixel" },
+      ]},
+      { label: "TikTok", href: "/admin/online-store/tiktok-shop", icon: <Music className="h-4.5 w-4.5" />, children: [
+        { label: "TikTok Shop", href: "/admin/online-store/tiktok-shop" },
+        { label: "TikTok Pixel", href: "/admin/integrations/tiktok-pixel" },
+      ]},
+      { label: "Google", href: "/admin/online-store/google-shopping", icon: <Search className="h-4.5 w-4.5" />, children: [
+        { label: "Google Shopping", href: "/admin/online-store/google-shopping" },
+        { label: "Google Ads", href: "/admin/marketing/google-ads" },
+        { label: "Google Analytics", href: "/admin/integrations/google-analytics" },
+      ]},
+    ],
+  },
+  {
+    title: t("Marketing", "Marketing"),
     items: [
       { label: t("Promoções", "Promotions"), href: "/admin/discounts", icon: <TicketPercent className="h-4.5 w-4.5" />, children: [
         { label: t("Cupons", "Coupons"), href: "/admin/discounts/coupons" },
         { label: t("Promoção", "Promotion"), href: "/admin/discounts/promotions" },
         { label: t("Frete grátis", "Free Shipping"), href: "/admin/discounts/free-shipping" },
       ]},
-      { label: t("Marketing", "Marketing"), href: "/admin/marketing", icon: <Speaker className="h-4.5 w-4.5" />, children: [
-        { label: t("E-mail Marketing", "Email Marketing"), href: "/admin/marketing/email-campaigns" },
-        { label: t("Integrações", "Integrations"), href: "/admin/marketing/integrations" },
-        { label: t("Afiliados", "Affiliates"), href: "/admin/marketing/affiliates" },
-      ]},
+      { label: t("E-mail Marketing", "Email Marketing"), href: "/admin/marketing/email-campaigns", icon: <Mail className="h-4.5 w-4.5" /> },
+      { label: t("Afiliados", "Affiliates"), href: "/admin/marketing/affiliates", icon: <Speaker className="h-4.5 w-4.5" /> },
+      { label: t("Upsell", "Upsell"), href: "/admin/upsell", icon: <Zap className="h-4.5 w-4.5" /> },
+      { label: t("Fidelidade", "Loyalty"), href: "/admin/loyalty", icon: <Star className="h-4.5 w-4.5" /> },
+      { label: t("Contadores", "Countdown"), href: "/admin/countdown-timers", icon: <Timer className="h-4.5 w-4.5" /> },
+      { label: t("Assinaturas", "Subscriptions"), href: "/admin/product-subscriptions", icon: <RefreshCw className="h-4.5 w-4.5" /> },
     ],
   },
   {
@@ -108,27 +156,18 @@ const navigation: NavSection[] = [
     ],
   },
   {
-    title: t("Canais", "Channels"),
+    title: t("Ferramentas", "Tools"),
     items: [
-      { label: t("Loja virtual", "Storefront"), href: "/admin/online-store", icon: <Globe className="h-4.5 w-4.5" />, external: true, children: [
-        { label: t("Tema e layout", "Theme & Layout"), href: "/admin/online-store/layout-theme" },
-        { label: t("Páginas", "Pages"), href: "/admin/online-store/pages" },
-        { label: t("Blog", "Blog"), href: "/admin/online-store/blog" },
-        { label: t("Links sociais", "Social Links"), href: "/admin/online-store/social-links" },
-        { label: t("Manutenção", "Maintenance"), href: "/admin/online-store/under-construction" },
-      ]},
-    ],
-  },  {
-    title: t("Integrações", "Integrations"),
-    items: [
+      { label: t("FAQ", "FAQ"), href: "/admin/faq", icon: <HelpCircle className="h-4.5 w-4.5" /> },
+      { label: t("Notas Fiscais", "Invoices"), href: "/admin/nfe", icon: <FileText className="h-4.5 w-4.5" /> },
       { label: t("Integrações", "Integrations"), href: "/admin/integrations", icon: <Plug className="h-4.5 w-4.5" />, children: [
         { label: t("Todas", "All"), href: "/admin/integrations" },
-        { label: "Google Analytics", href: "/admin/integrations/google-analytics" },
-        { label: "Facebook Pixel", href: "/admin/integrations/facebook-pixel" },
         { label: t("Domínios", "Domains"), href: "/admin/integrations/domains" },
       ]},
+      { label: t("Aplicativos", "Apps"), href: "/admin/apps", icon: <AppWindow className="h-4.5 w-4.5" /> },
     ],
-  },]
+  },
+]
 
 export function AdminSidebar() {
   const { collapsed } = useMobileSidebar()
@@ -280,7 +319,7 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary shrink-0">
           <Zap className="h-4.5 w-4.5 text-white" fill="white" />
         </div>
-        {!collapsed && <span className="text-[15px] font-bold tracking-tight text-sidebar-foreground">Lojaki</span>}
+        {!collapsed && <span className="text-[15px] font-bold tracking-tight text-sidebar-foreground">RapidoCart</span>}
       </div>
 
       {/* Navigation */}

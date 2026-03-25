@@ -13,6 +13,8 @@ const productService = {
         visibility: filters?.visibility,
         shippingPromotion: filters?.shippingPromotion,
         weightDimensions: filters?.weightDimensions,
+        sortBy: filters?.sortBy,
+        sortOrder: filters?.sortOrder,
       },
     });
     return response.data;
@@ -63,6 +65,31 @@ const productService = {
     await apiClient.patch(`/products/${id}/toggle-active`, null, {
       params: { active },
     });
+  },
+
+  duplicate: async (id: number): Promise<Product> => {
+    const response = await apiClient.post(`/products/${id}/duplicate`);
+    return response.data;
+  },
+
+  /* ── Image management ── */
+
+  deleteImage: async (productId: number, imageId: number): Promise<void> => {
+    await apiClient.delete(`/products/${productId}/images/${imageId}`);
+  },
+
+  setPrimaryImage: async (productId: number, imageId: number): Promise<void> => {
+    await apiClient.put(`/products/${productId}/images/${imageId}/primary`);
+  },
+
+  updateWithImages: async (id: number, request: CreateProductRequest, images?: File[]): Promise<Product> => {
+    const formData = new FormData();
+    formData.append('product', new Blob([JSON.stringify(request)], { type: 'application/json' }));
+    images?.forEach((image) => formData.append('images', image));
+    const response = await apiClient.put(`/products/${id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
   },
 };
 

@@ -85,7 +85,7 @@ export function DomainsClient() {
             <div className="flex items-center gap-3">
               <Globe className="h-5 w-5 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium text-foreground">{store?.slug || '—'}.lojaki.store</p>
+                <p className="text-sm font-medium text-foreground">{store?.slug || '—'}.rapidocart.com.br</p>
                 <p className="text-xs text-muted-foreground mt-0.5 break-all">{storeUrl}</p>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">Por padrão</span>

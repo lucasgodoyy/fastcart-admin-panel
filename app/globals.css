@@ -398,4 +398,101 @@
 .sa-theme-forest ::-webkit-scrollbar { width: 6px; height: 6px; }
 .sa-theme-forest ::-webkit-scrollbar-track { background: hsl(var(--sa-bg)); }
 .sa-theme-forest ::-webkit-scrollbar-thumb { background: hsl(var(--sa-border)); border-radius: 3px; }
+
+/* ══════════════════════════════════════════════════════════════
+   ██  THEME 4 — CLEAN LIGHT  (vibrant light, emerald/teal accent)
+   ══════════════════════════════════════════════════════════════ */
+.sa-theme-light {
+  --sa-bg: 145 20% 97%;
+  --sa-bg-secondary: 150 16% 94%;
+  --sa-surface: 0 0% 100%;
+  --sa-surface-hover: 155 18% 95%;
+  --sa-surface-active: 155 16% 90%;
+  --sa-border: 160 12% 86%;
+  --sa-border-subtle: 160 10% 90%;
+  --sa-text: 200 25% 12%;
+  --sa-text-secondary: 200 12% 38%;
+  --sa-text-muted: 200 10% 55%;
+  --sa-accent: 160 84% 36%;
+  --sa-accent-hover: 160 84% 30%;
+  --sa-accent-subtle: 155 55% 92%;
+  --sa-success: 152 69% 31%;
+  --sa-success-subtle: 150 55% 92%;
+  --sa-warning: 38 92% 50%;
+  --sa-warning-subtle: 40 80% 93%;
+  --sa-danger: 0 72% 51%;
+  --sa-danger-subtle: 0 55% 94%;
+  --sa-info: 210 100% 50%;
+  --sa-info-subtle: 210 80% 94%;
+  --sa-gradient-start: 160 84% 36%;
+  --sa-gradient-end: 210 100% 50%;
+  --sa-sidebar: 155 18% 98%;
+  --sa-header: 0 0% 100%;
+
+  --background: var(--sa-bg);
+  --foreground: var(--sa-text);
+  --card: var(--sa-surface);
+  --card-foreground: var(--sa-text);
+  --popover: var(--sa-surface);
+  --popover-foreground: var(--sa-text);
+  --primary: var(--sa-accent);
+  --primary-foreground: 0 0% 100%;
+  --secondary: var(--sa-surface-hover);
+  --secondary-foreground: var(--sa-text);
+  --muted: var(--sa-bg-secondary);
+  --muted-foreground: var(--sa-text-secondary);
+  --accent: var(--sa-surface-hover);
+  --accent-foreground: var(--sa-text);
+  --destructive: var(--sa-danger);
+  --destructive-foreground: 0 0% 100%;
+  --border: var(--sa-border);
+  --input: var(--sa-border);
+  --ring: var(--sa-accent);
+}
+
+.sa-theme-light ::-webkit-scrollbar { width: 6px; height: 6px; }
+.sa-theme-light ::-webkit-scrollbar-track { background: hsl(var(--sa-bg)); }
+.sa-theme-light ::-webkit-scrollbar-thumb { background: hsl(var(--sa-border)); border-radius: 3px; }
+
+/* Glass effects for light theme — frosted with a tinted hue */
+.sa-theme-light .sa-glass {
+  background: hsla(155, 20%, 99%, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid hsla(160, 12%, 86%, 0.6);
+  box-shadow: 0 1px 3px hsla(160, 20%, 60%, 0.06);
+}
+
+.sa-theme-light .sa-glass-strong {
+  background: hsla(155, 20%, 99%, 0.88);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid hsla(160, 12%, 86%, 0.7);
+  box-shadow: 0 2px 8px hsla(160, 20%, 60%, 0.08);
+}
+
+/* Dot pattern — soft green tinted */
+.sa-theme-light .sa-dot-pattern {
+  background-image: radial-gradient(hsla(160, 30%, 70%, 0.15) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Gradient text — keep vibrant on light */
+.sa-theme-light .sa-gradient-text {
+  background: linear-gradient(135deg, hsl(160, 84%, 36%), hsl(210, 100%, 50%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Stat cards / cards — add subtle colored shadows on hover */
+.sa-theme-light .group:hover {
+  box-shadow: 0 8px 30px hsla(160, 40%, 50%, 0.08), 0 2px 8px hsla(160, 40%, 50%, 0.04);
+}
+
+/* Sidebar active item — colored bg so white text stays readable */
+.sa-theme-light [data-sa-active-indicator] {
+  background: linear-gradient(135deg, hsla(160, 84%, 36%, 0.12), hsla(210, 100%, 50%, 0.06));
+  border-color: hsla(160, 84%, 36%, 0.18);
+}
 .super-admin-theme ::-webkit-scrollbar-thumb:hover { background: hsl(var(--sa-text-muted)); }

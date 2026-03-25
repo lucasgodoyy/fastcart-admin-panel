@@ -14,16 +14,28 @@ export type RecoveryStats = {
 
 export type AbandonedCart = {
   id: number;
+  storeId: number;
   customerEmail: string;
   customerName: string | null;
+  cartItemsSnapshot: string | null;
   cartTotal: number;
   cartCurrency: string;
   recoveryStatus: string;
   abandonedAt: string;
   recoveryToken: string | null;
-  emailCount: number;
+  emailCount: number | null;
   lastEmailSentAt: string | null;
   createdAt: string;
+  customerId?: number | null;
+};
+
+export type AbandonedCartItem = {
+  productId?: number;
+  productName?: string;
+  name?: string;
+  quantity: number;
+  price: number;
+  imageUrl?: string;
 };
 
 export type AbandonedCartListResponse = {
@@ -31,6 +43,11 @@ export type AbandonedCartListResponse = {
   page: number;
   pageSize: number;
   totalElements: number;
+};
+
+export type AbandonedCartSettings = {
+  mode: 'AUTO' | 'MANUAL';
+  delayHours: number;
 };
 
 /* ── Service ── */
@@ -60,6 +77,40 @@ const abandonedCartService = {
       params: { storeId },
     });
     return res.data;
+  },
+
+  sendEmail: async (
+    id: number,
+    storeId: number,
+    subject: string,
+    body: string,
+  ): Promise<void> => {
+    await apiClient.post(`/admin/abandoned-carts/${id}/send-email`, { subject, body }, {
+      params: { storeId },
+    });
+  },
+
+  getSettings: async (storeId: number): Promise<AbandonedCartSettings> => {
+    const res = await apiClient.get('/admin/abandoned-carts/settings', {
+      params: { storeId },
+    });
+    return res.data;
+  },
+
+  saveSettings: async (storeId: number, settings: AbandonedCartSettings): Promise<void> => {
+    await apiClient.put('/admin/abandoned-carts/settings', settings, {
+      params: { storeId },
+    });
+  },
+
+  parseCartItems: (snapshot: string | null): AbandonedCartItem[] => {
+    if (!snapshot) return [];
+    try {
+      const parsed = JSON.parse(snapshot);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
   },
 };
 

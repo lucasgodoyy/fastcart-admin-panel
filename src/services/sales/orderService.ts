@@ -1,5 +1,5 @@
 import apiClient from '@/lib/api';
-import { AdminOrder, OrderStats, DashboardStats, MercadoPagoDiagnosis } from '@/types/order';
+import { AdminOrder, OrderStats, DashboardStats, MercadoPagoDiagnosis, ShippingStats, PaymentStats, ProductStats, TrafficStats } from '@/types/order';
 
 const orderService = {
   /** List all orders for the authenticated store */
@@ -125,6 +125,70 @@ const orderService = {
   /** Discard (delete) a draft order */
   discardDraft: async (orderId: number): Promise<void> => {
     await apiClient.delete(`/orders/store/${orderId}/draft`);
+  },
+
+  /** Get shipping analytics stats for the store */
+  getShippingStats: async (period: string = '30d'): Promise<ShippingStats> => {
+    const response = await apiClient.get('/orders/store/shipping-stats', { params: { period } });
+    return response.data;
+  },
+
+  /** Get payment analytics stats for the store */
+  getPaymentStats: async (period: string = '30d'): Promise<PaymentStats> => {
+    const response = await apiClient.get('/orders/store/payment-stats', { params: { period } });
+    return response.data;
+  },
+
+  /** Get traffic source analytics stats for the store */
+  getTrafficStats: async (period: string = '30d'): Promise<TrafficStats> => {
+    const response = await apiClient.get('/orders/store/traffic-stats', { params: { period } });
+    return response.data;
+  },
+
+  // ─── Manual Orders ────────────────────────────────────────────────────────
+
+  /** Create a manual order */
+  createManualOrder: async (body: {
+    items: { productId: number; variantId?: number | null; quantity: number; unitPrice?: number | null }[];
+    discountAmount?: number | null;
+    discountType?: 'PERCENT' | 'FIXED' | null;
+    shippingCost?: number | null;
+    customerFirstName?: string | null;
+    customerLastName?: string | null;
+    customerEmail?: string | null;
+    customerPhone?: string | null;
+    customerCpfCnpj?: string | null;
+    paymentStatus: 'UNPAID' | 'PENDING' | 'PAID';
+    shippingAddressJson?: string | null;
+    origin?: string | null;
+    internalNotes?: string | null;
+  }): Promise<AdminOrder> => {
+    const response = await apiClient.post('/orders/store/manual', body);
+    return response.data;
+  },
+
+  /** List manual orders */
+  listManualOrders: async (): Promise<AdminOrder[]> => {
+    const response = await apiClient.get('/orders/store/manual');
+    return response.data;
+  },
+
+  /** Mark manual order as paid */
+  markManualOrderPaid: async (orderId: number): Promise<AdminOrder> => {
+    const response = await apiClient.patch(`/orders/store/${orderId}/mark-paid`);
+    return response.data;
+  },
+
+  /** Get product statistics: sales rankings, low-stock, most viewed */
+  getProductStats: async (
+    period: string = '30d',
+    topLimit: number = 10,
+    lowStockThreshold: number = 5
+  ): Promise<ProductStats> => {
+    const response = await apiClient.get('/analytics/product-stats', {
+      params: { period, topLimit, lowStockThreshold },
+    });
+    return response.data;
   },
 };
 

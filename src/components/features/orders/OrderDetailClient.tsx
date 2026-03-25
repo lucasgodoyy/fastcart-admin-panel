@@ -26,6 +26,8 @@ import {
   ExternalLink,
   Copy,
   Printer,
+  Phone,
+  MessageCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -659,6 +661,19 @@ export function OrderDetailClient() {
               <div className="space-y-1.5 text-sm">
                 <div className="flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground" /> {order.customerName}</div>
                 {order.customerEmail && <div className="flex items-center gap-2 text-muted-foreground"><Mail className="h-4 w-4" /> {order.customerEmail}</div>}
+                {order.customerPhone && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Phone className="h-4 w-4" /> {order.customerPhone}
+                    <a
+                      href={`https://wa.me/${order.customerPhone.replace(/\D/g, '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-auto inline-flex items-center gap-1 rounded-md bg-green-600 px-2 py-0.5 text-xs font-medium text-white hover:bg-green-700 transition-colors"
+                    >
+                      <MessageCircle className="h-3 w-3" /> WhatsApp
+                    </a>
+                  </div>
+                )}
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">—</p>

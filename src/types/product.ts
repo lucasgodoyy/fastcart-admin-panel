@@ -4,22 +4,39 @@ export type ProductImage = {
   isPrimary: boolean;
 };
 
+export type ProductVariantResponse = {
+  id: number;
+  sku: string;
+  size?: string | null;
+  color?: string | null;
+  stock: number;
+  priceAdjustment?: number | null;
+  imageUrl?: string | null;
+  available: boolean;
+};
+
 export type Product = {
   id: number;
   sku: string;
+  slug?: string | null;
   name: string;
   description: string;
   primaryImageUrl: string | null;
   images: ProductImage[];
+  variants?: ProductVariantResponse[];
   price: number;
   compareAtPrice?: number | null;
   salePrice?: number | null;
   costPrice?: number | null;
+  profitMargin?: number | null;
   currency: string;
   stock: number;
   infiniteStock: boolean;
   showPriceInStore: boolean;
   barcode?: string | null;
+  minQuantity?: number;
+  maxQuantity?: number | null;
+  sizeChartJson?: string | null;
   weightKg?: number | null;
   lengthCm?: number | null;
   widthCm?: number | null;
@@ -33,6 +50,8 @@ export type Product = {
   complementaryProductIds?: number[];
   categoryId?: number | null;
   categoryName?: string | null;
+  categoryIds?: number[];
+  categoryNames?: string[];
   brandId?: number | null;
   brandName?: string | null;
   color?: string | null;
@@ -72,6 +91,7 @@ export type CreateProductRequest = {
   relatedProductIds?: number[];
   complementaryProductIds?: number[];
   categoryId?: number | null;
+  categoryIds?: number[];
   brandId?: number | null;
   color?: string;
   sizeOptions?: string;
@@ -82,6 +102,9 @@ export type CreateProductRequest = {
   productType?: 'PHYSICAL' | 'DIGITAL';
   videoUrl?: string;
   isNew?: boolean;
+  minQuantity?: number;
+  maxQuantity?: number | null;
+  sizeChartJson?: string;
   initialVariants?: Array<Record<string, unknown>>;
 };
 
@@ -94,4 +117,6 @@ export type ProductListFilters = {
   visibility?: 'VISIBLE' | 'HIDDEN';
   shippingPromotion?: 'FREE_SHIPPING' | 'NO_FREE_SHIPPING';
   weightDimensions?: 'WITHOUT_DIMENSIONS' | 'WITHOUT_WEIGHT' | 'WITHOUT_WEIGHT_AND_DIMENSIONS';
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 };

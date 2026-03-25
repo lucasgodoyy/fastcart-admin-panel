@@ -3,7 +3,7 @@
 import { ReactNode, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { ExternalLink, HelpCircle, Mail, Plus, Search, Users } from 'lucide-react';
+import { ExternalLink, HelpCircle, Mail, MessageCircle, Plus, Search, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { customerService } from '@/services/sales';
@@ -142,9 +142,22 @@ export function CustomerClient() {
                   <td className="px-4 py-3 text-sm text-foreground">{customer.phone || '-'}</td>
                   <td className="px-4 py-3 text-sm text-foreground">{customer.document || '-'}</td>
                   <td className="px-4 py-3 text-sm text-muted-foreground">
-                    <ActionIconButton label="Contato">
-                      <Mail className="h-4 w-4" />
-                    </ActionIconButton>
+                    <div className="flex items-center gap-1">
+                      <ActionIconButton label="Contato">
+                        <Mail className="h-4 w-4" />
+                      </ActionIconButton>
+                      {customer.phone && (
+                        <a
+                          href={`https://wa.me/${customer.phone.replace(/\D/g, '')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="WhatsApp"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-green-600 hover:bg-green-50 hover:text-green-700 transition-colors dark:hover:bg-green-950"
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                        </a>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

@@ -12,9 +12,15 @@ function resolveApiBaseUrl() {
     if (hostname.includes('rapidocart.com.br')) {
       return 'https://api.rapidocart.com.br/api/v1';
     }
+
+    // Vercel preview deployments
+    if (hostname.includes('vercel.app')) {
+      return 'https://api.rapidocart.com.br/api/v1';
+    }
   }
 
-  return 'http://localhost:8080/api/v1';
+  // SSR fallback — uses env var if available
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
 }
 
 const apiClient = axios.create({

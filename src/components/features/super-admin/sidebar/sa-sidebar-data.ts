@@ -13,6 +13,7 @@ import {
   Bell,
   Handshake,
   Bug,
+  Facebook,
   type LucideIcon,
 } from "lucide-react";
 
@@ -160,6 +161,8 @@ export const saSidebarSections: SASidebarSection[] = [
         children: [
           { title: "Geral", href: "/super-admin/settings" },
           { title: "Integrações", href: "/super-admin/settings/integrations" },
+          { title: "Meta Ads", href: "/super-admin/settings/meta-ads" },
+          { title: "TikTok", href: "/super-admin/settings/tiktok" },
         ],
       },
       {

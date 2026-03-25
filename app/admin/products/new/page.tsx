@@ -1,5 +1,5 @@
-import { CreateProductClient } from '@/components/features/products/CreateProductClient';
+import { ProductFormClient } from '@/components/features/products/ProductFormClient';
 
 export default function NewProductPage() {
-  return <CreateProductClient />;
+  return <ProductFormClient mode="create" />;
 }

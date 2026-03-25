@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -147,7 +147,20 @@ export function CustomerDetailClient({ customerId }: CustomerDetailClientProps) 
             </div>
             <div>
               <label className="mb-1 block text-sm text-muted-foreground">Telefone</label>
-              <Input value={phone} onChange={(event) => setPhone(event.target.value)} />
+              <div className="flex items-center gap-2">
+                <Input value={phone} onChange={(event) => setPhone(event.target.value)} className="flex-1" />
+                {phone.trim() && (
+                  <a
+                    href={`https://wa.me/${phone.replace(/\D/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="WhatsApp"
+                    className="inline-flex h-9 items-center gap-1 rounded-md bg-green-600 px-3 text-xs font-medium text-white hover:bg-green-700 transition-colors"
+                  >
+                    <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
+                  </a>
+                )}
+              </div>
             </div>
             <div>
               <label className="mb-1 block text-sm text-muted-foreground">Documento</label>

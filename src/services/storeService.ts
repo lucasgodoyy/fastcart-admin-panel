@@ -18,6 +18,23 @@ export interface StoreInfo {
   customerMessageJson: string | null;
   googleAnalyticsId: string | null;
   facebookPixelId: string | null;
+  tiktokPixelId: string | null;
+  googleAdsId: string | null;
+  gtmId: string | null;
+  googleMerchantId: string | null;
+  googleAnalyticsApiSecret: string | null;
+  googleVerificationTag: string | null;
+  bingVerificationTag: string | null;
+  conversionCodeCheckout: string | null;
+  conversionCodeConfirmation: string | null;
+  mailchimpApiKey: string | null;
+  mailchimpListId: string | null;
+  mailchimpServer: string | null;
+  googleCustomerReviewsEnabled: boolean;
+  ebitId: string | null;
+  ebitUrl: string | null;
+  hotjarId: string | null;
+  externalChatScript: string | null;
   subdomain: string | null;
   customDomain: string | null;
 }
@@ -36,6 +53,23 @@ export interface UpdateStoreRequest {
   customerMessageJson?: string;
   googleAnalyticsId?: string;
   facebookPixelId?: string;
+  tiktokPixelId?: string;
+  googleAdsId?: string;
+  gtmId?: string;
+  googleMerchantId?: string;
+  googleAnalyticsApiSecret?: string;
+  googleVerificationTag?: string;
+  bingVerificationTag?: string;
+  conversionCodeCheckout?: string;
+  conversionCodeConfirmation?: string;
+  mailchimpApiKey?: string;
+  mailchimpListId?: string;
+  mailchimpServer?: string;
+  googleCustomerReviewsEnabled?: boolean;
+  ebitId?: string;
+  ebitUrl?: string;
+  hotjarId?: string;
+  externalChatScript?: string;
   subdomain?: string;
   customDomain?: string;
 }

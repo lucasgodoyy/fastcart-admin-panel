@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { authService } from '@/services/auth';
@@ -8,8 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Eye, EyeOff, Mail } from 'lucide-react';
+import { Eye, EyeOff, Mail, Loader2 } from 'lucide-react';
 import { t } from '@/lib/admin-language';
+import Script from 'next/script';
 
 interface SignupFormData {
   email: string;
@@ -23,6 +24,55 @@ export const SignupForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleError, setGoogleError] = useState<string | null>(null);
+
+  const handleGoogleCallback = useCallback(async (response: { credential?: string }) => {
+    if (!response.credential) return;
+    setGoogleLoading(true);
+    setGoogleError(null);
+    try {
+      const authRes = await authService.oauthLogin('google', response.credential);
+      const redirectPath = authRes.role === 'SUPER_ADMIN' ? '/super-admin' : '/admin';
+      router.push(redirectPath);
+    } catch {
+      setGoogleError(t('Falha ao entrar com Google. Tente novamente.', 'Failed to sign in with Google. Try again.'));
+    } finally {
+      setGoogleLoading(false);
+    }
+  }, [router]);
+
+  useEffect(() => {
+    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID;
+    if (!googleClientId || typeof window === 'undefined') return;
+    const initGoogle = () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const win = window as any;
+      if (!win.google) return;
+      const google = win.google;
+      google.accounts.id.initialize({
+        client_id: googleClientId,
+        callback: handleGoogleCallback,
+      });
+      const btnEl = document.getElementById('google-signup-btn');
+      if (btnEl) {
+        google.accounts.id.renderButton(btnEl, {
+          theme: 'outline',
+          size: 'large',
+          width: '100%',
+          text: 'signup_with',
+          locale: 'pt-BR',
+        });
+      }
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const win = window as any;
+    if (win.google) {
+      initGoogle();
+    } else {
+      win.__googleSignUpInit = initGoogle;
+    }
+  }, [handleGoogleCallback]);
 
   const form = useForm<SignupFormData>({
     defaultValues: {
@@ -266,6 +316,37 @@ export const SignupForm: React.FC = () => {
             </Button>
           </form>
         </Form>
+
+        {process.env.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID && (
+          <>
+            <div className="relative my-5">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">{t('ou', 'or')}</span>
+              </div>
+            </div>
+            <div id="google-signup-btn" className="flex justify-center" />
+            {googleLoading && (
+              <div className="flex items-center justify-center gap-2 mt-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {t('Entrando com Google...', 'Signing in with Google...')}
+              </div>
+            )}
+            {googleError && (
+              <p className="text-xs text-red-500 text-center mt-2">{googleError}</p>
+            )}
+            <Script
+              src="https://accounts.google.com/gsi/client"
+              strategy="afterInteractive"
+              onLoad={() => {
+                const init = (window as any).__googleSignUpInit;
+                if (typeof init === 'function') (init as () => void)();
+              }}
+            />
+          </>
+        )}
 
         <div className="flex justify-center items-center text-sm mt-6 pt-6 border-t">
           <span className="text-muted-foreground mr-1">{t('Já tem uma conta?', 'Already have an account?')}</span>
