@@ -108,6 +108,34 @@ export default function LayoutEditorPage() {
   const [deviceView, setDeviceView] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [iframeKey, setIframeKey] = useState(0);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [iframeReady, setIframeReady] = useState(false);
+
+  // ── Listen for "iframe ready" signal from the store ───────
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'LOJAKI_PREVIEW_READY') {
+        setIframeReady(true);
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
+  // ── Send live theme preview to iframe on every sections change (debounced 250ms) ──
+  useEffect(() => {
+    if (!iframeReady) return;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      iframeRef.current?.contentWindow?.postMessage(
+        { type: 'LOJAKI_THEME_PREVIEW', payload: JSON.stringify(sections) },
+        '*',
+      );
+    }, 250);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [sections, iframeReady]);
 
   // Hydrate from API
   useEffect(() => {
@@ -137,9 +165,10 @@ export default function LayoutEditorPage() {
   // ── Publish action ──────────────────────────────────────
   const handlePublish = () => mutation.mutate(sections);
 
-  // Refresh preview after publish
+  // On publish success, reset iframe-ready so we re-handshake on next reload
   useEffect(() => {
     if (mutation.isSuccess) {
+      setIframeReady(false);
       setIframeKey((k) => k + 1);
     }
   }, [mutation.isSuccess]);
