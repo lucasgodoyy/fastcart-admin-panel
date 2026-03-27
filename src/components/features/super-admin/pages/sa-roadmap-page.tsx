@@ -440,7 +440,7 @@ export function SaRoadmapPage() {
       <motion.div variants={fadeInUp} initial="initial" animate="animate">
         <SaCard className="p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))]">
               <Rocket className="h-5 w-5 text-white" />
             </div>
             <div>
@@ -476,7 +476,7 @@ export function SaRoadmapPage() {
             <motion.div
               key={phase}
               variants={fadeInUp}
-              className="rounded-xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-card))] p-4 hover:border-[hsl(var(--sa-border))] transition-all cursor-pointer"
+              className="rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-card))] p-4 hover:border-[hsl(var(--sa-border))] transition-all cursor-pointer"
               onClick={() => {
                 setFilterPhase(filterPhase === phase ? "ALL" : phase);
                 if (!expandedSections.has(phase)) {
@@ -607,7 +607,7 @@ export function SaRoadmapPage() {
               <motion.div key={phase} variants={fadeInUp}>
                 {/* Phase Header */}
                 <div
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-card))] cursor-pointer hover:border-[hsl(var(--sa-border))] transition-all"
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-card))] cursor-pointer hover:border-[hsl(var(--sa-border))] transition-all"
                   onClick={() => toggleSection(phase)}
                 >
                   <div
@@ -682,7 +682,7 @@ export function SaRoadmapPage() {
               return (
                 <motion.div key={modId} variants={fadeInUp}>
                   <div
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-card))] cursor-pointer hover:border-[hsl(var(--sa-border))] transition-all"
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-card))] cursor-pointer hover:border-[hsl(var(--sa-border))] transition-all"
                     onClick={() => toggleSection(modId)}
                   >
                     <ModIcon className="h-4 w-4 text-[hsl(var(--sa-text-muted))]" />
@@ -892,7 +892,7 @@ function FlowCard({
   const pct = Math.round((done / steps) * 100);
   const isComplete = done === steps;
   return (
-    <div className={`rounded-xl border p-4 transition-all ${isComplete ? "border-[hsl(var(--sa-success))]/30 bg-[hsl(var(--sa-success-subtle))]" : "border-[hsl(var(--sa-border-subtle))]"}`}>
+    <div className={`rounded-lg border p-4 transition-all ${isComplete ? "border-[hsl(var(--sa-success))]/30 bg-[hsl(var(--sa-success-subtle))]" : "border-[hsl(var(--sa-border-subtle))]"}`}>
       <div className="flex items-center justify-between mb-2">
         <span className="text-[12px] font-bold text-[hsl(var(--sa-text))]">{title}</span>
         {isComplete ? (

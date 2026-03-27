@@ -1,10 +1,10 @@
-﻿"use client";
+"use client";
 
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { type LucideIcon, TrendingUp, TrendingDown, Minus } from "lucide-react";
 
-/* ────── Animation variants ────── */
+/* ------ Animation variants ------ */
 export const fadeInUp = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
@@ -19,7 +19,7 @@ export const scaleIn = {
   animate: { opacity: 1, scale: 1 },
 };
 
-/* ────── Stat Card ────── */
+/* ------ Stat Card ------ */
 interface StatCardProps {
   title: string;
   value: string | number;
@@ -64,7 +64,7 @@ export function SaStatCard({ title, value, subtitle, icon: Icon, trend, color = 
     <motion.div
       variants={fadeInUp}
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-5 transition-all hover:border-[hsl(var(--sa-border))] hover:shadow-lg hover:shadow-[hsl(var(--sa-accent))]/8",
+        "group relative overflow-hidden rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-5 transition-all hover:border-[hsl(var(--sa-border))] hover:shadow-lg hover:shadow-[hsl(var(--sa-accent))]/8",
         className
       )}
       whileHover={{ y: -2 }}
@@ -74,7 +74,7 @@ export function SaStatCard({ title, value, subtitle, icon: Icon, trend, color = 
 
       <div className="relative z-10">
         <div className="flex items-start justify-between mb-4">
-          <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl ring-1", c.bg, c.ring)}>
+          <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg ring-1", c.bg, c.ring)}>
             <Icon className={cn("h-5 w-5", c.icon)} />
           </div>
           {trend && (
@@ -98,7 +98,7 @@ export function SaStatCard({ title, value, subtitle, icon: Icon, trend, color = 
   );
 }
 
-/* ────── Section Title ────── */
+/* ------ Section Title ------ */
 export function SaPageHeader({ title, description, actions }: { title: string; description?: string; actions?: React.ReactNode }) {
   return (
     <motion.div
@@ -116,13 +116,13 @@ export function SaPageHeader({ title, description, actions }: { title: string; d
   );
 }
 
-/* ────── Glass Card ────── */
+/* ------ Glass Card ------ */
 export function SaCard({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <motion.div
       variants={fadeInUp}
       className={cn(
-        "rounded-2xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-6 transition-colors hover:border-[hsl(var(--sa-border))]",
+        "rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-6 transition-colors hover:border-[hsl(var(--sa-border))]",
         className
       )}
     >
@@ -131,7 +131,7 @@ export function SaCard({ children, className }: { children: React.ReactNode; cla
   );
 }
 
-/* ────── Empty State ────── */
+/* ------ Empty State ------ */
 export function SaEmptyState({ icon: Icon, title, description }: { icon: LucideIcon; title: string; description: string }) {
   return (
     <motion.div
@@ -139,7 +139,7 @@ export function SaEmptyState({ icon: Icon, title, description }: { icon: LucideI
       animate={{ opacity: 1, scale: 1 }}
       className="flex flex-col items-center justify-center py-16 text-center"
     >
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[hsl(var(--sa-surface-hover))]">
+      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-lg bg-[hsl(var(--sa-surface-hover))]">
         <Icon className="h-8 w-8 text-[hsl(var(--sa-text-muted))]" />
       </div>
       <h3 className="text-lg font-semibold text-[hsl(var(--sa-text-secondary))]">{title}</h3>
@@ -148,7 +148,7 @@ export function SaEmptyState({ icon: Icon, title, description }: { icon: LucideI
   );
 }
 
-/* ────── Status Badge ────── */
+/* ------ Status Badge ------ */
 export function SaStatusBadge({ status, map }: { status: string; map?: Record<string, { label: string; color: string }> }) {
   const defaultMap: Record<string, { label: string; color: string }> = {
     ACTIVE: { label: "Ativo", color: "success" },
@@ -173,15 +173,15 @@ export function SaStatusBadge({ status, map }: { status: string; map?: Record<st
   );
 }
 
-/* ────── Skeleton Loader ────── */
+/* ------ Skeleton Loader ------ */
 export function SaSkeleton({ className }: { className?: string }) {
   return <div className={cn("sa-shimmer rounded-lg bg-[hsl(var(--sa-surface-hover))]", className)} />;
 }
 
-/* ────── Table wrapper ────── */
+/* ------ Table wrapper ------ */
 export function SaTableCard({ title, subtitle, actions, children }: { title: string; subtitle?: string; actions?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <motion.div variants={fadeInUp} className="rounded-2xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] overflow-hidden">
+    <motion.div variants={fadeInUp} className="rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] overflow-hidden">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between border-b border-[hsl(var(--sa-border-subtle))] px-6 py-4">
         <div>
           <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))]">{title}</h3>

@@ -14,6 +14,13 @@ import {
   Handshake,
   Bug,
   Facebook,
+  BarChart3,
+  Globe,
+  Server,
+  Shield,
+  ClipboardList,
+  Map,
+  DollarSign,
   type LucideIcon,
 } from "lucide-react";
 
@@ -51,6 +58,11 @@ export const saSidebarSections: SASidebarSection[] = [
         href: "/super-admin/activity",
         icon: Activity,
       },
+      {
+        title: "Analytics",
+        href: "/super-admin/analytics",
+        icon: BarChart3,
+      },
     ],
   },
   {
@@ -63,6 +75,7 @@ export const saSidebarSections: SASidebarSection[] = [
         children: [
           { title: "Todas as Lojas", href: "/super-admin/stores" },
           { title: "Aprovações", href: "/super-admin/stores/approvals" },
+          { title: "Performance", href: "/super-admin/stores/performance" },
         ],
       },
       {
@@ -82,7 +95,24 @@ export const saSidebarSections: SASidebarSection[] = [
         children: [
           { title: "Planos", href: "/super-admin/subscriptions" },
           { title: "Assinantes", href: "/super-admin/subscriptions/subscribers" },
+          { title: "Faturamento", href: "/super-admin/subscriptions/billing" },
         ],
+      },
+      {
+        title: "Financeiro",
+        href: "/super-admin/finance",
+        icon: DollarSign,
+        children: [
+          { title: "Visão Geral", href: "/super-admin/finance" },
+          { title: "Transações", href: "/super-admin/finance/transactions" },
+          { title: "Pagamentos", href: "/super-admin/finance/payouts" },
+          { title: "Taxas", href: "/super-admin/finance/fees" },
+        ],
+      },
+      {
+        title: "Domínios",
+        href: "/super-admin/domains",
+        icon: Globe,
       },
     ],
   },
@@ -96,6 +126,7 @@ export const saSidebarSections: SASidebarSection[] = [
         children: [
           { title: "Campanhas", href: "/super-admin/marketing" },
           { title: "Banners", href: "/super-admin/marketing/banners" },
+          { title: "Push", href: "/super-admin/marketing/push" },
         ],
       },
       {
@@ -108,7 +139,8 @@ export const saSidebarSections: SASidebarSection[] = [
         href: "/super-admin/affiliates",
         icon: Handshake,
         children: [
-          { title: "Parceiros", href: "/super-admin/affiliates" },
+          { title: "Visão Geral", href: "/super-admin/affiliates" },
+          { title: "Parceiros", href: "/super-admin/affiliates/partners" },
           { title: "Comissões", href: "/super-admin/affiliates/commissions" },
           { title: "Pagamentos", href: "/super-admin/affiliates/payouts" },
           { title: "Tracking", href: "/super-admin/affiliates/tracking" },
@@ -124,6 +156,10 @@ export const saSidebarSections: SASidebarSection[] = [
         title: "Mensagens",
         href: "/super-admin/messages",
         icon: MessageSquare,
+        children: [
+          { title: "Mensagens", href: "/super-admin/messages" },
+          { title: "Equipe", href: "/super-admin/messages/team" },
+        ],
       },
       {
         title: "E-mails",
@@ -132,6 +168,7 @@ export const saSidebarSections: SASidebarSection[] = [
         children: [
           { title: "Logs de Envio", href: "/super-admin/emails" },
           { title: "Templates", href: "/super-admin/emails/templates" },
+          { title: "Configurações", href: "/super-admin/emails/config" },
         ],
       },
       {
@@ -147,8 +184,33 @@ export const saSidebarSections: SASidebarSection[] = [
     ],
   },
   {
+    label: "Relatórios",
+    items: [
+      {
+        title: "Relatórios",
+        href: "/super-admin/reports",
+        icon: BarChart3,
+        children: [
+          { title: "Visão Geral", href: "/super-admin/reports" },
+          { title: "Crescimento", href: "/super-admin/reports/growth" },
+          { title: "Exportar", href: "/super-admin/reports/export" },
+        ],
+      },
+    ],
+  },
+  {
     label: "Plataforma",
     items: [
+      {
+        title: "Segurança",
+        href: "/super-admin/security",
+        icon: Shield,
+      },
+      {
+        title: "Infraestrutura",
+        href: "/super-admin/infrastructure",
+        icon: Server,
+      },
       {
         title: "Logs de Erro",
         href: "/super-admin/error-logs",
@@ -161,6 +223,7 @@ export const saSidebarSections: SASidebarSection[] = [
         children: [
           { title: "Geral", href: "/super-admin/settings" },
           { title: "Integrações", href: "/super-admin/settings/integrations" },
+          { title: "API Keys", href: "/super-admin/settings/api-keys" },
           { title: "Meta Ads", href: "/super-admin/settings/meta-ads" },
           { title: "TikTok", href: "/super-admin/settings/tiktok" },
         ],
@@ -169,6 +232,21 @@ export const saSidebarSections: SASidebarSection[] = [
         title: "Aparência",
         href: "/super-admin/appearance",
         icon: Palette,
+      },
+    ],
+  },
+  {
+    label: "Planejamento",
+    items: [
+      {
+        title: "Backlog",
+        href: "/super-admin/backlog",
+        icon: ClipboardList,
+      },
+      {
+        title: "Roadmap",
+        href: "/super-admin/roadmap",
+        icon: Map,
       },
     ],
   },

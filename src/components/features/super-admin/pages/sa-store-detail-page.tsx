@@ -130,14 +130,14 @@ export function SaStoreDetailPage({ storeId }: { storeId: number }) {
               <Button
                 variant="outline"
                 size="sm"
-                className="rounded-xl text-[12px] border-[hsl(var(--sa-border))] text-[hsl(var(--sa-text-secondary))] hover:bg-[hsl(var(--sa-surface-hover))] gap-2"
+                className="rounded-lg text-[12px] border-[hsl(var(--sa-border))] text-[hsl(var(--sa-text-secondary))] hover:bg-[hsl(var(--sa-surface-hover))] gap-2"
                 onClick={() => { const h = window.location.hostname; const p = window.location.protocol; let base = h; if (h.startsWith('admin.')) base = h.replace(/^admin\./, ''); else if (h.startsWith('www.')) base = h.replace(/^www\./, ''); else if (h === 'localhost' || h === '127.0.0.1') { window.open(`${p}//${store.slug}.127.0.0.1.nip.io:3000`, '_blank'); return; } window.open(`${p}//${store.slug}.${base}`, '_blank'); }}
               >
                 <ExternalLink className="h-3.5 w-3.5" /> Abrir Loja
               </Button>
               <Button
                 size="sm"
-                className={`rounded-xl text-[12px] gap-2 ${store.status === "ACTIVE"
+                className={`rounded-lg text-[12px] gap-2 ${store.status === "ACTIVE"
                   ? "bg-[hsl(var(--sa-danger))]/10 text-[hsl(var(--sa-danger))] hover:bg-[hsl(var(--sa-danger))] hover:text-white"
                   : "bg-[hsl(var(--sa-success))]/10 text-[hsl(var(--sa-success))] hover:bg-[hsl(var(--sa-success))] hover:text-white"
                   }`}

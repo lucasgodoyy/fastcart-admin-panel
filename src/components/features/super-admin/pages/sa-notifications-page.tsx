@@ -68,7 +68,7 @@ export function SaNotificationsPage() {
             <motion.div
               key={notif.id}
               variants={fadeInUp}
-              className={`rounded-xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))]/50 backdrop-blur-sm p-4 hover:bg-[hsl(var(--sa-surface-hover))] transition-all ${
+              className={`rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))]/50 backdrop-blur-sm p-4 hover:bg-[hsl(var(--sa-surface-hover))] transition-all ${
                 !notif.read ? "border-l-2 border-l-[hsl(var(--sa-accent))]" : ""
               }`}
             >

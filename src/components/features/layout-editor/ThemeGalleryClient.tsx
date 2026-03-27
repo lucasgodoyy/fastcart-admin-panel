@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -13,9 +13,9 @@ import type { SalesChannelSettings } from '@/types/salesChannel';
 import { toast } from 'sonner';
 import { t } from '@/lib/admin-language';
 
-/* ──────────────────────────────────────────────
- * Template catalog — display available themes
- * ────────────────────────────────────────────── */
+/* ----------------------------------------------
+ * Template catalog � display available themes
+ * ---------------------------------------------- */
 const TEMPLATES: Array<{
   id: string;
   name: string;
@@ -27,7 +27,7 @@ const TEMPLATES: Array<{
   {
     id: 'template-1',
     name: 'Morelia',
-    description: 'Template clássico para moda. Layout limpo com hero banner, grade 4 colunas de produtos e carrinho lateral.',
+    description: 'Template cl�ssico para moda. Layout limpo com hero banner, grade 4 colunas de produtos e carrinho lateral.',
     preview: '/templates/template-1-preview.png',
     niches: ['fashion', 'beauty', 'watches-accessories'],
     status: 'available',
@@ -43,7 +43,7 @@ const TEMPLATES: Array<{
   {
     id: 'template-3',
     name: 'Aurora',
-    description: 'Template moderno para eletrônicos e tech. Barra de promoções, grade 3 colunas com badges de specs, carrinho popup.',
+    description: 'Template moderno para eletr�nicos e tech. Barra de promo��es, grade 3 colunas com badges de specs, carrinho popup.',
     preview: '/templates/template-3-preview.png',
     niches: ['electronics', 'tech', 'gaming'],
     status: 'available',
@@ -51,7 +51,7 @@ const TEMPLATES: Array<{
   {
     id: 'template-4',
     name: 'Glamour',
-    description: 'Template luxuoso para beleza e cosméticos. Hero full-screen, logo centralizado, grade 4 colunas, carrinho lateral, estilo Kylie Cosmetics.',
+    description: 'Template luxuoso para beleza e cosm�ticos. Hero full-screen, logo centralizado, grade 4 colunas, carrinho lateral, estilo Kylie Cosmetics.',
     preview: '/templates/template-4-preview.png',
     niches: ['beauty', 'cosmetics', 'skincare', 'wellness'],
     status: 'available',
@@ -114,9 +114,9 @@ export function ThemeGalleryClient() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Tema e Layout</h1>
+          <h1 className="text-xl font-bold tracking-tight text-foreground">Tema e Layout</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Personalize o visual da sua loja. Escolha um template e edite cada seção.
+            Personalize o visual da sua loja. Escolha um template e edite cada se��o.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -191,7 +191,7 @@ export function ThemeGalleryClient() {
 
       {/* Template gallery */}
       <div>
-        <h2 className="mb-4 text-lg font-semibold">Templates disponíveis</h2>
+        <h2 className="mb-4 text-lg font-semibold">Templates dispon�veis</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {TEMPLATES.map((template) => {
             const isCurrent = template.id === currentTemplateId;

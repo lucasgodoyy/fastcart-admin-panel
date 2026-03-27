@@ -67,7 +67,7 @@ export function CustomerClient() {
   return (
     <div className="p-4 md:p-6 lg:p-8">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-5 font-semibold text-foreground">Clientes</h1>
+        <h1 className="text-xl font-bold tracking-tight text-foreground">Clientes</h1>
         <div className="flex items-center gap-3">
           <Link href="/admin/customers/new">
             <Button className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">

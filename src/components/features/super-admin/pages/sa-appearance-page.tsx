@@ -81,7 +81,7 @@ export function SaAppearancePage() {
             <motion.div key={theme.id} variants={fadeInUp}>
               <button
                 onClick={() => applyTheme(theme.id)}
-                className="w-full text-left outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--sa-accent))] rounded-2xl"
+                className="w-full text-left outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--sa-accent))] rounded-lg"
               >
                 <SaCard
                   className={`relative transition-all duration-300 ${

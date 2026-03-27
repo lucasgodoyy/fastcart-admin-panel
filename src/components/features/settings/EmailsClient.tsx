@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -357,6 +358,8 @@ export function EmailsClient() {
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'orders' | 'customers' | 'marketing' | 'system'>('all');
   const [composeOpen, setComposeOpen] = useState(false);
   const [composeForm, setComposeForm] = useState({ to: '', subject: '', bodyHtml: '' });
+  const [composeMode, setComposeMode] = useState<'template' | 'custom'>('template');
+  const [composeTemplateKey, setComposeTemplateKey] = useState('order_confirmation');
   const [testEmailAddr, setTestEmailAddr] = useState('');
 
   /* ── Data queries ── */
@@ -461,6 +464,8 @@ export function EmailsClient() {
     onSuccess: () => {
       toast.success('E-mail enviado com sucesso!');
       setComposeOpen(false);
+      setComposeMode('template');
+      setComposeTemplateKey('order_confirmation');
       setComposeForm({ to: '', subject: '', bodyHtml: '' });
       queryClient.invalidateQueries({ queryKey: ['email-logs'] });
     },
@@ -490,8 +495,8 @@ export function EmailsClient() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-foreground">E-mails automáticos</h1>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="text-xl font-bold tracking-tight text-foreground">E-mails automáticos</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Configure e-mails que são disparados automaticamente por ações na sua loja.
         </p>
       </div>
@@ -881,6 +886,57 @@ export function EmailsClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-2">
+            <div className="space-y-1.5">
+              <Label>Modo de envio</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={composeMode === 'template' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    const event = EMAIL_EVENTS.find((e) => e.key === composeTemplateKey) ?? EMAIL_EVENTS[0];
+                    setComposeMode('template');
+                    setComposeForm((p) => ({ ...p, subject: event.defaultSubject, bodyHtml: event.defaultBody }));
+                  }}
+                >
+                  Usar template
+                </Button>
+                <Button
+                  type="button"
+                  variant={composeMode === 'custom' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setComposeMode('custom')}
+                >
+                  Personalizado
+                </Button>
+              </div>
+            </div>
+
+            {composeMode === 'template' && (
+              <div className="space-y-1.5">
+                <Label>Template</Label>
+                <Select
+                  value={composeTemplateKey}
+                  onValueChange={(value) => {
+                    const event = EMAIL_EVENTS.find((e) => e.key === value) ?? EMAIL_EVENTS[0];
+                    setComposeTemplateKey(value);
+                    setComposeForm((p) => ({ ...p, subject: event.defaultSubject, bodyHtml: event.defaultBody }));
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EMAIL_EVENTS.map((event) => (
+                      <SelectItem key={event.key} value={event.key}>
+                        {event.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             <div className="space-y-1.5">
               <Label>Destinatário</Label>
               <Input

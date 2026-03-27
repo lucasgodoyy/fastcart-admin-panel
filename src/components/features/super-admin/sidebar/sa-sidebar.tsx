@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -8,14 +8,14 @@ import { ChevronDown, Shield, ExternalLink, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { saSidebarSections, type SASidebarItem, type SASidebarSection } from "./sa-sidebar-data";
 
-/* ──────────────── helpers ──────────────── */
+/* ---------------- helpers ---------------- */
 const norm = (p: string) => (p.length > 1 && p.endsWith("/") ? p.slice(0, -1) : p || "/");
 const isActive = (path: string, href: string) => {
   const c = norm(path), t = norm(href);
   return c === t || c.startsWith(`${t}/`);
 };
 
-/* ──────────────── Badge ──────────────── */
+/* ---------------- Badge ---------------- */
 function SaBadge({ text, variant = "default" }: { text: string; variant?: string }) {
   const colors: Record<string, string> = {
     default: "bg-[hsl(var(--sa-accent-subtle))] text-[hsl(var(--sa-accent))]",
@@ -30,7 +30,7 @@ function SaBadge({ text, variant = "default" }: { text: string; variant?: string
   );
 }
 
-/* ──────────────── Single nav item ──────────────── */
+/* ---------------- Single nav item ---------------- */
 function NavItem({ item, pathname, expanded, onToggle, collapsed }: {
   item: SASidebarItem; pathname: string; expanded: boolean; onToggle: () => void; collapsed: boolean;
 }) {
@@ -43,7 +43,7 @@ function NavItem({ item, pathname, expanded, onToggle, collapsed }: {
   const content = (
     <motion.div
       className={cn(
-        "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium cursor-pointer select-none transition-colors duration-200",
+        "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium cursor-pointer select-none transition-colors duration-200",
         active
           ? "text-[hsl(var(--sa-accent))] font-semibold"
           : "text-[hsl(var(--sa-text-secondary))] hover:text-[hsl(var(--sa-text))] hover:bg-[hsl(var(--sa-surface-hover))]"
@@ -55,7 +55,7 @@ function NavItem({ item, pathname, expanded, onToggle, collapsed }: {
       {active && (
         <motion.div
           layoutId="sa-active-indicator"
-          className="absolute inset-0 rounded-xl bg-linear-to-r from-[hsl(var(--sa-accent))/0.15] to-[hsl(var(--sa-info))/0.08] border border-[hsl(var(--sa-accent))/0.2]"
+          className="absolute inset-0 rounded-lg bg-linear-to-r from-[hsl(var(--sa-accent))/0.15] to-[hsl(var(--sa-info))/0.08] border border-[hsl(var(--sa-accent))/0.2]"
           transition={{ type: "spring", stiffness: 350, damping: 30 }}
         />
       )}
@@ -128,7 +128,7 @@ function NavItem({ item, pathname, expanded, onToggle, collapsed }: {
   );
 }
 
-/* ──────────────── Section ──────────────── */
+/* ---------------- Section ---------------- */
 function NavSection({ section, pathname, expandedKeys, toggle, collapsed }: {
   section: SASidebarSection; pathname: string; expandedKeys: Set<string>; toggle: (k: string) => void; collapsed: boolean;
 }) {
@@ -160,7 +160,7 @@ function NavSection({ section, pathname, expandedKeys, toggle, collapsed }: {
   );
 }
 
-/* ──────────────── MAIN SIDEBAR ──────────────── */
+/* ---------------- MAIN SIDEBAR ---------------- */
 export function SaSidebar({ collapsed = false }: { collapsed?: boolean }) {
   const pathname = usePathname();
   const [expandedKeys, setExpanded] = useState<Set<string>>(new Set());
@@ -221,7 +221,7 @@ export function SaSidebar({ collapsed = false }: { collapsed?: boolean }) {
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 border-b border-[hsl(var(--sa-border-subtle))] px-5">
         <motion.div
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] shadow-lg shadow-[hsl(var(--sa-accent))/0.2]"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] shadow-lg shadow-[hsl(var(--sa-accent))/0.2]"
           whileHover={{ scale: 1.08, rotate: 5 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -283,7 +283,7 @@ export function SaSidebar({ collapsed = false }: { collapsed?: boolean }) {
       <div className="border-t border-[hsl(var(--sa-border-subtle))] px-3 py-3">
         <Link href="/admin" prefetch={false}>
           <motion.div
-            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[12px] font-medium text-[hsl(var(--sa-text-muted))] hover:text-[hsl(var(--sa-text-secondary))] hover:bg-[hsl(var(--sa-surface-hover))] transition-colors"
+            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[12px] font-medium text-[hsl(var(--sa-text-muted))] hover:text-[hsl(var(--sa-text-secondary))] hover:bg-[hsl(var(--sa-surface-hover))] transition-colors"
             whileHover={{ x: 2 }}
           >
             <ExternalLink className="h-4 w-4" />

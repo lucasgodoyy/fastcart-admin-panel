@@ -96,7 +96,7 @@ export function AbandonedCartsClient() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-foreground">Carrinhos Abandonados</h1>
+        <h1 className="text-xl font-bold tracking-tight text-foreground">Carrinhos Abandonados</h1>
         <p className="text-sm text-muted-foreground">
           Monitore e recupere vendas perdidas com e-mails automáticos.
         </p>

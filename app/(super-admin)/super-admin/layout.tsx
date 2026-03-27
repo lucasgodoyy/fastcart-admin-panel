@@ -28,7 +28,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     return (
       <div className="super-admin-theme flex min-h-screen items-center justify-center bg-[hsl(var(--sa-bg))]">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-10 w-10 rounded-xl bg-linear-to-br from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] animate-pulse" />
+          <div className="h-10 w-10 rounded-lg bg-linear-to-br from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] animate-pulse" />
           <p className="text-sm text-[hsl(var(--sa-text-muted))]">Carregando Super Admin...</p>
         </div>
       </div>

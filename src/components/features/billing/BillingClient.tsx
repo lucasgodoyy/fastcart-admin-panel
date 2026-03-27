@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -35,7 +35,7 @@ function formatPrice(cents: number, currency: string) {
 }
 
 function formatDate(iso: string | null) {
-  if (!iso) return 'â€”';
+  if (!iso) return '—';
   return new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit',
     month: '2-digit',
@@ -64,7 +64,7 @@ const statusLabel = (s: string) => {
     trialing: t('Em trial', 'Trial'),
     past_due: t('Pagamento pendente', 'Past Due'),
     canceled: t('Cancelado', 'Canceled'),
-    unpaid: t('NÃ£o pago', 'Unpaid'),
+    unpaid: t('Não pago', 'Unpaid'),
   };
   return map[s.toLowerCase()] || s;
 };
@@ -133,33 +133,33 @@ export function BillingClient() {
         </p>
       </div>
 
-      {/* â”€â”€ Banners â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Banners ──────────────────────────────────────────────── */}
       {isSuccess && (
-        <div className="flex items-center gap-3 rounded-xl border border-green-300 bg-green-50 dark:bg-green-900/10 p-4">
+        <div className="flex items-center gap-3 rounded-lg border border-green-300 bg-green-50 dark:bg-green-900/10 p-4">
           <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" />
           <p className="text-sm font-medium text-green-800 dark:text-green-300">
             {t(
-              'Assinatura realizada com sucesso! Seu plano jÃ¡ estÃ¡ ativo.',
+              'Assinatura realizada com sucesso! Seu plano já está ativo.',
               'Subscription successful! Your plan is now active.',
             )}
           </p>
         </div>
       )}
       {isCanceled && (
-        <div className="flex items-center gap-3 rounded-xl border border-yellow-300 bg-yellow-50 dark:bg-yellow-900/10 p-4">
+        <div className="flex items-center gap-3 rounded-lg border border-yellow-300 bg-yellow-50 dark:bg-yellow-900/10 p-4">
           <AlertTriangle className="h-5 w-5 shrink-0 text-yellow-600" />
           <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
             {t(
-              'Checkout cancelado. VocÃª pode tentar novamente quando quiser.',
+              'Checkout cancelado. Você pode tentar novamente quando quiser.',
               'Checkout canceled. You can try again anytime.',
             )}
           </p>
         </div>
       )}
 
-      {/* â”€â”€ Trial Banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Trial Banner ─────────────────────────────────────────── */}
       {sub?.status?.toLowerCase() === 'trialing' && daysLeft !== null && (
-        <div className="flex items-center justify-between gap-4 rounded-xl border border-blue-300 bg-blue-50 dark:bg-blue-900/10 p-4">
+        <div className="flex items-center justify-between gap-4 rounded-lg border border-blue-300 bg-blue-50 dark:bg-blue-900/10 p-4">
           <div className="flex items-center gap-3">
             <Sparkles className="h-5 w-5 shrink-0 text-blue-600" />
             <div>
@@ -173,7 +173,7 @@ export function BillingClient() {
               </p>
               <p className="text-xs text-blue-600 dark:text-blue-400">
                 {t(
-                  'FaÃ§a upgrade para continuar usando todos os recursos.',
+                  'Faça upgrade para continuar usando todos os recursos.',
                   'Upgrade to keep all features.',
                 )}
               </p>
@@ -186,9 +186,9 @@ export function BillingClient() {
         </div>
       )}
 
-      {/* â”€â”€ Current Subscription â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Current Subscription ─────────────────────────────────── */}
       {sub ? (
-        <div className="rounded-xl border-2 border-primary/25 bg-card p-6 space-y-5">
+        <div className="rounded-lg border-2 border-primary/25 bg-card p-6 space-y-5">
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 flex-wrap">
@@ -242,8 +242,8 @@ export function BillingClient() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 pt-1">
             <InfoCard
               icon={<Calendar className="h-4 w-4 text-muted-foreground" />}
-              label={t('PerÃ­odo atual', 'Current period')}
-              value={`${formatDate(sub.currentPeriodStart)} â€” ${formatDate(sub.currentPeriodEnd)}`}
+              label={t('Período atual', 'Current period')}
+              value={`${formatDate(sub.currentPeriodStart)} — ${formatDate(sub.currentPeriodEnd)}`}
             />
             {sub.trialEnd && (
               <InfoCard
@@ -264,7 +264,7 @@ export function BillingClient() {
           {sub.features.length > 0 && (
             <div>
               <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">
-                {t('Recursos incluÃ­dos', 'Included Features')}
+                {t('Recursos incluídos', 'Included Features')}
               </p>
               <div className="flex flex-wrap gap-2">
                 {sub.features.map((f, i) => (
@@ -281,7 +281,7 @@ export function BillingClient() {
           )}
         </div>
       ) : (
-        <div className="rounded-xl border border-yellow-300 bg-yellow-50 dark:bg-yellow-900/10 p-5">
+        <div className="rounded-lg border border-yellow-300 bg-yellow-50 dark:bg-yellow-900/10 p-5">
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-yellow-600" />
             <h2 className="text-sm font-semibold text-foreground">
@@ -289,18 +289,18 @@ export function BillingClient() {
             </h2>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            {t('Escolha um plano abaixo para comeÃ§ar.', 'Choose a plan below to get started.')}
+            {t('Escolha um plano abaixo para começar.', 'Choose a plan below to get started.')}
           </p>
         </div>
       )}
 
-      {/* â”€â”€ Available Plans â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Available Plans ───────────────────────────────────────── */}
       {plans.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-5">
             <TrendingUp className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-bold text-foreground">
-              {t('Planos disponÃ­veis', 'Available Plans')}
+              {t('Planos disponíveis', 'Available Plans')}
             </h2>
           </div>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -339,7 +339,7 @@ function UsageBar({
         <span
           className={`text-xs font-bold ${isAtLimit ? 'text-red-600' : isNearLimit ? 'text-yellow-600' : 'text-muted-foreground'}`}
         >
-          {max == null ? `${current} / âˆž` : `${current} / ${max}`}
+          {max == null ? `${current} / ∞` : `${current} / ${max}`}
         </span>
       </div>
       {max != null && (
@@ -350,7 +350,7 @@ function UsageBar({
       )}
       {isAtLimit && (
         <p className="text-[10px] text-red-600 font-medium">
-          {t('Limite atingido â€” faÃ§a upgrade para adicionar mais.', 'Limit reached â€” upgrade to add more.')}
+          {t('Limite atingido — faça upgrade para adicionar mais.', 'Limit reached — upgrade to add more.')}
         </p>
       )}
     </div>
@@ -386,7 +386,7 @@ function PlanCard({
 
   return (
     <div
-      className={`relative flex flex-col rounded-xl border bg-card p-5 transition-shadow hover:shadow-md ${
+      className={`relative flex flex-col rounded-lg border bg-card p-5 transition-shadow hover:shadow-md ${
         plan.isCurrent
           ? 'border-primary ring-2 ring-primary/20'
           : plan.isPopular
@@ -417,7 +417,7 @@ function PlanCard({
 
       <div className="mb-1">
         <span className="text-2xl font-extrabold text-foreground">
-          {isFree ? t('GrÃ¡tis', 'Free') : formatPrice(plan.priceCents, plan.currency)}
+          {isFree ? t('Grátis', 'Free') : formatPrice(plan.priceCents, plan.currency)}
         </span>
         {!isFree && (
           <span className="text-xs text-muted-foreground">
@@ -433,7 +433,7 @@ function PlanCard({
       )}
       {plan.trialPeriodDays > 0 && !plan.isCurrent && (
         <p className="text-xs text-blue-600 mb-3">
-          âœ“ {plan.trialPeriodDays} {t('dias de trial grÃ¡tis', 'day free trial')}
+          ✓ {plan.trialPeriodDays} {t('dias de trial grátis', 'day free trial')}
         </p>
       )}
 
@@ -441,17 +441,17 @@ function PlanCard({
         <p>
           {plan.maxProducts == null
             ? t('Produtos ilimitados', 'Unlimited products')
-            : `${t('AtÃ©', 'Up to')} ${plan.maxProducts} ${t('produtos', 'products')}`}
+            : `${t('Até', 'Up to')} ${plan.maxProducts} ${t('produtos', 'products')}`}
         </p>
         <p>
           {plan.maxStaff >= 999
             ? t('Equipe ilimitada', 'Unlimited team')
-            : `${t('AtÃ©', 'Up to')} ${plan.maxStaff} ${t('membros', 'members')}`}
+            : `${t('Até', 'Up to')} ${plan.maxStaff} ${t('membros', 'members')}`}
         </p>
         <p>
           {plan.maxStores >= 999
             ? t('Lojas ilimitadas', 'Unlimited stores')
-            : `${t('AtÃ©', 'Up to')} ${plan.maxStores} ${t('lojas', 'stores')}`}
+            : `${t('Até', 'Up to')} ${plan.maxStores} ${t('lojas', 'stores')}`}
         </p>
       </div>
 
@@ -503,7 +503,7 @@ function PlanCard({
             ) : (
               <>
                 {plan.trialPeriodDays > 0
-                  ? t('Iniciar trial grÃ¡tis', 'Start free trial')
+                  ? t('Iniciar trial grátis', 'Start free trial')
                   : t('Assinar agora', 'Subscribe now')}
                 <ArrowRight className="h-4 w-4" />
               </>

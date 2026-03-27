@@ -260,7 +260,7 @@ export function ShippingHubClient() {
         <h2 className="text-base font-semibold text-foreground mb-4">Provedores de Frete</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Melhor Envio card */}
-          <div className="relative rounded-xl border-2 border-primary/30 bg-card p-5 flex flex-col gap-3 shadow-sm">
+          <div className="relative rounded-lg border-2 border-primary/30 bg-card p-5 flex flex-col gap-3 shadow-sm">
             <div className="absolute top-3 right-3">
               <Badge variant={meStatus?.connected ? 'default' : 'secondary'} className="text-xs">
                 {meStatus?.connected ? 'Conectado' : 'Desconectado'}
@@ -664,7 +664,7 @@ function ProviderComingSoonCard({
   description: string;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-5 flex flex-col gap-3 opacity-60">
+    <div className="rounded-lg border border-border bg-card p-5 flex flex-col gap-3 opacity-60">
       <div className="flex items-center gap-3">
         <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${iconBg}`}>
           {icon}

@@ -13,7 +13,7 @@ interface PosSaleSuccessModalProps {
 export function PosSaleSuccessModal({ orderId, changeAmount, onNewSale }: PosSaleSuccessModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="w-full max-w-sm rounded-xl bg-card p-8 text-center shadow-2xl">
+      <div className="w-full max-w-sm rounded-lg bg-card p-8 text-center shadow-2xl">
         <CheckCircle2 className="mx-auto mb-4 h-16 w-16 text-green-500" />
         <h2 className="mb-2 text-xl font-bold">{t('Venda Finalizada!', 'Sale Complete!')}</h2>
         <p className="text-sm text-muted-foreground">

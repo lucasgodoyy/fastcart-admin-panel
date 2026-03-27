@@ -80,7 +80,7 @@ export function TikTokPixelClient() {
             </svg>
           </div>
           <div>
-            <h1 className="text-xl font-bold">TikTok Pixel</h1>
+            <h1 className="text-xl font-bold tracking-tight text-foreground">TikTok Pixel</h1>
             <p className="text-sm text-muted-foreground">
               {t('Rastreamento de conversões e público personalizado', 'Conversion tracking and custom audiences')}
             </p>
@@ -106,7 +106,7 @@ export function TikTokPixelClient() {
       )}
 
       {/* Form */}
-      <div className="rounded-xl border bg-card p-6 space-y-5">
+      <div className="rounded-lg border bg-card p-6 space-y-5">
         <div>
           <label className="text-sm font-medium" htmlFor="tiktok-pixel-id">
             Pixel ID
@@ -156,7 +156,7 @@ export function TikTokPixelClient() {
       </div>
 
       {/* Info Section */}
-      <div className="rounded-xl border bg-card p-6 space-y-4">
+      <div className="rounded-lg border bg-card p-6 space-y-4">
         <div className="flex items-center gap-2">
           <Info className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-medium">{t('Eventos rastreados automaticamente', 'Auto-tracked events')}</h3>

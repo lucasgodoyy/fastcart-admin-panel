@@ -138,7 +138,7 @@ function ViewRow({ item, rank }: { item: ProductViewItem; rank: number }) {
 
 function MiniKpi({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: string; color: string }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
+    <div className="rounded-lg border border-border bg-card p-4">
       <div className="flex items-center gap-2 mb-1">
         <span className={color}>{icon}</span>
         <span className="text-xs text-muted-foreground">{label}</span>
@@ -166,7 +166,7 @@ function SectionCard({
   isEmpty: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
+    <div className="rounded-lg border border-border bg-card p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground">{icon}</span>
@@ -365,7 +365,7 @@ export function ProductStatsClient() {
       </div>
 
       {/* Limit control */}
-      <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
+      <div className="flex items-center gap-3 rounded-lg border border-border bg-card p-4">
         <ShoppingBag className="h-4 w-4 text-muted-foreground flex-shrink-0" />
         <span className="text-sm text-muted-foreground">{t('Itens por lista:', 'Items per list:')}</span>
         <input

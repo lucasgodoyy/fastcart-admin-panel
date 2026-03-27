@@ -63,7 +63,7 @@ function ConfigModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-xl border border-border bg-card shadow-xl">
+      <div className="w-full max-w-md rounded-lg border border-border bg-card shadow-xl">
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <h2 className="text-sm font-semibold text-foreground">
             {t('Configurações de Envio', 'Send Settings')}
@@ -174,7 +174,7 @@ function QuickEmailModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-lg rounded-xl border border-border bg-card shadow-xl">
+      <div className="w-full max-w-lg rounded-lg border border-border bg-card shadow-xl">
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <div>
             <h2 className="text-sm font-semibold text-foreground">

@@ -1,4 +1,4 @@
-ï»¿"use client";
+"use client";
 
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -11,6 +11,7 @@ import {
   Eye,
   EyeOff,
   BarChart3,
+  Send,
 } from "lucide-react";
 import {
   SaPageHeader,
@@ -65,7 +66,7 @@ export function SaSettingsPage() {
     queryFn: superAdminService.getGeneralSettings,
   });
 
-  // Local form state â€” initialized from backend
+  // Local form state — initialized from backend
   const [platformName, setPlatformName] = useState("");
   const [supportEmail, setSupportEmail] = useState("");
   const [maintenanceMode, setMaintenanceMode] = useState(false);
@@ -79,26 +80,26 @@ export function SaSettingsPage() {
   }, [settings]);
 
   const handleSave = () => {
-    toast.success("ConfiguraÃ§Ãµes salvas!");
+    toast.success("Configurações salvas!");
   };
 
   return (
     <div className="space-y-8">
       <SaPageHeader
-        title="ConfiguraÃ§Ãµes"
-        description="ConfiguraÃ§Ãµes gerais da plataforma, integraÃ§Ãµes e infraestrutura"
+        title="Configurações"
+        description="Configurações gerais da plataforma, integrações e infraestrutura"
         actions={
-          <Button onClick={handleSave} className="bg-linear-to-r from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] text-white rounded-xl gap-2 text-[12px] shadow-lg shadow-[hsl(var(--sa-accent))]/25 hover:opacity-90">
-            <Save className="h-4 w-4" /> Salvar AlteraÃ§Ãµes
+          <Button onClick={handleSave} className="bg-linear-to-r from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] text-white rounded-lg gap-2 text-[12px] shadow-lg shadow-[hsl(var(--sa-accent))]/25 hover:opacity-90">
+            <Save className="h-4 w-4" /> Salvar Alterações
           </Button>
         }
       />
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="bg-[hsl(var(--sa-surface))] border border-[hsl(var(--sa-border-subtle))] rounded-xl p-1 flex-wrap h-auto">
+        <TabsList className="bg-[hsl(var(--sa-surface))] border border-[hsl(var(--sa-border-subtle))] rounded-lg p-1 flex-wrap h-auto">
           {[
             { value: "general", icon: Globe, label: "Geral" },
-            { value: "integrations", icon: Server, label: "IntegraÃ§Ãµes" },
+            { value: "integrations", icon: Server, label: "Integrações" },
           ].map(t => (
             <TabsTrigger key={t.value} value={t.value} className="rounded-lg data-[state=active]:bg-[hsl(var(--sa-accent))] data-[state=active]:text-white text-[hsl(var(--sa-text-secondary))] text-[12px] gap-1.5">
               <t.icon className="h-3.5 w-3.5" />
@@ -114,13 +115,13 @@ export function SaSettingsPage() {
               <SettingRow label="Nome da Plataforma" desc="Nome exibido publicamente">
                 <Input value={platformName} onChange={e => setPlatformName(e.target.value)} placeholder={isLoading ? 'Carregando...' : ''} className="w-full sm:w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
               </SettingRow>
-              <SettingRow label="URL Principal" desc="DomÃ­nio principal da plataforma">
+              <SettingRow label="URL Principal" desc="Domínio principal da plataforma">
                 <Input defaultValue="https://rapidocart.com.br" className="w-full sm:w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
               </SettingRow>
-              <SettingRow label="Moeda PadrÃ£o" desc="Moeda utilizada nas transaÃ§Ãµes">
+              <SettingRow label="Moeda Padrão" desc="Moeda utilizada nas transações">
                 <Input defaultValue="BRL (R$)" disabled className="w-full sm:w-32 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text-muted))] text-[12px] rounded-lg h-9" />
               </SettingRow>
-              <SettingRow label="Modo ManutenÃ§Ã£o" desc="Desabilita acesso pÃºblico temporariamente">
+              <SettingRow label="Modo Manutenção" desc="Desabilita acesso público temporariamente">
                 <Switch checked={maintenanceMode} onCheckedChange={setMaintenanceMode} />
               </SettingRow>
               <SettingRow label="Registro de Novas Lojas" desc="Permitir cadastro de novas lojas">
@@ -129,10 +130,10 @@ export function SaSettingsPage() {
             </SettingSection>
 
             <SettingSection icon={Mail} title="E-mail">
-              <SettingRow label="E-mail de Suporte" desc="Exibido nas pÃ¡ginas de contato">
+              <SettingRow label="E-mail de Suporte" desc="Exibido nas páginas de contato">
                 <Input value={supportEmail} onChange={e => setSupportEmail(e.target.value)} placeholder={isLoading ? 'Carregando...' : ''} className="w-full sm:w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
               </SettingRow>
-              <SettingRow label="E-mail do Remetente" desc="From address para e-mails automÃ¡ticos">
+              <SettingRow label="E-mail do Remetente" desc="From address para e-mails automáticos">
                 <Input defaultValue="noreply@rapidocart.com.br" className="w-full sm:w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9" />
               </SettingRow>
             </SettingSection>
@@ -143,7 +144,7 @@ export function SaSettingsPage() {
         <TabsContent value="integrations" className="mt-6">
           <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-6">
             <SettingSection icon={CreditCard} title="Stripe (Pagamentos)">
-              <SettingRow label="Chave PÃºblica" desc="Publishable key do Stripe">
+              <SettingRow label="Chave Pública" desc="Publishable key do Stripe">
                 <Input defaultValue="pk_live_51..." className="w-full sm:w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9 font-mono" />
               </SettingRow>
               <SettingRow label="Chave Secreta" desc="Secret key do Stripe">
@@ -167,19 +168,45 @@ export function SaSettingsPage() {
             </SettingSection>
 
             <SettingSection icon={Mail} title="E-mail (Resend)">
-              <SettingRow label="Provedor" desc="ServiÃ§o de envio de e-mails transacionais">
+              <SettingRow label="Provedor" desc="Serviço de envio de e-mails transacionais">
                 <Input defaultValue="Resend" disabled className="w-full sm:w-40 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text-muted))] text-[12px] rounded-lg h-9" />
               </SettingRow>
               <SettingRow label="API Key" desc="Chave de API do Resend">
                 <Input type="password" placeholder="re_xxxxxxxxx" className="w-full sm:w-64 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9 font-mono" />
               </SettingRow>
-              <SettingRow label="DomÃ­nio Verificado" desc="DomÃ­nio configurado no Resend">
+              <SettingRow label="Domínio Verificado" desc="Domínio configurado no Resend">
                 <Input defaultValue="rapidocart.com.br" disabled className="w-full sm:w-56 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text-muted))] text-[12px] rounded-lg h-9" />
+              </SettingRow>
+              <SettingRow label="Enviar E-mail de Teste" desc="Verifica se o Resend está configurado corretamente">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1.5 text-[12px] h-9"
+                  onClick={async () => {
+                    try {
+                      const result = await superAdminService.sendPlatformEmail({
+                        to: settings?.supportEmail || 'admin@lojaki.store',
+                        subject: '[Lojaki] E-mail de teste — Resend OK ?',
+                        bodyHtml: '<h2>E-mail de teste</h2><p>Se você está lendo isso, o Resend está configurado corretamente!</p><p><small>Enviado em: ' + new Date().toLocaleString('pt-BR') + '</small></p>',
+                      });
+                      if (result.status === 'SENT') {
+                        toast.success('E-mail de teste enviado com sucesso!');
+                      } else {
+                        toast.error('Falha ao enviar e-mail de teste.');
+                      }
+                    } catch {
+                      toast.error('Erro ao enviar e-mail de teste. Verifique a API Key do Resend.');
+                    }
+                  }}
+                >
+                  <Send className="h-3.5 w-3.5" />
+                  Enviar teste
+                </Button>
               </SettingRow>
             </SettingSection>
 
             <SettingSection icon={BarChart3} title="Google Analytics">
-              <SettingRow label="Measurement ID" desc="ID de mensuraÃ§Ã£o do GA4 (ex: G-XXXXXXXXXX)">
+              <SettingRow label="Measurement ID" desc="ID de mensuração do GA4 (ex: G-XXXXXXXXXX)">
                 <Input placeholder="G-XXXXXXXXXX" className="w-full sm:w-56 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9 font-mono" />
               </SettingRow>
               <SettingRow label="Ativo" desc="Injetar script do GA4 na landing page e lojas">

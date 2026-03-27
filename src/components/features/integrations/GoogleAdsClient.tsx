@@ -87,7 +87,7 @@ export function GoogleAdsClient() {
             <TrendingUp className="h-6 w-6 text-blue-600" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">Google Ads</h1>
+            <h1 className="text-xl font-bold tracking-tight text-foreground">Google Ads</h1>
             <p className="text-sm text-muted-foreground">
               {t('Rastreamento de conversões e remarketing', 'Conversion tracking and remarketing')}
             </p>
@@ -111,7 +111,7 @@ export function GoogleAdsClient() {
         </div>
       )}
 
-      <div className="rounded-xl border bg-card p-6 space-y-5">
+      <div className="rounded-lg border bg-card p-6 space-y-5">
         <div>
           <label className="text-sm font-medium" htmlFor="ads-id">Conversion ID</label>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -182,7 +182,7 @@ export function GoogleAdsClient() {
         </div>
       </div>
 
-      <div className="rounded-xl border bg-card p-6 space-y-3">
+      <div className="rounded-lg border bg-card p-6 space-y-3">
         <div className="flex items-center gap-2">
           <Info className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-medium">{t('Eventos rastreados', 'Tracked events')}</h3>

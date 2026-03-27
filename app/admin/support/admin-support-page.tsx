@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -256,6 +257,32 @@ export default function AdminSupportPage() {
             <span className="text-xs font-medium uppercase tracking-wide">{t("Resolvidos", "Resolved")}</span>
           </div>
           <p className="text-2xl font-bold text-green-700 dark:text-green-300">{resolvedCount}</p>
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+        <div className="rounded-xl border bg-card p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">{t("Operacao SaaS", "SaaS operations")}</p>
+          <h2 className="mt-2 text-base font-semibold text-foreground">
+            {t("Como FAQ e tickets devem trabalhar juntos", "How FAQ and tickets should work together")}
+          </h2>
+          <div className="mt-4 space-y-3 text-sm text-muted-foreground">
+            <p>{t("1. Tudo que for pergunta recorrente deve virar item de FAQ publico.", "1. Any recurring question should become a public FAQ entry.")}</p>
+            <p>{t("2. Tickets devem ficar para casos com contexto do pedido, excecao ou erro operacional.", "2. Tickets should be reserved for order context, exceptions, or operational failures.")}</p>
+            <p>{t("3. Use esta fila para identificar gargalos e depois ajustar a base publica.", "3. Use this queue to identify friction points, then improve the public knowledge base.")}</p>
+          </div>
+        </div>
+
+        <div className="rounded-xl border bg-card p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">{t("Atalhos", "Shortcuts")}</p>
+          <div className="mt-4 grid gap-2">
+            <Button asChild variant="outline" className="justify-start">
+              <Link href="/admin/faq">{t("Gerenciar FAQ", "Manage FAQ")}</Link>
+            </Button>
+            <Button asChild variant="outline" className="justify-start">
+              <Link href="/admin/tutorials">{t("Ver tutoriais internos", "View internal tutorials")}</Link>
+            </Button>
+          </div>
         </div>
       </div>
 

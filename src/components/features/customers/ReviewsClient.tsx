@@ -113,7 +113,7 @@ export function ReviewsClient() {
     <div className="p-4 md:p-6 lg:p-8">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-5 font-semibold text-foreground">Avaliações</h1>
+          <h1 className="text-xl font-bold tracking-tight text-foreground">Avaliações</h1>
           <p className="mt-1 text-sm text-muted-foreground">Modere avaliações de produtos, acompanhe pendências e mantenha a vitrine confiável.</p>
         </div>
       </div>

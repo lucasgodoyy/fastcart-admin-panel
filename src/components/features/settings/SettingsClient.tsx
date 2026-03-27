@@ -156,7 +156,7 @@ export function SettingsClient() {
           <Link
             key={item.href}
             href={item.href}
-            className="flex items-center gap-4 rounded-xl border border-border bg-card px-4 py-3.5 transition-all hover:border-primary/30 hover:shadow-sm group"
+            className="flex items-center gap-4 rounded-lg border border-border bg-card px-4 py-3.5 transition-all hover:border-primary/30 hover:shadow-sm group"
           >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground group-hover:text-primary group-hover:bg-accent transition-colors">
               {item.icon}

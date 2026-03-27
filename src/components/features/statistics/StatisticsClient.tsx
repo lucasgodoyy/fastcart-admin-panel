@@ -72,7 +72,7 @@ export function StatisticsClient() {
       {/* Main KPIs */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {mainCards.map((card) => (
-          <div key={card.label} className="rounded-xl border border-border bg-card p-5">
+          <div key={card.label} className="rounded-lg border border-border bg-card p-5">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm text-muted-foreground">{card.label}</span>
               <div className={`rounded-lg p-2 ${card.bgColor}`}>
@@ -102,7 +102,7 @@ export function StatisticsClient() {
 
       {/* Conversion funnel */}
       {stats.totalOrders > 0 && (
-        <div className="rounded-xl border border-border bg-card p-5">
+        <div className="rounded-lg border border-border bg-card p-5">
           <h2 className="text-sm font-semibold text-foreground mb-4">Funil de conversão</h2>
           <div className="space-y-3">
             {[

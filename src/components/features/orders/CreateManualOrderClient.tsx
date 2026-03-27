@@ -214,7 +214,7 @@ export function CreateManualOrderClient() {
       </div>
 
       {/* ── Section A: Products ─────────────────── */}
-      <section className="rounded-xl border bg-card p-6 space-y-4">
+      <section className="rounded-lg border bg-card p-6 space-y-4">
         <h2 className="font-medium text-foreground">{t('Produtos', 'Products')}</h2>
 
         {/* Product search */}
@@ -321,7 +321,7 @@ export function CreateManualOrderClient() {
       </section>
 
       {/* ── Section B: Totals ─────────────────────── */}
-      <section className="rounded-xl border bg-card p-6 space-y-4">
+      <section className="rounded-lg border bg-card p-6 space-y-4">
         <h2 className="font-medium text-foreground">{t('Valores', 'Totals')}</h2>
 
         <div className="grid grid-cols-2 gap-4">
@@ -405,7 +405,7 @@ export function CreateManualOrderClient() {
       </section>
 
       {/* ── Section C: Customer ─────────────────── */}
-      <section className="rounded-xl border bg-card p-6 space-y-4">
+      <section className="rounded-lg border bg-card p-6 space-y-4">
         <h2 className="font-medium text-foreground">{t('Dados do Cliente', 'Customer Info')}</h2>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
@@ -436,7 +436,7 @@ export function CreateManualOrderClient() {
       </section>
 
       {/* ── Section D: Payment status ────────────── */}
-      <section className="rounded-xl border bg-card p-6 space-y-4">
+      <section className="rounded-lg border bg-card p-6 space-y-4">
         <h2 className="font-medium text-foreground">
           {t('Status do Pagamento', 'Payment Status')}
         </h2>
@@ -467,7 +467,7 @@ export function CreateManualOrderClient() {
       </section>
 
       {/* ── Section E: Shipping address ──────────── */}
-      <section className="rounded-xl border bg-card p-6 space-y-4">
+      <section className="rounded-lg border bg-card p-6 space-y-4">
         <h2 className="font-medium text-foreground">
           {t('Endereço de Entrega', 'Shipping Address')}
         </h2>
@@ -519,7 +519,7 @@ export function CreateManualOrderClient() {
       </section>
 
       {/* ── Section F: Origin + Notes ────────────── */}
-      <section className="rounded-xl border bg-card p-6 space-y-4">
+      <section className="rounded-lg border bg-card p-6 space-y-4">
         <h2 className="font-medium text-foreground">
           {t('Canal de Venda e Observações', 'Sales Channel & Notes')}
         </h2>

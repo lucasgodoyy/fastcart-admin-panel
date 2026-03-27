@@ -100,7 +100,7 @@ export function SaMetaAdsConfigPage() {
           <Button
             onClick={handleSave}
             disabled={saveMut.isPending}
-            className="bg-linear-to-r from-blue-600 to-blue-500 text-white rounded-xl gap-2 text-[12px] shadow-lg shadow-blue-600/25 hover:opacity-90"
+            className="bg-linear-to-r from-blue-600 to-blue-500 text-white rounded-lg gap-2 text-[12px] shadow-lg shadow-blue-600/25 hover:opacity-90"
           >
             {saveMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             Salvar Alterações

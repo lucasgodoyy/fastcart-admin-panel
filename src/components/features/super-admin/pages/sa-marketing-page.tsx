@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useTabFromPath } from "../hooks/use-tab-from-path";
 import { motion } from "framer-motion";
@@ -50,33 +50,33 @@ import { toast } from "sonner";
 const campaignStatusMap: Record<string, { label: string; color: string }> = {
   ACTIVE: { label: "Ativo", color: "success" },
   SCHEDULED: { label: "Agendado", color: "info" },
-  COMPLETED: { label: "Concluído", color: "accent" },
+  COMPLETED: { label: "Conclu�do", color: "accent" },
   PAUSED: { label: "Pausado", color: "warning" },
   DRAFT: { label: "Rascunho", color: "accent" },
 };
 
 const inputCls = "bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] text-[12px] rounded-lg h-9";
 
-/* ── Campaign form defaults ── */
+/* -- Campaign form defaults -- */
 const emptyCampaign = { name: "", type: "DISCOUNT", status: "DRAFT", description: "", targetAudience: "ALL_STORES", discountValue: "", channel: "PLATFORM" };
 
-/* ── Banner form defaults ── */
+/* -- Banner form defaults -- */
 const emptyBanner = { title: "", imageUrl: "", linkUrl: "", position: "HOME_TOP", active: true };
 
 export function SaMarketingPage() {
   const queryClient = useQueryClient();
   const [tab, setTab] = useTabFromPath("/super-admin/marketing", { campaigns: "", banners: "banners" }, "campaigns");
 
-  /* — Campaigns state — */
+  /* � Campaigns state � */
   const [campaignOpen, setCampaignOpen] = useState(false);
   const [campaignForm, setCampaignForm] = useState(emptyCampaign);
   const [editingCampaignId, setEditingCampaignId] = useState<number | null>(null);
 
-  /* — Banners state — */
+  /* � Banners state � */
   const [bannerOpen, setBannerOpen] = useState(false);
   const [bannerForm, setBannerForm] = useState(emptyBanner);
 
-  /* ── Queries ── */
+  /* -- Queries -- */
   const { data: stats } = useQuery({
     queryKey: ["sa-marketing-stats"],
     queryFn: superAdminService.getMarketingStats,
@@ -97,7 +97,7 @@ export function SaMarketingPage() {
   const campaigns = campaignsData?.content ?? [];
   const banners = bannersData?.content ?? [];
 
-  /* ── Campaign mutations ── */
+  /* -- Campaign mutations -- */
   const campaignMutation = useMutation({
     mutationFn: (data: typeof emptyCampaign) => {
       const body = { name: data.name, type: data.type, status: data.status, description: data.description, targetAudience: data.targetAudience, discountValue: data.discountValue, channel: data.channel, isPlatform: true };
@@ -124,7 +124,7 @@ export function SaMarketingPage() {
     onError: () => toast.error("Erro ao atualizar status"),
   });
 
-  /* ── Banner mutations ── */
+  /* -- Banner mutations -- */
   const bannerMutation = useMutation({
     mutationFn: (data: typeof emptyBanner) => superAdminService.createBanner({ title: data.title, imageUrl: data.imageUrl, linkUrl: data.linkUrl || null, active: data.active }),
     onSuccess: () => {
@@ -145,7 +145,7 @@ export function SaMarketingPage() {
     onError: () => toast.error("Erro ao alterar banner"),
   });
 
-  /* ── Helpers ── */
+  /* -- Helpers -- */
   function openNewCampaign() {
     setEditingCampaignId(null);
     setCampaignForm(emptyCampaign);
@@ -176,14 +176,14 @@ export function SaMarketingPage() {
     <div className="space-y-8">
       <SaPageHeader
         title="Marketing"
-        description="Campanhas, banners e promoções da plataforma"
+        description="Campanhas, banners e promo��es da plataforma"
         actions={
           tab === "campaigns" ? (
-            <Button onClick={openNewCampaign} className="bg-linear-to-r from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] text-white rounded-xl gap-2 text-[12px] shadow-lg shadow-[hsl(var(--sa-accent))]/25 hover:opacity-90">
+            <Button onClick={openNewCampaign} className="bg-linear-to-r from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] text-white rounded-lg gap-2 text-[12px] shadow-lg shadow-[hsl(var(--sa-accent))]/25 hover:opacity-90">
               <Plus className="h-4 w-4" /> Nova Campanha
             </Button>
           ) : (
-            <Button onClick={() => { setBannerForm(emptyBanner); setBannerOpen(true); }} className="bg-linear-to-r from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] text-white rounded-xl gap-2 text-[12px] shadow-lg shadow-[hsl(var(--sa-accent))]/25 hover:opacity-90">
+            <Button onClick={() => { setBannerForm(emptyBanner); setBannerOpen(true); }} className="bg-linear-to-r from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] text-white rounded-lg gap-2 text-[12px] shadow-lg shadow-[hsl(var(--sa-accent))]/25 hover:opacity-90">
               <Plus className="h-4 w-4" /> Novo Banner
             </Button>
           )
@@ -198,7 +198,7 @@ export function SaMarketingPage() {
       </motion.div>
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="bg-[hsl(var(--sa-surface))] border border-[hsl(var(--sa-border-subtle))] rounded-xl p-1">
+        <TabsList className="bg-[hsl(var(--sa-surface))] border border-[hsl(var(--sa-border-subtle))] rounded-lg p-1">
           <TabsTrigger value="campaigns" className="rounded-lg data-[state=active]:bg-[hsl(var(--sa-accent))] data-[state=active]:text-white text-[hsl(var(--sa-text-secondary))] text-[12px]">
             Campanhas
           </TabsTrigger>
@@ -207,7 +207,7 @@ export function SaMarketingPage() {
           </TabsTrigger>
         </TabsList>
 
-        {/* ── Campaigns Tab ── */}
+        {/* -- Campaigns Tab -- */}
         <TabsContent value="campaigns" className="mt-6">
           {campaignsLoading ? (
             <div className="py-12 text-center text-[hsl(var(--sa-text-muted))]">Carregando campanhas...</div>
@@ -222,7 +222,7 @@ export function SaMarketingPage() {
                   <motion.div
                     key={campaign.id}
                     variants={fadeInUp}
-                    className="rounded-xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))]/50 backdrop-blur-sm p-5 hover:bg-[hsl(var(--sa-surface-hover))] transition-all"
+                    className="rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))]/50 backdrop-blur-sm p-5 hover:bg-[hsl(var(--sa-surface-hover))] transition-all"
                   >
                     <div className="flex items-start justify-between gap-4 flex-wrap">
                       <div className="flex-1 min-w-0">
@@ -237,7 +237,7 @@ export function SaMarketingPage() {
                           {(campaign.startDate || campaign.endDate) && (
                             <span className="text-[11px] text-[hsl(var(--sa-text-muted))] flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
-                              {campaign.startDate ?? "—"} — {campaign.endDate ?? "—"}
+                              {campaign.startDate ?? "�"} � {campaign.endDate ?? "�"}
                             </span>
                           )}
                           {campaign.storeName && (
@@ -276,7 +276,7 @@ export function SaMarketingPage() {
           )}
         </TabsContent>
 
-        {/* ── Banners Tab ── */}
+        {/* -- Banners Tab -- */}
         <TabsContent value="banners" className="mt-6">
           {bannersLoading ? (
             <div className="py-12 text-center text-[hsl(var(--sa-text-muted))]">Carregando banners...</div>
@@ -293,7 +293,7 @@ export function SaMarketingPage() {
                     <motion.div
                       key={banner.id}
                       variants={fadeInUp}
-                      className="rounded-xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg))] p-4"
+                      className="rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg))] p-4"
                     >
                       {banner.imageUrl ? (
                         <div className="h-24 rounded-lg border border-[hsl(var(--sa-border-subtle))] mb-3 overflow-hidden">
@@ -326,7 +326,7 @@ export function SaMarketingPage() {
         </TabsContent>
       </Tabs>
 
-      {/* ── Campaign Dialog ── */}
+      {/* -- Campaign Dialog -- */}
       <Dialog open={campaignOpen} onOpenChange={(v) => { if (!v) closeCampaignDialog(); else setCampaignOpen(true); }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -354,7 +354,7 @@ export function SaMarketingPage() {
                     <SelectItem value="DISCOUNT">Desconto</SelectItem>
                     <SelectItem value="SEASONAL">Sazonal</SelectItem>
                     <SelectItem value="FLASH_SALE">Flash Sale</SelectItem>
-                    <SelectItem value="LAUNCH">Lançamento</SelectItem>
+                    <SelectItem value="LAUNCH">Lan�amento</SelectItem>
                     <SelectItem value="LOYALTY">Fidelidade</SelectItem>
                     <SelectItem value="OTHER">Outro</SelectItem>
                   </SelectContent>
@@ -374,9 +374,9 @@ export function SaMarketingPage() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-[12px] font-medium text-[hsl(var(--sa-text))]">Descrição</label>
+              <label className="text-[12px] font-medium text-[hsl(var(--sa-text))]">Descri��o</label>
               <textarea
-                placeholder="Descrição da campanha..."
+                placeholder="Descri��o da campanha..."
                 value={campaignForm.description}
                 onChange={(e) => setCampaignForm(p => ({ ...p, description: e.target.value }))}
                 className={`w-full h-20 p-3 text-xs font-mono bg-[hsl(var(--sa-bg))] border border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-[hsl(var(--sa-accent))]`}
@@ -384,7 +384,7 @@ export function SaMarketingPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-[12px] font-medium text-[hsl(var(--sa-text))]">Público-alvo</label>
+                <label className="text-[12px] font-medium text-[hsl(var(--sa-text))]">P�blico-alvo</label>
                 <Select value={campaignForm.targetAudience} onValueChange={(v) => setCampaignForm(p => ({ ...p, targetAudience: v }))}>
                   <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -421,7 +421,7 @@ export function SaMarketingPage() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Banner Dialog ── */}
+      {/* -- Banner Dialog -- */}
       <Dialog open={bannerOpen} onOpenChange={(v) => { if (!v) closeBannerDialog(); else setBannerOpen(true); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -432,9 +432,9 @@ export function SaMarketingPage() {
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div className="space-y-1.5">
-              <label className="text-[12px] font-medium text-[hsl(var(--sa-text))]">Título *</label>
+              <label className="text-[12px] font-medium text-[hsl(var(--sa-text))]">T�tulo *</label>
               <Input
-                placeholder="Ex: Promoção de Verão"
+                placeholder="Ex: Promo��o de Ver�o"
                 value={bannerForm.title}
                 onChange={(e) => setBannerForm(p => ({ ...p, title: e.target.value }))}
                 className={inputCls}
@@ -460,14 +460,14 @@ export function SaMarketingPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-[12px] font-medium text-[hsl(var(--sa-text))]">Posição</label>
+                <label className="text-[12px] font-medium text-[hsl(var(--sa-text))]">Posi��o</label>
                 <Select value={bannerForm.position} onValueChange={(v) => setBannerForm(p => ({ ...p, position: v }))}>
                   <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="HOME_TOP">Topo da Home</SelectItem>
                     <SelectItem value="HOME_MIDDLE">Meio da Home</SelectItem>
                     <SelectItem value="SIDEBAR">Sidebar</SelectItem>
-                    <SelectItem value="FOOTER">Rodapé</SelectItem>
+                    <SelectItem value="FOOTER">Rodap�</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

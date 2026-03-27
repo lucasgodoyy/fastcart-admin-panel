@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -144,7 +144,7 @@ export function SaSubscriptionsPage() {
           <div className="flex gap-2">
             <Button
               asChild
-              className="bg-[hsl(var(--sa-success))] hover:bg-[hsl(var(--sa-success))]/90 text-white rounded-xl gap-2"
+              className="bg-[hsl(var(--sa-success))] hover:bg-[hsl(var(--sa-success))]/90 text-white rounded-lg gap-2"
             >
               <Link href="/super-admin/subscriptions/plans/new">
               <Plus className="h-4 w-4" /> Novo Plano
@@ -189,7 +189,7 @@ export function SaSubscriptionsPage() {
       </motion.div>
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="bg-[hsl(var(--sa-surface))] border border-[hsl(var(--sa-border-subtle))] rounded-xl p-1">
+        <TabsList className="bg-[hsl(var(--sa-surface))] border border-[hsl(var(--sa-border-subtle))] rounded-lg p-1">
           <TabsTrigger
             value="plans"
             className="rounded-lg data-[state=active]:bg-[hsl(var(--sa-accent))] data-[state=active]:text-white text-[hsl(var(--sa-text-secondary))] text-[12px]"
@@ -210,13 +210,13 @@ export function SaSubscriptionsPage() {
           </TabsTrigger>
         </TabsList>
 
-        {/* ── Plans Tab ─────────────────────────────────────────────── */}
+        {/* -- Plans Tab ----------------------------------------------- */}
         <TabsContent value="plans" className="mt-6">
           {plans.length === 0 ? (
             <SaEmptyState
               icon={Sparkles}
               title="Nenhum plano cadastrado"
-              description="Crie o primeiro plano de assinatura para começar a configurar o catálogo SaaS da plataforma."
+              description="Crie o primeiro plano de assinatura para come�ar a configurar o cat�logo SaaS da plataforma."
             />
           ) : (
             <motion.div
@@ -235,7 +235,7 @@ export function SaSubscriptionsPage() {
                     key={plan.id}
                     variants={fadeInUp}
                     whileHover={{ y: -6, scale: 1.01 }}
-                    className={`relative rounded-3xl border ${
+                    className={`relative rounded-lg border ${
                       plan.isPopular
                         ? "border-[hsl(var(--sa-accent))] shadow-[0_24px_60px_-32px_hsl(var(--sa-accent)/0.55)]"
                         : "border-[hsl(var(--sa-border-subtle))]"
@@ -248,7 +248,7 @@ export function SaSubscriptionsPage() {
                       </div>
                     )}
                     <div className="relative mb-5">
-                      <div className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[hsl(var(--sa-surface))]/80 backdrop-blur-sm">
+                      <div className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-lg bg-[hsl(var(--sa-surface))]/80 backdrop-blur-sm">
                         <Icon className={`h-5 w-5 text-[hsl(var(--${color}))]`} />
                       </div>
                       <div className="flex items-start justify-between gap-3">
@@ -268,7 +268,7 @@ export function SaSubscriptionsPage() {
                         <span className="text-[28px] font-bold text-[hsl(var(--sa-text))]">
                           {fmtCents(plan.priceCents)}
                         </span>
-                        <span className="pb-1 text-[11px] text-[hsl(var(--sa-text-muted))]">/mês</span>
+                        <span className="pb-1 text-[11px] text-[hsl(var(--sa-text-muted))]">/m�s</span>
                       </div>
                       {plan.annualPriceCents != null && (
                         <p className="mt-1 text-[11px] text-[hsl(var(--sa-success))]">
@@ -277,7 +277,7 @@ export function SaSubscriptionsPage() {
                       )}
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2 rounded-2xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg-secondary))]/60 p-3 text-center backdrop-blur-sm">
+                    <div className="grid grid-cols-3 gap-2 rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg-secondary))]/60 p-3 text-center backdrop-blur-sm">
                       <div>
                         <p className="text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--sa-text-muted))]">Produtos</p>
                         <p className="mt-1 text-[14px] font-semibold text-[hsl(var(--sa-text))]">
@@ -308,7 +308,7 @@ export function SaSubscriptionsPage() {
                       ))}
                       {(plan.features ?? []).length > 4 && (
                         <li className="pl-5 text-[10px] text-[hsl(var(--sa-text-muted))]">
-                          +{plan.features.length - 4} benefícios adicionais
+                          +{plan.features.length - 4} benef�cios adicionais
                         </li>
                       )}
                     </ul>
@@ -335,7 +335,7 @@ export function SaSubscriptionsPage() {
                         <Button
                           asChild
                           size="sm"
-                          className="rounded-xl bg-[hsl(var(--sa-accent))] px-3 text-white hover:bg-[hsl(var(--sa-accent-hover))]"
+                          className="rounded-lg bg-[hsl(var(--sa-accent))] px-3 text-white hover:bg-[hsl(var(--sa-accent-hover))]"
                         >
                           <Link href={`/super-admin/subscriptions/plans/${plan.id}`}>
                             <Pencil className="h-3.5 w-3.5" /> Editar
@@ -350,7 +350,7 @@ export function SaSubscriptionsPage() {
           )}
         </TabsContent>
 
-        {/* ── Subscribers Tab ────────────────────────────────────────── */}
+        {/* -- Subscribers Tab ------------------------------------------ */}
         <TabsContent value="subscribers" className="mt-6">
           <motion.div variants={fadeInUp} initial="initial" animate="animate">
             <SaTableCard title="Assinantes" subtitle={`${subsData?.totalElements ?? 0} assinante(s)`}>
@@ -373,7 +373,7 @@ export function SaSubscriptionsPage() {
                       Vencimento
                     </TableHead>
                     <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">
-                      Ações
+                      A��es
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -414,8 +414,8 @@ export function SaSubscriptionsPage() {
                         {sub.currentPeriodEnd
                           ? new Date(sub.currentPeriodEnd).toLocaleDateString("pt-BR")
                           : sub.trialEnd
-                            ? `Trial até ${new Date(sub.trialEnd).toLocaleDateString("pt-BR")}`
-                            : "—"}
+                            ? `Trial at� ${new Date(sub.trialEnd).toLocaleDateString("pt-BR")}`
+                            : "�"}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
@@ -451,7 +451,7 @@ export function SaSubscriptionsPage() {
           </motion.div>
         </TabsContent>
 
-        {/* ── Billing Tab ────────────────────────────────────────────── */}
+        {/* -- Billing Tab ---------------------------------------------- */}
         <TabsContent value="billing" className="mt-6">
           <motion.div
             variants={staggerContainer}
@@ -461,15 +461,15 @@ export function SaSubscriptionsPage() {
           >
             <SaCard>
               <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">
-                Integração Stripe
+                Integra��o Stripe
               </h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between py-3 border-b border-[hsl(var(--sa-border-subtle))]">
                   <span className="text-[12px] text-[hsl(var(--sa-text-secondary))]">
-                    Status da Conexão
+                    Status da Conex�o
                   </span>
                   <span className="flex items-center gap-2 text-[12px] font-bold text-[hsl(var(--sa-warning))]">
-                    <div className="h-2 w-2 rounded-full bg-[hsl(var(--sa-warning))]" /> Não
+                    <div className="h-2 w-2 rounded-full bg-[hsl(var(--sa-warning))]" /> N�o
                     configurado
                   </span>
                 </div>
@@ -481,7 +481,7 @@ export function SaSubscriptionsPage() {
                   <span className="text-[12px] text-[hsl(var(--sa-text-secondary))]">Modo</span>
                   <span className="text-[12px] text-[hsl(var(--sa-text-muted))]">Test</span>
                 </div>
-                <Button disabled className="mt-2 w-full rounded-xl bg-[hsl(var(--sa-accent))] text-white opacity-60">
+                <Button disabled className="mt-2 w-full rounded-lg bg-[hsl(var(--sa-accent))] text-white opacity-60">
                   Stripe em breve
                 </Button>
               </div>
@@ -534,7 +534,7 @@ export function SaSubscriptionsPage() {
         </TabsContent>
       </Tabs>
 
-      {/* ── Change Plan Dialog ─────────────────────────────────────── */}
+      {/* -- Change Plan Dialog --------------------------------------- */}
       <Dialog
         open={changePlanSub !== null}
         onOpenChange={(open) => {
@@ -546,7 +546,7 @@ export function SaSubscriptionsPage() {
       >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Trocar Plano — {changePlanSub?.storeName}</DialogTitle>
+            <DialogTitle>Trocar Plano � {changePlanSub?.storeName}</DialogTitle>
             <DialogDescription>Selecione o novo plano para esta loja.</DialogDescription>
           </DialogHeader>
           <div className="py-4">
@@ -557,7 +557,7 @@ export function SaSubscriptionsPage() {
               <SelectContent>
                 {plans.map((p) => (
                   <SelectItem key={p.id} value={String(p.id)}>
-                    {p.name} — {fmtCents(p.priceCents)}/mês
+                    {p.name} � {fmtCents(p.priceCents)}/m�s
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -590,7 +590,7 @@ export function SaSubscriptionsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Delete Confirmation Dialog ─────────────────────────────── */}
+      {/* -- Delete Confirmation Dialog ------------------------------- */}
       <Dialog
         open={deleteConfirmId !== null}
         onOpenChange={(open) => !open && setDeleteConfirmId(null)}
@@ -599,7 +599,7 @@ export function SaSubscriptionsPage() {
           <DialogHeader>
             <DialogTitle>Excluir Plano</DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja excluir este plano? Esta ação não pode ser desfeita.
+              Tem certeza que deseja excluir este plano? Esta a��o n�o pode ser desfeita.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

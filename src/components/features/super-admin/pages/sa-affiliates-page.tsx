@@ -111,6 +111,7 @@ export function SaAffiliatesPage() {
       payouts: "payouts",
       tracking: "tracking",
       settings: "settings",
+      "how-it-works": "how-it-works",
     },
     "partners",
   );
@@ -318,7 +319,7 @@ export function SaAffiliatesPage() {
         description="Gerencie parceiros, comissões, pagamentos, links e configurações"
         actions={
           <Button
-            className="bg-[hsl(var(--sa-accent))] hover:bg-[hsl(var(--sa-accent-hover))] text-white rounded-xl gap-2"
+            className="bg-[hsl(var(--sa-accent))] hover:bg-[hsl(var(--sa-accent-hover))] text-white rounded-lg gap-2"
             onClick={openCreate}
           >
             <Plus className="h-4 w-4" /> Novo Parceiro
@@ -367,12 +368,13 @@ export function SaAffiliatesPage() {
 
       {/* Tabs */}
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="bg-[hsl(var(--sa-surface))] border border-[hsl(var(--sa-border-subtle))] rounded-xl p-1">
+        <TabsList className="bg-[hsl(var(--sa-surface))] border border-[hsl(var(--sa-border-subtle))] rounded-lg p-1">
           <TabsTrigger value="partners" className={tabTriggerCls}>Parceiros</TabsTrigger>
           <TabsTrigger value="commissions" className={tabTriggerCls}>Comissões</TabsTrigger>
           <TabsTrigger value="payouts" className={tabTriggerCls}>Pagamentos</TabsTrigger>
           <TabsTrigger value="tracking" className={tabTriggerCls}>Tracking</TabsTrigger>
           <TabsTrigger value="settings" className={tabTriggerCls}>Configurações</TabsTrigger>
+          <TabsTrigger value="how-it-works" className={tabTriggerCls}>Como Funciona</TabsTrigger>
         </TabsList>
 
         {/* ─── PARTNERS TAB ─────────────────────────────────────── */}
@@ -612,7 +614,7 @@ export function SaAffiliatesPage() {
         <TabsContent value="payouts" className="mt-6 space-y-6">
           <div className="flex justify-end">
             <Button
-              className="bg-[hsl(var(--sa-accent))] hover:bg-[hsl(var(--sa-accent-hover))] text-white rounded-xl gap-2"
+              className="bg-[hsl(var(--sa-accent))] hover:bg-[hsl(var(--sa-accent-hover))] text-white rounded-lg gap-2"
               onClick={() => {
                 setPayoutForm(blankPayoutForm);
                 setPayoutOpen(true);
@@ -870,7 +872,7 @@ export function SaAffiliatesPage() {
                   </p>
                 </div>
                 <Button
-                  className="bg-[hsl(var(--sa-accent))] hover:bg-[hsl(var(--sa-accent-hover))] text-white rounded-xl"
+                  className="bg-[hsl(var(--sa-accent))] hover:bg-[hsl(var(--sa-accent-hover))] text-white rounded-lg"
                   onClick={() => saveSettingsMut.mutate()}
                   disabled={saveSettingsMut.isPending}
                 >
@@ -880,7 +882,7 @@ export function SaAffiliatesPage() {
 
               <div className="grid gap-6 md:grid-cols-2">
                 {/* Enabled */}
-                <div className="flex items-center justify-between p-4 rounded-xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))]">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))]">
                   <div>
                     <Label className="text-[13px] font-semibold text-[hsl(var(--sa-text))]">
                       Programa Ativo
@@ -896,7 +898,7 @@ export function SaAffiliatesPage() {
                 </div>
 
                 {/* Auto-approve */}
-                <div className="flex items-center justify-between p-4 rounded-xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))]">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))]">
                   <div>
                     <Label className="text-[13px] font-semibold text-[hsl(var(--sa-text))]">
                       Auto-Aprovar Conversões
@@ -992,6 +994,232 @@ export function SaAffiliatesPage() {
                 </div>
               </div>
             </SaCard>
+          </motion.div>
+        </TabsContent>
+
+        {/* ─── HOW IT WORKS TAB ─────────────────────────────────── */}
+        <TabsContent value="how-it-works" className="mt-6">
+          <motion.div variants={fadeInUp} initial="initial" animate="animate" className="space-y-6">
+            {/* Overview */}
+            <SaCard title="Visão Geral do Programa de Afiliados" subtitle="Como o sistema funciona de ponta a ponta">
+              <div className="space-y-4 text-[13px] text-[hsl(var(--sa-text-secondary))] leading-relaxed">
+                <p>
+                  O programa de afiliados permite que parceiros externos promovam as lojas da plataforma
+                  e ganhem comissões sobre vendas geradas através de seus links exclusivos. O sistema
+                  é gerenciado centralmente pelo Super Admin e funciona por loja individualmente.
+                </p>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {[
+                    { n: "1", t: "Cadastro do Parceiro", d: "Admin ou Super Admin cadastra o afiliado com nome, e-mail, comissão (%) e dados bancários/PIX." },
+                    { n: "2", t: "Link de Referência", d: "Um código único (referralCode) é gerado. Links de afiliado incluem UTM params para rastreamento." },
+                    { n: "3", t: "Cookie de Tracking", d: "Quando alguém clica no link, um cookie é salvo (duração configurável, padrão 30 dias)." },
+                    { n: "4", t: "Click Registrado", d: "Cada clique é registrado com IP, user-agent, timestamp e associado ao afiliado." },
+                    { n: "5", t: "Conversão (Venda)", d: "Se o visitante compra dentro do período do cookie, uma conversão é registrada automaticamente." },
+                    { n: "6", t: "Comissão Calculada", d: "A comissão é calculada como % do valor da venda. Fica como PENDING até aprovação." },
+                    { n: "7", t: "Aprovação", d: "Admin ou Super Admin aprova a conversão. Pode rejeitar com motivo." },
+                    { n: "8", t: "Pagamento", d: "No dia definido, cria-se um payout via PIX ou transferência. Mínimo configurável." },
+                  ].map(s => (
+                    <div key={s.n} className="rounded-lg border border-[hsl(var(--sa-border-subtle))] p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(var(--sa-accent))] text-white text-[10px] font-bold">{s.n}</div>
+                        <span className="text-[12px] font-bold text-[hsl(var(--sa-text))]">{s.t}</span>
+                      </div>
+                      <p className="text-[11px] text-[hsl(var(--sa-text-muted))]">{s.d}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </SaCard>
+
+            {/* Backend API Status */}
+            <SaCard title="Status da API Backend" subtitle="Endpoints implementados e funcionalidades">
+              <div className="space-y-3">
+                <div className="text-[12px] font-bold text-[hsl(var(--sa-text))] mb-2">✅ Endpoints Implementados (Nível Loja — /api/v1/affiliates)</div>
+                <div className="grid gap-1.5">
+                  {[
+                    { m: "GET", p: "/settings", d: "Obter config do programa" },
+                    { m: "PUT", p: "/settings", d: "Atualizar config do programa" },
+                    { m: "GET", p: "/", d: "Listar afiliados (com paginação e filtro status)" },
+                    { m: "GET", p: "/{id}", d: "Detalhe do afiliado" },
+                    { m: "POST", p: "/", d: "Criar afiliado" },
+                    { m: "PUT", p: "/{id}", d: "Atualizar afiliado" },
+                    { m: "GET", p: "/links", d: "Listar links (filtro por afiliado)" },
+                    { m: "POST", p: "/links", d: "Criar link de afiliado" },
+                    { m: "GET", p: "/conversions", d: "Listar conversões" },
+                    { m: "PUT", p: "/conversions/{id}/approve", d: "Aprovar conversão" },
+                    { m: "PUT", p: "/conversions/{id}/reject", d: "Rejeitar conversão" },
+                    { m: "GET", p: "/payouts", d: "Listar pagamentos" },
+                    { m: "POST", p: "/payouts", d: "Criar pagamento" },
+                    { m: "PUT", p: "/payouts/{id}/paid", d: "Marcar como pago" },
+                    { m: "GET", p: "/stats", d: "Estatísticas do programa" },
+                  ].map((api, i) => (
+                    <div key={i} className="flex items-center gap-3 rounded-lg border border-[hsl(var(--sa-border-subtle))] px-3 py-2">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                        api.m === "GET" ? "bg-blue-500/10 text-blue-400" :
+                        api.m === "POST" ? "bg-green-500/10 text-green-400" :
+                        "bg-amber-500/10 text-amber-400"
+                      }`}>{api.m}</span>
+                      <code className="text-[11px] text-[hsl(var(--sa-text))] font-mono">{api.p}</code>
+                      <span className="text-[11px] text-[hsl(var(--sa-text-muted))] ml-auto">{api.d}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="text-[12px] font-bold text-[hsl(var(--sa-text))] mt-4 mb-2">✅ Endpoint Público (tracking de cliques)</div>
+                <div className="flex items-center gap-3 rounded-lg border border-[hsl(var(--sa-border-subtle))] px-3 py-2">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/10 text-blue-400">GET</span>
+                  <code className="text-[11px] text-[hsl(var(--sa-text))] font-mono">/api/v1/public/affiliates/...</code>
+                  <span className="text-[11px] text-[hsl(var(--sa-text-muted))] ml-auto">Registro de cliques público</span>
+                </div>
+              </div>
+            </SaCard>
+
+            {/* Frontend Status */}
+            <SaCard title="Status do Frontend" subtitle="Telas e funcionalidades implementadas">
+              <div className="space-y-4">
+                <div>
+                  <div className="text-[12px] font-bold text-[hsl(var(--sa-text))] mb-2">✅ Super Admin (esta tela)</div>
+                  <div className="grid gap-1.5 ml-4">
+                    {[
+                      "Dashboard com stats (parceiros ativos, receita, comissões, taxa conversão)",
+                      "CRUD completo de parceiros (criar, editar, detalhe, aprovar, suspender, reativar)",
+                      "Tabela de comissões com aprovação/rejeição",
+                      "Tabela de pagamentos com criação e marcação como pago",
+                      "Tracking: top parceiros por cliques, melhores conversores, tabela de links",
+                      "Configurações: ativar/desativar, taxa, cookie, mínimo, dia de pagamento, auto-aprovação",
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-start gap-2 text-[11px] text-[hsl(var(--sa-text-secondary))]">
+                        <CheckCircle className="h-3.5 w-3.5 text-green-400 shrink-0 mt-0.5" />
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[12px] font-bold text-[hsl(var(--sa-text))] mb-2">✅ Painel do Lojista (/admin/marketing/affiliates)</div>
+                  <div className="grid gap-1.5 ml-4">
+                    {[
+                      "Dashboard com stats e top afiliados",
+                      "CRUD de afiliados com filtro de status",
+                      "Criação e gerenciamento de links com UTM",
+                      "Tabela de conversões com aprovação/rejeição",
+                      "Criação de payouts mostrando saldo pendente",
+                      "Configurações: comissão, cookie, mínimo, auto-aprovação, termos",
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-start gap-2 text-[11px] text-[hsl(var(--sa-text-secondary))]">
+                        <CheckCircle className="h-3.5 w-3.5 text-green-400 shrink-0 mt-0.5" />
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </SaCard>
+
+            {/* Database Entities */}
+            <SaCard title="Entidades do Banco de Dados" subtitle="Estrutura de dados do programa">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {[
+                  { t: "AffiliateSettingsEntity", d: "Configurações do programa por loja: enabled, commissionRate, cookieDays, minPayout, payoutDay, autoApprove, termsUrl" },
+                  { t: "AffiliateEntity", d: "Parceiro afiliado: name, email, phone, document, referralCode, commissionRate, pixKey, bankInfo, status, store" },
+                  { t: "AffiliateLinkEntity", d: "Link de tracking: affiliate, slug, destinationUrl, utmSource, utmMedium, utmCampaign, clicks, conversions, active" },
+                  { t: "AffiliateClickEntity", d: "Registro de clique: link, ip, userAgent, referer, timestamp" },
+                  { t: "AffiliateConversionEntity", d: "Conversão (venda): affiliate, orderId, saleAmount, commissionRate, commissionAmount, status, rejectReason" },
+                  { t: "AffiliatePayoutEntity", d: "Pagamento: affiliate, amount, method, reference, notes, status, paidAt" },
+                ].map((e, i) => (
+                  <div key={i} className="rounded-lg border border-[hsl(var(--sa-border-subtle))] p-4">
+                    <code className="text-[11px] font-bold text-[hsl(var(--sa-accent))] font-mono">{e.t}</code>
+                    <p className="text-[10px] text-[hsl(var(--sa-text-muted))] mt-1.5 leading-relaxed">{e.d}</p>
+                  </div>
+                ))}
+              </div>
+            </SaCard>
+
+            {/* What's Missing / TODO */}
+            <SaCard title="O que falta / Melhorias futuras" subtitle="Items pendentes para completar o programa">
+              <div className="space-y-4">
+                <div>
+                  <div className="text-[12px] font-bold text-amber-400 mb-2">⚠️ Pendente — Prioridade Alta</div>
+                  <div className="grid gap-1.5 ml-4">
+                    {[
+                      "Registro automático de conversão no checkout (quando pedido é pago, verificar cookie e criar conversão)",
+                      "Endpoint público de redirect: /ref/{code} → redireciona e seta cookie de tracking",
+                      "Webhook de pagamento do Stripe → trigger de conversão automática",
+                      "Página pública de registro de afiliado (landing page para novos afiliados se cadastrarem)",
+                      "Dashboard do afiliado: área onde o afiliado vê suas stats, links e ganhos",
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-start gap-2 text-[11px] text-[hsl(var(--sa-text-secondary))]">
+                        <XCircle className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[12px] font-bold text-blue-400 mb-2">📋 Pendente — Prioridade Média</div>
+                  <div className="grid gap-1.5 ml-4">
+                    {[
+                      "E-mail automático para afiliado quando conversão é aprovada",
+                      "E-mail automático quando pagamento é feito",
+                      "Relatório exportável de comissões (CSV/Excel)",
+                      "Filtro por período (mês/semana) nas tabelas de conversões e payouts",
+                      "Integração com PIX automático via Stripe Payouts",
+                      "Notificação no painel quando nova conversão pendente",
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-start gap-2 text-[11px] text-[hsl(var(--sa-text-secondary))]">
+                        <XCircle className="h-3.5 w-3.5 text-blue-400 shrink-0 mt-0.5" />
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[12px] font-bold text-[hsl(var(--sa-text-muted))] mb-2">💡 Melhorias Futuras</div>
+                  <div className="grid gap-1.5 ml-4">
+                    {[
+                      "Sistema de tiers de comissão (bronze/silver/gold)",
+                      "Comissão recorrente para assinaturas",
+                      "Materiais de marketing (banners, textos) para afiliados",
+                      "API pública para afiliados integrarem com seus próprios sistemas",
+                      "Painel de ranking de afiliados (gamificação)",
+                      "Suporte a multi-nível (MLM) se necessário",
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-start gap-2 text-[11px] text-[hsl(var(--sa-text-muted))]">
+                        <span className="h-3.5 w-3.5 shrink-0 mt-0.5 text-center">•</span>
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </SaCard>
+
+            {/* Current Status Summary */}
+            <div className="rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-6">
+              <div className="text-center space-y-3">
+                <div className="text-[14px] font-bold text-[hsl(var(--sa-text))]">Status Atual: 70% Implementado</div>
+                <div className="w-full h-3 bg-[hsl(var(--sa-bg))] rounded-full overflow-hidden">
+                  <div className="h-full bg-linear-to-r from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] rounded-full" style={{ width: "70%" }} />
+                </div>
+                <div className="grid grid-cols-3 gap-4 text-center pt-2">
+                  <div>
+                    <div className="text-[18px] font-bold text-green-400">15</div>
+                    <div className="text-[10px] text-[hsl(var(--sa-text-muted))]">Endpoints API</div>
+                  </div>
+                  <div>
+                    <div className="text-[18px] font-bold text-green-400">12</div>
+                    <div className="text-[10px] text-[hsl(var(--sa-text-muted))]">Telas Frontend</div>
+                  </div>
+                  <div>
+                    <div className="text-[18px] font-bold text-green-400">6</div>
+                    <div className="text-[10px] text-[hsl(var(--sa-text-muted))]">Entidades DB</div>
+                  </div>
+                </div>
+                <p className="text-[11px] text-[hsl(var(--sa-text-muted))] max-w-md mx-auto">
+                  O CRUD completo está funcional. Falta a integração automática com checkout (conversão via cookie)
+                  e a área pública do afiliado para tornar o programa 100% operacional.
+                </p>
+              </div>
+            </div>
           </motion.div>
         </TabsContent>
       </Tabs>

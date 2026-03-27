@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -53,12 +53,12 @@ import storeSettingsService from '@/services/storeSettingsService';
 import integrationService from '@/services/integrationService';
 import { MercadoPagoStatus, StripeConnectStatus } from '@/types/integration';
 
-// ─── Query keys ────────────────────────────────────────────────────────────────
+// --- Query keys ----------------------------------------------------------------
 const STORE_QUERY_KEY = ['store-settings'];
 const STRIPE_QK = ['integration', 'stripe-connect'];
 const MP_QK = ['integration', 'mercadopago'];
 
-// ─── Stripe helpers ─────────────────────────────────────────────────────────────
+// --- Stripe helpers -------------------------------------------------------------
 function getStripeState(s?: StripeConnectStatus) {
   if (!s?.connected) return 'NOT_CONNECTED';
   if (s.chargesEnabled && s.payoutsEnabled) return 'ACTIVE';
@@ -67,21 +67,21 @@ function getStripeState(s?: StripeConnectStatus) {
   return 'ONBOARDING_PENDING';
 }
 
-// ─── PIX key type labels ────────────────────────────────────────────────────────
+// --- PIX key type labels --------------------------------------------------------
 const PIX_KEY_TYPES = [
   { value: 'CPF', label: 'CPF' },
   { value: 'CNPJ', label: 'CNPJ' },
   { value: 'EMAIL', label: 'E-mail' },
   { value: 'PHONE', label: 'Telefone' },
-  { value: 'RANDOM', label: 'Chave aleatória' },
+  { value: 'RANDOM', label: 'Chave aleat�ria' },
 ] as const;
 
-// ─── Small helpers ───────────────────────────────────────────────────────────────
+// --- Small helpers ---------------------------------------------------------------
 function StatusPill({
   ok,
   loading,
   activeLabel = 'Ativo',
-  inactiveLabel = 'Não configurado',
+  inactiveLabel = 'N�o configurado',
 }: {
   ok: boolean;
   loading?: boolean;
@@ -110,7 +110,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-// ─── Gateway card ────────────────────────────────────────────────────────────────
+// --- Gateway card ----------------------------------------------------------------
 interface GatewayCardProps {
   icon: React.ReactNode;
   name: string;
@@ -133,7 +133,7 @@ function GatewayCard({
 }: GatewayCardProps) {
   return (
     <div
-      className={`rounded-xl border border-border bg-card transition-shadow ${disabled ? 'opacity-50 pointer-events-none' : 'hover:shadow-sm'}`}
+      className={`rounded-lg border border-border bg-card transition-shadow ${disabled ? 'opacity-50 pointer-events-none' : 'hover:shadow-sm'}`}
     >
       <div className="flex items-center gap-4 p-5">
         <div className="shrink-0">{icon}</div>
@@ -168,7 +168,7 @@ function GatewayCard({
   );
 }
 
-// ─── Offline method row ─────────────────────────────────────────────────────────
+// --- Offline method row ---------------------------------------------------------
 interface OfflineRowProps {
   icon: React.ReactNode;
   name: string;
@@ -212,7 +212,7 @@ function OfflineRow({ icon, name, description, enabled, onToggle, onConfigure, s
   );
 }
 
-// ─── Main component ──────────────────────────────────────────────────────────────
+// --- Main component --------------------------------------------------------------
 type ActiveDialog = 'mercadopago' | 'stripe' | 'pix' | 'manual-payment' | null;
 
 export function PaymentMethodsClient() {
@@ -222,19 +222,19 @@ export function PaymentMethodsClient() {
 
   const [openDialog, setOpenDialog] = useState<ActiveDialog>(null);
 
-  // ── Pix form draft ──
+  // -- Pix form draft --
   const [pixKeyDraft, setPixKeyDraft] = useState('');
   const [pixKeyTypeDraft, setPixKeyTypeDraft] = useState('CPF');
 
-  // ── Manual payment form draft ──
+  // -- Manual payment form draft --
   const [manualLabelDraft, setManualLabelDraft] = useState('');
   const [manualInstrDraft, setManualInstrDraft] = useState('');
 
-  // ── MP installment + interest draft ──
+  // -- MP installment + interest draft --
   const [mpInstDraft, setMpInstDraft] = useState(12);
   const [mpInterestDraft, setMpInterestDraft] = useState(false);
 
-  // ── Queries ──
+  // -- Queries --
   const { data: store, isLoading: isLoadingStore } = useQuery({
     queryKey: STORE_QUERY_KEY,
     queryFn: storeSettingsService.getMyStore,
@@ -250,7 +250,7 @@ export function PaymentMethodsClient() {
     queryFn: integrationService.getMercadoPagoStatus,
   });
 
-  // ── Populate drafts when dialogs open ──
+  // -- Populate drafts when dialogs open --
   useEffect(() => {
     if (openDialog === 'pix' && store) {
       setPixKeyDraft(store.pixKey ?? '');
@@ -266,18 +266,18 @@ export function PaymentMethodsClient() {
     }
   }, [openDialog, store]);
 
-  // ── Store mutations ──
+  // -- Store mutations --
   const updateStoreMutation = useMutation({
     mutationFn: storeSettingsService.updateMyStore,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: STORE_QUERY_KEY }),
-    onError: () => toast.error('Não foi possível salvar. Tente novamente.'),
+    onError: () => toast.error('N�o foi poss�vel salvar. Tente novamente.'),
   });
 
   function toggleStore(patch: Parameters<typeof storeSettingsService.updateMyStore>[0]) {
     updateStoreMutation.mutate(patch);
   }
 
-  // ── MP mutations ──
+  // -- MP mutations --
   const mpAuthorizeMutation = useMutation({
     mutationFn: integrationService.getMercadoPagoAuthorizeUrl,
     onSuccess: (r) => { window.location.href = r.authorizeUrl; },
@@ -294,7 +294,7 @@ export function PaymentMethodsClient() {
     onError: () => toast.error('Falha ao desconectar Mercado Pago.'),
   });
 
-  // ── Stripe mutations ──
+  // -- Stripe mutations --
   const stripeOnboardMutation = useMutation({
     mutationFn: integrationService.createStripeOnboardingLink,
     onSuccess: (r) => { window.location.href = r.onboardingUrl; },
@@ -317,7 +317,7 @@ export function PaymentMethodsClient() {
     onError: () => toast.error('Falha ao desconectar Stripe.'),
   });
 
-  // ── URL callback handling ──
+  // -- URL callback handling --
   useEffect(() => {
     const stripeParam = searchParams.get('stripe');
     if (stripeParam === 'return' || stripeParam === 'refresh') {
@@ -334,16 +334,16 @@ export function PaymentMethodsClient() {
     } else if (mpParam === 'error') {
       const reason = searchParams.get('reason') ?? 'unknown';
       const msgs: Record<string, string> = {
-        missing_params: 'Parâmetros ausentes na resposta do Mercado Pago.',
-        invalid_state: 'Identificador de loja inválido.',
-        exchange_failed: 'Falha ao trocar código de autorização.',
+        missing_params: 'Par�metros ausentes na resposta do Mercado Pago.',
+        invalid_state: 'Identificador de loja inv�lido.',
+        exchange_failed: 'Falha ao trocar c�digo de autoriza��o.',
       };
       toast.error(msgs[reason] ?? 'Falha ao conectar Mercado Pago.');
       router.replace('/admin/settings/payment-methods');
     }
   }, [searchParams, queryClient, router]);
 
-  // ── Derived state ──
+  // -- Derived state --
   const stripeState = getStripeState(stripeStatus);
   const stripeActive = stripeState === 'ACTIVE';
   const stripeConnected = stripeStatus?.connected ?? false;
@@ -351,7 +351,7 @@ export function PaymentMethodsClient() {
 
   const isSavingToggle = updateStoreMutation.isPending;
 
-  // ── Save PIX settings ──
+  // -- Save PIX settings --
   function savePixConfig() {
     updateStoreMutation.mutate(
       { pixDirectEnabled: true, pixKey: pixKeyDraft, pixKeyType: pixKeyTypeDraft },
@@ -359,7 +359,7 @@ export function PaymentMethodsClient() {
     );
   }
 
-  // ── Save manual payment settings ──
+  // -- Save manual payment settings --
   function saveManualConfig() {
     updateStoreMutation.mutate(
       { manualPaymentEnabled: true, manualPaymentLabel: manualLabelDraft, manualPaymentInstructions: manualInstrDraft },
@@ -367,34 +367,34 @@ export function PaymentMethodsClient() {
     );
   }
 
-  // ── Save MP config (installments + interest) ──
+  // -- Save MP config (installments + interest) --
   function saveMpConfig() {
     updateStoreMutation.mutate(
       { mpMaxInstallments: mpInstDraft, mpInterestByCustomer: mpInterestDraft },
-      { onSuccess: () => toast.success('Configurações do Mercado Pago salvas.') }
+      { onSuccess: () => toast.success('Configura��es do Mercado Pago salvas.') }
     );
   }
 
   return (
     <>
       <SettingsPageLayout
-        title="Como você quer receber suas vendas"
-        description="Escolha os meios de pagamento disponíveis na sua loja e configure cada um deles."
+        title="Como voc� quer receber suas vendas"
+        description="Escolha os meios de pagamento dispon�veis na sua loja e configure cada um deles."
         helpText="Entender taxas e prazos"
       >
-        {/* ── Online gateways ── */}
+        {/* -- Online gateways -- */}
         <div>
           <SectionTitle>Pagamentos online</SectionTitle>
           <div className="space-y-3">
             {/* Mercado Pago */}
             <GatewayCard
               icon={
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#009EE3]/10">
+                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#009EE3]/10">
                   <Landmark className="h-5 w-5 text-[#009EE3]" />
                 </div>
               }
               name="Mercado Pago"
-              tagline="Aceite Pix, boleto, cartão e parcelamento — sem taxas adicionais da plataforma."
+              tagline="Aceite Pix, boleto, cart�o e parcelamento � sem taxas adicionais da plataforma."
               badge={
                 <Badge className="text-[10px] px-1.5 py-0 h-4 bg-amber-400/20 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-300">
                   Recomendado
@@ -405,7 +405,7 @@ export function PaymentMethodsClient() {
                   ok={mpConnected}
                   loading={isLoadingMp}
                   activeLabel="Ativo"
-                  inactiveLabel="Não conectado"
+                  inactiveLabel="N�o conectado"
                 />
               }
               configureLabel={mpConnected ? 'Gerenciar' : 'Conectar'}
@@ -415,12 +415,12 @@ export function PaymentMethodsClient() {
             {/* Stripe */}
             <GatewayCard
               icon={
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 dark:bg-violet-950/20">
+                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-violet-50 dark:bg-violet-950/20">
                   <CreditCard className="h-5 w-5 text-violet-600 dark:text-violet-400" />
                 </div>
               }
               name="Stripe"
-              tagline="Cartão de crédito e débito internacionais, checkout seguro e repasse automático."
+              tagline="Cart�o de cr�dito e d�bito internacionais, checkout seguro e repasse autom�tico."
               badge={
                 <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 text-muted-foreground">
                   Internacional
@@ -431,22 +431,22 @@ export function PaymentMethodsClient() {
                   ok={stripeActive}
                   loading={isLoadingStripe}
                   activeLabel="Ativo"
-                  inactiveLabel={stripeConnected ? 'Pendente' : 'Não conectado'}
+                  inactiveLabel={stripeConnected ? 'Pendente' : 'N�o conectado'}
                 />
               }
               configureLabel={stripeConnected ? 'Gerenciar' : 'Conectar'}
               onConfigure={() => setOpenDialog('stripe')}
             />
 
-            {/* PayPal — coming soon */}
+            {/* PayPal � coming soon */}
             <GatewayCard
               icon={
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/20">
+                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/20">
                   <ShieldCheck className="h-5 w-5 text-blue-500" />
                 </div>
               }
               name="PayPal"
-              tagline="Pagamentos internacionais via PayPal. Em breve disponível."
+              tagline="Pagamentos internacionais via PayPal. Em breve dispon�vel."
               statusNode={null}
               configureLabel=""
               onConfigure={() => {}}
@@ -455,10 +455,10 @@ export function PaymentMethodsClient() {
           </div>
         </div>
 
-        {/* ── Offline methods ── */}
+        {/* -- Offline methods -- */}
         <div>
           <SectionTitle>Pagamentos manuais</SectionTitle>
-          <div className="rounded-xl border border-border bg-card divide-y divide-border">
+          <div className="rounded-lg border border-border bg-card divide-y divide-border">
             {/* PIX Direto */}
             <OfflineRow
               icon={
@@ -467,7 +467,7 @@ export function PaymentMethodsClient() {
                 </div>
               }
               name="PIX direto"
-              description="O cliente vê sua chave PIX no checkout e paga fora da plataforma."
+              description="O cliente v� sua chave PIX no checkout e paga fora da plataforma."
               enabled={store?.pixDirectEnabled ?? false}
               saving={isSavingToggle}
               onToggle={(v) => {
@@ -488,7 +488,7 @@ export function PaymentMethodsClient() {
                 </div>
               }
               name="Dinheiro na entrega"
-              description="O cliente paga em espécie na hora da entrega do pedido."
+              description="O cliente paga em esp�cie na hora da entrega do pedido."
               enabled={store?.cashOnDeliveryEnabled ?? false}
               saving={isSavingToggle}
               onToggle={(v) => toggleStore({ cashOnDeliveryEnabled: v })}
@@ -502,7 +502,7 @@ export function PaymentMethodsClient() {
                 </div>
               }
               name="Combinar com o vendedor"
-              description={store?.manualPaymentLabel ? `"${store.manualPaymentLabel}" — acertado fora da plataforma.` : 'Pedido gerado, pagamento acertado por WhatsApp ou outro canal.'}
+              description={store?.manualPaymentLabel ? `"${store.manualPaymentLabel}" � acertado fora da plataforma.` : 'Pedido gerado, pagamento acertado por WhatsApp ou outro canal.'}
               enabled={store?.manualPaymentEnabled ?? false}
               saving={isSavingToggle}
               onToggle={(v) => {
@@ -517,24 +517,24 @@ export function PaymentMethodsClient() {
           </div>
         </div>
 
-        {/* ── Fee transparency note ── */}
-        <div className="rounded-xl border border-blue-200 bg-blue-50/60 dark:bg-blue-900/10 dark:border-blue-800 p-4 flex items-start gap-3">
+        {/* -- Fee transparency note -- */}
+        <div className="rounded-lg border border-blue-200 bg-blue-50/60 dark:bg-blue-900/10 dark:border-blue-800 p-4 flex items-start gap-3">
           <Info className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
           <div className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
-            <strong>Sobre taxas:</strong> As taxas de transação são cobradas diretamente pelo gateway
-            (Mercado Pago, Stripe etc.) na sua conta lá. Não cobramos nenhuma comissão adicional sobre
+            <strong>Sobre taxas:</strong> As taxas de transa��o s�o cobradas diretamente pelo gateway
+            (Mercado Pago, Stripe etc.) na sua conta l�. N�o cobramos nenhuma comiss�o adicional sobre
             as suas vendas. Consulte a tabela de taxas de cada provedor no site deles.{' '}
             <Link href="/admin/settings/shipping-methods" className="font-medium underline">
               Meios de envio
             </Link>{' '}
-            ficam em uma seção separada.
+            ficam em uma se��o separada.
           </div>
         </div>
       </SettingsPageLayout>
 
-      {/* ════════════════════════════════════════════════════
+      {/* ----------------------------------------------------
           DIALOG: Mercado Pago
-      ════════════════════════════════════════════════════ */}
+      ---------------------------------------------------- */}
       <Dialog open={openDialog === 'mercadopago'} onOpenChange={(o) => !o && setOpenDialog(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -544,7 +544,7 @@ export function PaymentMethodsClient() {
             </DialogTitle>
             <DialogDescription>
               Conecte sua conta do Mercado Pago via OAuth para receber pagamentos diretamente na sua
-              conta — sem intermediários.
+              conta � sem intermedi�rios.
             </DialogDescription>
           </DialogHeader>
 
@@ -553,13 +553,13 @@ export function PaymentMethodsClient() {
             {isLoadingMp ? (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Verificando conexão...
+                Verificando conex�o...
               </div>
             ) : mpConnected ? (
               <div className="rounded-lg border border-emerald-200 bg-emerald-50 dark:bg-emerald-950/20 dark:border-emerald-800 p-3 flex items-center gap-3">
                 <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
                 <div className="text-xs text-emerald-700 dark:text-emerald-300">
-                  <strong>Conta conectada.</strong> Os pagamentos serão processados diretamente na
+                  <strong>Conta conectada.</strong> Os pagamentos ser�o processados diretamente na
                   sua conta do Mercado Pago.
                   {mpStatus?.mercadoPagoUserId && (
                     <span className="ml-1 font-mono opacity-70">
@@ -573,9 +573,9 @@ export function PaymentMethodsClient() {
                 <p className="text-xs font-medium text-foreground">Como conectar:</p>
                 <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
                   <li>Clique em <strong>Conectar com Mercado Pago</strong> abaixo</li>
-                  <li>Faça login na sua conta do Mercado Pago</li>
+                  <li>Fa�a login na sua conta do Mercado Pago</li>
                   <li>Autorize o acesso ao app da plataforma</li>
-                  <li>Você será redirecionado de volta automaticamente</li>
+                  <li>Voc� ser� redirecionado de volta automaticamente</li>
                 </ol>
               </div>
             )}
@@ -617,10 +617,10 @@ export function PaymentMethodsClient() {
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2 text-sm font-medium">
                     <Layers className="h-4 w-4 text-muted-foreground" />
-                    Parcelamento máximo
+                    Parcelamento m�ximo
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    Número máximo de parcelas que seus clientes podem escolher no checkout.
+                    N�mero m�ximo de parcelas que seus clientes podem escolher no checkout.
                   </p>
                   <Select
                     value={String(mpInstDraft)}
@@ -632,7 +632,7 @@ export function PaymentMethodsClient() {
                     <SelectContent>
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => (
                         <SelectItem key={n} value={String(n)}>
-                          {n === 1 ? 'Apenas à vista' : `Até ${n}x`}
+                          {n === 1 ? 'Apenas � vista' : `At� ${n}x`}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -648,7 +648,7 @@ export function PaymentMethodsClient() {
                     </Label>
                     <p className="text-xs text-muted-foreground">
                       Quando ativado, o Mercado Pago repassa o custo dos juros para o comprador.
-                      Desativado, o valor parcelado pode não incluir juros adicionais.
+                      Desativado, o valor parcelado pode n�o incluir juros adicionais.
                     </p>
                   </div>
                   <Switch
@@ -663,7 +663,7 @@ export function PaymentMethodsClient() {
                   <ShieldCheck className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                   <p className="text-xs text-muted-foreground">
                     <strong>Checkout transparente ativo:</strong> seus clientes pagam dentro da
-                    sua loja, sem sair para o site do Mercado Pago. Isso aumenta a taxa de conversão.
+                    sua loja, sem sair para o site do Mercado Pago. Isso aumenta a taxa de convers�o.
                   </p>
                 </div>
               </div>
@@ -678,7 +678,7 @@ export function PaymentMethodsClient() {
                 disabled={updateStoreMutation.isPending}
               >
                 {updateStoreMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
-                Salvar configurações
+                Salvar configura��es
               </Button>
             </DialogFooter>
           )}
@@ -690,9 +690,9 @@ export function PaymentMethodsClient() {
         </DialogContent>
       </Dialog>
 
-      {/* ════════════════════════════════════════════════════
+      {/* ----------------------------------------------------
           DIALOG: Stripe
-      ════════════════════════════════════════════════════ */}
+      ---------------------------------------------------- */}
       <Dialog open={openDialog === 'stripe'} onOpenChange={(o) => !o && setOpenDialog(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -701,8 +701,8 @@ export function PaymentMethodsClient() {
               Stripe Connect
             </DialogTitle>
             <DialogDescription>
-              Conecte sua conta Stripe para receber pagamentos de cartão de crédito e débito
-              diretamente na sua conta bancária.
+              Conecte sua conta Stripe para receber pagamentos de cart�o de cr�dito e d�bito
+              diretamente na sua conta banc�ria.
             </DialogDescription>
           </DialogHeader>
 
@@ -710,7 +710,7 @@ export function PaymentMethodsClient() {
             {isLoadingStripe ? (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Verificando conexão...
+                Verificando conex�o...
               </div>
             ) : stripeActive ? (
               <div className="rounded-lg border border-emerald-200 bg-emerald-50 dark:bg-emerald-950/20 dark:border-emerald-800 p-3 flex items-center gap-3">
@@ -736,8 +736,8 @@ export function PaymentMethodsClient() {
                 <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
                   <li>Clique em <strong>Conectar com Stripe</strong> abaixo</li>
                   <li>Crie ou acesse sua conta Stripe</li>
-                  <li>Preencha os dados da empresa e conta bancária</li>
-                  <li>Retorne e os pagamentos já estarão ativos</li>
+                  <li>Preencha os dados da empresa e conta banc�ria</li>
+                  <li>Retorne e os pagamentos j� estar�o ativos</li>
                 </ol>
               </div>
             )}
@@ -746,8 +746,8 @@ export function PaymentMethodsClient() {
             <div className="rounded-lg border border-border bg-muted/30 p-3 flex items-start gap-2">
               <ShieldCheck className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
               <p className="text-xs text-muted-foreground">
-                <strong>Checkout transparente:</strong> os dados de cartão são inseridos direto na
-                sua loja via Stripe Elements — seus clientes nunca saem do seu domínio.
+                <strong>Checkout transparente:</strong> os dados de cart�o s�o inseridos direto na
+                sua loja via Stripe Elements � seus clientes nunca saem do seu dom�nio.
               </p>
             </div>
 
@@ -812,9 +812,9 @@ export function PaymentMethodsClient() {
         </DialogContent>
       </Dialog>
 
-      {/* ════════════════════════════════════════════════════
+      {/* ----------------------------------------------------
           DIALOG: PIX Direto
-      ════════════════════════════════════════════════════ */}
+      ---------------------------------------------------- */}
       <Dialog open={openDialog === 'pix'} onOpenChange={(o) => !o && setOpenDialog(null)}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
@@ -823,7 +823,7 @@ export function PaymentMethodsClient() {
               PIX direto
             </DialogTitle>
             <DialogDescription>
-              A chave PIX que aparecerá para o cliente no checkout. O pagamento é acertado fora da
+              A chave PIX que aparecer� para o cliente no checkout. O pagamento � acertado fora da
               plataforma.
             </DialogDescription>
           </DialogHeader>
@@ -858,7 +858,7 @@ export function PaymentMethodsClient() {
                     ? '000.000.000-00'
                     : pixKeyTypeDraft === 'CNPJ'
                     ? '00.000.000/0001-00'
-                    : 'Chave aleatória (32 caracteres)'
+                    : 'Chave aleat�ria (32 caracteres)'
                 }
                 value={pixKeyDraft}
                 onChange={(e) => setPixKeyDraft(e.target.value)}
@@ -866,7 +866,7 @@ export function PaymentMethodsClient() {
             </div>
 
             <div className="rounded-lg border border-emerald-200 bg-emerald-50/60 dark:bg-emerald-950/20 dark:border-emerald-800 p-3 text-xs text-emerald-700 dark:text-emerald-400">
-              Nenhuma taxa da plataforma. O dinheiro vai direto para sua conta — você confirma
+              Nenhuma taxa da plataforma. O dinheiro vai direto para sua conta � voc� confirma
               o recebimento manualmente no painel a cada pedido.
             </div>
           </div>
@@ -884,9 +884,9 @@ export function PaymentMethodsClient() {
         </DialogContent>
       </Dialog>
 
-      {/* ════════════════════════════════════════════════════
+      {/* ----------------------------------------------------
           DIALOG: Combinar com vendedor
-      ════════════════════════════════════════════════════ */}
+      ---------------------------------------------------- */}
       <Dialog open={openDialog === 'manual-payment'} onOpenChange={(o) => !o && setOpenDialog(null)}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
@@ -895,17 +895,17 @@ export function PaymentMethodsClient() {
               Combinar com o vendedor
             </DialogTitle>
             <DialogDescription>
-              O pedido é criado normalmente, mas o pagamento é acertado por fora (WhatsApp,
-              transferência, etc.).
+              O pedido � criado normalmente, mas o pagamento � acertado por fora (WhatsApp,
+              transfer�ncia, etc.).
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-1">
             <div className="space-y-2">
-              <Label htmlFor="manual-label">Nome do método (visível ao cliente)</Label>
+              <Label htmlFor="manual-label">Nome do m�todo (vis�vel ao cliente)</Label>
               <Input
                 id="manual-label"
-                placeholder="Ex: Pagar via WhatsApp, Transferência bancária..."
+                placeholder="Ex: Pagar via WhatsApp, Transfer�ncia banc�ria..."
                 value={manualLabelDraft}
                 onChange={(e) => setManualLabelDraft(e.target.value)}
                 maxLength={100}
@@ -913,10 +913,10 @@ export function PaymentMethodsClient() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="manual-instr">Instruções para o cliente</Label>
+              <Label htmlFor="manual-instr">Instru��es para o cliente</Label>
               <Textarea
                 id="manual-instr"
-                placeholder="Ex: Após finalizar o pedido, entre em contato pelo WhatsApp (11) 99999-9999 para combinar o pagamento."
+                placeholder="Ex: Ap�s finalizar o pedido, entre em contato pelo WhatsApp (11) 99999-9999 para combinar o pagamento."
                 value={manualInstrDraft}
                 onChange={(e) => setManualInstrDraft(e.target.value)}
                 rows={4}

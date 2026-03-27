@@ -131,7 +131,7 @@ export function MarketingClient() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-foreground">Marketing</h1>
+          <h1 className="text-xl font-bold tracking-tight text-foreground">Marketing</h1>
           <p className="text-sm text-muted-foreground">
             Gerencie campanhas, banners e push notifications da sua loja.
           </p>

@@ -1,4 +1,4 @@
-ï»¿'use client';
+'use client';
 
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -64,7 +64,7 @@ export function BlogManagementClient() {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       setForm(emptyForm());
     },
-    onError: () => toast.error('NÃ£o foi possÃ­vel criar o post.'),
+    onError: () => toast.error('Não foi possível criar o post.'),
   });
 
   const updateMutation = useMutation({
@@ -78,7 +78,7 @@ export function BlogManagementClient() {
       setEditingPostId(null);
       setForm(emptyForm());
     },
-    onError: () => toast.error('NÃ£o foi possÃ­vel atualizar o post.'),
+    onError: () => toast.error('Não foi possível atualizar o post.'),
   });
 
   const deleteMutation = useMutation({
@@ -91,7 +91,7 @@ export function BlogManagementClient() {
         setForm(emptyForm());
       }
     },
-    onError: () => toast.error('NÃ£o foi possÃ­vel remover o post.'),
+    onError: () => toast.error('Não foi possível remover o post.'),
   });
 
   const isSaving = createMutation.isPending || updateMutation.isPending;
@@ -103,12 +103,12 @@ export function BlogManagementClient() {
 
   const onSubmit = () => {
     if (!form.title.trim()) {
-      toast.error('Informe o tÃ­tulo do post.');
+      toast.error('Informe o título do post.');
       return;
     }
 
     if (!form.content.trim()) {
-      toast.error('Informe o conteÃºdo do post.');
+      toast.error('Informe o conteúdo do post.');
       return;
     }
 
@@ -148,8 +148,8 @@ export function BlogManagementClient() {
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-foreground">Blog</h1>
-        <p className="text-sm text-muted-foreground">Crie posts por loja com persistÃªncia no backend SaaS.</p>
+        <h1 className="text-xl font-bold tracking-tight text-foreground">Blog</h1>
+        <p className="text-sm text-muted-foreground">Crie posts por loja com persistência no backend SaaS.</p>
       </div>
 
       <Card>
@@ -158,7 +158,7 @@ export function BlogManagementClient() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="blog-title">TÃ­tulo</Label>
+            <Label htmlFor="blog-title">Título</Label>
             <Input
               id="blog-title"
               value={form.title}
@@ -169,13 +169,13 @@ export function BlogManagementClient() {
                   slug: prev.slug ? prev.slug : slugify(event.target.value),
                 }))
               }
-              placeholder="TÃ­tulo do post"
+              placeholder="Título do post"
             />
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="blog-content">ConteÃºdo</Label>
+              <Label htmlFor="blog-content">Conteúdo</Label>
               <Button
                 type="button"
                 variant="outline"
@@ -232,12 +232,12 @@ export function BlogManagementClient() {
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="blog-seo-title">TÃ­tulo SEO</Label>
+              <Label htmlFor="blog-seo-title">Título SEO</Label>
               <Input
                 id="blog-seo-title"
                 value={form.seoTitle}
                 onChange={(event) => setForm((prev) => ({ ...prev, seoTitle: event.target.value }))}
-                placeholder="TÃ­tulo SEO"
+                placeholder="Título SEO"
               />
             </div>
             <div className="space-y-2">
@@ -252,7 +252,7 @@ export function BlogManagementClient() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="blog-seo-description">DescriÃ§Ã£o SEO</Label>
+            <Label htmlFor="blog-seo-description">Descrição SEO</Label>
             <textarea
               id="blog-seo-description"
               className="min-h-23 w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
@@ -272,7 +272,7 @@ export function BlogManagementClient() {
 
           <div className="flex items-center gap-2">
             <Button type="button" onClick={onSubmit} disabled={isSaving}>
-              {editingPostId ? 'Salvar alteraÃ§Ãµes' : 'Criar post'}
+              {editingPostId ? 'Salvar alterações' : 'Criar post'}
             </Button>
             {editingPostId && (
               <Button
@@ -284,7 +284,7 @@ export function BlogManagementClient() {
                 }}
                 disabled={isSaving}
               >
-                Cancelar ediÃ§Ã£o
+                Cancelar edição
               </Button>
             )}
           </div>
@@ -309,7 +309,7 @@ export function BlogManagementClient() {
                   <p className="font-medium text-foreground">{post.title}</p>
                   <p className="text-xs text-muted-foreground">/{post.slug}</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {post.published ? 'Publicado' : 'Rascunho'} Â· Atualizado em {new Date(post.updatedAt).toLocaleDateString()}
+                    {post.published ? 'Publicado' : 'Rascunho'} · Atualizado em {new Date(post.updatedAt).toLocaleDateString()}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">

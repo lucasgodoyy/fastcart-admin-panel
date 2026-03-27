@@ -89,7 +89,7 @@ export function DomainsClient() {
             <Globe className="h-6 w-6 text-emerald-600" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">{t('Domínios', 'Domains')}</h1>
+            <h1 className="text-xl font-bold tracking-tight text-foreground">{t('Domínios', 'Domains')}</h1>
             <p className="text-sm text-muted-foreground">
               {t('Gerencie o endereço da sua loja', 'Manage your store address')}
             </p>
@@ -98,7 +98,7 @@ export function DomainsClient() {
       </div>
 
       {/* Free subdomain section */}
-      <div className="rounded-xl border bg-card p-6 space-y-4">
+      <div className="rounded-lg border bg-card p-6 space-y-4">
         <div className="flex items-center gap-2">
           <CheckCircle2 className="h-5 w-5 text-green-500" />
           <h2 className="font-semibold text-sm">
@@ -146,7 +146,7 @@ export function DomainsClient() {
       </div>
 
       {/* Custom domain section */}
-      <div className="rounded-xl border bg-card p-6 space-y-5">
+      <div className="rounded-lg border bg-card p-6 space-y-5">
         <h2 className="font-semibold text-sm">
           {t('Domínio personalizado', 'Custom domain')}
           <span className="ml-2 text-xs font-normal text-muted-foreground">
@@ -234,7 +234,7 @@ export function DomainsClient() {
       </div>
 
       {/* How Shopify does it */}
-      <div className="rounded-xl border bg-muted/30 p-5 space-y-3">
+      <div className="rounded-lg border bg-muted/30 p-5 space-y-3">
         <div className="flex items-center gap-2">
           <Info className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-semibold">

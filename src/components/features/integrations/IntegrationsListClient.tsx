@@ -290,7 +290,7 @@ export function IntegrationsListClient() {
                 <button
                   key={integration.id}
                   onClick={() => router.push(integration.href)}
-                  className="group relative flex items-start gap-4 rounded-xl border bg-card p-5 text-left transition-all hover:shadow-md hover:border-primary/30"
+                  className="group relative flex items-start gap-4 rounded-lg border bg-card p-5 text-left transition-all hover:shadow-md hover:border-primary/30"
                 >
                   <div className="shrink-0 rounded-lg bg-muted/60 p-3">
                     {integration.icon}

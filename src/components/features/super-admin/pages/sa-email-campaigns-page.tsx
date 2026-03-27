@@ -676,15 +676,15 @@ export function SaEmailCampaignsPage() {
 
               {/* Rates */}
               <div className="grid grid-cols-3 gap-3">
-                <div className="rounded-xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg))] p-3 text-center">
+                <div className="rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg))] p-3 text-center">
                   <p className="text-[10px] uppercase font-bold text-[hsl(var(--sa-text-muted))] tracking-wider">Abertura</p>
                   <p className="text-[20px] font-bold text-[hsl(var(--sa-success))]">{selectedCampaign.openRate.toFixed(1)}%</p>
                 </div>
-                <div className="rounded-xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg))] p-3 text-center">
+                <div className="rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg))] p-3 text-center">
                   <p className="text-[10px] uppercase font-bold text-[hsl(var(--sa-text-muted))] tracking-wider">Clique</p>
                   <p className="text-[20px] font-bold text-[hsl(var(--sa-accent))]">{selectedCampaign.clickRate.toFixed(1)}%</p>
                 </div>
-                <div className="rounded-xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg))] p-3 text-center">
+                <div className="rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg))] p-3 text-center">
                   <p className="text-[10px] uppercase font-bold text-[hsl(var(--sa-text-muted))] tracking-wider">Bounce</p>
                   <p className="text-[20px] font-bold text-[hsl(var(--sa-danger))]">{selectedCampaign.bounceRate.toFixed(1)}%</p>
                 </div>
@@ -803,7 +803,7 @@ function MetricCard({
     : "text-[hsl(var(--sa-text))]";
 
   return (
-    <div className="rounded-xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg))] p-3">
+    <div className="rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg))] p-3">
       <div className="flex items-center gap-2 mb-1">
         <Icon className={`h-3.5 w-3.5 ${colorCls}`} />
         <span className="text-[10px] uppercase font-bold text-[hsl(var(--sa-text-muted))] tracking-wider">{label}</span>

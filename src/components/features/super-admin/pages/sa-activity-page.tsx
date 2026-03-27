@@ -1,4 +1,4 @@
-ï»¿"use client";
+"use client";
 
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -81,10 +81,10 @@ export function SaActivityPage() {
   const filters = [
     { key: "all", label: "Todos" },
     { key: "LOGIN", label: "Login" },
-    { key: "CREATE", label: "CriaÃ§Ã£o" },
-    { key: "UPDATE", label: "AlteraÃ§Ã£o" },
-    { key: "DELETE", label: "RemoÃ§Ã£o" },
-    { key: "SECURITY", label: "SeguranÃ§a" },
+    { key: "CREATE", label: "Criação" },
+    { key: "UPDATE", label: "Alteração" },
+    { key: "DELETE", label: "Remoção" },
+    { key: "SECURITY", label: "Segurança" },
     { key: "BILLING", label: "Financeiro" },
     { key: "TENANT_REGISTERED", label: "Novo Lojista" },
     { key: "SUBSCRIPTION_ACTIVATED", label: "Assinatura Ativa" },
@@ -95,7 +95,7 @@ export function SaActivityPage() {
     <div className="space-y-8">
       <SaPageHeader
         title="Registro de Atividades"
-        description="Log de todas as aÃ§Ãµes realizadas na plataforma"
+        description="Log de todas as ações realizadas na plataforma"
       />
 
       {/* Filters */}
@@ -106,7 +106,7 @@ export function SaActivityPage() {
             placeholder="Buscar atividade..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="pl-10 bg-[hsl(var(--sa-surface))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] placeholder:text-[hsl(var(--sa-text-muted))] rounded-xl h-10 text-[12px]"
+            className="pl-10 bg-[hsl(var(--sa-surface))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] placeholder:text-[hsl(var(--sa-text-muted))] rounded-lg h-10 text-[12px]"
           />
         </div>
         <div className="flex gap-1.5 flex-wrap">
@@ -138,9 +138,9 @@ export function SaActivityPage() {
             <motion.div
               key={activity.id}
               variants={fadeInUp}
-              className="group flex items-start gap-4 p-4 rounded-xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))]/50 hover:bg-[hsl(var(--sa-surface-hover))] transition-all backdrop-blur-sm"
+              className="group flex items-start gap-4 p-4 rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))]/50 hover:bg-[hsl(var(--sa-surface-hover))] transition-all backdrop-blur-sm"
             >
-              <div className={`h-10 w-10 shrink-0 rounded-xl bg-[hsl(var(--${color}))]/10 flex items-center justify-center`}>
+              <div className={`h-10 w-10 shrink-0 rounded-lg bg-[hsl(var(--${color}))]/10 flex items-center justify-center`}>
                 <Icon className={`h-5 w-5 text-[hsl(var(--${color}))]`} />
               </div>
 
@@ -188,10 +188,10 @@ export function SaActivityPage() {
             <ChevronLeft className="h-4 w-4" /> Anterior
           </Button>
           <span className="text-[11px] text-[hsl(var(--sa-text-muted))]">
-            PÃ¡g. {logsData.page + 1} de {logsData.totalPages}
+            Pág. {logsData.page + 1} de {logsData.totalPages}
           </span>
           <Button variant="ghost" size="sm" disabled={logsData.last} onClick={() => setPage(p => p + 1)} className="rounded-lg text-[11px]">
-            PrÃ³xima <ChevronRight className="h-4 w-4" />
+            Próxima <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       )}

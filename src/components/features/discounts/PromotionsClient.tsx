@@ -457,7 +457,7 @@ export function PromotionsClient() {
           <div className="mx-auto max-w-2xl">
             <div className="flex flex-col items-center text-center gap-6 py-12">
               <div className="relative flex items-center justify-center">
-                <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-primary/10">
+                <div className="flex h-24 w-24 items-center justify-center rounded-lg bg-primary/10">
                   <Megaphone className="h-12 w-12 text-primary" />
                 </div>
                 <div className="absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/30">
@@ -496,7 +496,7 @@ export function PromotionsClient() {
             <Separator />
             <div className="mt-6">
               <p className="text-xs uppercase text-muted-foreground mb-3">Integração com apps</p>
-              <div className="rounded-xl border border-border bg-card p-4 flex items-center justify-between gap-4">
+              <div className="rounded-lg border border-border bg-card p-4 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
                     <Users className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />

@@ -70,7 +70,7 @@ export function ChatWidgetClient() {
             <MessageSquare className="h-6 w-6 text-indigo-500" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">{t('Chat / Widget Externo', 'External Chat / Widget')}</h1>
+            <h1 className="text-xl font-bold tracking-tight text-foreground">{t('Chat / Widget Externo', 'External Chat / Widget')}</h1>
             <p className="text-sm text-muted-foreground">
               {t('Tawk.to, Crisp, JivoChat, Tidio e outros', 'Tawk.to, Crisp, JivoChat, Tidio and others')}
             </p>
@@ -94,7 +94,7 @@ export function ChatWidgetClient() {
         </div>
       )}
 
-      <div className="rounded-xl border bg-card p-6 space-y-5">
+      <div className="rounded-lg border bg-card p-6 space-y-5">
         <div>
           <label className="text-sm font-medium" htmlFor="chat-script">
             {t('Script do widget', 'Widget script')}
@@ -135,7 +135,7 @@ export function ChatWidgetClient() {
         </div>
       </div>
 
-      <div className="rounded-xl border bg-card p-6 space-y-3">
+      <div className="rounded-lg border bg-card p-6 space-y-3">
         <div className="flex items-center gap-2">
           <Info className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-medium">{t('Serviços compatíveis', 'Compatible services')}</h3>

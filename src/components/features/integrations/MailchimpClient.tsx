@@ -93,7 +93,7 @@ export function MailchimpClient() {
             <Mail className="h-6 w-6 text-yellow-600" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">Mailchimp</h1>
+            <h1 className="text-xl font-bold tracking-tight text-foreground">Mailchimp</h1>
             <p className="text-sm text-muted-foreground">
               {t('Email marketing e automação', 'Email marketing and automation')}
             </p>
@@ -117,7 +117,7 @@ export function MailchimpClient() {
         </div>
       )}
 
-      <div className="rounded-xl border bg-card p-6 space-y-5">
+      <div className="rounded-lg border bg-card p-6 space-y-5">
         <div>
           <label className="text-sm font-medium" htmlFor="mc-api-key">API Key</label>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -192,7 +192,7 @@ export function MailchimpClient() {
         </div>
       </div>
 
-      <div className="rounded-xl border bg-card p-6 space-y-3">
+      <div className="rounded-lg border bg-card p-6 space-y-3">
         <div className="flex items-center gap-2">
           <Info className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-medium">{t('O que será sincronizado', 'What will be synced')}</h3>

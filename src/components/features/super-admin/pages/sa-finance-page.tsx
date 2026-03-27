@@ -1,4 +1,4 @@
-ï»¿"use client";
+"use client";
 
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -46,7 +46,7 @@ const fmtMoney = (n: number) => `R$ ${n.toLocaleString("pt-BR", { minimumFractio
 // These tables will be wired once STRIPE_SECRET_KEY is configured.
 
 const txnStatusMap: Record<string, { label: string; color: string }> = {
-  COMPLETED: { label: "ConcluÃ­do", color: "success" },
+  COMPLETED: { label: "Concluído", color: "success" },
   PENDING: { label: "Pendente", color: "warning" },
   REFUNDED: { label: "Reembolsado", color: "danger" },
   PAID: { label: "Pago", color: "success" },
@@ -69,9 +69,9 @@ export function SaFinancePage() {
     <div className="space-y-8">
       <SaPageHeader
         title="Financeiro"
-        description="GestÃ£o financeira da plataforma: transaÃ§Ãµes, repasses e taxas"
+        description="Gestão financeira da plataforma: transações, repasses e taxas"
         actions={
-          <Button className="bg-[hsl(var(--sa-surface))] border border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text-secondary))] hover:bg-[hsl(var(--sa-surface-hover))] rounded-xl gap-2 text-[12px]">
+          <Button className="bg-[hsl(var(--sa-surface))] border border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text-secondary))] hover:bg-[hsl(var(--sa-surface-hover))] rounded-lg gap-2 text-[12px]">
             <Download className="h-4 w-4" /> Exportar
           </Button>
         }
@@ -85,12 +85,12 @@ export function SaFinancePage() {
       </motion.div>
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="bg-[hsl(var(--sa-surface))] border border-[hsl(var(--sa-border-subtle))] rounded-xl p-1">
+        <TabsList className="bg-[hsl(var(--sa-surface))] border border-[hsl(var(--sa-border-subtle))] rounded-lg p-1">
           <TabsTrigger value="overview" className="rounded-lg data-[state=active]:bg-[hsl(var(--sa-accent))] data-[state=active]:text-white text-[hsl(var(--sa-text-secondary))] text-[12px]">
-            VisÃ£o Geral
+            Visão Geral
           </TabsTrigger>
           <TabsTrigger value="transactions" className="rounded-lg data-[state=active]:bg-[hsl(var(--sa-accent))] data-[state=active]:text-white text-[hsl(var(--sa-text-secondary))] text-[12px]">
-            TransaÃ§Ãµes
+            Transações
           </TabsTrigger>
           <TabsTrigger value="payouts" className="rounded-lg data-[state=active]:bg-[hsl(var(--sa-accent))] data-[state=active]:text-white text-[hsl(var(--sa-text-secondary))] text-[12px]">
             Repasses
@@ -122,10 +122,10 @@ export function SaFinancePage() {
             </SaCard>
 
             <SaCard>
-              <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">TransaÃ§Ãµes de Vendas (Stripe)</h3>
+              <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Transações de Vendas (Stripe)</h3>
               <div className="flex items-center gap-3 py-8 justify-center text-center">
                 <AlertTriangle className="h-5 w-5 text-[hsl(var(--sa-warning))]" />
-                <p className="text-[12px] text-[hsl(var(--sa-text-muted))]">IntegraÃ§Ã£o Stripe nÃ£o configurada. Configure STRIPE_SECRET_KEY para ver dados de GMV e transaÃ§Ãµes.</p>
+                <p className="text-[12px] text-[hsl(var(--sa-text-muted))]">Integração Stripe não configurada. Configure STRIPE_SECRET_KEY para ver dados de GMV e transações.</p>
               </div>
             </SaCard>
           </motion.div>
@@ -137,9 +137,9 @@ export function SaFinancePage() {
             <SaCard>
               <div className="flex items-center gap-3 py-12 justify-center text-center flex-col">
                 <AlertTriangle className="h-8 w-8 text-[hsl(var(--sa-warning))]" />
-                <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))]">IntegraÃ§Ã£o Stripe NecessÃ¡ria</h3>
-                <p className="text-[12px] text-[hsl(var(--sa-text-muted))] max-w-md">As transaÃ§Ãµes de vendas e pagamentos serÃ£o exibidas aqui apÃ³s configurar a integraÃ§Ã£o com Stripe Connect.</p>
-                <Button className="mt-2 bg-[hsl(var(--sa-accent))] hover:bg-[hsl(var(--sa-accent-hover))] text-white rounded-xl">Configurar Stripe</Button>
+                <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))]">Integração Stripe Necessária</h3>
+                <p className="text-[12px] text-[hsl(var(--sa-text-muted))] max-w-md">As transações de vendas e pagamentos serão exibidas aqui após configurar a integração com Stripe Connect.</p>
+                <Button className="mt-2 bg-[hsl(var(--sa-accent))] hover:bg-[hsl(var(--sa-accent-hover))] text-white rounded-lg">Configurar Stripe</Button>
               </div>
             </SaCard>
           </motion.div>
@@ -152,7 +152,7 @@ export function SaFinancePage() {
               <div className="flex items-center gap-3 py-12 justify-center text-center flex-col">
                 <AlertTriangle className="h-8 w-8 text-[hsl(var(--sa-warning))]" />
                 <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))]">Repasses Stripe Connect</h3>
-                <p className="text-[12px] text-[hsl(var(--sa-text-muted))] max-w-md">O histÃ³rico de repasses Ã s lojas serÃ¡ exibido aqui apÃ³s configurar o Stripe Connect para split payments.</p>
+                <p className="text-[12px] text-[hsl(var(--sa-text-muted))] max-w-md">O histórico de repasses às lojas será exibido aqui após configurar o Stripe Connect para split payments.</p>
               </div>
             </SaCard>
           </motion.div>
@@ -165,12 +165,12 @@ export function SaFinancePage() {
               <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Estrutura de Taxas</h3>
               <div className="space-y-3">
                 {[
-                  { label: "Taxa por TransaÃ§Ã£o", value: "5.0%", desc: "Sobre o valor bruto de cada venda" },
+                  { label: "Taxa por Transação", value: "5.0%", desc: "Sobre o valor bruto de cada venda" },
                   { label: "Taxa de Processamento", value: "2.49% + R$ 0,39", desc: "Gateway de pagamento (Stripe)" },
-                  { label: "Taxa de Saque", value: "R$ 3,67", desc: "Por transferÃªncia bancÃ¡ria" },
-                  { label: "Taxa de Marketplace", value: "3.5%", desc: "ComissÃ£o adicional para marketplace" },
+                  { label: "Taxa de Saque", value: "R$ 3,67", desc: "Por transferência bancária" },
+                  { label: "Taxa de Marketplace", value: "3.5%", desc: "Comissão adicional para marketplace" },
                 ].map(fee => (
-                  <motion.div key={fee.label} variants={fadeInUp} className="rounded-xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg))] p-4">
+                  <motion.div key={fee.label} variants={fadeInUp} className="rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg))] p-4">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[12px] font-semibold text-[hsl(var(--sa-text))]">{fee.label}</span>
                       <span className="text-[13px] font-bold text-[hsl(var(--sa-accent))]">{fee.value}</span>
@@ -182,7 +182,7 @@ export function SaFinancePage() {
             </SaCard>
 
             <SaCard>
-              <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Receita de Assinaturas (MÃªs)</h3>
+              <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Receita de Assinaturas (Mês)</h3>
               <div className="space-y-3">
                 {[
                   { label: "MRR (Recorrente)", value: fmtMoney(mrr), pct: 100 },

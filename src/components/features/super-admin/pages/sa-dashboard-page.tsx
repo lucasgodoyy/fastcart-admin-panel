@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -30,17 +30,17 @@ import {
   fadeInUp,
 } from "../ui/sa-components";
 
-/* ── Quick-action button ── */
+/* -- Quick-action button -- */
 function QuickAction({ icon: Icon, label, href }: { icon: React.ComponentType<{ className?: string }>; label: string; href: string }) {
   return (
     <motion.a
       href={href}
       variants={fadeInUp}
-      className="flex flex-col items-center gap-2 rounded-2xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-4 hover:border-[hsl(var(--sa-accent))/0.3] hover:bg-[hsl(var(--sa-surface-hover))] transition-all group cursor-pointer"
+      className="flex flex-col items-center gap-2 rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-4 hover:border-[hsl(var(--sa-accent))/0.3] hover:bg-[hsl(var(--sa-surface-hover))] transition-all group cursor-pointer"
       whileHover={{ y: -4, scale: 1.02 }}
       whileTap={{ scale: 0.97 }}
     >
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--sa-accent-subtle))] group-hover:bg-[hsl(var(--sa-accent))] transition-colors">
+      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[hsl(var(--sa-accent-subtle))] group-hover:bg-[hsl(var(--sa-accent))] transition-colors">
         <Icon className="h-5 w-5 text-[hsl(var(--sa-accent))] group-hover:text-white transition-colors" />
       </div>
       <span className="text-[11px] font-medium text-[hsl(var(--sa-text-secondary))] group-hover:text-[hsl(var(--sa-text))] transition-colors">{label}</span>
@@ -48,7 +48,7 @@ function QuickAction({ icon: Icon, label, href }: { icon: React.ComponentType<{ 
   );
 }
 
-/* ── Recent activity item ── */
+/* -- Recent activity item -- */
 function ActivityItem({ icon: Icon, title, time, color }: {
   icon: React.ComponentType<{ className?: string }>; title: string; time: string; color: string;
 }) {
@@ -65,7 +65,7 @@ function ActivityItem({ icon: Icon, title, time, color }: {
   );
 }
 
-/* ── Top stores row ── */
+/* -- Top stores row -- */
 function TopStoreRow({ rank, name, revenue, orders, status }: {
   rank: number; name: string; revenue: string; orders: number; status: string;
 }) {
@@ -84,7 +84,7 @@ function TopStoreRow({ rank, name, revenue, orders, status }: {
   );
 }
 
-/* ════════════════════════════════════════════ */
+/* -------------------------------------------- */
 export function SaDashboardPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["super-admin-overview"],
@@ -106,7 +106,7 @@ export function SaDashboardPage() {
     queryFn: () => superAdminService.listStores({ page: 0, size: 5 }),
   });
 
-  const val = (n?: number) => (isLoading ? "—" : (n ?? 0).toLocaleString("pt-BR"));
+  const val = (n?: number) => (isLoading ? "�" : (n ?? 0).toLocaleString("pt-BR"));
   const fmtMoney = (n: number) => `R$ ${n.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
   const recentActivity = activityData?.content ?? [];
@@ -118,10 +118,10 @@ export function SaDashboardPage() {
     <div className="space-y-8">
       <SaPageHeader
         title="Dashboard"
-        description="Visão geral da plataforma em tempo real"
+        description="Vis�o geral da plataforma em tempo real"
         actions={
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 rounded-xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] px-3 py-2 text-[12px] text-[hsl(var(--sa-text-muted))]">
+            <div className="flex items-center gap-2 rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] px-3 py-2 text-[12px] text-[hsl(var(--sa-text-muted))]">
               <Activity className="h-3.5 w-3.5 text-[hsl(var(--sa-success))]" />
               Atualizado agora
             </div>
@@ -129,15 +129,15 @@ export function SaDashboardPage() {
         }
       />
 
-      {/* ── KPI Grid ── */}
+      {/* -- KPI Grid -- */}
       <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <SaStatCard title="Lojas Ativas" value={val(data?.activeStores)} subtitle={`${val(data?.totalStores)} total`} icon={Building2} color="accent" />
-        <SaStatCard title="Usuários" value={val(data?.totalUsers)} subtitle={`${val(data?.activeUsers)} ativos`} icon={Users} color="info" />
+        <SaStatCard title="Usu�rios" value={val(data?.totalUsers)} subtitle={`${val(data?.activeUsers)} ativos`} icon={Users} color="info" />
         <SaStatCard title="Tickets Abertos" value={val(data?.openSupportTickets)} subtitle={`${val(data?.totalSupportTickets)} total`} icon={Mail} color="warning" />
         <SaStatCard title="E-mails Enviados" value={val(data?.totalEmailLogs)} subtitle={`${val(data?.failedEmailLogs)} falhas`} icon={Mail} color="success" />
       </motion.div>
 
-      {/* ── Revenue + Chart row ── */}
+      {/* -- Revenue + Chart row -- */}
       <div className="grid gap-6 lg:grid-cols-3">
         <motion.div variants={staggerContainer} initial="initial" animate="animate" className="lg:col-span-2 space-y-4">
           <SaCard className="!p-0 overflow-hidden">
@@ -168,7 +168,7 @@ export function SaDashboardPage() {
 
           <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <QuickAction icon={Building2} label="Nova Loja" href="/super-admin/stores" />
-            <QuickAction icon={Users} label="Usuários" href="/super-admin/users" />
+            <QuickAction icon={Users} label="Usu�rios" href="/super-admin/users" />
             <QuickAction icon={CreditCard} label="Assinaturas" href="/super-admin/subscriptions" />
             <QuickAction icon={Mail} label="E-mails" href="/super-admin/emails" />
           </motion.div>
@@ -210,7 +210,7 @@ export function SaDashboardPage() {
         </motion.div>
       </div>
 
-      {/* ── Top Stores + Subscription Health ── */}
+      {/* -- Top Stores + Subscription Health -- */}
       <div className="grid gap-6 lg:grid-cols-2">
         <motion.div variants={staggerContainer} initial="initial" animate="animate">
           <SaCard>
@@ -241,7 +241,7 @@ export function SaDashboardPage() {
 
         <motion.div variants={staggerContainer} initial="initial" animate="animate">
           <SaCard>
-            <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Saúde das Assinaturas</h3>
+            <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Sa�de das Assinaturas</h3>
             <div className="space-y-4">
               <HealthBar label="Assinaturas Ativas" value={subStats?.activeSubscriptions ?? 0} suffix="" color="success" />
               <HealthBar label="Em Trial" value={subStats?.trialSubscriptions ?? 0} suffix="" color="info" />
@@ -255,7 +255,7 @@ export function SaDashboardPage() {
   );
 }
 
-/* ── Health bar mini-component ── */
+/* -- Health bar mini-component -- */
 function HealthBar({ label, value, suffix = "%", color }: { label: string; value: number; suffix?: string; color: string }) {
   const barColor: Record<string, string> = {
     success: "bg-[hsl(var(--sa-success))]",

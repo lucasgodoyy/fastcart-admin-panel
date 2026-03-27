@@ -81,7 +81,7 @@ export function ConversionCodesClient() {
             <Code className="h-6 w-6 text-purple-500" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">{t('Códigos de Conversão', 'Conversion Codes')}</h1>
+            <h1 className="text-xl font-bold tracking-tight text-foreground">{t('Códigos de Conversão', 'Conversion Codes')}</h1>
             <p className="text-sm text-muted-foreground">
               {t('Scripts customizados no checkout e confirmação', 'Custom scripts on checkout and confirmation')}
             </p>
@@ -105,7 +105,7 @@ export function ConversionCodesClient() {
         </div>
       )}
 
-      <div className="rounded-xl border bg-card p-6 space-y-5">
+      <div className="rounded-lg border bg-card p-6 space-y-5">
         <div>
           <label className="text-sm font-medium" htmlFor="conv-checkout">
             {t('Script — Página de Checkout', 'Script — Checkout Page')}
@@ -166,7 +166,7 @@ export function ConversionCodesClient() {
         </div>
       </div>
 
-      <div className="rounded-xl border bg-card p-6 space-y-3">
+      <div className="rounded-lg border bg-card p-6 space-y-3">
         <div className="flex items-center gap-2">
           <Info className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-medium">{t('Quando usar', 'When to use')}</h3>

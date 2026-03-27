@@ -210,8 +210,8 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
       <div className="space-y-8">
         <SaPageHeader title="Carregando plano" description="Buscando as configurações salvas do plano." />
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_380px]">
-          <SaSkeleton className="h-[620px] rounded-3xl" />
-          <SaSkeleton className="h-[620px] rounded-3xl" />
+          <SaSkeleton className="h-[620px] rounded-lg" />
+          <SaSkeleton className="h-[620px] rounded-lg" />
         </div>
       </div>
     );
@@ -238,7 +238,7 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
         description="Use uma página dedicada para organizar preço, limites, Stripe e benefícios sem sobrepor a listagem de planos."
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <Button asChild variant="outline" className="rounded-xl border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))]">
+            <Button asChild variant="outline" className="rounded-lg border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))]">
               <Link href="/super-admin/subscriptions">
                 <ArrowLeft className="h-4 w-4" /> Voltar para planos
               </Link>
@@ -246,7 +246,7 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
             <Button
               onClick={handleSave}
               disabled={isBusy || !formData.name.trim() || !slugify(formData.slug || formData.name)}
-              className="rounded-xl bg-[hsl(var(--sa-accent))] text-white hover:bg-[hsl(var(--sa-accent-hover))]"
+              className="rounded-lg bg-[hsl(var(--sa-accent))] text-white hover:bg-[hsl(var(--sa-accent-hover))]"
             >
               {saveMutation.isPending ? (
                 <>
@@ -264,7 +264,7 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_380px]">
         <div className="space-y-6">
-          <SaCard className="overflow-hidden rounded-3xl border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-0">
+          <SaCard className="overflow-hidden rounded-lg border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-0">
             <div className="border-b border-[hsl(var(--sa-border-subtle))] bg-linear-to-r from-[hsl(var(--sa-accent-subtle))] via-[hsl(var(--sa-surface))] to-[hsl(var(--sa-success-subtle))] px-6 py-6">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge className="bg-[hsl(var(--sa-accent))] text-white">Plano SaaS</Badge>
@@ -297,7 +297,7 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
                       value={formData.name}
                       onChange={(event) => handleNameChange(event.target.value)}
                       placeholder="Ex: Plus"
-                      className="h-11 rounded-xl"
+                      className="h-11 rounded-lg"
                     />
                   </div>
                   <div className="space-y-2">
@@ -307,7 +307,7 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
                       value={formData.slug}
                       onChange={(event) => handleSlugChange(event.target.value)}
                       placeholder="Ex: plus"
-                      className="h-11 rounded-xl"
+                      className="h-11 rounded-lg"
                     />
                     <p className="text-[11px] text-[hsl(var(--sa-text-muted))]">
                       URL técnica: {slugify(formData.slug || formData.name) || "preencha o nome do plano"}
@@ -321,7 +321,7 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
                     value={formData.description ?? ""}
                     onChange={(event) => updateField("description", event.target.value)}
                     placeholder="Ideal para lojas em crescimento com operação recorrente e catálogo robusto."
-                    className="min-h-28 rounded-2xl"
+                    className="min-h-28 rounded-lg"
                   />
                 </div>
               </section>
@@ -344,7 +344,7 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
                       value={formData.priceCents}
                       onChange={(event) => updateField("priceCents", Number.parseInt(event.target.value, 10) || 0)}
                       placeholder="4900"
-                      className="h-11 rounded-xl"
+                      className="h-11 rounded-lg"
                     />
                     <p className="text-[11px] text-[hsl(var(--sa-success))]">{monthlyPrice} / mês</p>
                   </div>
@@ -361,7 +361,7 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
                         )
                       }
                       placeholder="47000"
-                      className="h-11 rounded-xl"
+                      className="h-11 rounded-lg"
                     />
                     <p className="text-[11px] text-[hsl(var(--sa-success))]">{annualPrice} / ano</p>
                   </div>
@@ -373,7 +373,7 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
                       value={formData.sortOrder ?? 0}
                       onChange={(event) => updateField("sortOrder", Number.parseInt(event.target.value, 10) || 0)}
                       placeholder="0"
-                      className="h-11 rounded-xl"
+                      className="h-11 rounded-lg"
                     />
                     <p className="text-[11px] text-[hsl(var(--sa-text-muted))]">Menor número aparece primeiro.</p>
                   </div>
@@ -403,7 +403,7 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
                         )
                       }
                       placeholder="vazio = ilimitado"
-                      className="h-11 rounded-xl"
+                      className="h-11 rounded-lg"
                     />
                   </div>
                   <div className="space-y-2">
@@ -413,7 +413,7 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
                       type="number"
                       value={formData.maxStores ?? 1}
                       onChange={(event) => updateField("maxStores", Number.parseInt(event.target.value, 10) || 1)}
-                      className="h-11 rounded-xl"
+                      className="h-11 rounded-lg"
                     />
                   </div>
                   <div className="space-y-2">
@@ -423,7 +423,7 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
                       type="number"
                       value={formData.maxStaff ?? 1}
                       onChange={(event) => updateField("maxStaff", Number.parseInt(event.target.value, 10) || 1)}
-                      className="h-11 rounded-xl"
+                      className="h-11 rounded-lg"
                     />
                   </div>
                   <div className="space-y-2">
@@ -435,7 +435,7 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
                       onChange={(event) =>
                         updateField("trialPeriodDays", Number.parseInt(event.target.value, 10) || 0)
                       }
-                      className="h-11 rounded-xl"
+                      className="h-11 rounded-lg"
                     />
                   </div>
                 </div>
@@ -458,7 +458,7 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
                       value={formData.stripeProductId ?? ""}
                       onChange={(event) => updateField("stripeProductId", event.target.value)}
                       placeholder="prod_..."
-                      className="h-11 rounded-xl"
+                      className="h-11 rounded-lg"
                     />
                   </div>
                   <div className="space-y-2">
@@ -468,7 +468,7 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
                       value={formData.stripePriceId ?? ""}
                       onChange={(event) => updateField("stripePriceId", event.target.value)}
                       placeholder="price_..."
-                      className="h-11 rounded-xl"
+                      className="h-11 rounded-lg"
                     />
                   </div>
                   <div className="space-y-2">
@@ -478,7 +478,7 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
                       value={formData.annualStripePriceId ?? ""}
                       onChange={(event) => updateField("annualStripePriceId", event.target.value)}
                       placeholder="price_..."
-                      className="h-11 rounded-xl"
+                      className="h-11 rounded-lg"
                     />
                   </div>
                 </div>
@@ -500,10 +500,10 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
                     value={featuresText}
                     onChange={(event) => setFeaturesText(event.target.value)}
                     placeholder={"Até 500 produtos\nCertificado SSL\nPIX automático\nSuporte prioritário"}
-                    className="min-h-40 rounded-2xl"
+                    className="min-h-40 rounded-lg"
                   />
                 </div>
-                <div className="flex flex-wrap items-center gap-6 rounded-2xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg))] px-4 py-4">
+                <div className="flex flex-wrap items-center gap-6 rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg))] px-4 py-4">
                   <div className="flex items-center gap-3">
                     <Switch
                       id="plan-active"
@@ -533,7 +533,7 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
         </div>
 
         <div className="space-y-6">
-          <SaCard className="rounded-3xl border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-6">
+          <SaCard className="rounded-lg border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-6">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--sa-text-muted))]">Pré-visualização</p>
@@ -546,9 +546,9 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
               </Badge>
             </div>
 
-            <div className="mt-5 rounded-3xl border border-[hsl(var(--sa-border-subtle))] bg-linear-to-br from-[hsl(var(--sa-accent-subtle))] via-[hsl(var(--sa-surface))] to-[hsl(var(--sa-success-subtle))] p-5">
+            <div className="mt-5 rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-linear-to-br from-[hsl(var(--sa-accent-subtle))] via-[hsl(var(--sa-surface))] to-[hsl(var(--sa-success-subtle))] p-5">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[hsl(var(--sa-accent-subtle))] text-[hsl(var(--sa-accent))] shadow-sm">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[hsl(var(--sa-accent-subtle))] text-[hsl(var(--sa-accent))] shadow-sm">
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <div>
@@ -570,7 +570,7 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
             </div>
           </SaCard>
 
-          <SaCard className="rounded-3xl border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-6">
+          <SaCard className="rounded-lg border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-6">
             <h3 className="text-[15px] font-semibold text-[hsl(var(--sa-text))]">Benefícios listados</h3>
             <p className="mt-1 text-[12px] text-[hsl(var(--sa-text-muted))]">
               O que será percebido por quem compara os planos.
@@ -580,14 +580,14 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
                 featureItems.map((feature) => (
                   <div
                     key={feature}
-                    className="flex items-start gap-2 rounded-2xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg))] px-3 py-3"
+                    className="flex items-start gap-2 rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg))] px-3 py-3"
                   >
                     <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--sa-success))]" />
                     <span className="text-[12px] leading-5 text-[hsl(var(--sa-text-secondary))]">{feature}</span>
                   </div>
                 ))
               ) : (
-                <p className="rounded-2xl border border-dashed border-[hsl(var(--sa-border-subtle))] px-4 py-6 text-center text-[12px] text-[hsl(var(--sa-text-muted))]">
+                <p className="rounded-lg border border-dashed border-[hsl(var(--sa-border-subtle))] px-4 py-6 text-center text-[12px] text-[hsl(var(--sa-text-muted))]">
                   Adicione benefícios para enriquecer a comparação entre planos.
                 </p>
               )}
@@ -595,7 +595,7 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
           </SaCard>
 
           {isEditing && (
-            <SaCard className="rounded-3xl border border-red-500/20 bg-[hsl(var(--sa-surface))] p-6">
+            <SaCard className="rounded-lg border border-red-500/20 bg-[hsl(var(--sa-surface))] p-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h3 className="text-[15px] font-semibold text-[hsl(var(--sa-text))]">Ações rápidas</h3>
@@ -610,7 +610,7 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
                   variant="outline"
                   onClick={() => toggleMutation.mutate()}
                   disabled={isBusy}
-                  className="justify-start rounded-2xl border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg))]"
+                  className="justify-start rounded-lg border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg))]"
                 >
                   {toggleMutation.isPending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                   {formData.isActive ? "Desativar este plano" : "Reativar este plano"}
@@ -619,7 +619,7 @@ export function SaSubscriptionPlanEditorPage({ planId }: { planId?: number }) {
                   variant="destructive"
                   onClick={() => deleteMutation.mutate()}
                   disabled={isBusy}
-                  className="justify-start rounded-2xl"
+                  className="justify-start rounded-lg"
                 >
                   {deleteMutation.isPending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                   Excluir plano
@@ -643,9 +643,9 @@ function InfoRow({
   value: string;
 }) {
   return (
-    <div className="flex items-center justify-between rounded-2xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg))] px-4 py-3">
+    <div className="flex items-center justify-between rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg))] px-4 py-3">
       <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[hsl(var(--sa-accent-subtle))] text-[hsl(var(--sa-accent))]">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[hsl(var(--sa-accent-subtle))] text-[hsl(var(--sa-accent))]">
           <Icon className="h-4 w-4" />
         </div>
         <span className="text-[12px] text-[hsl(var(--sa-text-secondary))]">{label}</span>

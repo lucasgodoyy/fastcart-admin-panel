@@ -173,6 +173,15 @@ const superAdminService = {
     return result;
   },
 
+  getPlatformTemplates: async (): Promise<{ id: number | null; templateKey: string; subject: string; bodyHtml: string; active: boolean; updatedAt: string | null }[]> => {
+    const { data } = await apiClient.get('/super-admin/emails/platform-templates');
+    return data;
+  },
+
+  upsertPlatformTemplate: async (templateKey: string, data: { subject: string; bodyHtml: string; active: boolean }): Promise<void> => {
+    await apiClient.put(`/super-admin/emails/templates/${templateKey}`, data);
+  },
+
   // ── Activity Logs ─────────────────────────────────────────────
   listActivityLogs: async (params?: {
     actionType?: string;

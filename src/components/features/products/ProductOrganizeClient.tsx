@@ -33,7 +33,7 @@ const OOS_OPTIONS: { value: ProductOrgSettings['outOfStockListBehavior']; label:
 // ─── Section card ────────────────────────────────────────────────────────────
 function SectionCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`rounded-xl border border-border bg-card p-5 ${className}`}>
+    <div className={`rounded-lg border border-border bg-card p-5 ${className}`}>
       {children}
     </div>
   );
@@ -89,7 +89,7 @@ function HighlightCard({
 }) {
   return (
     <Link href={`/admin/products?${filterParam}`}
-      className="flex items-center justify-between rounded-xl border border-border bg-card p-4 hover:bg-muted/40 transition-colors group">
+      className="flex items-center justify-between rounded-lg border border-border bg-card p-4 hover:bg-muted/40 transition-colors group">
       <div className="flex items-center gap-3">
         <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${color}`}>
           {icon}
@@ -185,7 +185,7 @@ export function ProductOrganizeClient() {
 
       {/* Page header */}
       <div className="border-b border-border px-4 md:px-6 lg:px-8 py-4">
-        <h1 className="text-xl font-bold text-foreground tracking-tight">
+        <h1 className="text-xl font-bold tracking-tight text-foreground tracking-tight">
           {t('Organizar Produtos', 'Organize Products')}
         </h1>
         <p className="text-xs text-muted-foreground mt-0.5">
@@ -236,7 +236,7 @@ export function ProductOrganizeClient() {
               {loadingHighlights ? (
                 <div className="space-y-3">
                   {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="h-16 animate-pulse rounded-xl bg-muted" />
+                    <div key={i} className="h-16 animate-pulse rounded-lg bg-muted" />
                   ))}
                 </div>
               ) : (
@@ -289,7 +289,7 @@ export function ProductOrganizeClient() {
         {activeTab === 'sort' && (
           <div className="space-y-6 max-w-2xl">
             {loadingSettings ? (
-              <div className="h-48 animate-pulse rounded-xl bg-muted" />
+              <div className="h-48 animate-pulse rounded-lg bg-muted" />
             ) : (
               <SectionCard>
                 <div className="flex items-center gap-2 mb-1">
@@ -320,8 +320,8 @@ export function ProductOrganizeClient() {
           <div className="space-y-6 max-w-2xl">
             {loadingSettings ? (
               <div className="space-y-4">
-                <div className="h-48 animate-pulse rounded-xl bg-muted" />
-                <div className="h-48 animate-pulse rounded-xl bg-muted" />
+                <div className="h-48 animate-pulse rounded-lg bg-muted" />
+                <div className="h-48 animate-pulse rounded-lg bg-muted" />
               </div>
             ) : (
               <>

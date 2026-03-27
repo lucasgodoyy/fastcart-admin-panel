@@ -71,7 +71,7 @@ export function GoogleMerchantClient() {
             <TrendingUp className="h-6 w-6 text-green-600" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">Google Merchant Center</h1>
+            <h1 className="text-xl font-bold tracking-tight text-foreground">Google Merchant Center</h1>
             <p className="text-sm text-muted-foreground">
               {t('Exiba seus produtos no Google Shopping', 'Display your products on Google Shopping')}
             </p>
@@ -95,7 +95,7 @@ export function GoogleMerchantClient() {
         </div>
       )}
 
-      <div className="rounded-xl border bg-card p-6 space-y-5">
+      <div className="rounded-lg border bg-card p-6 space-y-5">
         <div>
           <label className="text-sm font-medium" htmlFor="merchant-id">Merchant Center ID</label>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -140,7 +140,7 @@ export function GoogleMerchantClient() {
         </div>
       </div>
 
-      <div className="rounded-xl border bg-card p-6 space-y-3">
+      <div className="rounded-lg border bg-card p-6 space-y-3">
         <div className="flex items-center gap-2">
           <Info className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-medium">{t('Como funciona', 'How it works')}</h3>

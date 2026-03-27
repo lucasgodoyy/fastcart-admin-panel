@@ -134,8 +134,8 @@ export function NotificationsSettingsClient() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-lg font-bold text-foreground">Notificações</h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <h1 className="text-xl font-bold tracking-tight text-foreground">Notificações</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Gerencie suas notificações e defina como deseja ser avisado sobre eventos da loja.
         </p>
       </div>

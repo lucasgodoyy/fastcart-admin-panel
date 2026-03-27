@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -56,43 +56,43 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-/* ── helpers ─────────────────────────────────────────────────── */
+/* -- helpers --------------------------------------------------- */
 
 function formatCurrency(value: number | null | undefined) {
-  if (value == null) return '—';
+  if (value == null) return '�';
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 }
 
 function formatDate(iso: string | null | undefined) {
-  if (!iso) return '—';
+  if (!iso) return '�';
   return new Date(iso).toLocaleDateString('pt-BR');
 }
 
 const SCOPE_LABELS: Record<ShippingApplyScopeType, string> = {
   ENTIRE_STORE: 'Toda a loja',
-  CATEGORIES: 'Categorias específicas',
-  PRODUCTS: 'Produtos específicos',
-  BRANDS: 'Marcas específicas',
+  CATEGORIES: 'Categorias espec�ficas',
+  PRODUCTS: 'Produtos espec�ficos',
+  BRANDS: 'Marcas espec�ficas',
 };
 
 const SCOPE_DESCRIPTIONS: Record<ShippingApplyScopeType, string> = {
-  ENTIRE_STORE: 'Aplica o frete grátis para qualquer produto da loja.',
-  CATEGORIES: 'Somente produtos de categorias selecionadas recebem o benefício.',
-  PRODUCTS: 'Somente os produtos selecionados recebem o benefício.',
-  BRANDS: 'Somente produtos das marcas selecionadas recebem o benefício.',
+  ENTIRE_STORE: 'Aplica o frete gr�tis para qualquer produto da loja.',
+  CATEGORIES: 'Somente produtos de categorias selecionadas recebem o benef�cio.',
+  PRODUCTS: 'Somente os produtos selecionados recebem o benef�cio.',
+  BRANDS: 'Somente produtos das marcas selecionadas recebem o benef�cio.',
 };
 
 const ZONE_LABELS: Record<DeliveryZoneType, string> = {
   ALL: 'Todo o Brasil',
-  SPECIFIC: 'Regiões específicas',
+  SPECIFIC: 'Regi�es espec�ficas',
 };
 
 const ZONE_DESCRIPTIONS: Record<DeliveryZoneType, string> = {
-  ALL: 'Frete grátis para qualquer endereço de entrega.',
-  SPECIFIC: 'Defina estados ou zonas postais elegíveis.',
+  ALL: 'Frete gr�tis para qualquer endere�o de entrega.',
+  SPECIFIC: 'Defina estados ou zonas postais eleg�veis.',
 };
 
-/* ── form state ──────────────────────────────────────────────── */
+/* -- form state ------------------------------------------------ */
 
 type CartAmountMode = 'NONE' | 'MIN';
 type DateMode = 'UNLIMITED' | 'PERIOD';
@@ -178,18 +178,18 @@ function formToPayload(form: FormState): ShippingOfferUpsertRequest {
   };
 }
 
-/* ── Section wrapper ─────────────────────────────────────────── */
+/* -- Section wrapper ------------------------------------------- */
 
 function FormSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+    <div className="rounded-lg border border-border bg-card p-5 space-y-4">
       <p className="text-sm font-semibold text-foreground">{title}</p>
       {children}
     </div>
   );
 }
 
-/* ── Radio card ──────────────────────────────────────────────── */
+/* -- Radio card ------------------------------------------------ */
 
 function RadioCard({
   selected,
@@ -236,7 +236,7 @@ function RadioCard({
   );
 }
 
-/* ── Truck SVG illustration ──────────────────────────────────── */
+/* -- Truck SVG illustration ------------------------------------ */
 
 function TruckIllustration() {
   return (
@@ -283,9 +283,9 @@ function TruckIllustration() {
   );
 }
 
-/* ══════════════════════════════════════════════════════════════
+/* --------------------------------------------------------------
    Main component
-═══════════════════════════════════════════════════════════════ */
+--------------------------------------------------------------- */
 
 export function FreeShippingClient() {
   const queryClient = useQueryClient();
@@ -296,7 +296,7 @@ export function FreeShippingClient() {
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [scopePickerOpen, setScopePickerOpen] = useState(false);
 
-  /* ── queries ── */
+  /* -- queries -- */
   const { data: offers = [], isLoading } = useQuery<ShippingOffer[]>({
     queryKey: ['shipping-offers'],
     queryFn: shippingOfferService.list,
@@ -320,12 +320,12 @@ export function FreeShippingClient() {
     enabled: view === 'form' && form.applyScopeType === 'BRANDS',
   });
 
-  /* ── mutations ── */
+  /* -- mutations -- */
   const createMutation = useMutation({
     mutationFn: (payload: ShippingOfferUpsertRequest) => shippingOfferService.create(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['shipping-offers'] });
-      toast.success('Oferta de frete grátis criada!');
+      toast.success('Oferta de frete gr�tis criada!');
       closeForm();
     },
     onError: (err: unknown) => {
@@ -365,7 +365,7 @@ export function FreeShippingClient() {
     onError: () => toast.error('Erro ao remover oferta.'),
   });
 
-  /* ── navigation helpers ── */
+  /* -- navigation helpers -- */
   const openCreate = () => {
     setEditingOffer(null);
     setForm(BLANK_FORM);
@@ -386,7 +386,7 @@ export function FreeShippingClient() {
     setForm(BLANK_FORM);
   };
 
-  /* ── scope picker helpers ── */
+  /* -- scope picker helpers -- */
   const toggleScopeId = (id: number) => {
     setForm((prev) => {
       const set = new Set(prev.applyScopeTargetIds);
@@ -419,18 +419,18 @@ export function FreeShippingClient() {
       ? allBrands.map((b) => ({ id: b.id, label: b.name }))
       : allCategories.map((c) => ({ id: c.id, label: c.name }));
 
-  /* ── save ── */
+  /* -- save -- */
   const handleSave = () => {
     if (!form.name.trim()) {
       toast.error('Informe o nome da oferta.');
       return;
     }
     if (form.applyScopeType !== 'ENTIRE_STORE' && form.applyScopeTargetIds.length === 0) {
-      toast.error('Selecione ao menos um item para o escopo específico.');
+      toast.error('Selecione ao menos um item para o escopo espec�fico.');
       return;
     }
     if (form.cartAmountMode === 'MIN' && !form.minCartAmount) {
-      toast.error('Informe o valor mínimo do carrinho.');
+      toast.error('Informe o valor m�nimo do carrinho.');
       return;
     }
     const payload = formToPayload(form);
@@ -449,14 +449,14 @@ export function FreeShippingClient() {
   const isEditing = !!editingOffer;
   const activeOffers = offers.filter((o) => o.active);
 
-  /* ══════════════════════════════════════════════════════════════
+  /* --------------------------------------------------------------
      VIEW: FORM (full-page)
-  ═══════════════════════════════════════════════════════════════ */
+  --------------------------------------------------------------- */
   if (view === 'form') {
     return (
       <div className="flex flex-col min-h-[calc(100vh-4rem)] bg-background">
 
-        {/* ── Sticky top bar ── */}
+        {/* -- Sticky top bar -- */}
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background/95 backdrop-blur px-6 py-3">
           <div className="flex items-center gap-3">
             <Button
@@ -470,7 +470,7 @@ export function FreeShippingClient() {
             </Button>
             <Separator orientation="vertical" className="h-5" />
             <span className="text-sm font-semibold text-foreground">
-              {isEditing ? 'Editar oferta de frete grátis' : 'Configurar frete grátis'}
+              {isEditing ? 'Editar oferta de frete gr�tis' : 'Configurar frete gr�tis'}
             </span>
           </div>
           <Button size="sm" onClick={handleSave} disabled={isSaving}>
@@ -479,11 +479,11 @@ export function FreeShippingClient() {
           </Button>
         </div>
 
-        {/* ── Scrollable form body ── */}
+        {/* -- Scrollable form body -- */}
         <div className="flex-1 overflow-y-auto">
           <div className="mx-auto max-w-2xl space-y-4 px-6 py-6">
 
-            {/* 0 — Name */}
+            {/* 0 � Name */}
             <FormSection title="Nome da oferta">
               <div className="space-y-1.5">
                 <Label htmlFor="offer-name" className="text-xs text-muted-foreground">
@@ -493,13 +493,13 @@ export function FreeShippingClient() {
                   id="offer-name"
                   value={form.name}
                   onChange={(e) => setField('name', e.target.value)}
-                  placeholder='Ex: "Frete grátis acima de R$ 199 — Sul e Sudeste"'
+                  placeholder='Ex: "Frete gr�tis acima de R$ 199 � Sul e Sudeste"'
                 />
               </div>
             </FormSection>
 
-            {/* 1 — Where to apply */}
-            <FormSection title="Onde o frete grátis será aplicado?">
+            {/* 1 � Where to apply */}
+            <FormSection title="Onde o frete gr�tis ser� aplicado?">
               <div className="space-y-2">
                 {(
                   ['ENTIRE_STORE', 'CATEGORIES', 'PRODUCTS', 'BRANDS'] as ShippingApplyScopeType[]
@@ -620,7 +620,7 @@ export function FreeShippingClient() {
               <Separator />
               <div className="space-y-2">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Região de entrega
+                  Regi�o de entrega
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   {(['ALL', 'SPECIFIC'] as DeliveryZoneType[]).map((z) => (
@@ -657,7 +657,7 @@ export function FreeShippingClient() {
               </div>
             </FormSection>
 
-            {/* 2 — Shipping type */}
+            {/* 2 � Shipping type */}
             <FormSection title="Tipo de envio">
               <div className="space-y-4">
                 <label className="flex items-start gap-3 cursor-pointer">
@@ -669,11 +669,11 @@ export function FreeShippingClient() {
                   />
                   <div>
                     <p className="text-sm font-medium text-foreground leading-none">
-                      Aplicar somente para a opção de envio com menor custo
+                      Aplicar somente para a op��o de envio com menor custo
                     </p>
                     <p className="mt-1.5 text-xs text-muted-foreground">
-                      Recomendado para proteger a margem de lucro — o frete grátis é concedido
-                      apenas na modalidade econômica (PAC / Envio Fácil), evitando subsidiar
+                      Recomendado para proteger a margem de lucro � o frete gr�tis � concedido
+                      apenas na modalidade econ�mica (PAC / Envio F�cil), evitando subsidiar
                       fretes expressos.
                     </p>
                   </div>
@@ -695,16 +695,16 @@ export function FreeShippingClient() {
                       Permitir combinar com outros descontos
                     </p>
                     <p className="mt-1.5 text-xs text-muted-foreground">
-                      Quando ativo, clientes podem usar cupons ou promoções em conjunto com este
-                      frete grátis.
+                      Quando ativo, clientes podem usar cupons ou promo��es em conjunto com este
+                      frete gr�tis.
                     </p>
                   </div>
                 </label>
               </div>
             </FormSection>
 
-            {/* 3 — Conditions */}
-            <FormSection title="Condições de uso">
+            {/* 3 � Conditions */}
+            <FormSection title="Condi��es de uso">
 
               {/* Cart value */}
               <div className="space-y-2">
@@ -721,7 +721,7 @@ export function FreeShippingClient() {
                           : 'border-border text-muted-foreground hover:border-foreground/30'
                       }`}
                     >
-                      {mode === 'NONE' ? 'Sem mínimo' : 'A partir de'}
+                      {mode === 'NONE' ? 'Sem m�nimo' : 'A partir de'}
                     </button>
                   ))}
                 </div>
@@ -758,7 +758,7 @@ export function FreeShippingClient() {
                           : 'border-border text-muted-foreground hover:border-foreground/30'
                       }`}
                     >
-                      {mode === 'UNLIMITED' ? 'Ilimitada' : 'Período'}
+                      {mode === 'UNLIMITED' ? 'Ilimitada' : 'Per�odo'}
                     </button>
                   ))}
                 </div>
@@ -773,7 +773,7 @@ export function FreeShippingClient() {
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs text-muted-foreground">Até</Label>
+                      <Label className="text-xs text-muted-foreground">At�</Label>
                       <Input
                         type="datetime-local"
                         value={form.expiresAt}
@@ -823,12 +823,12 @@ export function FreeShippingClient() {
               </div>
             </FormSection>
 
-            {/* 4 — Active toggle */}
-            <div className="flex items-center justify-between rounded-xl border border-border bg-card px-5 py-4">
+            {/* 4 � Active toggle */}
+            <div className="flex items-center justify-between rounded-lg border border-border bg-card px-5 py-4">
               <div>
                 <p className="text-sm font-medium text-foreground">Oferta ativa</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  {form.active ? 'Visível para clientes no checkout' : 'Oculta para clientes'}
+                  {form.active ? 'Vis�vel para clientes no checkout' : 'Oculta para clientes'}
                 </p>
               </div>
               <Switch
@@ -845,14 +845,14 @@ export function FreeShippingClient() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors underline-offset-2 hover:underline"
               >
-                Mais sobre promoções e descontos
+                Mais sobre promo��es e descontos
                 <ExternalLink className="h-3 w-3" />
               </a>
             </div>
           </div>
         </div>
 
-        {/* ── Fixed bottom bar ── */}
+        {/* -- Fixed bottom bar -- */}
         <div className="sticky bottom-0 border-t border-border bg-background/95 backdrop-blur px-6 py-4">
           <div className="mx-auto max-w-2xl flex gap-3">
             <Button variant="outline" className="flex-1" onClick={closeForm}>
@@ -860,7 +860,7 @@ export function FreeShippingClient() {
             </Button>
             <Button className="flex-1" onClick={handleSave} disabled={isSaving}>
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isEditing ? 'Salvar alterações' : 'Criar oferta'}
+              {isEditing ? 'Salvar altera��es' : 'Criar oferta'}
             </Button>
           </div>
         </div>
@@ -868,17 +868,17 @@ export function FreeShippingClient() {
     );
   }
 
-  /* ══════════════════════════════════════════════════════════════
+  /* --------------------------------------------------------------
      VIEW: LIST / LANDING PAGE
-  ═══════════════════════════════════════════════════════════════ */
+  --------------------------------------------------------------- */
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-foreground">Frete Grátis</h1>
+          <h1 className="text-xl font-bold tracking-tight text-foreground">Frete Gr�tis</h1>
           <p className="text-sm text-muted-foreground">
-            Regras de frete grátis com escopo, valor mínimo e período de vigência.
+            Regras de frete gr�tis com escopo, valor m�nimo e per�odo de vig�ncia.
           </p>
         </div>
         {offers.length > 0 && (
@@ -895,19 +895,19 @@ export function FreeShippingClient() {
         </div>
       ) : offers.length === 0 ? (
 
-        /* ── Landing page (empty state) ── */
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card py-16 px-8 text-center">
+        /* -- Landing page (empty state) -- */
+        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card py-16 px-8 text-center">
           <TruckIllustration />
           <h2 className="mt-6 text-xl font-bold text-foreground">
-            Aumente o ticket médio oferecendo frete grátis
+            Aumente o ticket m�dio oferecendo frete gr�tis
           </h2>
           <p className="mt-2 max-w-sm text-sm text-muted-foreground leading-relaxed">
-            Ofereça frete grátis para todo o país, regiões específicas, categorias, produtos ou
-            marcas — a partir de um valor mínimo de compra ou sem condições.
+            Ofere�a frete gr�tis para todo o pa�s, regi�es espec�ficas, categorias, produtos ou
+            marcas � a partir de um valor m�nimo de compra ou sem condi��es.
           </p>
           <Button className="mt-8 gap-2 px-6" size="lg" onClick={openCreate}>
             <Truck className="h-4 w-4" />
-            Configurar frete grátis
+            Configurar frete gr�tis
           </Button>
           <a
             href="https://ajuda.rapidocart.com.br/promocoes-e-descontos"
@@ -915,7 +915,7 @@ export function FreeShippingClient() {
             rel="noopener noreferrer"
             className="mt-4 flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors underline-offset-2 hover:underline"
           >
-            Mais sobre promoções e descontos
+            Mais sobre promo��es e descontos
             <ExternalLink className="h-3 w-3" />
           </a>
         </div>
@@ -924,7 +924,7 @@ export function FreeShippingClient() {
         <>
           {/* Stats */}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-            <div className="rounded-xl border border-green-200 bg-green-50 dark:border-green-900/50 dark:bg-green-900/10 p-4">
+            <div className="rounded-lg border border-green-200 bg-green-50 dark:border-green-900/50 dark:bg-green-900/10 p-4">
               <div className="flex items-center gap-2 text-green-600 dark:text-green-400 mb-2">
                 <Truck className="h-4 w-4" />
                 <span className="text-xs font-medium uppercase tracking-wide">Ativas</span>
@@ -933,7 +933,7 @@ export function FreeShippingClient() {
                 {activeOffers.length}
               </p>
             </div>
-            <div className="rounded-xl border border-border bg-card p-4">
+            <div className="rounded-lg border border-border bg-card p-4">
               <div className="flex items-center gap-2 text-muted-foreground mb-2">
                 <Package className="h-4 w-4" />
                 <span className="text-xs font-medium uppercase tracking-wide">Total</span>
@@ -947,7 +947,7 @@ export function FreeShippingClient() {
             {offers.map((offer) => (
               <div
                 key={offer.id}
-                className="rounded-xl border border-border bg-card p-5 flex items-start gap-4"
+                className="rounded-lg border border-border bg-card p-5 flex items-start gap-4"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -972,8 +972,8 @@ export function FreeShippingClient() {
                   </div>
                   <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
                     <span>
-                      <strong>Região:</strong>{' '}
-                      {offer.deliveryZoneType === 'ALL' ? 'Todo o Brasil' : 'Regiões específicas'}
+                      <strong>Regi�o:</strong>{' '}
+                      {offer.deliveryZoneType === 'ALL' ? 'Todo o Brasil' : 'Regi�es espec�ficas'}
                     </span>
                     <span>
                       <strong>Escopo:</strong>{' '}
@@ -981,12 +981,12 @@ export function FreeShippingClient() {
                     </span>
                     {offer.minCartAmount != null && (
                       <span>
-                        <strong>Mínimo:</strong> {formatCurrency(offer.minCartAmount)}
+                        <strong>M�nimo:</strong> {formatCurrency(offer.minCartAmount)}
                       </span>
                     )}
                     <span>
                       <strong>Usos:</strong> {offer.usageCount}/
-                      {offer.usageLimit != null ? offer.usageLimit : '∞'}
+                      {offer.usageLimit != null ? offer.usageLimit : '8'}
                     </span>
                     {offer.expiresAt && (
                       <span>
@@ -1030,9 +1030,9 @@ export function FreeShippingClient() {
       <AlertDialog open={deleteId !== null} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remover oferta de frete grátis?</AlertDialogTitle>
+            <AlertDialogTitle>Remover oferta de frete gr�tis?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação não pode ser desfeita. A oferta será removida permanentemente.
+              Esta a��o n�o pode ser desfeita. A oferta ser� removida permanentemente.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

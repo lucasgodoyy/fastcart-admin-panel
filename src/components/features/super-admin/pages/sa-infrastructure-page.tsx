@@ -110,7 +110,7 @@ export function SaInfrastructurePage() {
           <Button
             onClick={runHealthChecks}
             disabled={checking}
-            className="bg-[hsl(var(--sa-accent))] hover:bg-[hsl(var(--sa-accent-hover))] text-white rounded-xl gap-2 text-[12px]"
+            className="bg-[hsl(var(--sa-accent))] hover:bg-[hsl(var(--sa-accent-hover))] text-white rounded-lg gap-2 text-[12px]"
           >
             {checking ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
             Verificar

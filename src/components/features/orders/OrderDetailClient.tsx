@@ -322,7 +322,7 @@ export function OrderDetailClient() {
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-xl font-bold text-foreground">
+            <h1 className="text-xl font-bold tracking-tight text-foreground">
               {t('Pedido', 'Order')} #{order.id}
             </h1>
             <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${sc.color}`}>

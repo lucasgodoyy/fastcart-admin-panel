@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { ReactNode, useRef, useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
@@ -65,10 +65,10 @@ type SortOption = {
 const SORT_OPTIONS: SortOption[] = [
   { key: 'newest',      label: 'Mais novo',     sortBy: 'createdAt',   sortOrder: 'desc' },
   { key: 'oldest',      label: 'Mais antigo',   sortBy: 'createdAt',   sortOrder: 'asc' },
-  { key: 'price-asc',  label: 'Menor preÃ§o',   sortBy: 'price',       sortOrder: 'asc' },
-  { key: 'price-desc', label: 'Maior preÃ§o',   sortBy: 'price',       sortOrder: 'desc' },
-  { key: 'az',         label: 'A â€“ Z',         sortBy: 'name',        sortOrder: 'asc' },
-  { key: 'za',         label: 'Z â€“ A',         sortBy: 'name',        sortOrder: 'desc' },
+  { key: 'price-asc',  label: 'Menor preço',   sortBy: 'price',       sortOrder: 'asc' },
+  { key: 'price-desc', label: 'Maior preço',   sortBy: 'price',       sortOrder: 'desc' },
+  { key: 'az',         label: 'A – Z',         sortBy: 'name',        sortOrder: 'asc' },
+  { key: 'za',         label: 'Z – A',         sortBy: 'name',        sortOrder: 'desc' },
   { key: 'best',       label: 'Mais vendidos', sortBy: 'bestSelling', sortOrder: 'desc' },
   { key: 'manual',     label: 'Ordem manual',  href: '/admin/products/organize' },
 ];
@@ -83,26 +83,26 @@ const STOCK_OPTIONS: FilterOption<NonNullable<DrawerFilters['stockStatus']>>[] =
 const PRICE_OPTIONS: FilterOption<NonNullable<DrawerFilters['priceType']>>[] = [
   { value: null, label: 'Todos' },
   { value: 'PROMOTIONAL', label: 'Promocional' },
-  { value: 'NON_PROMOTIONAL', label: 'NÃ£o promocional' },
+  { value: 'NON_PROMOTIONAL', label: 'Não promocional' },
 ];
 
 const VISIBILITY_OPTIONS: FilterOption<NonNullable<DrawerFilters['visibility']>>[] = [
   { value: null, label: 'Todos' },
-  { value: 'VISIBLE', label: 'VisÃ­veis' },
+  { value: 'VISIBLE', label: 'Visíveis' },
   { value: 'HIDDEN', label: 'Ocultos' },
 ];
 
 const SHIPPING_OPTIONS: FilterOption<NonNullable<DrawerFilters['shippingPromotion']>>[] = [
   { value: null, label: 'Todos' },
-  { value: 'FREE_SHIPPING', label: 'Com envio grÃ¡tis' },
-  { value: 'NO_FREE_SHIPPING', label: 'Sem envio grÃ¡tis' },
+  { value: 'FREE_SHIPPING', label: 'Com envio grátis' },
+  { value: 'NO_FREE_SHIPPING', label: 'Sem envio grátis' },
 ];
 
 const WEIGHT_DIMENSIONS_OPTIONS: FilterOption<NonNullable<DrawerFilters['weightDimensions']>>[] = [
   { value: null, label: 'Todos' },
-  { value: 'WITHOUT_DIMENSIONS', label: 'Sem dimensÃµes' },
+  { value: 'WITHOUT_DIMENSIONS', label: 'Sem dimensões' },
   { value: 'WITHOUT_WEIGHT', label: 'Sem peso' },
-  { value: 'WITHOUT_WEIGHT_AND_DIMENSIONS', label: 'Sem peso nem dimensÃµes' },
+  { value: 'WITHOUT_WEIGHT_AND_DIMENSIONS', label: 'Sem peso nem dimensões' },
 ];
 
 const formatMoney = (value: number, currency = 'BRL') =>
@@ -220,7 +220,7 @@ function InlinePriceInput({ product, field, onSave }: InlinePriceInputProps) {
       title="Clique para editar"
       className="cursor-text rounded px-1 py-0.5 text-sm text-foreground hover:bg-muted/60 hover:ring-1 hover:ring-border"
     >
-      {currentValue != null ? formatMoney(Number(currentValue), product.currency || 'BRL') : <span className="text-muted-foreground">â€”</span>}
+      {currentValue != null ? formatMoney(Number(currentValue), product.currency || 'BRL') : <span className="text-muted-foreground">—</span>}
     </button>
   );
 }
@@ -253,7 +253,7 @@ export function ProductClient() {
       link.download = `produtos_${new Date().toISOString().slice(0, 10)}.csv`;
       link.click();
       URL.revokeObjectURL(url);
-      toast.success('ExportaÃ§Ã£o concluÃ­da!');
+      toast.success('Exportação concluída!');
     } catch {
       toast.error('Erro ao exportar produtos.');
     }
@@ -272,7 +272,7 @@ export function ProductClient() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       const { created, skipped, errors } = response.data as { created: number; skipped: number; errors: string[] };
-      toast.success(`ImportaÃ§Ã£o concluÃ­da: ${created} criado(s), ${skipped} ignorado(s).`);
+      toast.success(`Importação concluída: ${created} criado(s), ${skipped} ignorado(s).`);
       if (errors.length > 0) toast.warning(`${errors.length} linha(s) com erro.`);
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
     } catch {
@@ -310,7 +310,7 @@ export function ProductClient() {
       toast.success('Produto removido');
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
     },
-    onError: () => toast.error('NÃ£o foi possÃ­vel remover o produto'),
+    onError: () => toast.error('Não foi possível remover o produto'),
   });
 
   const duplicateMutation = useMutation({
@@ -321,17 +321,17 @@ export function ProductClient() {
       setDuplicateSource(null);
       setDuplicateName('');
     },
-    onError: () => toast.error('NÃ£o foi possÃ­vel duplicar o produto'),
+    onError: () => toast.error('Não foi possível duplicar o produto'),
   });
 
   const priceMutation = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: CreateProductRequest }) =>
       productService.update(id, payload),
     onSuccess: () => {
-      toast.success('PreÃ§o atualizado');
+      toast.success('Preço atualizado');
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
     },
-    onError: () => toast.error('NÃ£o foi possÃ­vel atualizar o preÃ§o'),
+    onError: () => toast.error('Não foi possível atualizar o preço'),
   });
 
   const handlePriceSave = useCallback((product: Product, field: 'price' | 'salePrice', newValue: number | null) => {
@@ -348,7 +348,7 @@ export function ProductClient() {
 
   const handleOpenDuplicate = (product: Product) => {
     setDuplicateSource(product);
-    setDuplicateName(`${product.name} - (cÃ³pia)`);
+    setDuplicateName(`${product.name} - (cópia)`);
   };
 
   const handleConfirmDuplicate = () => {
@@ -411,7 +411,7 @@ export function ProductClient() {
   return (
     <div className="p-4 md:p-6 lg:p-8">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-5 font-semibold text-foreground">Produtos</h1>
+        <h1 className="text-xl font-bold tracking-tight text-foreground">Produtos</h1>
         <div className="flex items-center gap-3">
           <Button variant="outline" className="gap-2" onClick={handleExportCsv}>
             <Download className="h-4 w-4" />
@@ -528,9 +528,9 @@ export function ProductClient() {
             <tr className="border-b border-border bg-muted/30 text-left">
               <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">Produto</th>
               <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">Estoque</th>
-              <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">PreÃ§o</th>
+              <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">Preço</th>
               <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">Promo</th>
-              <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">AÃ§Ãµes</th>
+              <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -579,7 +579,7 @@ export function ProductClient() {
                   </td>
                   <td className="px-4 py-3 text-sm">
                     {product.infiniteStock ? (
-                      <span className="text-muted-foreground">âˆž Infinito</span>
+                      <span className="text-muted-foreground">∞ Infinito</span>
                     ) : (
                       <span className={product.stock === 0 ? 'text-destructive' : 'text-foreground'}>
                         {product.stock}
@@ -705,28 +705,28 @@ export function ProductClient() {
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm font-medium text-foreground">Tipo de preÃ§o</p>
+                <p className="text-sm font-medium text-foreground">Tipo de preço</p>
                 {renderFilterOptions(draftFilters.priceType, PRICE_OPTIONS, (value) =>
                   setDraftFilters((prev) => ({ ...prev, priceType: value }))
                 )}
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm font-medium text-foreground">VisÃ­vel na loja</p>
+                <p className="text-sm font-medium text-foreground">Visível na loja</p>
                 {renderFilterOptions(draftFilters.visibility, VISIBILITY_OPTIONS, (value) =>
                   setDraftFilters((prev) => ({ ...prev, visibility: value }))
                 )}
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm font-medium text-foreground">PromoÃ§Ã£o de envio</p>
+                <p className="text-sm font-medium text-foreground">Promoção de envio</p>
                 {renderFilterOptions(draftFilters.shippingPromotion, SHIPPING_OPTIONS, (value) =>
                   setDraftFilters((prev) => ({ ...prev, shippingPromotion: value }))
                 )}
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm font-medium text-foreground">Peso e dimensÃµes</p>
+                <p className="text-sm font-medium text-foreground">Peso e dimensões</p>
                 {renderFilterOptions(draftFilters.weightDimensions, WEIGHT_DIMENSIONS_OPTIONS, (value) =>
                   setDraftFilters((prev) => ({ ...prev, weightDimensions: value }))
                 )}
@@ -745,7 +745,7 @@ export function ProductClient() {
                     <span className="block text-xs text-primary/90">Adicione diferentes atributos aos seus produtos</span>
                   </span>
                 </div>
-                <span className="text-primary">â€º</span>
+                <span className="text-primary">›</span>
               </button>
             </div>
 

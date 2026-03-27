@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -14,28 +14,28 @@ const fadeUp = {
   }),
 };
 
-/* ── Static blog content (placeholder) ── */
+/* -- Static blog content (placeholder) -- */
 const articles: Record<string, { title: string; category: string; readTime: string; date: string; gradient: string; content: string }> = {
   'como-criar-loja-virtual-2026': {
-    title: 'Como criar sua loja virtual em 2026 — Guia completo',
+    title: 'Como criar sua loja virtual em 2026 � Guia completo',
     category: 'Guias',
     readTime: '12 min',
     date: '2026-03-01',
     gradient: 'from-primary to-emerald-400',
     content: `
       <h2>1. Escolha a plataforma certa</h2>
-      <p>A escolha da plataforma é o primeiro passo mais importante. Você precisa de algo que seja fácil de usar, escalável e que ofereça todas as ferramentas necessárias para vender online.</p>
-      <p>A Lojaki é uma plataforma brasileira que combina simplicidade com funcionalidades avançadas — perfeita para quem está começando e para quem já vende bastante.</p>
+      <p>A escolha da plataforma � o primeiro passo mais importante. Voc� precisa de algo que seja f�cil de usar, escal�vel e que ofere�a todas as ferramentas necess�rias para vender online.</p>
+      <p>A Lojaki � uma plataforma brasileira que combina simplicidade com funcionalidades avan�adas � perfeita para quem est� come�ando e para quem j� vende bastante.</p>
       
       <h2>2. Configure seus produtos</h2>
-      <p>Cadastre seus produtos com fotos de alta qualidade, descrições detalhadas e preços competitivos. Use variações para oferecer tamanhos, cores e outros atributos.</p>
-      <p>Dica: invista em fotos com fundo branco e descrições que respondam as principais dúvidas do cliente.</p>
+      <p>Cadastre seus produtos com fotos de alta qualidade, descri��es detalhadas e pre�os competitivos. Use varia��es para oferecer tamanhos, cores e outros atributos.</p>
+      <p>Dica: invista em fotos com fundo branco e descri��es que respondam as principais d�vidas do cliente.</p>
       
       <h2>3. Configure os pagamentos</h2>
-      <p>Ofereça múltiplas opções de pagamento: PIX (confirmação instantânea), cartão de crédito com parcelamento, boleto e carteiras digitais. Quanto mais opções, maior a conversão.</p>
+      <p>Ofere�a m�ltiplas op��es de pagamento: PIX (confirma��o instant�nea), cart�o de cr�dito com parcelamento, boleto e carteiras digitais. Quanto mais op��es, maior a convers�o.</p>
       
       <h2>4. Configure o frete</h2>
-      <p>Integre com o Melhor Envio para calcular frete automaticamente e oferecer múltiplas transportadoras. Configure frete grátis condicional para pedidos acima de determinado valor.</p>
+      <p>Integre com o Melhor Envio para calcular frete automaticamente e oferecer m�ltiplas transportadoras. Configure frete gr�tis condicional para pedidos acima de determinado valor.</p>
       
       <h2>5. Publique e divulgue</h2>
       <p>Com tudo configurado, publique sua loja! Compartilhe nas redes sociais, invista em Google Ads e SEO para atrair clientes.</p>
@@ -49,19 +49,19 @@ const articles: Record<string, { title: string; category: string; readTime: stri
     gradient: 'from-blue-500 to-indigo-500',
     content: `
       <h2>Panorama do mercado em 2026</h2>
-      <p>O mercado de e-commerce no Brasil não para de crescer. Escolher a plataforma certa é fundamental para o sucesso do seu negócio online.</p>
+      <p>O mercado de e-commerce no Brasil n�o para de crescer. Escolher a plataforma certa � fundamental para o sucesso do seu neg�cio online.</p>
       
       <h2>Shopify</h2>
-      <p>Líder global, mas com preços em dólar e suporte limitado em português. Boa para operações internacionais.</p>
+      <p>L�der global, mas com pre�os em d�lar e suporte limitado em portugu�s. Boa para opera��es internacionais.</p>
       
       <h2>Nuvemshop</h2>
-      <p>Popular na América Latina, com foco no mercado brasileiro. Boa variedade de temas.</p>
+      <p>Popular na Am�rica Latina, com foco no mercado brasileiro. Boa variedade de temas.</p>
       
       <h2>Lojaki</h2>
-      <p>Plataforma brasileira moderna com painel administrativo completo, integração nativa com meios de pagamento brasileiros e frete via Melhor Envio. Destaque para o plano gratuito que permite começar sem investimento.</p>
+      <p>Plataforma brasileira moderna com painel administrativo completo, integra��o nativa com meios de pagamento brasileiros e frete via Melhor Envio. Destaque para o plano gratuito que permite come�ar sem investimento.</p>
       
-      <h2>Conclusão</h2>
-      <p>A melhor plataforma depende do seu momento e necessidade. Para quem está começando no Brasil, a Lojaki oferece o melhor custo-benefício.</p>
+      <h2>Conclus�o</h2>
+      <p>A melhor plataforma depende do seu momento e necessidade. Para quem est� come�ando no Brasil, a Lojaki oferece o melhor custo-benef�cio.</p>
     `,
   },
 };
@@ -72,7 +72,7 @@ const defaultArticle = {
   readTime: '5 min',
   date: '2026-03-01',
   gradient: 'from-gray-400 to-gray-500',
-  content: '<p>Este artigo está sendo produzido e será publicado em breve. Fique de olho!</p>',
+  content: '<p>Este artigo est� sendo produzido e ser� publicado em breve. Fique de olho!</p>',
 };
 
 export default function BlogPostPage() {
@@ -85,20 +85,20 @@ export default function BlogPostPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 antialiased">
+    <div className="min-h-screen bg-background text-foreground antialiased">
       {/* Navbar */}
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-white/70 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60">
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/70 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-primary to-emerald-400 shadow-lg shadow-primary/25">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-linear-to-br from-primary to-emerald-400 shadow-lg shadow-primary/25">
               <Zap className="h-5 w-5 text-white" fill="white" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-gray-900">Lojaki</span>
+            <span className="text-xl font-bold tracking-tight text-foreground">Lojaki</span>
           </Link>
           <div className="flex items-center gap-3">
-            <Link href="/blog" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Blog</Link>
-            <Link href="/signup" className="rounded-xl bg-linear-to-r from-primary to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25">
-              Começar grátis
+            <Link href="/blog" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
+            <Link href="/signup" className="rounded-lg bg-linear-to-r from-primary to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25">
+              Come�ar gr�tis
             </Link>
           </div>
         </nav>
@@ -135,34 +135,34 @@ export default function BlogPostPage() {
             animate="visible"
             custom={3}
             className="prose prose-gray prose-lg max-w-none
-              prose-headings:font-extrabold prose-headings:tracking-tight prose-headings:text-gray-900
+              prose-headings:font-extrabold prose-headings:tracking-tight prose-headings:text-foreground
               prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
-              prose-p:text-gray-600 prose-p:leading-relaxed
+              prose-p:text-muted-foreground prose-p:leading-relaxed
               prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-              prose-strong:text-gray-900"
+              prose-strong:text-foreground"
             dangerouslySetInnerHTML={{ __html: article.content }}
           />
         </div>
       </article>
 
       {/* CTA */}
-      <section className="py-16 px-6 bg-gray-50/50">
+      <section className="py-16 px-6 bg-muted/30">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-2xl font-extrabold text-gray-900 md:text-3xl">Pronto para criar sua loja?</h2>
-          <p className="mt-3 text-gray-500">Comece grátis e ponha em prática tudo que você leu.</p>
+          <h2 className="text-2xl font-extrabold text-foreground md:text-3xl">Pronto para criar sua loja?</h2>
+          <p className="mt-3 text-muted-foreground">Comece gr�tis e ponha em pr�tica tudo que voc� leu.</p>
           <div className="mt-6 flex items-center justify-center gap-4">
-            <Link href="/signup" className="group inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-primary to-emerald-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-primary/25 hover:shadow-xl transition-all">
-              Começar grátis <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            <Link href="/signup" className="group inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-primary to-emerald-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-primary/25 hover:shadow-xl transition-all">
+              Come�ar gr�tis <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
-            <Link href="/blog" className="rounded-xl border border-gray-200 bg-white px-6 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+            <Link href="/blog" className="rounded-lg border border-border bg-card px-6 py-3 text-sm font-semibold text-foreground/80 hover:bg-muted transition-colors">
               Mais artigos
             </Link>
           </div>
         </div>
       </section>
 
-      <footer className="border-t border-gray-100 bg-white px-6 py-8 text-center">
-        <p className="text-xs text-gray-400">© {new Date().getFullYear()} Lojaki. Todos os direitos reservados.</p>
+      <footer className="border-t border-border bg-card px-6 py-8 text-center">
+        <p className="text-xs text-muted-foreground/70">� {new Date().getFullYear()} Lojaki. Todos os direitos reservados.</p>
       </footer>
     </div>
   );

@@ -81,7 +81,7 @@ export function VerificationTagsClient() {
             <Search className="h-6 w-6 text-green-600" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">{t('Tags de Verificação', 'Verification Tags')}</h1>
+            <h1 className="text-xl font-bold tracking-tight text-foreground">{t('Tags de Verificação', 'Verification Tags')}</h1>
             <p className="text-sm text-muted-foreground">
               {t('Verifique seu site no Google e Bing para SEO', 'Verify your site on Google and Bing for SEO')}
             </p>
@@ -108,7 +108,7 @@ export function VerificationTagsClient() {
         </div>
       )}
 
-      <div className="rounded-xl border bg-card p-6 space-y-5">
+      <div className="rounded-lg border bg-card p-6 space-y-5">
         <div>
           <label className="text-sm font-medium" htmlFor="google-tag">Google Search Console</label>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -165,7 +165,7 @@ export function VerificationTagsClient() {
         </div>
       </div>
 
-      <div className="rounded-xl border bg-card p-6 space-y-3">
+      <div className="rounded-lg border bg-card p-6 space-y-3">
         <div className="flex items-center gap-2">
           <Info className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-medium">{t('Como verificar', 'How to verify')}</h3>

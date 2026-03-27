@@ -37,6 +37,9 @@ import {
   Share2,
   Music,
   Search,
+  Bell,
+  GraduationCap,
+  Activity,
 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -152,12 +155,21 @@ const navigation: NavSection[] = [
     title: t("Comunicação", "Communication"),
     items: [
       { label: t("Mensagens", "Messages"), href: "/admin/chat", icon: <MessageSquare className="h-4.5 w-4.5" /> },
+      { label: t("Notificações", "Notifications"), href: "/admin/notifications", icon: <Bell className="h-4.5 w-4.5" /> },
       { label: t("Suporte", "Support"), href: "/admin/support", icon: <Headphones className="h-4.5 w-4.5" /> },
     ],
   },
   {
     title: t("Ferramentas", "Tools"),
     items: [
+      { label: t("Tutoriais", "Tutorials"), href: "/admin/tutorials", icon: <GraduationCap className="h-4.5 w-4.5" />, children: [
+        { label: t("Primeiros passos", "Getting Started"), href: "/admin/tutorials" },
+        { label: t("Produtos", "Products"), href: "/admin/tutorials/products" },
+        { label: t("Pedidos", "Orders"), href: "/admin/tutorials/orders" },
+        { label: t("Marketing", "Marketing"), href: "/admin/tutorials/marketing" },
+        { label: t("Integrações", "Integrations"), href: "/admin/tutorials/integrations" },
+        { label: t("Pagamentos", "Payments"), href: "/admin/tutorials/payments" },
+      ]},
       { label: t("FAQ", "FAQ"), href: "/admin/faq", icon: <HelpCircle className="h-4.5 w-4.5" /> },
       { label: t("Notas Fiscais", "Invoices"), href: "/admin/nfe", icon: <FileText className="h-4.5 w-4.5" /> },
       { label: t("Integrações", "Integrations"), href: "/admin/integrations", icon: <Plug className="h-4.5 w-4.5" />, children: [
@@ -165,6 +177,7 @@ const navigation: NavSection[] = [
         { label: t("Domínios", "Domains"), href: "/admin/integrations/domains" },
       ]},
       { label: t("Aplicativos", "Apps"), href: "/admin/apps", icon: <AppWindow className="h-4.5 w-4.5" /> },
+      { label: t("Atividade", "Activity"), href: "/admin/activity", icon: <Activity className="h-4.5 w-4.5" /> },
     ],
   },
 ]

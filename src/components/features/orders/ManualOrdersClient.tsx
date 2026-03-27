@@ -95,7 +95,7 @@ export function ManualOrdersClient() {
           ))}
         </div>
       ) : orders.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-16 text-center">
+        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
           <ShoppingBag className="h-10 w-10 text-muted-foreground/40 mb-3" />
           <p className="font-medium text-foreground">
             {t('Nenhum pedido manual ainda', 'No manual orders yet')}
@@ -118,7 +118,7 @@ export function ManualOrdersClient() {
           {orders.map((order) => (
             <div
               key={order.id}
-              className="flex items-center gap-4 rounded-xl border bg-card px-5 py-4 shadow-sm"
+              className="flex items-center gap-4 rounded-lg border bg-card px-5 py-4 shadow-sm"
             >
               {/* Order ID + origin */}
               <div className="min-w-0 flex-1">

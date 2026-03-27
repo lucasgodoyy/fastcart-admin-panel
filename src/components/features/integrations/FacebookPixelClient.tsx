@@ -78,7 +78,7 @@ export function FacebookPixelClient() {
             <Facebook className="h-6 w-6 text-blue-600" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">Facebook Pixel (Meta)</h1>
+            <h1 className="text-xl font-bold tracking-tight text-foreground">Facebook Pixel (Meta)</h1>
             <p className="text-sm text-muted-foreground">
               {t('Rastreamento de conversões e remarketing', 'Conversion tracking and remarketing')}
             </p>
@@ -104,7 +104,7 @@ export function FacebookPixelClient() {
       )}
 
       {/* Form */}
-      <div className="rounded-xl border bg-card p-6 space-y-5">
+      <div className="rounded-lg border bg-card p-6 space-y-5">
         <div>
           <label className="text-sm font-medium" htmlFor="pixel-id">
             Pixel ID
@@ -154,7 +154,7 @@ export function FacebookPixelClient() {
       </div>
 
       {/* Info box */}
-      <div className="rounded-xl border bg-muted/30 p-5 space-y-3">
+      <div className="rounded-lg border bg-muted/30 p-5 space-y-3">
         <div className="flex items-center gap-2">
           <Info className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-semibold">
@@ -202,7 +202,7 @@ export function FacebookPixelClient() {
       </div>
 
       {/* Step by step */}
-      <div className="rounded-xl border bg-card p-6 space-y-4">
+      <div className="rounded-lg border bg-card p-6 space-y-4">
         <h3 className="text-sm font-semibold">
           {t('Passo a passo', 'Step by step')}
         </h3>

@@ -91,7 +91,7 @@ export function SaTikTokConfigPage() {
           <Button
             onClick={handleSave}
             disabled={saveMut.isPending}
-            className="bg-linear-to-r from-zinc-800 to-zinc-700 text-white rounded-xl gap-2 text-[12px] shadow-lg shadow-zinc-600/25 hover:opacity-90"
+            className="bg-linear-to-r from-zinc-800 to-zinc-700 text-white rounded-lg gap-2 text-[12px] shadow-lg shadow-zinc-600/25 hover:opacity-90"
           >
             {saveMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             Salvar Alterações

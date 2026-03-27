@@ -225,7 +225,7 @@ export function CategoryClient() {
   return (
     <div ref={rootRef} className="p-4 md:p-6 lg:p-8">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-5 font-semibold text-foreground">Categorias</h1>
+        <h1 className="text-xl font-bold tracking-tight text-foreground">Categorias</h1>
         <Button className="h-8 bg-primary px-4 text-xs text-primary-foreground hover:bg-primary/90" onClick={startCreateRoot}>
           Criar categoria
         </Button>

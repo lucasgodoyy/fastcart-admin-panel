@@ -1,5 +1,5 @@
 import apiClient from '@/lib/api';
-import { FaqCategory, FaqItem } from '@/types/faq';
+import { FaqCategory, FaqCategoryPayload, FaqItem, FaqItemPayload } from '@/types/faq';
 
 const faqService = {
   async listCategories(): Promise<FaqCategory[]> {
@@ -7,13 +7,18 @@ const faqService = {
     return data;
   },
 
-  async createCategory(name: string, sortOrder?: number): Promise<FaqCategory> {
-    const { data } = await apiClient.post<FaqCategory>('/admin/faq/categories', { name, sortOrder });
+  async listItems(): Promise<FaqItem[]> {
+    const { data } = await apiClient.get<FaqItem[]>('/admin/faq/items');
     return data;
   },
 
-  async updateCategory(id: number, name: string, sortOrder?: number, active?: boolean): Promise<FaqCategory> {
-    const { data } = await apiClient.put<FaqCategory>(`/admin/faq/categories/${id}`, { name, sortOrder, active });
+  async createCategory(payload: FaqCategoryPayload): Promise<FaqCategory> {
+    const { data } = await apiClient.post<FaqCategory>('/admin/faq/categories', payload);
+    return data;
+  },
+
+  async updateCategory(id: number, payload: FaqCategoryPayload): Promise<FaqCategory> {
+    const { data } = await apiClient.put<FaqCategory>(`/admin/faq/categories/${id}`, payload);
     return data;
   },
 
@@ -21,13 +26,13 @@ const faqService = {
     await apiClient.delete(`/admin/faq/categories/${id}`);
   },
 
-  async createItem(categoryId: number, question: string, answer: string, sortOrder?: number): Promise<FaqItem> {
-    const { data } = await apiClient.post<FaqItem>(`/admin/faq/categories/${categoryId}/items`, { question, answer, sortOrder });
+  async createItem(payload: FaqItemPayload): Promise<FaqItem> {
+    const { data } = await apiClient.post<FaqItem>('/admin/faq/items', payload);
     return data;
   },
 
-  async updateItem(itemId: number, question: string, answer: string, sortOrder?: number, active?: boolean): Promise<FaqItem> {
-    const { data } = await apiClient.put<FaqItem>(`/admin/faq/items/${itemId}`, { question, answer, sortOrder, active });
+  async updateItem(itemId: number, payload: FaqItemPayload): Promise<FaqItem> {
+    const { data } = await apiClient.put<FaqItem>(`/admin/faq/items/${itemId}`, payload);
     return data;
   },
 

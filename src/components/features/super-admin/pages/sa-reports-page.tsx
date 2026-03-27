@@ -190,7 +190,7 @@ export function SaReportsPage() {
           <Button
             onClick={exportAll}
             disabled={exportingKey === "all"}
-            className="bg-[hsl(var(--sa-accent))] hover:bg-[hsl(var(--sa-accent-hover))] text-white rounded-xl gap-2 text-[12px]"
+            className="bg-[hsl(var(--sa-accent))] hover:bg-[hsl(var(--sa-accent-hover))] text-white rounded-lg gap-2 text-[12px]"
           >
             {exportingKey === "all" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
             Exportar Tudo
@@ -206,7 +206,7 @@ export function SaReportsPage() {
       </motion.div>
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="bg-[hsl(var(--sa-surface))] border border-[hsl(var(--sa-border-subtle))] rounded-xl p-1">
+        <TabsList className="bg-[hsl(var(--sa-surface))] border border-[hsl(var(--sa-border-subtle))] rounded-lg p-1">
           <TabsTrigger value="revenue" className="rounded-lg data-[state=active]:bg-[hsl(var(--sa-accent))] data-[state=active]:text-white text-[hsl(var(--sa-text-secondary))] text-[12px]">
             Receita
           </TabsTrigger>
@@ -231,7 +231,7 @@ export function SaReportsPage() {
                 <motion.div key={report.name} variants={fadeInUp}>
                   <SaCard className="hover:border-[hsl(var(--sa-accent))]/30 transition-all">
                     <div className="flex items-start gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--sa-accent-subtle))]">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--sa-accent-subtle))]">
                         <report.icon className="h-5 w-5 text-[hsl(var(--sa-accent))]" />
                       </div>
                       <div className="flex-1">

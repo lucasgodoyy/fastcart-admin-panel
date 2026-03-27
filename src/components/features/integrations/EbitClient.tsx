@@ -78,7 +78,7 @@ export function EbitClient() {
             <Star className="h-6 w-6 text-amber-500" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">Ebit / Reclame Aqui</h1>
+            <h1 className="text-xl font-bold tracking-tight text-foreground">Ebit / Reclame Aqui</h1>
             <p className="text-sm text-muted-foreground">
               {t('Selo de reputação e avaliações pós-compra', 'Reputation badge and post-purchase reviews')}
             </p>
@@ -102,7 +102,7 @@ export function EbitClient() {
         </div>
       )}
 
-      <div className="rounded-xl border bg-card p-6 space-y-5">
+      <div className="rounded-lg border bg-card p-6 space-y-5">
         <div>
           <label className="text-sm font-medium" htmlFor="ebit-id">Ebit ID</label>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -155,7 +155,7 @@ export function EbitClient() {
         </div>
       </div>
 
-      <div className="rounded-xl border bg-card p-6 space-y-3">
+      <div className="rounded-lg border bg-card p-6 space-y-3">
         <div className="flex items-center gap-2">
           <Info className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-medium">{t('O que o Ebit faz', 'What Ebit does')}</h3>

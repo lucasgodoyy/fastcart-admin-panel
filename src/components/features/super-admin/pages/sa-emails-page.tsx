@@ -128,6 +128,29 @@ const EMAIL_SCENARIOS: EmailScenario[] = [
   },
 ];
 
+const PLATFORM_TEMPLATE_DEFAULTS: Record<string, { subject: string; bodyHtml: string }> = {
+  WELCOME: {
+    subject: "Bem-vindo(a) a {{store_name}}",
+    bodyHtml: "<p>Ola {{customer_name}}, seja bem-vindo(a)!</p>",
+  },
+  PASSWORD_RESET: {
+    subject: "Redefina sua senha",
+    bodyHtml: "<p>Ola {{customer_name}}, clique no link para redefinir sua senha.</p>",
+  },
+  ORDER_PAID_CONFIRMATION: {
+    subject: "Pagamento confirmado - Pedido #{{order_id}}",
+    bodyHtml: "<p>Recebemos seu pagamento com sucesso. Pedido #{{order_id}}.</p>",
+  },
+  ORDER_DISPATCHED: {
+    subject: "Seu pedido foi enviado",
+    bodyHtml: "<p>Seu pedido foi despachado e esta a caminho.</p>",
+  },
+  CONTACT_FORM: {
+    subject: "Nova mensagem de contato",
+    bodyHtml: "<p>Voce recebeu uma nova mensagem do formulario de contato.</p>",
+  },
+};
+
 /* ------------------------------------------------------------------ */
 /*  Main Component                                                     */
 /* ------------------------------------------------------------------ */
@@ -139,6 +162,9 @@ export function SaEmailsPage() {
   const [page, setPage] = useState(0);
   const [composeOpen, setComposeOpen] = useState(false);
   const [composeForm, setComposeForm] = useState({ to: "", subject: "", bodyHtml: "" });
+  const [templateEditorOpen, setTemplateEditorOpen] = useState(false);
+  const [templateEditorKey, setTemplateEditorKey] = useState("");
+  const [templateForm, setTemplateForm] = useState({ subject: "", bodyHtml: "", active: true, testEmail: "" });
 
   const { data, isLoading } = useQuery({
     queryKey: ["super-admin-emails", status, storeFilter, page],
@@ -156,6 +182,12 @@ export function SaEmailsPage() {
     queryKey: ["super-admin-email-templates"],
     queryFn: () => superAdminService.listEmailTemplates({ page: 0, size: 50 }),
     enabled: tab === "templates",
+  });
+
+  const { data: platformTemplates = [] } = useQuery({
+    queryKey: ["super-admin-platform-templates"],
+    queryFn: () => superAdminService.getPlatformTemplates(),
+    enabled: tab === "templates" || templateEditorOpen,
   });
 
   const { data: overview } = useQuery({
@@ -188,6 +220,45 @@ export function SaEmailsPage() {
     },
     onError: () => toast.error("Erro ao enviar e-mail da plataforma"),
   });
+
+  const upsertTemplateMutation = useMutation({
+    mutationFn: () => superAdminService.upsertPlatformTemplate(templateEditorKey, {
+      subject: templateForm.subject,
+      bodyHtml: templateForm.bodyHtml,
+      active: templateForm.active,
+    }),
+    onSuccess: () => {
+      toast.success("Template salvo com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["super-admin-platform-templates"] });
+    },
+    onError: () => toast.error("Erro ao salvar template"),
+  });
+
+  const sendTemplateTestMutation = useMutation({
+    mutationFn: () => superAdminService.sendPlatformEmail({
+      to: templateForm.testEmail,
+      subject: `[TESTE] ${templateForm.subject}`,
+      bodyHtml: templateForm.bodyHtml,
+    }),
+    onSuccess: () => toast.success("Teste enviado com sucesso!"),
+    onError: () => toast.error("Erro ao enviar teste"),
+  });
+
+  const openTemplateEditor = (scenario: EmailScenario) => {
+    const existing = platformTemplates.find((tpl) => tpl.templateKey === scenario.templateKey);
+    const defaults = PLATFORM_TEMPLATE_DEFAULTS[scenario.templateKey] ?? {
+      subject: scenario.label,
+      bodyHtml: "<p>Template padrao da plataforma.</p>",
+    };
+    setTemplateEditorKey(scenario.templateKey);
+    setTemplateForm({
+      subject: existing?.subject ?? defaults.subject,
+      bodyHtml: existing?.bodyHtml ?? defaults.bodyHtml,
+      active: existing?.active ?? true,
+      testEmail: composeForm.to,
+    });
+    setTemplateEditorOpen(true);
+  };
 
   const templates = templatesData?.content ?? [];
 
@@ -225,7 +296,7 @@ export function SaEmailsPage() {
 
       {/* Tabs */}
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="bg-[hsl(var(--sa-surface))] border border-[hsl(var(--sa-border-subtle))] rounded-xl p-1">
+        <TabsList className="bg-[hsl(var(--sa-surface))] border border-[hsl(var(--sa-border-subtle))] rounded-lg p-1">
           <TabsTrigger value="logs" className="rounded-lg data-[state=active]:bg-[hsl(var(--sa-accent))] data-[state=active]:text-white text-[hsl(var(--sa-text-secondary))] text-[12px]">
             Logs de Envio
           </TabsTrigger>
@@ -384,41 +455,62 @@ export function SaEmailsPage() {
 
         {/* ── Templates Tab ─────────────────────────────────────── */}
         <TabsContent value="templates" className="mt-6">
-          {templatesLoading ? (
-            <div className="py-12 text-center text-[hsl(var(--sa-text-muted))]">Carregando templates...</div>
-          ) : templates.length === 0 ? (
-            <SaEmptyState icon={FileText} title="Nenhum template encontrado" description="Templates de e-mail aparecerão aqui quando lojas os personalizarem" />
-          ) : (
-            <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {templates.map((tpl) => (
-                <motion.div
-                  key={tpl.id}
-                  variants={fadeInUp}
-                  whileHover={{ y: -3 }}
-                  className="group rounded-2xl border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-5 hover:border-[hsl(var(--sa-border))] transition-all cursor-pointer"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--sa-accent-subtle))]">
-                      <FileText className="h-5 w-5 text-[hsl(var(--sa-accent))]" />
+          <div className="space-y-6">
+            <SaCard>
+              <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-2">Templates principais da plataforma</h3>
+              <p className="text-[12px] text-[hsl(var(--sa-text-muted))] mb-4">
+                Configure os e-mails base (boas-vindas, pedido pago, envio e outros) e envie testes antes de publicar.
+              </p>
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {EMAIL_SCENARIOS.map((scenario) => {
+                  const tpl = platformTemplates.find((t) => t.templateKey === scenario.templateKey);
+                  return (
+                    <button
+                      key={scenario.key}
+                      type="button"
+                      onClick={() => openTemplateEditor(scenario)}
+                      className="text-left rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-4 hover:border-[hsl(var(--sa-border))] transition-colors"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[12px] font-semibold text-[hsl(var(--sa-text))]">{scenario.label}</span>
+                        <Badge className={`text-[10px] border-0 ${tpl?.active !== false ? "bg-[hsl(var(--sa-success))]/10 text-[hsl(var(--sa-success))]" : "bg-[hsl(var(--sa-warning))]/10 text-[hsl(var(--sa-warning))]"}`}>
+                          {tpl?.active !== false ? "Ativo" : "Inativo"}
+                        </Badge>
+                      </div>
+                      <p className="text-[11px] text-[hsl(var(--sa-text-muted))] mb-2">{scenario.description}</p>
+                      <p className="text-[10px] font-mono text-[hsl(var(--sa-text-muted))]">{scenario.templateKey}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </SaCard>
+
+            {templatesLoading ? (
+              <div className="py-12 text-center text-[hsl(var(--sa-text-muted))]">Carregando templates de lojas...</div>
+            ) : templates.length === 0 ? (
+              <SaEmptyState icon={FileText} title="Nenhum template customizado por loja" description="Quando lojas personalizarem e-mails, aparecerão aqui" />
+            ) : (
+              <SaCard>
+                <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-3">Templates customizados por loja</h3>
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  {templates.map((tpl) => (
+                    <div key={tpl.id} className="rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] p-4">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[12px] font-semibold text-[hsl(var(--sa-text))] truncate">{tpl.subject}</span>
+                        <span className={`text-[10px] font-bold ${tpl.active ? "text-[hsl(var(--sa-success))]" : "text-[hsl(var(--sa-text-muted))]"}`}>
+                          {tpl.active ? "Ativo" : "Inativo"}
+                        </span>
+                      </div>
+                      <p className="text-[10px] font-mono text-[hsl(var(--sa-text-muted))]">{tpl.templateKey}</p>
+                      <div className="pt-2 mt-2 border-t border-[hsl(var(--sa-border-subtle))] text-[10px] text-[hsl(var(--sa-text-muted))]">
+                        {tpl.storeName || "Plataforma"}
+                      </div>
                     </div>
-                    <span className={`text-[10px] font-bold ${tpl.active ? "text-[hsl(var(--sa-success))]" : "text-[hsl(var(--sa-text-muted))]"}`}>
-                      {tpl.active ? "Ativo" : "Inativo"}
-                    </span>
-                  </div>
-                  <h4 className="text-[13px] font-semibold text-[hsl(var(--sa-text))] mb-1">{tpl.subject}</h4>
-                  <p className="text-[11px] font-mono text-[hsl(var(--sa-text-muted))] mb-3">{tpl.templateKey}</p>
-                  <div className="flex items-center justify-between pt-3 border-t border-[hsl(var(--sa-border-subtle))]">
-                    <span className="text-[11px] text-[hsl(var(--sa-text-muted))]">
-                      {tpl.storeName || "Plataforma"}
-                    </span>
-                    <span className="text-[11px] text-[hsl(var(--sa-text-muted))]">
-                      {formatDistanceToNow(new Date(tpl.updatedAt), { addSuffix: true, locale: ptBR })}
-                    </span>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
+                  ))}
+                </div>
+              </SaCard>
+            )}
+          </div>
         </TabsContent>
 
         {/* ── Config Tab ────────────────────────────────────────── */}
@@ -524,6 +616,61 @@ export function SaEmailsPage() {
         </TabsContent>
       </Tabs>
 
+      <Dialog open={templateEditorOpen} onOpenChange={setTemplateEditorOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Editar template da plataforma</DialogTitle>
+            <DialogDescription>
+              Configure assunto e HTML para o template <strong>{templateEditorKey}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label>Assunto</Label>
+              <Input
+                value={templateForm.subject}
+                onChange={(e) => setTemplateForm((p) => ({ ...p, subject: e.target.value }))}
+                placeholder="Assunto do template"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Conteudo HTML</Label>
+              <textarea
+                className="w-full h-56 p-3 text-xs font-mono bg-[hsl(var(--sa-bg))] border border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-[hsl(var(--sa-accent))]"
+                value={templateForm.bodyHtml}
+                onChange={(e) => setTemplateForm((p) => ({ ...p, bodyHtml: e.target.value }))}
+                placeholder="<p>Template HTML...</p>"
+              />
+            </div>
+            <div className="flex items-center justify-between gap-3 pt-2 border-t border-[hsl(var(--sa-border-subtle))]">
+              <div className="flex items-center gap-2 flex-1">
+                <Input
+                  type="email"
+                  placeholder="email@teste.com"
+                  value={templateForm.testEmail}
+                  onChange={(e) => setTemplateForm((p) => ({ ...p, testEmail: e.target.value }))}
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => sendTemplateTestMutation.mutate()}
+                  disabled={sendTemplateTestMutation.isPending || !templateForm.testEmail || !templateForm.subject || !templateForm.bodyHtml}
+                >
+                  {sendTemplateTestMutation.isPending ? <RotateCcw className="h-3.5 w-3.5 mr-2 animate-spin" /> : <Send className="h-3.5 w-3.5 mr-2" />}
+                  Enviar teste
+                </Button>
+              </div>
+              <Button
+                onClick={() => upsertTemplateMutation.mutate()}
+                disabled={upsertTemplateMutation.isPending || !templateForm.subject || !templateForm.bodyHtml || !templateEditorKey}
+              >
+                {upsertTemplateMutation.isPending ? <RotateCcw className="h-3.5 w-3.5 mr-2 animate-spin" /> : null}
+                Salvar template
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* ═══ Compose Platform Email Dialog ═══ */}
       <Dialog open={composeOpen} onOpenChange={setComposeOpen}>
         <DialogContent className="max-w-lg">
@@ -613,7 +760,7 @@ function ScenarioRow({
 
   return (
     <div className="flex items-center gap-4 px-6 py-4 border-b border-[hsl(var(--sa-border-subtle))] last:border-0 hover:bg-[hsl(var(--sa-surface-hover))] transition-colors">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--sa-accent-subtle))]">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--sa-accent-subtle))]">
         <Icon className="h-5 w-5 text-[hsl(var(--sa-accent))]" />
       </div>
       <div className="flex-1 min-w-0">
