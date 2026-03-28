@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import themeService from '@/services/theme';
+import storeSettingsService from '@/services/storeSettingsService';
 import type {
   ThemeSections,
   ThemeSectionsResponse,
@@ -80,6 +81,10 @@ function parseThemeSections(json: string | null | undefined): ThemeSections {
 export default function LayoutEditorPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { data: storeData } = useQuery({
+    queryKey: ['store-settings'],
+    queryFn: () => storeSettingsService.getMyStore(),
+  });
 
   // ── API queries ─────────────────────────────────────────
   const { data, isLoading } = useQuery<ThemeSectionsResponse>({
@@ -176,8 +181,12 @@ export default function LayoutEditorPage() {
   // ── Storefront preview URL ──────────────────────────────
   const previewUrl = useMemo(() => {
     const base = process.env.NEXT_PUBLIC_STOREFRONT_URL || 'http://localhost:3000';
-    return `${base.replace(/\/$/, '')}/?preview=true`;
-  }, []);
+    const params = new URLSearchParams({ preview: 'true' });
+    if (storeData?.slug) {
+      params.set('storeSlug', storeData.slug);
+    }
+    return `${base.replace(/\/$/, '')}/?${params.toString()}`;
+  }, [storeData?.slug]);
 
   // ── Close editor ────────────────────────────────────────
   const handleClose = () => router.push('/admin/online-store/layout-theme');
@@ -185,7 +194,11 @@ export default function LayoutEditorPage() {
   // ── View store ──────────────────────────────────────────
   const handleViewStore = () => {
     const base = process.env.NEXT_PUBLIC_STOREFRONT_URL || 'http://localhost:3000';
-    window.open(base, '_blank');
+    const url = new URL(base.replace(/\/$/, ''));
+    if (storeData?.slug) {
+      url.searchParams.set('storeSlug', storeData.slug);
+    }
+    window.open(url.toString(), '_blank');
   };
 
   if (isLoading) {

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import themeService from '@/services/theme';
 import salesChannelsService from '@/services/salesChannels';
+import storeSettingsService from '@/services/storeSettingsService';
 import type { ThemeSectionsResponse } from '@/types/theme';
 import { TEMPLATE_PRESETS } from '@/types/theme';
 import type { SalesChannelSettings } from '@/types/salesChannel';
@@ -80,6 +81,11 @@ export function ThemeGalleryClient() {
     queryFn: () => salesChannelsService.getSettings(),
   });
 
+  const { data: storeData } = useQuery({
+    queryKey: ['store-settings'],
+    queryFn: () => storeSettingsService.getMyStore(),
+  });
+
   const activateTemplateMutation = useMutation({
     mutationFn: async (templateId: string) => {
       const preset = TEMPLATE_PRESETS[templateId];
@@ -110,7 +116,11 @@ export function ThemeGalleryClient() {
 
   const handleViewStore = () => {
     const base = process.env.NEXT_PUBLIC_STOREFRONT_URL || 'http://localhost:3000';
-    window.open(base, '_blank');
+    const url = new URL(base.replace(/\/$/, ''));
+    if (storeData?.slug) {
+      url.searchParams.set('storeSlug', storeData.slug);
+    }
+    window.open(url.toString(), '_blank');
   };
 
   if (isLoading) {
