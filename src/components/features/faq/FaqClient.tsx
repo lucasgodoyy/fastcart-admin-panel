@@ -309,7 +309,7 @@ export function FaqClient() {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            <h1 className="text-xl font-bold tracking-tight text-foreground">
               {t('Central de FAQ', 'FAQ Center')}
             </h1>
             <p className="mt-2 max-w-3xl text-sm text-muted-foreground">

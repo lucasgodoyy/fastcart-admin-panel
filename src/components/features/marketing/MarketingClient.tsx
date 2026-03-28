@@ -45,6 +45,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { PageContainer, PageHeader } from '@/components/admin/page-header';
 
 const statusLabels: Record<string, string> = {
   ACTIVE: 'Ativa',
@@ -128,70 +129,68 @@ export function MarketingClient() {
   const banners = bannersData?.content ?? [];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground">Marketing</h1>
-          <p className="text-sm text-muted-foreground">
-            Gerencie campanhas, banners e push notifications da sua loja.
-          </p>
-        </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="gap-1.5">
-              <Plus className="h-4 w-4" />
-              Nova campanha
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Criar campanha</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 pt-2">
-              <div className="space-y-1.5">
-                <Label>Nome</Label>
-                <Input
-                  value={form.name}
-                  onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-                  placeholder="Ex: Black Friday 2025"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Tipo</Label>
-                <Select value={form.type} onValueChange={(v) => setForm((p) => ({ ...p, type: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="DISCOUNT">Desconto</SelectItem>
-                    <SelectItem value="FLASH_SALE">Flash Sale</SelectItem>
-                    <SelectItem value="BUNDLE">Bundle</SelectItem>
-                    <SelectItem value="SEASONAL">Sazonal</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label>Canal</Label>
-                <Select value={form.channel} onValueChange={(v) => setForm((p) => ({ ...p, channel: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="EMAIL">E-mail</SelectItem>
-                    <SelectItem value="PUSH">Push</SelectItem>
-                    <SelectItem value="SMS">SMS</SelectItem>
-                    <SelectItem value="SOCIAL">Redes sociais</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button
-                className="w-full"
-                onClick={() => createCampaign.mutate()}
-                disabled={!form.name || createCampaign.isPending}
-              >
-                {createCampaign.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Criar
-              </Button>
+    <PageContainer>
+      <PageHeader
+        title="Marketing"
+        description="Gerencie campanhas, banners e push notifications da sua loja."
+        actions={
+          <Button size="sm" className="gap-1.5" onClick={() => setDialogOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Nova campanha
+          </Button>
+        }
+      />
+
+      {/* Create campaign dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Criar campanha</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-1.5">
+              <Label>Nome</Label>
+              <Input
+                value={form.name}
+                onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                placeholder="Ex: Black Friday 2025"
+              />
             </div>
-          </DialogContent>
-        </Dialog>
-      </div>
+            <div className="space-y-1.5">
+              <Label>Tipo</Label>
+              <Select value={form.type} onValueChange={(v) => setForm((p) => ({ ...p, type: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="DISCOUNT">Desconto</SelectItem>
+                  <SelectItem value="FLASH_SALE">Flash Sale</SelectItem>
+                  <SelectItem value="BUNDLE">Bundle</SelectItem>
+                  <SelectItem value="SEASONAL">Sazonal</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Canal</Label>
+              <Select value={form.channel} onValueChange={(v) => setForm((p) => ({ ...p, channel: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="EMAIL">E-mail</SelectItem>
+                  <SelectItem value="PUSH">Push</SelectItem>
+                  <SelectItem value="SMS">SMS</SelectItem>
+                  <SelectItem value="SOCIAL">Redes sociais</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              className="w-full"
+              onClick={() => createCampaign.mutate()}
+              disabled={!form.name || createCampaign.isPending}
+            >
+              {createCampaign.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Criar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -369,6 +368,6 @@ export function MarketingClient() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </PageContainer>
   );
 }

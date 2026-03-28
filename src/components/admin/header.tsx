@@ -1,6 +1,6 @@
 ﻿"use client"
 
-import { Bell, Search, ChevronRight, LogOut, User, CheckCheck, Menu, PanelLeftClose, PanelLeftOpen } from "lucide-react"
+import { Bell, Search, ChevronRight, LogOut, User, CheckCheck, Menu, PanelLeftClose, PanelLeftOpen, ExternalLink } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
 import { useMemo } from "react"
@@ -10,6 +10,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import notificationService from "@/services/notificationService"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useMobileSidebar } from "@/context/MobileSidebarContext"
+import apiClient from "@/lib/api"
+import { toast } from "sonner"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -88,6 +90,45 @@ export function AdminHeader() {
     },
   })
 
+  const { data: storeData } = useQuery<{ slug: string }>({
+    queryKey: ["header-store", user?.storeId],
+    queryFn: async () => {
+      const { data } = await apiClient.get<{ slug: string }>(`/admin/stores/${user?.storeId}`)
+      return data
+    },
+    enabled: Boolean(user?.storeId),
+    staleTime: 60_000,
+  })
+
+  const openStorefront = () => {
+    const slug = (storeData?.slug || "").trim()
+    if (!slug) {
+      toast.error(t("Slug da loja não encontrado.", "Store slug not found."))
+      return
+    }
+
+    const configured = (process.env.NEXT_PUBLIC_STOREFRONT_URL || "").trim()
+    if (configured) {
+      const baseUrl = configured.replace(/\/$/, "")
+      window.open(`${baseUrl}/?storeSlug=${encodeURIComponent(slug)}`, "_blank", "noopener,noreferrer")
+      return
+    }
+
+    if (typeof window === "undefined") return
+    const protocol = window.location.protocol
+    const hostname = window.location.hostname
+
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      const port = process.env.NEXT_PUBLIC_STOREFRONT_PORT || "3000"
+      window.open(`${protocol}//${slug}.127.0.0.1.nip.io:${port}`, "_blank", "noopener,noreferrer")
+      return
+    }
+
+    // Strip admin/painel/www prefix to get root domain
+    const rootDomain = hostname.replace(/^(admin|painel|www)\./, "")
+    window.open(`${protocol}//${slug}.${rootDomain}`, "_blank", "noopener,noreferrer")
+  }
+
   return (
     <header className="flex h-14 lg:h-16 items-center justify-between border-b border-border bg-card px-3 sm:px-4 lg:px-6 gap-2 sm:gap-4">
       {/* Left side: hamburger + collapse toggle + breadcrumbs */}
@@ -129,6 +170,16 @@ export function AdminHeader() {
 
       {/* Right side */}
       <div className="flex items-center gap-3 shrink-0">
+        {/* Open Store */}
+        <button
+          onClick={openStorefront}
+          className="flex items-center gap-1.5 rounded-lg border border-primary/20 bg-primary/5 px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-primary/10 transition-colors"
+          title={t("Abrir loja", "Open store")}
+        >
+          <ExternalLink className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">{t("Ver loja", "View store")}</span>
+        </button>
+
         {/* Search */}
         <button className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted transition-colors">
           <Search className="h-4 w-4" />

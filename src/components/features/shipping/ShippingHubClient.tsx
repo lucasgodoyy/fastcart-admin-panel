@@ -31,6 +31,7 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { ShippingLabelsClient } from '@/components/features/shipping/ShippingLabelsClient';
+import { PageContainer, PageHeader } from '@/components/admin/page-header';
 import integrationService from '@/services/integrationService';
 import shippingConfigService from '@/services/shippingConfigService';
 import {
@@ -254,7 +255,11 @@ export function ShippingHubClient() {
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-8">
+    <PageContainer>
+      <PageHeader
+        title="Logística"
+        description="Configure provedores de frete, métodos de envio e gerencie etiquetas."
+      />
       {/* ── Section: Provedores ──────────────────────────────────────── */}
       <div>
         <h2 className="text-base font-semibold text-foreground mb-4">Provedores de Frete</h2>
@@ -646,7 +651,7 @@ export function ShippingHubClient() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 }
 

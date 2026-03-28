@@ -1,11 +1,12 @@
 'use client';
 
-import { ReactNode, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { ExternalLink, HelpCircle, Mail, MessageCircle, Plus, Search, Users } from 'lucide-react';
+import { Mail, MessageCircle, Plus, Search, Users, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PageContainer, PageHeader, EmptyState } from '@/components/admin/page-header';
 import { customerService } from '@/services/sales';
 import { Customer } from '@/types/customer';
 
@@ -16,30 +17,6 @@ const getStoreId = () => {
   if (!Number.isInteger(storeId) || storeId <= 0) return null;
   return storeId;
 };
-
-function ActionIconButton({
-  label,
-  children,
-}: {
-  label: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="group relative inline-flex">
-      <button
-        type="button"
-        className="cursor-pointer rounded-full border border-border p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-        aria-label={label}
-      >
-        {children}
-      </button>
-      <span className="pointer-events-none absolute -top-10 left-1/2 z-10 -translate-x-1/2 scale-95 rounded bg-foreground px-2 py-1 text-xs text-background opacity-0 transition-all duration-150 group-hover:scale-100 group-hover:opacity-100">
-        {label}
-        <span className="absolute left-1/2 top-full h-2 w-2 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-foreground" />
-      </span>
-    </div>
-  );
-}
 
 export function CustomerClient() {
   const [search, setSearch] = useState('');
@@ -65,113 +42,135 @@ export function CustomerClient() {
   }, [customers, search]);
 
   return (
-    <div className="p-4 md:p-6 lg:p-8">
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-xl font-bold tracking-tight text-foreground">Clientes</h1>
-        <div className="flex items-center gap-3">
+    <PageContainer>
+      <PageHeader
+        title="Clientes"
+        description="Gerencie os clientes da sua loja."
+        actions={
           <Link href="/admin/customers/new">
-            <Button className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button className="gap-2">
               <Plus className="h-4 w-4" />
               Adicionar cliente
             </Button>
           </Link>
-        </div>
-      </div>
+        }
+      />
 
-      <div className="mb-2 flex items-center gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Buscar por nome, e-mail, telefone ou documento"
-            className="pl-9"
-          />
-        </div>
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar por nome, e-mail, telefone ou documento"
+          className="pl-9"
+        />
       </div>
 
       {!storeId && (
-        <div className="mb-4 rounded-md border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
+        <div className="rounded-xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
           Não foi possível identificar a loja. Faça login novamente para listar os clientes.
         </div>
       )}
 
-      {storeId && <div className="mb-4 text-sm text-muted-foreground">{filteredCustomers.length} clientes</div>}
+      {storeId && (
+        <p className="text-sm text-muted-foreground">{filteredCustomers.length} clientes</p>
+      )}
 
-      <div className="overflow-x-auto overflow-hidden rounded-md border border-border bg-card">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-border bg-muted/30 text-left">
-              <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">Nome</th>
-              <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">Telefone</th>
-              <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">Documento</th>
-              <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading && (
-              <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-sm text-muted-foreground">
-                  Carregando clientes...
-                </td>
-              </tr>
-            )}
+      {/* Loading */}
+      {isLoading && (
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="animate-pulse rounded-xl border border-border bg-card p-4">
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 rounded-full bg-muted" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-32 rounded bg-muted" />
+                  <div className="h-3 w-48 rounded bg-muted" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
-            {!isLoading && filteredCustomers.length === 0 && (
-              <tr>
-                <td colSpan={4} className="px-4 py-10 text-center">
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    <Users className="h-8 w-8 text-muted-foreground/60" />
-                    <p className="text-sm text-muted-foreground">Nenhum cliente encontrado.</p>
+      {/* Empty state */}
+      {!isLoading && filteredCustomers.length === 0 && (
+        <EmptyState
+          icon={<Users className="h-10 w-10" />}
+          title="Nenhum cliente encontrado"
+          description="Quando seus clientes fizerem pedidos, eles aparecerão aqui."
+          action={
+            <Link href="/admin/customers/new">
+              <Button variant="outline" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Adicionar cliente
+              </Button>
+            </Link>
+          }
+        />
+      )}
+
+      {/* Customer card list */}
+      {!isLoading && filteredCustomers.length > 0 && (
+        <div className="space-y-2">
+          {filteredCustomers.map((customer) => {
+            const name = [customer.firstName, customer.lastName].filter(Boolean).join(' ') || `Cliente #${customer.id}`;
+            const initials = name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+
+            return (
+              <Link
+                key={customer.id}
+                href={`/admin/customers/${customer.id}`}
+                className="group flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition-all duration-150 hover:shadow-md hover:border-border/80 hover:bg-accent/30"
+              >
+                {/* Avatar */}
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+                  {initials || <User className="h-4 w-4" />}
+                </div>
+
+                {/* Info — stacked on mobile, row on desktop */}
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
+                    <p className="truncate text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                      {name}
+                    </p>
+                    {customer.phone && (
+                      <span className="text-xs text-muted-foreground">{customer.phone}</span>
+                    )}
+                    {customer.document && (
+                      <span className="hidden text-xs text-muted-foreground sm:inline">{customer.document}</span>
+                    )}
                   </div>
-                </td>
-              </tr>
-            )}
+                </div>
 
-            {!isLoading &&
-              filteredCustomers.map((customer) => (
-                <tr key={customer.id} className="border-b border-border transition-colors hover:bg-muted/40">
-                  <td className="px-4 py-3 text-sm">
-                    <Link
-                      href={`/admin/customers/${customer.id}`}
-                      className="cursor-pointer font-medium text-primary transition-colors hover:text-primary/80 hover:underline"
+                {/* Actions */}
+                <div className="flex shrink-0 items-center gap-1" onClick={(e) => e.preventDefault()}>
+                  <button
+                    type="button"
+                    className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    aria-label="E-mail"
+                  >
+                    <Mail className="h-4 w-4" />
+                  </button>
+                  {customer.phone && (
+                    <a
+                      href={`https://wa.me/${customer.phone.replace(/\D/g, '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-lg p-2 text-green-600 transition-colors hover:bg-green-50 hover:text-green-700 dark:hover:bg-green-950"
+                      aria-label="WhatsApp"
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      {[customer.firstName, customer.lastName].filter(Boolean).join(' ') || `Cliente #${customer.id}`}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-foreground">{customer.phone || '-'}</td>
-                  <td className="px-4 py-3 text-sm text-foreground">{customer.document || '-'}</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <ActionIconButton label="Contato">
-                        <Mail className="h-4 w-4" />
-                      </ActionIconButton>
-                      {customer.phone && (
-                        <a
-                          href={`https://wa.me/${customer.phone.replace(/\D/g, '')}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title="WhatsApp"
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-green-600 hover:bg-green-50 hover:text-green-700 transition-colors dark:hover:bg-green-950"
-                        >
-                          <MessageCircle className="h-4 w-4" />
-                        </a>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="mt-6 flex items-center justify-center gap-2 text-xs text-primary">
-        <HelpCircle className="h-3.5 w-3.5" />
-        <a href="#" className="inline-flex items-center gap-1 hover:underline">
-          Mais sobre clientes
-          <ExternalLink className="h-3 w-3" />
-        </a>
-      </div>
-    </div>
+                      <MessageCircle className="h-4 w-4" />
+                    </a>
+                  )}
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </PageContainer>
   );
 }

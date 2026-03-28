@@ -120,7 +120,7 @@ export function BillingClient() {
   const daysLeft = trialDaysLeft(sub?.trialEnd ?? null);
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-6xl mx-auto space-y-8">
+    <div className="p-4 md:p-6 lg:p-8 space-y-8">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-foreground">
           {t('Assinatura e Planos', 'Subscription & Plans')}

@@ -5,10 +5,8 @@ import { motion } from 'framer-motion';
 import {
   ArrowRight,
   BookOpen,
-  Calendar,
   Clock,
   Search,
-  Sparkles,
   Tag,
   Zap,
 } from 'lucide-react';
@@ -41,7 +39,7 @@ const posts = [
     category: 'Guias',
     readTime: '12 min',
     date: '2026-03-01',
-    gradient: 'from-primary to-emerald-400',
+    gradient: 'from-emerald-500 to-teal-500',
     featured: true,
   },
   {
@@ -51,7 +49,7 @@ const posts = [
     category: 'Comparativos',
     readTime: '8 min',
     date: '2026-02-25',
-    gradient: 'from-blue-500 to-indigo-500',
+    gradient: 'from-emerald-500 to-cyan-500',
     featured: false,
   },
   {
@@ -61,7 +59,7 @@ const posts = [
     category: 'Marketing',
     readTime: '7 min',
     date: '2026-02-20',
-    gradient: 'from-violet-500 to-purple-500',
+    gradient: 'from-teal-500 to-emerald-500',
     featured: false,
   },
   {
@@ -111,7 +109,7 @@ const posts = [
     category: 'Marketing',
     readTime: '11 min',
     date: '2026-01-20',
-    gradient: 'from-indigo-500 to-blue-500',
+    gradient: 'from-emerald-600 to-teal-500',
     featured: false,
   },
   {
@@ -138,17 +136,13 @@ export default function BlogPage() {
     .filter((p) => filter === 'Todos' || p.category === filter)
     .filter((p) => !search || p.title.toLowerCase().includes(search.toLowerCase()) || p.excerpt.toLowerCase().includes(search.toLowerCase()));
 
-  function formatDate(d: string) {
-    return new Date(d).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
-  }
-
   return (
     <div className="min-h-screen bg-background text-foreground antialiased">
       {/* -- Navbar -- */}
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/70 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/70 backdrop-blur-xl supports-backdrop-filter:bg-background/60">
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-linear-to-br from-primary to-emerald-400 shadow-lg shadow-primary/25 transition-transform group-hover:scale-105">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-linear-to-br from-emerald-600 to-teal-500 shadow-lg shadow-emerald-500/25 transition-transform group-hover:scale-105">
               <Zap className="h-5 w-5 text-white" fill="white" />
             </div>
             <span className="text-xl font-bold tracking-tight text-foreground">Lojaki</span>
@@ -161,7 +155,7 @@ export default function BlogPage() {
           </div>
           <div className="flex items-center gap-3">
             <Link href="/login" className="hidden md:block rounded-lg px-4 py-2 text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-muted transition-colors">Entrar</Link>
-            <Link href="/signup" className="group inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-primary to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25">
+            <Link href="/signup" className="group inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-emerald-600 to-teal-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25">
               Come�ar gr�tis <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -171,16 +165,16 @@ export default function BlogPage() {
       {/* -- Hero -- */}
       <section className="relative overflow-hidden pt-32 pb-12 md:pt-40 md:pb-16">
         <div className="absolute inset-0 -z-10">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-linear-to-b from-primary/8 via-emerald-100/30 to-transparent rounded-full blur-3xl" />
+          <div className="absolute top-0 left-1/2 h-125 w-200 -translate-x-1/2 rounded-full bg-linear-to-b from-emerald-100/60 via-teal-50/40 to-transparent blur-3xl" />
         </div>
         <div className="mx-auto max-w-4xl text-center px-6">
-          <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0} className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
+          <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0} className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-200/60 bg-emerald-50/80 px-4 py-1.5 text-sm font-medium text-emerald-700">
             <BookOpen className="h-3.5 w-3.5" />
             Blog Lojaki
           </motion.div>
           <motion.h1 variants={fadeUp} initial="hidden" animate="visible" custom={1} className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl">
             Dicas e guias para{' '}
-            <span className="bg-linear-to-r from-primary via-emerald-500 to-teal-500 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-emerald-700 via-emerald-500 to-teal-500 bg-clip-text text-transparent">
               vender mais
             </span>
           </motion.h1>
@@ -197,7 +191,7 @@ export default function BlogPage() {
             <Link href={`/blog/${featured.slug}`} className="group block">
               <div className="relative overflow-hidden rounded-lg border border-border bg-card transition-all hover:shadow-2xl hover:shadow-muted/60">
                 <div className="grid md:grid-cols-2">
-                  <div className={`aspect-[16/10] md:aspect-auto bg-linear-to-br ${featured.gradient} flex items-center justify-center`}>
+                  <div className={`aspect-16/10 md:aspect-auto bg-linear-to-br ${featured.gradient} flex items-center justify-center`}>
                     <BookOpen className="h-20 w-20 text-white/30" />
                   </div>
                   <div className="p-8 md:p-10 flex flex-col justify-center">
@@ -260,7 +254,7 @@ export default function BlogPage() {
             >
               <Link href={`/blog/${post.slug}`} className="group block h-full">
                 <div className="flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card transition-all hover:shadow-xl hover:shadow-muted/80 hover:-translate-y-1">
-                  <div className={`aspect-[16/9] bg-linear-to-br ${post.gradient} flex items-center justify-center`}>
+                  <div className={`aspect-video bg-linear-to-br ${post.gradient} flex items-center justify-center`}>
                     <Tag className="h-10 w-10 text-white/20" />
                   </div>
                   <div className="flex flex-1 flex-col p-5">
@@ -298,7 +292,7 @@ export default function BlogPage() {
           </h2>
           <p className="mt-3 text-muted-foreground">Crie sua loja gr�tis e aplique tudo que aprendeu aqui.</p>
           <div className="mt-6">
-            <Link href="/signup" className="group inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-primary to-emerald-500 px-8 py-4 text-base font-bold text-white shadow-2xl shadow-primary/25 hover:shadow-primary/40 transition-all hover:-translate-y-0.5">
+            <Link href="/signup" className="group inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-emerald-600 to-teal-500 px-8 py-4 text-base font-bold text-white shadow-2xl shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all hover:-translate-y-0.5">
               Come�ar gr�tis agora
               <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Link>

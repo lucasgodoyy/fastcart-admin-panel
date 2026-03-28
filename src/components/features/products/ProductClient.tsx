@@ -32,6 +32,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { PageContainer, PageHeader, EmptyState } from '@/components/admin/page-header';
 import { categoryService, product as productService } from '@/services/catalog';
 import { Category } from '@/types/category';
 import { CreateProductRequest, Product, ProductListFilters } from '@/types/product';
@@ -409,44 +410,48 @@ export function ProductClient() {
   );
 
   return (
-    <div className="p-4 md:p-6 lg:p-8">
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-xl font-bold tracking-tight text-foreground">Produtos</h1>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="gap-2" onClick={handleExportCsv}>
-            <Download className="h-4 w-4" />
-            Exportar CSV
-          </Button>
-          <Button
-            variant="outline"
-            className="gap-2"
-            disabled={isImporting}
-            onClick={() => csvInputRef.current?.click()}
-          >
-            <Upload className="h-4 w-4" />
-            {isImporting ? 'Importando...' : 'Importar CSV'}
-          </Button>
-          <input
-            ref={csvInputRef}
-            type="file"
-            accept=".csv"
-            className="hidden"
-            onChange={handleImportCsv}
-          />
-          <Button variant="outline" className="gap-2" onClick={openFilterDrawer}>
-            <SlidersHorizontal className="h-4 w-4" />
-            Filtrar
-          </Button>
-          <Link href="/admin/products/new">
-            <Button className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
-              <Plus className="h-4 w-4" />
-              Adicionar produto
+    <PageContainer>
+      <PageHeader
+        title="Produtos"
+        description={`${products.length} produtos encontrados`}
+        actions={
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="gap-2" onClick={handleExportCsv}>
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">Exportar CSV</span>
             </Button>
-          </Link>
-        </div>
-      </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              disabled={isImporting}
+              onClick={() => csvInputRef.current?.click()}
+            >
+              <Upload className="h-4 w-4" />
+              <span className="hidden sm:inline">{isImporting ? 'Importando...' : 'Importar CSV'}</span>
+            </Button>
+            <input
+              ref={csvInputRef}
+              type="file"
+              accept=".csv"
+              className="hidden"
+              onChange={handleImportCsv}
+            />
+            <Button variant="outline" size="sm" className="gap-2" onClick={openFilterDrawer}>
+              <SlidersHorizontal className="h-4 w-4" />
+              <span className="hidden sm:inline">Filtrar</span>
+            </Button>
+            <Link href="/admin/products/new">
+              <Button size="sm" className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">Adicionar produto</span>
+              </Button>
+            </Link>
+          </div>
+        }
+      />
 
-      <div className="mb-2 flex items-center gap-2">
+      <div className="flex items-center gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -522,107 +527,105 @@ export function ProductClient() {
 
       <div className="mb-4 text-sm text-muted-foreground">{products.length} produtos</div>
 
-      <div className="overflow-x-auto overflow-hidden rounded-md border border-border bg-card">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-border bg-muted/30 text-left">
-              <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">Produto</th>
-              <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">Estoque</th>
-              <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">Preço</th>
-              <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">Promo</th>
-              <th className="px-4 py-2 text-xs font-medium uppercase text-muted-foreground">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading && (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-sm text-muted-foreground">
-                  Carregando produtos...
-                </td>
-              </tr>
-            )}
+      {/* Loading */}
+      {isLoading && (
+        <div className="space-y-2">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="animate-pulse rounded-xl border border-border bg-card p-4">
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 rounded-md bg-muted" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-48 rounded bg-muted" />
+                  <div className="h-3 w-24 rounded bg-muted" />
+                </div>
+                <div className="h-4 w-16 rounded bg-muted" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
-            {!isLoading && products.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-sm text-muted-foreground">
-                  Nenhum produto encontrado.
-                </td>
-              </tr>
-            )}
+      {/* Empty */}
+      {!isLoading && products.length === 0 && (
+        <EmptyState
+          icon={<Camera className="h-10 w-10" />}
+          title="Nenhum produto encontrado."
+          description="Comece adicionando seu primeiro produto à loja."
+          action={
+            <Link href="/admin/products/new">
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" />
+                Adicionar produto
+              </Button>
+            </Link>
+          }
+        />
+      )}
 
-            {!isLoading &&
-              products.map((product) => (
-                <tr key={product.id} className="border-b border-border transition-colors hover:bg-muted/40">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted">
-                        {product.primaryImageUrl ? (
-                          <img
-                            src={product.primaryImageUrl}
-                            alt={product.name}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <Camera className="h-4 w-4 text-muted-foreground" />
-                        )}
-                      </div>
-                      <div>
-                        <Link
-                          href={`/admin/products/${product.id}`}
-                          className="cursor-pointer text-sm font-medium text-primary transition-colors hover:text-primary/80 hover:underline"
-                        >
-                          {product.name}
-                        </Link>
-                        <div className="text-xs text-muted-foreground">SKU: {product.sku || '-'}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    {product.infiniteStock ? (
-                      <span className="text-muted-foreground">∞ Infinito</span>
-                    ) : (
-                      <span className={product.stock === 0 ? 'text-destructive' : 'text-foreground'}>
-                        {product.stock}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <InlinePriceInput
-                      product={product}
-                      field="price"
-                      onSave={(p, v) => v !== null && handlePriceSave(p, 'price', v)}
-                    />
-                  </td>
-                  <td className="px-4 py-3">
-                    <InlinePriceInput
-                      product={product}
-                      field="salePrice"
-                      onSave={(p, v) => handlePriceSave(p, 'salePrice', v)}
-                    />
-                  </td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <ActionIconButton
-                        label="Duplicar"
-                        onClick={() => handleOpenDuplicate(product)}
-                        disabled={duplicateMutation.isPending}
-                      >
-                        <Copy className="h-4 w-4" />
-                      </ActionIconButton>
-                      <ActionIconButton
-                        label="Eliminar"
-                        onClick={() => handleDelete(product)}
-                        disabled={deleteMutation.isPending}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </ActionIconButton>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
-      </div>
+      {/* Product card list */}
+      {!isLoading && products.length > 0 && (
+        <div className="space-y-2">
+          {products.map((product) => (
+            <div
+              key={product.id}
+              className="group rounded-xl border border-border bg-card p-4 transition-all duration-150 hover:shadow-md hover:border-border/80"
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                {/* Product image */}
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted">
+                  {product.primaryImageUrl ? (
+                    <img src={product.primaryImageUrl} alt={product.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <Camera className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
+
+                {/* Name + SKU */}
+                <div className="min-w-0 flex-1">
+                  <Link
+                    href={`/admin/products/${product.id}`}
+                    className="text-sm font-medium text-primary transition-colors hover:text-primary/80 hover:underline"
+                  >
+                    {product.name}
+                  </Link>
+                  <p className="text-xs text-muted-foreground">SKU: {product.sku || '-'}</p>
+                </div>
+
+                {/* Stock */}
+                <div className="shrink-0 sm:w-20 text-sm">
+                  {product.infiniteStock ? (
+                    <span className="text-muted-foreground">∞</span>
+                  ) : (
+                    <span className={product.stock === 0 ? 'text-destructive font-medium' : 'text-foreground'}>
+                      {product.stock} <span className="text-xs text-muted-foreground">un.</span>
+                    </span>
+                  )}
+                </div>
+
+                {/* Price */}
+                <div className="shrink-0 sm:w-28">
+                  <InlinePriceInput product={product} field="price" onSave={(p, v) => v !== null && handlePriceSave(p, 'price', v)} />
+                </div>
+
+                {/* Promo price */}
+                <div className="shrink-0 sm:w-28">
+                  <InlinePriceInput product={product} field="salePrice" onSave={(p, v) => handlePriceSave(p, 'salePrice', v)} />
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-2 shrink-0">
+                  <ActionIconButton label="Duplicar" onClick={() => handleOpenDuplicate(product)} disabled={duplicateMutation.isPending}>
+                    <Copy className="h-4 w-4" />
+                  </ActionIconButton>
+                  <ActionIconButton label="Eliminar" onClick={() => handleDelete(product)} disabled={deleteMutation.isPending}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </ActionIconButton>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="mt-6 flex items-center justify-center gap-2 text-xs text-primary">
         <HelpCircle className="h-3.5 w-3.5" />
@@ -760,6 +763,6 @@ export function ProductClient() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 }

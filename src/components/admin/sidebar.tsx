@@ -162,14 +162,6 @@ const navigation: NavSection[] = [
   {
     title: t("Ferramentas", "Tools"),
     items: [
-      { label: t("Tutoriais", "Tutorials"), href: "/admin/tutorials", icon: <GraduationCap className="h-4.5 w-4.5" />, children: [
-        { label: t("Primeiros passos", "Getting Started"), href: "/admin/tutorials" },
-        { label: t("Produtos", "Products"), href: "/admin/tutorials/products" },
-        { label: t("Pedidos", "Orders"), href: "/admin/tutorials/orders" },
-        { label: t("Marketing", "Marketing"), href: "/admin/tutorials/marketing" },
-        { label: t("Integrações", "Integrations"), href: "/admin/tutorials/integrations" },
-        { label: t("Pagamentos", "Payments"), href: "/admin/tutorials/payments" },
-      ]},
       { label: t("FAQ", "FAQ"), href: "/admin/faq", icon: <HelpCircle className="h-4.5 w-4.5" /> },
       { label: t("Notas Fiscais", "Invoices"), href: "/admin/nfe", icon: <FileText className="h-4.5 w-4.5" /> },
       { label: t("Integrações", "Integrations"), href: "/admin/integrations", icon: <Plug className="h-4.5 w-4.5" />, children: [
@@ -391,7 +383,7 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
                             event.preventDefault()
                             event.stopPropagation()
 
-                            if (item.label === t("Loja virtual", "Storefront")) {
+                            if (item.label === t("Loja Virtual", "Online Store")) {
                               openStorefront(salesChannelSettings?.channelLinks?.onlineStore)
                               return
                             }
@@ -469,6 +461,22 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
+                  href="/admin/tutorials"
+                  className={cn(
+                    "flex items-center justify-center rounded-lg p-2.5 transition-all duration-150",
+                    pathname.startsWith("/admin/tutorials")
+                      ? "bg-sidebar-accent text-sidebar-primary font-semibold"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent"
+                  )}
+                >
+                  <GraduationCap className="h-4.5 w-4.5 text-sidebar-muted" />
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right" sideOffset={8}>{t("Central de ajuda", "Help Center")}</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
                   href="/admin/billing"
                   className={cn(
                     "flex items-center justify-center rounded-lg p-2.5 transition-all duration-150",
@@ -509,6 +517,18 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
           </>
         ) : (
           <>
+            <Link
+              href="/admin/tutorials"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] transition-all duration-150",
+                pathname.startsWith("/admin/tutorials")
+                  ? "bg-sidebar-accent text-sidebar-primary font-semibold"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent"
+              )}
+            >
+              <GraduationCap className="h-4.5 w-4.5 text-sidebar-muted" />
+              <span className="flex-1">{t("Central de ajuda", "Help Center")}</span>
+            </Link>
             <Link
               href="/admin/billing"
               className={cn(

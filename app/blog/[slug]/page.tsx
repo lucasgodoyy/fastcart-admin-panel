@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, BookOpen, Calendar, Clock, Zap } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calendar, Clock, Zap } from 'lucide-react';
 import { useParams } from 'next/navigation';
 
 const fadeUp = {
@@ -46,7 +46,7 @@ const articles: Record<string, { title: string; category: string; readTime: stri
     category: 'Comparativos',
     readTime: '8 min',
     date: '2026-02-25',
-    gradient: 'from-blue-500 to-indigo-500',
+    gradient: 'from-emerald-600 to-teal-500',
     content: `
       <h2>Panorama do mercado em 2026</h2>
       <p>O mercado de e-commerce no Brasil n�o para de crescer. Escolher a plataforma certa � fundamental para o sucesso do seu neg�cio online.</p>
@@ -87,7 +87,7 @@ export default function BlogPostPage() {
   return (
     <div className="min-h-screen bg-background text-foreground antialiased">
       {/* Navbar */}
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/70 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/70 backdrop-blur-xl supports-backdrop-filter:bg-background/60">
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
           <Link href="/" className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-linear-to-br from-primary to-emerald-400 shadow-lg shadow-primary/25">

@@ -35,6 +35,7 @@ import { Brand } from '@/types/brand';
 import { Category } from '@/types/category';
 import { CreateProductRequest, Product, ProductImage } from '@/types/product';
 import { GeneratedVariant, ProductVariations, VariantOption } from './ProductVariations';
+import { FieldHelper } from '@/components/shared/field-helper';
 
 /* ────────────────────────────────────────────────────────────────── */
 /*  Types                                                             */
@@ -629,7 +630,13 @@ export function ProductFormClient(props: ProductFormClientProps) {
           <h2 className="mb-4 text-lg font-semibold text-foreground">Preço e promoção</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm text-muted-foreground">Preço *</label>
+              <label className="mb-1 block text-sm text-muted-foreground">
+                Preço *
+                <FieldHelper
+                  content="Este é o valor principal exibido na loja e usado como base para cálculos de desconto e margem."
+                  learnMoreHref="/admin/tutorials/products"
+                />
+              </label>
               <Input
                 type="number"
                 min="0"
@@ -641,6 +648,10 @@ export function ProductFormClient(props: ProductFormClientProps) {
             <div>
               <label className="mb-1 block text-sm text-muted-foreground">
                 Preço promocional
+                <FieldHelper
+                  content="Defina um valor menor para criar oferta. Se vazio, o produto será vendido pelo preço principal."
+                  learnMoreHref="/admin/tutorials/marketing"
+                />
                 {discountPercent != null && (
                   <span className="ml-2 text-xs font-semibold text-emerald-600">
                     &minus;{discountPercent}% de desconto
@@ -658,6 +669,10 @@ export function ProductFormClient(props: ProductFormClientProps) {
             <div>
               <label className="mb-1 block text-sm text-muted-foreground">
                 Preço comparativo
+                <FieldHelper
+                  content="Mostra o preço de referência riscado para evidenciar economia em promoções."
+                  learnMoreHref="/admin/tutorials/marketing"
+                />
               </label>
               <Input
                 type="number"
@@ -670,6 +685,10 @@ export function ProductFormClient(props: ProductFormClientProps) {
             <div>
               <label className="mb-1 block text-sm text-muted-foreground">
                 Custo por unidade
+                <FieldHelper
+                  content="Use o custo real para acompanhar sua margem de lucro e evitar promoções abaixo do custo."
+                  learnMoreHref="/admin/tutorials/products"
+                />
               </label>
               <Input
                 type="number"
@@ -736,6 +755,10 @@ export function ProductFormClient(props: ProductFormClientProps) {
             <div className="mt-3 max-w-xs">
               <label className="mb-1 block text-sm text-muted-foreground">
                 Quantidade em estoque
+                <FieldHelper
+                  content="Quantidade disponível para venda quando o estoque for limitado. Ao chegar em zero, o item pode ficar indisponível."
+                  learnMoreHref="/admin/tutorials/products"
+                />
               </label>
               <Input
                 type="number"

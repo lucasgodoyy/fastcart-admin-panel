@@ -513,3 +513,32 @@ export interface ErrorLogStats {
   errorCount: number;
   warnCount: number;
 }
+
+// ── Landing Config ─────────────────────────────────────────
+export interface LandingConfig {
+  id: number;
+  announcementActive: boolean;
+  announcementText: string | null;
+  announcementLink: string | null;
+  announcementBgColor: string | null;
+  heroTitle: string | null;
+  heroSubtitle: string | null;
+  heroTypewriterPhrases: string | null;
+  heroCtaText: string | null;
+  heroCtaLink: string | null;
+  heroVideoUrl: string | null;
+  statsStoresCount: number | null;
+  statsProductsCount: number | null;
+  statsUptime: string | null;
+  testimonials: string | null;
+  showcaseStores: string | null;
+  footerInstagram: string | null;
+  footerYoutube: string | null;
+  footerLinkedin: string | null;
+  footerTiktok: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  seoOgImage: string | null;
+}
+
+export type LandingConfigUpdateRequest = Partial<Omit<LandingConfig, 'id'>>;

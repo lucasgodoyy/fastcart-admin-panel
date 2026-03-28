@@ -126,38 +126,46 @@ const DEFAULT_ATTRIBUTES_BY_NICHE: Record<string, ProductAttributeSetting[]> = {
   ],
 };
 
-const THEME_PRESETS = [
+const THEME_PRESETS: { id: string; name: string; templateId: string; storeNiche: string; layoutPreset: string; status: 'live' | 'draft' }[] = [
   {
-    id: 'morelia',
-    name: 'Morelia',
+    id: 'clean',
+    name: 'Clean',
     templateId: 'template-1',
-    storeNiche: 'fashion',
-    layoutPreset: 'fashion-classic',
-    status: 'live' as const,
+    storeNiche: 'general',
+    layoutPreset: 'clean-universal',
+    status: 'live',
   },
   {
-    id: 'patagonia',
-    name: 'Patagonia',
+    id: 'nova',
+    name: 'Nova',
     templateId: 'template-2',
-    storeNiche: 'fashion',
-    layoutPreset: 'fashion-editorial',
-    status: 'draft' as const,
+    storeNiche: 'brand',
+    layoutPreset: 'nova-brand',
+    status: 'live',
   },
   {
-    id: 'aurora',
-    name: 'Aurora',
+    id: 'vogue',
+    name: 'Vogue',
     templateId: 'template-3',
-    storeNiche: 'electronics',
-    layoutPreset: 'tech-modern',
-    status: 'live' as const,
+    storeNiche: 'fashion',
+    layoutPreset: 'vogue-editorial',
+    status: 'live',
   },
   {
-    id: 'glamour',
-    name: 'Glamour',
+    id: 'boost',
+    name: 'Boost',
     templateId: 'template-4',
-    storeNiche: 'beauty',
-    layoutPreset: 'beauty-luxury',
-    status: 'live' as const,
+    storeNiche: 'dropshipping',
+    layoutPreset: 'boost-conversion',
+    status: 'live',
+  },
+  {
+    id: 'bulk',
+    name: 'Bulk',
+    templateId: 'template-5',
+    storeNiche: 'catalog',
+    layoutPreset: 'bulk-catalog',
+    status: 'live',
   },
 ];
 
@@ -775,7 +783,7 @@ function OnlineStorePagesEditor({
     <div className="p-4 md:p-6 lg:p-8">
       <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Páginas</h1>
+          <h1 className="text-xl font-bold tracking-tight text-foreground">Páginas</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Fale sobre sua marca e compartilhe informações importantes com seus clientes.
           </p>

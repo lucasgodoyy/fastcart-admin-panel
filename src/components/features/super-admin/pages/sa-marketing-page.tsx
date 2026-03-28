@@ -50,7 +50,7 @@ import { toast } from "sonner";
 const campaignStatusMap: Record<string, { label: string; color: string }> = {
   ACTIVE: { label: "Ativo", color: "success" },
   SCHEDULED: { label: "Agendado", color: "info" },
-  COMPLETED: { label: "Conclu�do", color: "accent" },
+  COMPLETED: { label: "ConcluÃ­do", color: "accent" },
   PAUSED: { label: "Pausado", color: "warning" },
   DRAFT: { label: "Rascunho", color: "accent" },
 };
@@ -67,12 +67,12 @@ export function SaMarketingPage() {
   const queryClient = useQueryClient();
   const [tab, setTab] = useTabFromPath("/super-admin/marketing", { campaigns: "", banners: "banners" }, "campaigns");
 
-  /* � Campaigns state � */
+  /* Â Campaigns state Â */
   const [campaignOpen, setCampaignOpen] = useState(false);
   const [campaignForm, setCampaignForm] = useState(emptyCampaign);
   const [editingCampaignId, setEditingCampaignId] = useState<number | null>(null);
 
-  /* � Banners state � */
+  /* Â Banners state Â */
   const [bannerOpen, setBannerOpen] = useState(false);
   const [bannerForm, setBannerForm] = useState(emptyBanner);
 
@@ -176,7 +176,7 @@ export function SaMarketingPage() {
     <div className="space-y-8">
       <SaPageHeader
         title="Marketing"
-        description="Campanhas, banners e promo��es da plataforma"
+        description="Campanhas, banners e promoÃ§Ãµes da plataforma"
         actions={
           tab === "campaigns" ? (
             <Button onClick={openNewCampaign} className="bg-linear-to-r from-[hsl(var(--sa-accent))] to-[hsl(var(--sa-info))] text-white rounded-lg gap-2 text-[12px] shadow-lg shadow-[hsl(var(--sa-accent))]/25 hover:opacity-90">
@@ -237,7 +237,7 @@ export function SaMarketingPage() {
                           {(campaign.startDate || campaign.endDate) && (
                             <span className="text-[11px] text-[hsl(var(--sa-text-muted))] flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
-                              {campaign.startDate ?? "�"} � {campaign.endDate ?? "�"}
+                              {campaign.startDate ?? "Â"} Â {campaign.endDate ?? "Â"}
                             </span>
                           )}
                           {campaign.storeName && (
@@ -354,7 +354,7 @@ export function SaMarketingPage() {
                     <SelectItem value="DISCOUNT">Desconto</SelectItem>
                     <SelectItem value="SEASONAL">Sazonal</SelectItem>
                     <SelectItem value="FLASH_SALE">Flash Sale</SelectItem>
-                    <SelectItem value="LAUNCH">Lan�amento</SelectItem>
+                    <SelectItem value="LAUNCH">LanÃ§amento</SelectItem>
                     <SelectItem value="LOYALTY">Fidelidade</SelectItem>
                     <SelectItem value="OTHER">Outro</SelectItem>
                   </SelectContent>
@@ -374,9 +374,9 @@ export function SaMarketingPage() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-[12px] font-medium text-[hsl(var(--sa-text))]">Descri��o</label>
+              <label className="text-[12px] font-medium text-[hsl(var(--sa-text))]">DescriÃ§Ã£o</label>
               <textarea
-                placeholder="Descri��o da campanha..."
+                placeholder="DescriÃ§Ã£o da campanha..."
                 value={campaignForm.description}
                 onChange={(e) => setCampaignForm(p => ({ ...p, description: e.target.value }))}
                 className={`w-full h-20 p-3 text-xs font-mono bg-[hsl(var(--sa-bg))] border border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-[hsl(var(--sa-accent))]`}
@@ -384,7 +384,7 @@ export function SaMarketingPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-[12px] font-medium text-[hsl(var(--sa-text))]">P�blico-alvo</label>
+                <label className="text-[12px] font-medium text-[hsl(var(--sa-text))]">PÃºblico-alvo</label>
                 <Select value={campaignForm.targetAudience} onValueChange={(v) => setCampaignForm(p => ({ ...p, targetAudience: v }))}>
                   <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -432,9 +432,9 @@ export function SaMarketingPage() {
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div className="space-y-1.5">
-              <label className="text-[12px] font-medium text-[hsl(var(--sa-text))]">T�tulo *</label>
+              <label className="text-[12px] font-medium text-[hsl(var(--sa-text))]">TÃ­tulo *</label>
               <Input
-                placeholder="Ex: Promo��o de Ver�o"
+                placeholder="Ex: PromoÃ§Ã£o de VerÃ£o"
                 value={bannerForm.title}
                 onChange={(e) => setBannerForm(p => ({ ...p, title: e.target.value }))}
                 className={inputCls}
@@ -460,14 +460,14 @@ export function SaMarketingPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-[12px] font-medium text-[hsl(var(--sa-text))]">Posi��o</label>
+                <label className="text-[12px] font-medium text-[hsl(var(--sa-text))]">PosiÃ§Ã£o</label>
                 <Select value={bannerForm.position} onValueChange={(v) => setBannerForm(p => ({ ...p, position: v }))}>
                   <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="HOME_TOP">Topo da Home</SelectItem>
                     <SelectItem value="HOME_MIDDLE">Meio da Home</SelectItem>
                     <SelectItem value="SIDEBAR">Sidebar</SelectItem>
-                    <SelectItem value="FOOTER">Rodap�</SelectItem>
+                    <SelectItem value="FOOTER">RodapÃ©</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

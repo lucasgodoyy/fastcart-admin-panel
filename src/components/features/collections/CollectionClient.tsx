@@ -119,11 +119,11 @@ export function CollectionClient() {
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 p-6">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Coleções</h1>
+          <h1 className="text-xl font-bold tracking-tight text-foreground">Coleções</h1>
           <p className="text-sm text-muted-foreground">
             Agrupe produtos em coleções manuais ou automáticas.
           </p>

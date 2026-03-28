@@ -94,7 +94,7 @@ export function MessagesClient() {
     queryFn: chatService.getStats,
   });
 
-  // Conversations list � TEAM channel only (Lojista ? Equipe)
+  // Conversations list Â TEAM channel only (Lojista ? Equipe)
   const { data: convData, isLoading: loadingConvs } = useQuery<PaginatedResult<Conversation>>({
     queryKey: ['chat-conversations', statusFilter],
     queryFn: () =>
@@ -201,7 +201,7 @@ export function MessagesClient() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-foreground">Mensagens da Equipe</h1>
-          <p className="text-sm text-muted-foreground">Comunica��o interna entre os membros da sua loja</p>
+          <p className="text-sm text-muted-foreground">ComunicaÃ§Ã£o interna entre os membros da sua loja</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
@@ -212,7 +212,7 @@ export function MessagesClient() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Iniciar conversa � Equipe</DialogTitle>
+              <DialogTitle>Iniciar conversa Â Equipe</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-2">
               <div className="space-y-1.5">
@@ -323,7 +323,7 @@ export function MessagesClient() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-medium text-muted-foreground">N�o lidas</CardTitle>
+            <CardTitle className="text-xs font-medium text-muted-foreground">NÃ£o lidas</CardTitle>
             <Clock className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent><div className="text-2xl font-bold text-orange-600">{stats?.unreadMessages ?? 0}</div></CardContent>
@@ -495,7 +495,7 @@ export function MessagesClient() {
                     className="w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50"
                   />
                   <div className="flex items-center justify-between mt-1">
-                    <span className="text-[10px] text-muted-foreground">Enter para enviar � Shift+Enter para nova linha</span>
+                    <span className="text-[10px] text-muted-foreground">Enter para enviar Â· Shift+Enter para nova linha</span>
                     <Button
                       size="sm"
                       className="h-7 gap-1.5 px-3 text-xs"

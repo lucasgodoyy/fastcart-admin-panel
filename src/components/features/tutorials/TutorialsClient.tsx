@@ -308,25 +308,18 @@ const featureExplanations = [
 
 export function TutorialsClient() {
   return (
-    <div className="mx-auto max-w-5xl space-y-8 p-6 md:p-8">
+    <div className="p-4 md:p-6 lg:p-8 space-y-8">
       {/* Header */}
-      <div className="rounded-lg border border-border bg-card/60 px-5 py-4">
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-            <GraduationCap className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-foreground">
-              {t('Central de Ajuda e Tutoriais', 'Help Center & Tutorials')}
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {t(
-                'Guias objetivos para configurar rotinas operacionais, catálogo, vendas e integrações.',
-                'Objective guides to set up operations, catalog, sales, and integrations.'
-              )}
-            </p>
-          </div>
-        </div>
+      <div>
+        <h1 className="text-xl font-bold tracking-tight text-foreground">
+          {t('Central de Ajuda e Tutoriais', 'Help Center & Tutorials')}
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {t(
+            'Guias objetivos para configurar rotinas operacionais, catálogo, vendas e integrações.',
+            'Objective guides to set up operations, catalog, sales, and integrations.'
+          )}
+        </p>
       </div>
 
       {/* Category Cards */}

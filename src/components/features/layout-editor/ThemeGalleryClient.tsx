@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import { t } from '@/lib/admin-language';
 
 /* ----------------------------------------------
- * Template catalog — display available themes
+ * Template catalog ï¿½ display available themes
  * ---------------------------------------------- */
 const TEMPLATES: Array<{
   id: string;
@@ -26,34 +26,42 @@ const TEMPLATES: Array<{
 }> = [
   {
     id: 'template-1',
-    name: 'Morelia',
-    description: 'Template clássico para moda. Layout limpo com hero banner, grade 4 colunas de produtos e carrinho lateral.',
+    name: 'Clean',
+    description: 'Tema gratuito e universal. Fundo branco, grid simples, banner bÃ¡sico, produto padrÃ£o. Funciona pra tudo.',
     preview: '/templates/template-1-preview.png',
-    niches: ['fashion', 'beauty', 'watches-accessories'],
+    niches: ['general', 'all'],
     status: 'available',
   },
   {
     id: 'template-2',
-    name: 'Patagonia',
-    description: 'Template editorial para marcas premium. Hero full-screen, logo centralizado, grade 2 colunas com imagens grandes.',
+    name: 'Nova',
+    description: 'Tema de marca forte. Hero com vÃ­deo, tipografia impactante, seÃ§Ãµes de storytelling. Ideal para marcas prÃ³prias.',
     preview: '/templates/template-2-preview.png',
-    niches: ['fashion', 'lifestyle', 'premium'],
+    niches: ['brand', 'dtc', 'premium'],
     status: 'available',
   },
   {
     id: 'template-3',
-    name: 'Aurora',
-    description: 'Template moderno para eletrônicos e tech. Barra de promoções, grade 3 colunas com badges de specs, carrinho popup.',
+    name: 'Vogue',
+    description: 'Tema editorial para moda. Imagens enormes, grid 2 colunas, visual elegante e clean. O nicho que mais paga.',
     preview: '/templates/template-3-preview.png',
-    niches: ['electronics', 'tech', 'gaming'],
+    niches: ['fashion', 'accessories', 'jewelry'],
     status: 'available',
   },
   {
     id: 'template-4',
-    name: 'Glamour',
-    description: 'Template luxuoso para beleza e cosméticos. Hero full-screen, logo centralizado, grade 4 colunas, carrinho lateral, estilo Kylie Cosmetics.',
+    name: 'Boost',
+    description: 'Tema focado em conversÃ£o. CTAs fortes, urgÃªncia, reviews, badges de confianÃ§a. Feito pra vender muito.',
     preview: '/templates/template-4-preview.png',
-    niches: ['beauty', 'cosmetics', 'skincare', 'wellness'],
+    niches: ['dropshipping', 'conversion', 'single-product'],
+    status: 'available',
+  },
+  {
+    id: 'template-5',
+    name: 'Bulk',
+    description: 'Tema catÃ¡logo para lojas grandes. Filtro lateral forte, grid denso, navegaÃ§Ã£o rÃ¡pida, carrinho pÃ¡gina inteira.',
+    preview: '/templates/template-5-preview.png',
+    niches: ['catalog', 'wholesale', 'multi-category'],
     status: 'available',
   },
 ];
@@ -116,7 +124,7 @@ export function ThemeGalleryClient() {
         <div>
           <h1 className="text-xl font-bold tracking-tight text-foreground">Tema e Layout</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Personalize o visual da sua loja. Escolha um template e edite cada seção.
+            Personalize o visual da sua loja. Escolha um template e edite cada seï¿½ï¿½o.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -191,7 +199,7 @@ export function ThemeGalleryClient() {
 
       {/* Template gallery */}
       <div>
-        <h2 className="mb-4 text-lg font-semibold">Templates disponíveis</h2>
+        <h2 className="mb-4 text-lg font-semibold">Templates disponï¿½veis</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {TEMPLATES.map((template) => {
             const isCurrent = template.id === currentTemplateId;

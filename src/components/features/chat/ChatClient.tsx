@@ -42,6 +42,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { PageContainer, PageHeader } from '@/components/admin/page-header';
 
 const statusFilters = [
   { value: 'ALL', label: 'Todos' },
@@ -148,22 +149,21 @@ export function ChatClient() {
   const selectedConv = conversations.find((c) => c.id === selectedId);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground">Chat</h1>
-          <p className="text-sm text-muted-foreground">
-            Central de mensagens com clientes
-          </p>
-        </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="gap-1.5">
-              <Plus className="h-4 w-4" />
-              Nova conversa
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
+    <PageContainer>
+      <PageHeader
+        title="Chat"
+        description="Central de mensagens com clientes"
+        actions={
+          <Button size="sm" className="gap-1.5" onClick={() => setDialogOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Nova conversa
+          </Button>
+        }
+      />
+
+      {/* Create dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
             <DialogHeader>
               <DialogTitle>Iniciar conversa</DialogTitle>
             </DialogHeader>
@@ -209,7 +209,6 @@ export function ChatClient() {
             </div>
           </DialogContent>
         </Dialog>
-      </div>
 
       {/* Stats bar */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -420,6 +419,6 @@ export function ChatClient() {
           )}
         </Card>
       </div>
-    </div>
+    </PageContainer>
   );
 }

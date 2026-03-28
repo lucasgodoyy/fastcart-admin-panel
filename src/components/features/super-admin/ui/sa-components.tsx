@@ -117,7 +117,7 @@ export function SaPageHeader({ title, description, actions }: { title: string; d
 }
 
 /* ------ Glass Card ------ */
-export function SaCard({ children, className }: { children: React.ReactNode; className?: string }) {
+export function SaCard({ children, className, title, subtitle }: { children: React.ReactNode; className?: string; title?: string; subtitle?: string }) {
   return (
     <motion.div
       variants={fadeInUp}
@@ -126,6 +126,12 @@ export function SaCard({ children, className }: { children: React.ReactNode; cla
         className
       )}
     >
+      {title && (
+        <div className="mb-4">
+          <h3 className="text-base font-semibold text-[hsl(var(--sa-text))]">{title}</h3>
+          {subtitle && <p className="mt-1 text-sm text-[hsl(var(--sa-text-secondary))]">{subtitle}</p>}
+        </div>
+      )}
       {children}
     </motion.div>
   );

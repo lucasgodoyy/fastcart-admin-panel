@@ -16,10 +16,12 @@ import {
   Tag,
   Loader2,
   Download,
+  ShoppingBag,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { PageContainer, PageHeader, StatCard, EmptyState } from '@/components/admin/page-header';
 import apiClient from '@/lib/api';
 import orderService from '@/services/sales/orderService';
 import shippingLabelsService from '@/services/shippingLabelsService';
@@ -121,13 +123,7 @@ export function OrderListClient() {
     const term = search.trim().toLowerCase();
     if (term) {
       result = result.filter((o) => {
-        const values = [
-          `#${o.id}`,
-          o.customerName,
-          o.customerEmail,
-          o.paymentStatus,
-          o.status,
-        ]
+        const values = [`#${o.id}`, o.customerName, o.customerEmail, o.paymentStatus, o.status]
           .filter(Boolean)
           .join(' ')
           .toLowerCase();
@@ -148,26 +144,21 @@ export function OrderListClient() {
   ];
 
   return (
-    <div className="p-4 md:p-6 lg:p-8">
-      {/* Header */}
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground">
-            {t('Pedidos', 'Orders')}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t('Gerencie todos os pedidos da sua loja.', 'Manage all orders for your store.')}
-          </p>
-        </div>
-        <Button variant="outline" size="sm" className="gap-1.5" disabled={exporting} onClick={handleExportCsv}>
-          {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-          {t('Exportar CSV', 'Export CSV')}
-        </Button>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title={t('Pedidos', 'Orders')}
+        description={t('Gerencie todos os pedidos da sua loja.', 'Manage all orders for your store.')}
+        actions={
+          <Button variant="outline" size="sm" className="gap-1.5" disabled={exporting} onClick={handleExportCsv}>
+            {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+            {t('Exportar CSV', 'Export CSV')}
+          </Button>
+        }
+      />
 
       {/* KPI Cards */}
       {stats && (
-        <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <StatCard
             icon={<Package className="h-5 w-5 text-blue-600" />}
             label={t('Total Pedidos', 'Total Orders')}
@@ -192,7 +183,7 @@ export function OrderListClient() {
       )}
 
       {/* Tabs */}
-      <div className="mb-4 flex items-center gap-1 overflow-x-auto border-b border-border">
+      <div className="flex items-center gap-1 overflow-x-auto border-b border-border">
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -212,74 +203,83 @@ export function OrderListClient() {
       </div>
 
       {/* Search */}
-      <div className="mb-4 flex items-center gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={t('Buscar por #pedido, cliente ou email...', 'Search by #order, customer or email...')}
-            className="pl-9"
-          />
-        </div>
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={t('Buscar por #pedido, cliente ou email...', 'Search by #order, customer or email...')}
+          className="pl-9"
+        />
       </div>
 
       {/* Results count */}
-      <div className="mb-2 text-sm text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         {filteredOrders.length} {t('pedidos', 'orders')}
-      </div>
+      </p>
 
-      {/* Table */}
-      <div className="overflow-hidden rounded-md border border-border bg-card">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-border bg-muted/30 text-left">
-              <th className="px-4 py-2.5 text-xs font-medium uppercase text-muted-foreground">#</th>
-              <th className="px-4 py-2.5 text-xs font-medium uppercase text-muted-foreground">{t('Cliente', 'Customer')}</th>
-              <th className="px-4 py-2.5 text-xs font-medium uppercase text-muted-foreground">{t('Status', 'Status')}</th>
-              <th className="px-4 py-2.5 text-xs font-medium uppercase text-muted-foreground">{t('Pagamento', 'Payment')}</th>
-              <th className="px-4 py-2.5 text-xs font-medium uppercase text-muted-foreground">{t('Total', 'Total')}</th>
-              <th className="px-4 py-2.5 text-xs font-medium uppercase text-muted-foreground">{t('Envio', 'Shipping')}</th>
-              <th className="px-4 py-2.5 text-xs font-medium uppercase text-muted-foreground">{t('Data', 'Date')}</th>
-              <th className="px-4 py-2.5 text-xs font-medium uppercase text-muted-foreground"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading && (
-              <tr>
-                <td colSpan={8} className="px-4 py-12 text-center text-sm text-muted-foreground">
-                  {t('Carregando pedidos...', 'Loading orders...')}
-                </td>
-              </tr>
-            )}
-            {!isLoading && filteredOrders.length === 0 && (
-              <tr>
-                <td colSpan={8} className="px-4 py-12 text-center text-sm text-muted-foreground">
-                  {t('Nenhum pedido encontrado.', 'No orders found.')}
-                </td>
-              </tr>
-            )}
-            {filteredOrders.map((order) => {
-              const sc = statusConfig[order.status] || statusConfig.PENDING;
-              return (
-                <tr key={order.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
-                  <td className="px-4 py-3 text-sm font-medium text-foreground">
-                    #{order.id}
+      {/* Loading */}
+      {isLoading && (
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="animate-pulse rounded-xl border border-border bg-card p-4">
+              <div className="flex items-center gap-4">
+                <div className="h-6 w-16 rounded bg-muted" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-40 rounded bg-muted" />
+                  <div className="h-3 w-24 rounded bg-muted" />
+                </div>
+                <div className="h-5 w-20 rounded bg-muted" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Empty */}
+      {!isLoading && filteredOrders.length === 0 && (
+        <EmptyState
+          icon={<ShoppingBag className="h-10 w-10" />}
+          title={t('Nenhum pedido encontrado', 'No orders found')}
+          description={t('Os pedidos da sua loja aparecerão aqui.', 'Your store orders will appear here.')}
+        />
+      )}
+
+      {/* Order card list */}
+      {!isLoading && filteredOrders.length > 0 && (
+        <div className="space-y-2">
+          {filteredOrders.map((order) => {
+            const sc = statusConfig[order.status] || statusConfig.PENDING;
+            return (
+              <div
+                key={order.id}
+                className="group rounded-xl border border-border bg-card p-4 transition-all duration-150 hover:shadow-md hover:border-border/80"
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                  {/* Order ID + origin */}
+                  <div className="flex items-center gap-2 sm:w-24 shrink-0">
+                    <span className="text-sm font-semibold text-foreground">#{order.id}</span>
                     {order.orderOrigin === 'POS' && (
-                      <Badge variant="outline" className="ml-1.5 text-[10px] px-1.5 py-0">PDV</Badge>
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">PDV</Badge>
                     )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="text-sm font-medium text-foreground">{order.customerName || '—'}</div>
-                    <div className="text-xs text-muted-foreground">{order.customerEmail || ''}</div>
-                  </td>
-                  <td className="px-4 py-3">
+                  </div>
+
+                  {/* Customer info */}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {order.customerName || '—'}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {order.customerEmail || ''}
+                    </p>
+                  </div>
+
+                  {/* Status badges */}
+                  <div className="flex flex-wrap items-center gap-2">
                     <Badge variant={sc.variant} className="gap-1 text-xs">
                       {sc.icon}
                       {sc.label}
                     </Badge>
-                  </td>
-                  <td className="px-4 py-3">
                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
                       order.paymentStatus.toLowerCase() === 'paid'
                         ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
@@ -287,93 +287,53 @@ export function OrderListClient() {
                     }`}>
                       {paymentStatusLabel(order.paymentStatus)}
                     </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm font-medium text-foreground">
-                    {formatCurrency(order.totalAmount, order.currency)}
-                  </td>
-                  <td className="px-4 py-3">
-                    {order.trackingCode ? (
-                      <div>
-                        <span className="font-mono text-xs text-foreground">{order.trackingCode}</span>
-                        {order.shippingCarrier && (
-                          <div className="text-xs text-muted-foreground">{order.shippingCarrier}</div>
-                        )}
-                      </div>
-                    ) : order.paymentStatus?.toLowerCase() === 'paid' && order.status !== 'CANCELLED' && order.status !== 'DELIVERED' ? (
-                      <Badge variant="outline" className="text-xs gap-1">
-                        <Clock className="h-3 w-3" />
-                        {t('Aguardando', 'Awaiting')}
-                      </Badge>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">—</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">
-                    {formatDate(order.createdAt)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-1">
-                      {order.paymentStatus?.toLowerCase() === 'paid' &&
-                        !order.shippingLabelId &&
-                        order.status !== 'CANCELLED' &&
-                        order.status !== 'DELIVERED' && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-1 text-xs h-7 px-2"
-                          title={t('Gerar Etiqueta no Melhor Envio', 'Generate Shipping Label')}
-                          disabled={generatingLabelId === order.id}
-                          onClick={() => {
-                            setGeneratingLabelId(order.id);
-                            generateLabelMutation.mutate(order.id);
-                          }}
-                        >
-                          {generatingLabelId === order.id ? (
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          ) : (
-                            <Tag className="h-3.5 w-3.5" />
-                          )}
-                          <span className="hidden sm:inline">{t('Etiqueta', 'Label')}</span>
-                        </Button>
-                      )}
-                      {order.shippingLabelId && (
-                        <Link href="/admin/shipping">
-                          <Button variant="ghost" size="sm" className="gap-1 text-xs h-7 px-2 text-green-600 hover:text-green-700">
-                            <Tag className="h-3.5 w-3.5" />
-                            <span className="hidden sm:inline">{t('Ver Etiqueta', 'View Label')}</span>
-                          </Button>
-                        </Link>
-                      )}
-                      <Link href={`/admin/sales/${order.id}`}>
-                        <Button variant="ghost" size="sm" className="gap-1.5 text-xs">
-                          <Eye className="h-3.5 w-3.5" />
-                          {t('Ver', 'View')}
-                        </Button>
-                      </Link>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
+                  </div>
 
-function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-border bg-card p-4">
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted/50">
-          {icon}
+                  {/* Amount */}
+                  <div className="text-right sm:w-28 shrink-0">
+                    <p className="text-sm font-semibold text-foreground">
+                      {formatCurrency(order.totalAmount, order.currency)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{formatDate(order.createdAt)}</p>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-1 shrink-0">
+                    {order.paymentStatus?.toLowerCase() === 'paid' &&
+                      !order.shippingLabelId &&
+                      order.status !== 'CANCELLED' &&
+                      order.status !== 'DELIVERED' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1 text-xs h-7 px-2"
+                        title={t('Gerar Etiqueta', 'Generate Label')}
+                        disabled={generatingLabelId === order.id}
+                        onClick={() => {
+                          setGeneratingLabelId(order.id);
+                          generateLabelMutation.mutate(order.id);
+                        }}
+                      >
+                        {generatingLabelId === order.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Tag className="h-3.5 w-3.5" />
+                        )}
+                      </Button>
+                    )}
+                    <Link href={`/admin/sales/${order.id}`}>
+                      <Button variant="ghost" size="sm" className="gap-1.5 text-xs">
+                        <Eye className="h-3.5 w-3.5" />
+                        {t('Ver', 'View')}
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
-        <div>
-          <p className="text-xs text-muted-foreground">{label}</p>
-          <p className="text-lg font-bold text-foreground">{value}</p>
-        </div>
-      </div>
-    </div>
+      )}
+    </PageContainer>
   );
 }

@@ -6,7 +6,7 @@ import storeService from '@/services/storeService';
 import { t } from '@/lib/admin-language';
 import {
   BarChart3, Facebook, Globe, TrendingUp, ArrowRight, CheckCircle2, Circle,
-  Tag, Search, Mail, Star, MessageSquare, Flame, Code,
+  Tag, Search, Mail, Star, MessageSquare, Flame, Code, Zap,
 } from 'lucide-react';
 
 interface Integration {
@@ -245,13 +245,27 @@ export function IntegrationsListClient() {
         ? t('Ativo', 'Active')
         : t('Não configurado', 'Not configured'),
     },
+    // ── Automações ──
+    {
+      id: 'zapier',
+      name: 'Zapier',
+      description: t(
+        'Conecte sua loja a mais de 7.000 aplicativos com webhooks automáticos.',
+        'Connect your store to 7,000+ apps with automatic webhooks.'
+      ),
+      icon: <Zap className="h-8 w-8 text-orange-500" />,
+      href: '/admin/integrations/zapier',
+      category: t('Automações', 'Automations'),
+      connected: false,
+      statusLabel: t('Configurar', 'Configure'),
+    },
   ];
 
   const categories = [...new Set(integrations.map((i) => i.category))];
 
   if (isLoading) {
     return (
-      <div className="p-8">
+      <div className="p-4 md:p-6 lg:p-8">
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-muted rounded w-1/3" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -265,9 +279,9 @@ export function IntegrationsListClient() {
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-8">
+    <div className="p-4 md:p-6 lg:p-8 space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">
+        <h1 className="text-xl font-bold tracking-tight text-foreground">
           {t('Integrações', 'Integrations')}
         </h1>
         <p className="text-muted-foreground mt-1">

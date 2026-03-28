@@ -48,7 +48,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setEmailVerified(verified);
 
       setUser({
-        id: 'temp-id',
+        id: response.userId?.toString() || localStorage.getItem('userId') || credentials.email,
         email: response.email || credentials.email,
         role: normalizeRole(response.role),
         storeId: response.storeId,

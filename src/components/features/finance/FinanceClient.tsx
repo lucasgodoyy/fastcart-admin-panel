@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+import { PageContainer, PageHeader } from '@/components/admin/page-header';
 import orderService from '@/services/sales/orderService';
 import { DashboardStats, AdminOrder } from '@/types/order';
 import { t } from '@/lib/admin-language';
@@ -57,35 +58,31 @@ export function FinanceClient() {
     : 1;
 
   return (
-    <div className="p-4 md:p-6 lg:p-8">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground">
-            {t('Financeiro', 'Finances')}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t('Acompanhe receita, pagamentos e performance financeira.', 'Track revenue, payments and financial performance.')}
-          </p>
-        </div>
-        <div className="flex gap-1 rounded-lg border border-border bg-card p-1">
-          {periods.map(p => (
-            <button
-              key={p.key}
-              onClick={() => setPeriod(p.key)}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                period === p.key
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-              }`}
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title={t('Financeiro', 'Finances')}
+        description={t('Acompanhe receita, pagamentos e performance financeira.', 'Track revenue, payments and financial performance.')}
+        actions={
+          <div className="flex gap-1 rounded-lg border border-border bg-card p-1">
+            {periods.map(p => (
+              <button
+                key={p.key}
+                onClick={() => setPeriod(p.key)}
+                className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                  period === p.key
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       {/* Finance KPI Cards */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 mb-6">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <FinanceCard
           icon={<DollarSign className="h-5 w-5 text-green-600" />}
           label={t('Receita Total', 'Total Revenue')}
@@ -114,7 +111,7 @@ export function FinanceClient() {
       </div>
 
       {/* Payment Status + Revenue Chart */}
-      <div className="grid gap-6 lg:grid-cols-3 mb-6">
+      <div className="grid gap-6 lg:grid-cols-3">
         {/* Revenue Chart */}
         <div className="lg:col-span-2 rounded-lg border border-border bg-card p-5">
           <h2 className="text-sm font-semibold text-foreground mb-4">
@@ -212,37 +209,26 @@ export function FinanceClient() {
             {t('Nenhuma transação encontrada.', 'No transactions found.')}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-muted/30 text-left">
-                <th className="px-5 py-2 text-xs font-medium uppercase text-muted-foreground">{t('Pedido', 'Order')}</th>
-                <th className="px-5 py-2 text-xs font-medium uppercase text-muted-foreground">{t('Cliente', 'Customer')}</th>
-                <th className="px-5 py-2 text-xs font-medium uppercase text-muted-foreground">{t('Valor', 'Amount')}</th>
-                <th className="px-5 py-2 text-xs font-medium uppercase text-muted-foreground">{t('Data', 'Date')}</th>
-                <th className="px-5 py-2 text-xs font-medium uppercase text-muted-foreground"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {paidOrders.map(order => (
-                <tr key={order.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
-                  <td className="px-5 py-2.5 text-sm font-medium text-foreground">#{order.id}</td>
-                  <td className="px-5 py-2.5 text-sm text-foreground">{order.customerName || '—'}</td>
-                  <td className="px-5 py-2.5 text-sm font-medium text-green-600">{formatCurrency(order.totalAmount)}</td>
-                  <td className="px-5 py-2.5 text-sm text-muted-foreground">{formatDate(order.createdAt)}</td>
-                  <td className="px-5 py-2.5">
-                    <Link href={`/admin/sales/${order.id}`} className="text-primary hover:underline">
-                      <Eye className="h-4 w-4" />
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="space-y-2 p-4">
+            {paidOrders.map(order => (
+              <div key={order.id} className="group rounded-xl border border-border bg-card p-3 transition-all duration-150 hover:shadow-md hover:border-border/80">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+                  <span className="shrink-0 text-sm font-semibold text-foreground sm:w-16">#{order.id}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-foreground">{order.customerName || '—'}</p>
+                  </div>
+                  <span className="text-sm font-semibold text-green-600 shrink-0">{formatCurrency(order.totalAmount)}</span>
+                  <span className="text-xs text-muted-foreground shrink-0">{formatDate(order.createdAt)}</span>
+                  <Link href={`/admin/sales/${order.id}`} className="text-primary hover:underline shrink-0">
+                    <Eye className="h-4 w-4" />
+                  </Link>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
-    </div>
+    </PageContainer>
   );
 }
 

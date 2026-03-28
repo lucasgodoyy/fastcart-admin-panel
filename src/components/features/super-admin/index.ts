@@ -47,3 +47,5 @@ export { SaBacklogPage } from "./pages/sa-backlog-page";
 export { SaRoadmapPage } from "./pages/sa-roadmap-page";
 export { SaMessagesPage } from "./pages/sa-messages-page";
 export { SaErrorLogsPage } from "./pages/sa-error-logs-page";
+export { SaLandingConfigPage } from "./pages/sa-landing-config-page";
+export { SaZapierPage } from "./pages/sa-zapier-page";

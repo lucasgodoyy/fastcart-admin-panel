@@ -100,20 +100,20 @@ export function SaUsersPage() {
   return (
     <div className="space-y-8">
       <SaPageHeader
-        title="Gerenciamento de Usu�rios"
-        description="Gerencie todos os usu�rios da plataforma, roles e permiss�es"
+        title="Gerenciamento de UsuÃ¡rios"
+        description="Gerencie todos os usuÃ¡rios da plataforma, roles e permissÃµes"
         actions={
           <Button className="bg-[hsl(var(--sa-accent))] hover:bg-[hsl(var(--sa-accent-hover))] text-white rounded-lg gap-2">
-            <Plus className="h-4 w-4" /> Novo Usu�rio
+            <Plus className="h-4 w-4" /> Novo UsuÃ¡rio
           </Button>
         }
       />
 
       <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SaStatCard title="Total de Usu�rios" value={fmt(overview?.totalUsers)} icon={Users} color="accent" trend={{ value: 12, label: "" }} />
+        <SaStatCard title="Total de UsuÃ¡rios" value={fmt(overview?.totalUsers)} icon={Users} color="accent" trend={{ value: 12, label: "" }} />
         <SaStatCard title="Ativos" value={fmt(overview?.activeUsers)} icon={Shield} color="info" />
         <SaStatCard title="Resultados" value={fmt(usersData?.totalElements)} icon={Clock} color="success" />
-        <SaStatCard title="P�ginas" value={`${(usersData?.page ?? 0) + 1}/${usersData?.totalPages ?? 1}`} icon={Ban} color="warning" />
+        <SaStatCard title="PÃ¡ginas" value={`${(usersData?.page ?? 0) + 1}/${usersData?.totalPages ?? 1}`} icon={Ban} color="warning" />
       </motion.div>
 
       <motion.div variants={fadeInUp} initial="initial" animate="animate">
@@ -146,15 +146,15 @@ export function SaUsersPage() {
       </motion.div>
 
       <motion.div variants={fadeInUp} initial="initial" animate="animate">
-        <SaTableCard title="Usu�rios" subtitle={`${usersData?.totalElements ?? 0} resultado(s)`}>
+        <SaTableCard title="UsuÃ¡rios" subtitle={`${usersData?.totalElements ?? 0} resultado(s)`}>
           <Table>
             <TableHeader>
               <TableRow className="border-[hsl(var(--sa-border-subtle))] hover:bg-transparent">
-                <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Usu�rio</TableHead>
+                <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">UsuÃ¡rio</TableHead>
                 <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Role</TableHead>
                 <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Loja</TableHead>
                 <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Status</TableHead>
-                <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">�ltimo Login</TableHead>
+                <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Ãltimo Login</TableHead>
                 <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider w-12"></TableHead>
               </TableRow>
             </TableHeader>
@@ -189,7 +189,7 @@ export function SaUsersPage() {
                         <RoleIcon className="h-3 w-3" /> {user.role}
                       </span>
                     </TableCell>
-                    <TableCell className="text-[12px] text-[hsl(var(--sa-text-secondary))]">{user.storeName ?? "�"}</TableCell>
+                    <TableCell className="text-[12px] text-[hsl(var(--sa-text-secondary))]">{user.storeName ?? "Â"}</TableCell>
                     <TableCell><SaStatusBadge status={user.status} /></TableCell>
                     <TableCell className="text-[12px] text-[hsl(var(--sa-text-muted))]">{lastLogin}</TableCell>
                     <TableCell>
@@ -211,7 +211,7 @@ export function SaUsersPage() {
             </TableBody>
           </Table>
           {users.length === 0 && !isLoading && (
-            <SaEmptyState icon={Users} title="Nenhum usu�rio encontrado" description="Tente ajustar os filtros de busca" />
+            <SaEmptyState icon={Users} title="Nenhum usuÃ¡rio encontrado" description="Tente ajustar os filtros de busca" />
           )}
         </SaTableCard>
       </motion.div>

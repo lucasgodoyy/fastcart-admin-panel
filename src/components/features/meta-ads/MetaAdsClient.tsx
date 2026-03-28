@@ -197,7 +197,15 @@ export function MetaAdsClient() {
     onSuccess: (data) => {
       window.location.href = data.authorizeUrl;
     },
-    onError: () => toast.error('Erro ao gerar URL de conexão.'),
+    onError: (error: unknown) => {
+      const axiosError = error as { response?: { data?: { message?: string }; status?: number } };
+      const msg = axiosError?.response?.data?.message || '';
+      if (msg.includes('not configured') || axiosError?.response?.status === 500) {
+        toast.error('Meta Ads não está configurado na plataforma. Solicite ao administrador que configure o App ID e App Secret no painel Super Admin.');
+      } else {
+        toast.error('Erro ao gerar URL de conexão com o Meta. Tente novamente.');
+      }
+    },
   });
 
   const updateAssetsMut = useMutation({

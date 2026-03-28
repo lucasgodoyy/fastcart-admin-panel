@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { PageContainer, PageHeader, EmptyState } from '@/components/admin/page-header';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -81,104 +82,106 @@ export function DraftOrdersClient() {
   });
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-foreground">{t('Rascunhos de Pedidos', 'Draft Orders')}</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            {t(
-              'Pedidos em rascunho não movimentam estoque nem geram cobrança até serem convertidos.',
-              'Draft orders do not affect stock or billing until converted.'
-            )}
-          </p>
-        </div>
-        <Button onClick={() => setShowNewDraftDialog(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          {t('Novo Rascunho', 'New Draft')}
-        </Button>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title={t('Rascunhos de Pedidos', 'Draft Orders')}
+        description={t(
+          'Pedidos em rascunho não movimentam estoque nem geram cobrança até serem convertidos.',
+          'Draft orders do not affect stock or billing until converted.'
+        )}
+        actions={
+          <Button onClick={() => setShowNewDraftDialog(true)} className="gap-2">
+            <Plus className="h-4 w-4" />
+            {t('Novo Rascunho', 'New Draft')}
+          </Button>
+        }
+      />
 
       {/* List */}
       {isLoading ? (
-        <div className="rounded-lg border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          {t('Carregando rascunhos...', 'Loading drafts...')}
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="animate-pulse rounded-xl border border-border bg-card p-4">
+              <div className="flex items-center gap-4">
+                <div className="h-4 w-12 rounded bg-muted" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-40 rounded bg-muted" />
+                  <div className="h-3 w-24 rounded bg-muted" />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       ) : drafts.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-border bg-card p-10 text-center">
-          <FileText className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">
-            {t('Nenhum rascunho encontrado.', 'No drafts found.')}
-          </p>
-          <Button
-            variant="outline"
-            className="mt-4 gap-2"
-            onClick={() => setShowNewDraftDialog(true)}
-          >
-            <Plus className="h-4 w-4" />
-            {t('Criar primeiro rascunho', 'Create first draft')}
-          </Button>
-        </div>
+        <EmptyState
+          icon={<FileText className="h-10 w-10" />}
+          title={t('Nenhum rascunho encontrado.', 'No drafts found.')}
+          description={t('Crie um rascunho para montar pedidos sem cobrança imediata.', 'Create a draft to build orders without immediate billing.')}
+          action={
+            <Button variant="outline" className="gap-2" onClick={() => setShowNewDraftDialog(true)}>
+              <Plus className="h-4 w-4" />
+              {t('Criar primeiro rascunho', 'Create first draft')}
+            </Button>
+          }
+        />
       ) : (
-        <div className="rounded-lg border border-border bg-card overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/40 text-xs text-muted-foreground">
-                <th className="px-4 py-3 text-left font-medium">{t('Nº', 'ID')}</th>
-                <th className="px-4 py-3 text-left font-medium">{t('Nome do rascunho', 'Draft name')}</th>
-                <th className="px-4 py-3 text-left font-medium">{t('Criado em', 'Created at')}</th>
-                <th className="px-4 py-3 text-left font-medium">{t('Total', 'Total')}</th>
-                <th className="px-4 py-3 text-left font-medium">{t('Status', 'Status')}</th>
-                <th className="px-4 py-3 text-right font-medium">{t('Ações', 'Actions')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {drafts.map((draft) => (
-                <tr key={draft.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
-                  <td className="px-4 py-3 font-mono text-xs text-muted-foreground">#{draft.id}</td>
-                  <td className="px-4 py-3 font-medium text-foreground">
+        <div className="space-y-2">
+          {drafts.map((draft) => (
+            <div
+              key={draft.id}
+              className="group rounded-xl border border-border bg-card p-4 transition-all duration-150 hover:shadow-md hover:border-border/80"
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                {/* ID */}
+                <span className="shrink-0 font-mono text-xs text-muted-foreground sm:w-16">#{draft.id}</span>
+
+                {/* Name */}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-foreground">
                     {draft.draftName || <span className="italic text-muted-foreground">{t('Sem nome', 'Unnamed')}</span>}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">{formatDate(draft.createdAt)}</td>
-                  <td className="px-4 py-3">{formatCurrency(draft.totalAmount, draft.currency)}</td>
-                  <td className="px-4 py-3">
-                    <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
-                      {t('Rascunho', 'Draft')}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1">
-                      <Button asChild size="sm" variant="ghost" className="h-7 gap-1 text-xs">
-                        <Link href={`/admin/sales/${draft.id}`}>
-                          <Eye className="h-3 w-3" />
-                          {t('Ver', 'View')}
-                        </Link>
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-7 gap-1 text-xs text-green-600 hover:text-green-700 hover:bg-green-50"
-                        disabled={convertMutation.isPending}
-                        onClick={() => convertMutation.mutate(draft.id)}
-                      >
-                        <RotateCcw className="h-3 w-3" />
-                        {t('Converter', 'Convert')}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-7 gap-1 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => setDiscardTarget(draft)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                        {t('Descartar', 'Discard')}
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </p>
+                  <p className="text-xs text-muted-foreground">{formatDate(draft.createdAt)}</p>
+                </div>
+
+                {/* Amount + badge */}
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-semibold text-foreground">{formatCurrency(draft.totalAmount, draft.currency)}</span>
+                  <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+                    {t('Rascunho', 'Draft')}
+                  </Badge>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-1 shrink-0">
+                  <Button asChild size="sm" variant="ghost" className="h-7 gap-1 text-xs">
+                    <Link href={`/admin/sales/${draft.id}`}>
+                      <Eye className="h-3 w-3" />
+                      {t('Ver', 'View')}
+                    </Link>
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 gap-1 text-xs text-green-600 hover:text-green-700 hover:bg-green-50"
+                    disabled={convertMutation.isPending}
+                    onClick={() => convertMutation.mutate(draft.id)}
+                  >
+                    <RotateCcw className="h-3 w-3" />
+                    {t('Converter', 'Convert')}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 gap-1 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => setDiscardTarget(draft)}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    {t('Descartar', 'Discard')}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -244,6 +247,6 @@ export function DraftOrdersClient() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageContainer>
   );
 }

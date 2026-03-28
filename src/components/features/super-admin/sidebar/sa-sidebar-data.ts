@@ -21,6 +21,7 @@ import {
   ClipboardList,
   Map,
   DollarSign,
+  PanelTop,
   type LucideIcon,
 } from "lucide-react";
 
@@ -119,6 +120,11 @@ export const saSidebarSections: SASidebarSection[] = [
   {
     label: "Marketing",
     items: [
+      {
+        title: "Landing Page",
+        href: "/super-admin/landing",
+        icon: PanelTop,
+      },
       {
         title: "Campanhas",
         href: "/super-admin/marketing",

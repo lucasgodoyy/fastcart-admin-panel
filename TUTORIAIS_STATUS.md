@@ -1,7 +1,8 @@
 # Status dos Tutoriais e Central de Ajuda — Painel Admin
 
-**Data:** 27/03/2026  
-**Projeto:** fastcart-admin-panel
+**Data:** 28/03/2026  
+**Projeto:** fastcart-admin-panel  
+**Documento complementar:** [`SISTEMA_AJUDA_CONTEXTUAL.md`](./SISTEMA_AJUDA_CONTEXTUAL.md) — Blueprint completo de tooltips, textos e ajuda contextual para todo o painel
 
 ---
 
@@ -84,7 +85,8 @@ O agente anterior **NÃO** criou nenhuma página de tutoriais. O que existia:
 - [ ] Tutorial em vídeo embed (YouTube/Loom) para cada seção
 - [ ] Sistema de busca dentro dos tutoriais
 - [ ] Tutorial interativo de primeira configuração (tour guiado)
-- [ ] Tooltips contextuais em cada página do painel (ex: "Como funciona?" em pedidos)
+- [ ] **Tooltips contextuais em cada página do painel** → Documentado em [`SISTEMA_AJUDA_CONTEXTUAL.md`](./SISTEMA_AJUDA_CONTEXTUAL.md)
+- [ ] **Mover Tutoriais para rodapé da sidebar (ícone de ajuda discreto)** → Documentado em SISTEMA_AJUDA_CONTEXTUAL.md §2
 
 ### Prioridade Média
 - [ ] Categorias adicionais: Frete/Logística, Loja Virtual/Personalização, SEO

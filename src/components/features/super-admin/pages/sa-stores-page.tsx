@@ -71,15 +71,15 @@ export function SaStoresPage() {
   const PRESET_TEMPLATES: Record<string, { subject: string; bodyHtml: string }> = {
     welcome: {
       subject: "Bem-vindo(a) a Lojaki!",
-      bodyHtml: "<p>Ol�!</p><p>Seu painel est� pronto para vender mais.</p><p>Conte com nosso time para acelerar seus resultados.</p>",
+      bodyHtml: "<p>OlÃ¡!</p><p>Seu painel estÃ¡ pronto para vender mais.</p><p>Conte com nosso time para acelerar seus resultados.</p>",
     },
     order_updates: {
-      subject: "Ative os e-mails autom�ticos da sua loja",
-      bodyHtml: "<p>Ol�!</p><p>Configure os e-mails de pedido pago, envio e entrega para melhorar sua convers�o e suporte.</p>",
+      subject: "Ative os e-mails automÃ¡ticos da sua loja",
+      bodyHtml: "<p>OlÃ¡!</p><p>Configure os e-mails de pedido pago, envio e entrega para melhorar sua conversÃ£o e suporte.</p>",
     },
     growth: {
       subject: "Novos recursos para aumentar suas vendas",
-      bodyHtml: "<p>Ol�!</p><p>Liberamos novos recursos de marketing e recupera��o de carrinho para sua loja.</p>",
+      bodyHtml: "<p>OlÃ¡!</p><p>Liberamos novos recursos de marketing e recuperaÃ§Ã£o de carrinho para sua loja.</p>",
     },
   };
 
@@ -178,7 +178,7 @@ export function SaStoresPage() {
                   <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))] text-right">Produtos</th>
                   <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))] text-right">Pedidos</th>
                   <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))] text-right">Receita</th>
-                  <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))] text-center">A��es</th>
+                  <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))] text-center">AÃ§Ãµes</th>
                 </tr>
               </thead>
               <tbody>
@@ -204,7 +204,7 @@ export function SaStoresPage() {
                     </td>
                     <td className="px-5 py-4">
                       <span className="text-[12px] font-medium text-[hsl(var(--sa-text-secondary))] bg-[hsl(var(--sa-surface-hover))] rounded-full px-2.5 py-1">
-                        {store.planName || "�"}
+                        {store.planName || "Â"}
                       </span>
                     </td>
                     <td className="px-5 py-4 text-right">
@@ -257,7 +257,7 @@ export function SaStoresPage() {
           {totalPages > 1 && (
             <div className="flex items-center justify-between border-t border-[hsl(var(--sa-border-subtle))] px-5 py-3">
               <p className="text-[12px] text-[hsl(var(--sa-text-muted))]">
-                P�gina {page + 1} de {totalPages} � {storesData?.totalElements ?? 0} lojas
+                PÃ¡gina {page + 1} de {totalPages} Â {storesData?.totalElements ?? 0} lojas
               </p>
               <div className="flex items-center gap-2">
                 <Button
@@ -276,7 +276,7 @@ export function SaStoresPage() {
                   onClick={() => setPage(p => p + 1)}
                   className="h-8 px-2 text-[hsl(var(--sa-text-secondary))] hover:bg-[hsl(var(--sa-surface-hover))]"
                 >
-                  Pr�xima <ChevronRight className="h-4 w-4" />
+                  PrÃ³xima <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
             </div>

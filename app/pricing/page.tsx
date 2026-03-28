@@ -28,21 +28,21 @@ const PLANS = [
     maxStores: 1,
     trialDays: 0,
     isPopular: false,
-    ctaLabel: 'Come�ar gr�tis',
+    ctaLabel: 'ComeÃ§ar grÃ¡tis',
     features: [
       '1 loja',
-      'At� 50 produtos',
+      'AtÃ© 50 produtos',
       'Certificado SSL',
-      'Subdom�nio Lojaki',
+      'SubdomÃ­nio Lojaki',
       'Suporte por e-mail',
-      'Cat�logo online',
-      'Checkout b�sico',
+      'CatÃ¡logo online',
+      'Checkout bÃ¡sico',
     ],
   },
   {
     id: 'starter',
     name: 'Starter',
-    description: 'Para quem est� come�ando e quer vender mais.',
+    description: 'Para quem estÃ¡ comeÃ§ando e quer vender mais.',
     icon: Rocket,
     monthlyPrice: 49,
     annualPrice: 470,
@@ -51,24 +51,24 @@ const PLANS = [
     maxStores: 1,
     trialDays: 14,
     isPopular: false,
-    ctaLabel: 'Iniciar 14 dias gr�tis',
+    ctaLabel: 'Iniciar 14 dias grÃ¡tis',
     features: [
       '1 loja',
-      'At� 500 produtos',
-      'Dom�nio pr�prio',
-      'SSL gr�tis',
-      'Boleto Banc�rio',
+      'AtÃ© 500 produtos',
+      'DomÃ­nio prÃ³prio',
+      'SSL grÃ¡tis',
+      'Boleto BancÃ¡rio',
       'Mercado Pago',
       'Carrinho abandonado',
       'WhatsApp integrado',
-      'Relat�rios b�sicos',
-      'Personaliza��o visual',
+      'RelatÃ³rios bÃ¡sicos',
+      'PersonalizaÃ§Ã£o visual',
     ],
   },
   {
     id: 'plus',
     name: 'Plus',
-    description: 'Para lojas em crescimento com recursos avan�ados.',
+    description: 'Para lojas em crescimento com recursos avanÃ§ados.',
     icon: Crown,
     monthlyPrice: 99,
     annualPrice: 950,
@@ -77,27 +77,27 @@ const PLANS = [
     maxStores: 2,
     trialDays: 14,
     isPopular: true,
-    ctaLabel: 'Iniciar 14 dias gr�tis',
+    ctaLabel: 'Iniciar 14 dias grÃ¡tis',
     features: [
       '2 lojas',
-      'At� 5.000 produtos',
+      'AtÃ© 5.000 produtos',
       'Tudo do Starter',
       'Stripe Connect',
-      'PIX autom�tico',
+      'PIX automÃ¡tico',
       'Google Shopping',
       'Facebook Pixel',
       'Afiliados',
       'Blog integrado',
-      'Cupons & promo��es',
-      'Dom�nios customizados',
+      'Cupons & promoÃ§Ãµes',
+      'DomÃ­nios customizados',
       'API Access',
-      'Suporte priorit�rio',
+      'Suporte prioritÃ¡rio',
     ],
   },
   {
     id: 'pro',
     name: 'Pro',
-    description: 'Para opera��es de alto volume com suporte dedicado.',
+    description: 'Para operaÃ§Ãµes de alto volume com suporte dedicado.',
     icon: Gem,
     monthlyPrice: 149,
     annualPrice: 1430,
@@ -106,7 +106,7 @@ const PLANS = [
     maxStores: null,
     trialDays: 30,
     isPopular: false,
-    ctaLabel: 'Iniciar 30 dias gr�tis',
+    ctaLabel: 'Iniciar 30 dias grÃ¡tis',
     features: [
       'Lojas ilimitadas',
       'Produtos ilimitados',
@@ -115,9 +115,9 @@ const PLANS = [
       'Account Manager',
       'SLA 99,9%',
       'White label',
-      'Integra��es customizadas',
+      'IntegraÃ§Ãµes customizadas',
       'Multi-moeda',
-      'Relat�rios avan�ados',
+      'RelatÃ³rios avanÃ§ados',
       'Google Tag Manager',
       'Suporte 24/7',
     ],
@@ -129,20 +129,20 @@ const COMPARISON = [
   {
     category: 'Loja',
     rows: [
-      { label: 'N�mero de lojas', values: ['1', '1', '2', 'Ilimitado'] },
+      { label: 'NÃºmero de lojas', values: ['1', '1', '2', 'Ilimitado'] },
       { label: 'Produtos', values: ['50', '500', '5.000', 'Ilimitado'] },
       { label: 'Membros da equipe', values: ['1', '2', '5', 'Ilimitado'] },
-      { label: 'Dom�nio pr�prio', values: [false, true, true, true] },
+      { label: 'DomÃ­nio prÃ³prio', values: [false, true, true, true] },
       { label: 'Certificado SSL', values: [true, true, true, true] },
     ],
   },
   {
     category: 'Pagamentos',
     rows: [
-      { label: 'Checkout b�sico', values: [true, true, true, true] },
-      { label: 'Boleto Banc�rio', values: [false, true, true, true] },
+      { label: 'Checkout bÃ¡sico', values: [true, true, true, true] },
+      { label: 'Boleto BancÃ¡rio', values: [false, true, true, true] },
       { label: 'Mercado Pago', values: [false, true, true, true] },
-      { label: 'PIX autom�tico', values: [false, false, true, true] },
+      { label: 'PIX automÃ¡tico', values: [false, false, true, true] },
       { label: 'Stripe Connect', values: [false, false, true, true] },
       { label: 'Multi-moeda', values: [false, false, false, true] },
     ],
@@ -152,7 +152,7 @@ const COMPARISON = [
     rows: [
       { label: 'Carrinho abandonado', values: [false, true, true, true] },
       { label: 'WhatsApp integrado', values: [false, true, true, true] },
-      { label: 'Cupons & promo��es', values: [false, false, true, true] },
+      { label: 'Cupons & promoÃ§Ãµes', values: [false, false, true, true] },
       { label: 'Google Shopping', values: [false, false, true, true] },
       { label: 'Facebook Pixel', values: [false, false, true, true] },
       { label: 'Blog integrado', values: [false, false, true, true] },
@@ -164,7 +164,7 @@ const COMPARISON = [
     rows: [
       { label: 'Suporte por e-mail', values: [true, true, true, true] },
       { label: 'Chat de suporte', values: [false, true, true, true] },
-      { label: 'Suporte priorit�rio', values: [false, false, true, true] },
+      { label: 'Suporte prioritÃ¡rio', values: [false, false, true, true] },
       { label: 'Account Manager', values: [false, false, false, true] },
       { label: 'Suporte 24/7', values: [false, false, false, true] },
       { label: 'SLA 99,9%', values: [false, false, false, true] },
@@ -175,15 +175,15 @@ const COMPARISON = [
 const planColors: Record<string, string> = {
   gratuito: 'text-slate-600',
   starter: 'text-blue-600',
-  plus: 'text-violet-600',
-  pro: 'text-emerald-600',
+  plus: 'text-emerald-600',
+  pro: 'text-teal-700',
 };
 
 const planBg: Record<string, string> = {
   gratuito: 'bg-slate-50 dark:bg-slate-900/40',
   starter: 'bg-blue-50 dark:bg-blue-900/20',
-  plus: 'bg-violet-50 dark:bg-violet-900/20',
-  pro: 'bg-emerald-50 dark:bg-emerald-900/20',
+  plus: 'bg-emerald-50 dark:bg-emerald-900/20',
+  pro: 'bg-teal-50 dark:bg-teal-900/20',
 };
 
 export default function PricingPage() {
@@ -215,7 +215,7 @@ export default function PricingPage() {
               href="/login?register=true"
               className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
             >
-              Criar conta gr�tis
+              Criar conta grÃ¡tis
             </Link>
           </div>
         </div>
@@ -233,7 +233,7 @@ export default function PricingPage() {
           <span className="text-primary">para sua loja</span>
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground">
-          Comece gr�tis, fa�a upgrade quando precisar. Sem taxa de setup, cancele quando quiser.
+          Comece grÃ¡tis, faÃ§a upgrade quando precisar. Sem taxa de setup, cancele quando quiser.
         </p>
 
         {/* -- Monthly / Annual toggle ------------------------------- */}
@@ -299,20 +299,20 @@ export default function PricingPage() {
                 <div className="mt-4 flex items-baseline gap-1">
                   <span className="text-3xl font-extrabold text-foreground">
                     {plan.monthlyPrice === 0
-                      ? 'Gr�tis'
+                      ? 'GrÃ¡tis'
                       : fmtPrice(plan.monthlyPrice, plan.annualPrice)}
                   </span>
                   {plan.monthlyPrice > 0 && (
-                    <span className="text-sm text-muted-foreground">/m�s</span>
+                    <span className="text-sm text-muted-foreground">/mÃªs</span>
                   )}
                 </div>
                 {annual && plan.annualPrice > 0 && (
                   <p className="mt-0.5 text-xs text-green-600">
-                    R${plan.annualPrice}/ano � economia de R${(plan.monthlyPrice * 12 - plan.annualPrice)}
+                    R${plan.annualPrice}/ano Â economia de R${(plan.monthlyPrice * 12 - plan.annualPrice)}
                   </p>
                 )}
                 {plan.trialDays > 0 && (
-                  <p className="mt-1 text-xs text-blue-600">? {plan.trialDays} dias gr�tis</p>
+                  <p className="mt-1 text-xs text-blue-600">? {plan.trialDays} dias grÃ¡tis</p>
                 )}
 
                 <div className="my-4 border-t border-border" />
@@ -321,13 +321,13 @@ export default function PricingPage() {
                   <p>
                     {plan.maxProducts == null
                       ? '8 produtos'
-                      : `At� ${plan.maxProducts} produtos`}
+                      : `AtÃ© ${plan.maxProducts} produtos`}
                   </p>
                   <p>
-                    {plan.maxStaff == null ? '8 membros' : `At� ${plan.maxStaff} membros`}
+                    {plan.maxStaff == null ? '8 membros' : `AtÃ© ${plan.maxStaff} membros`}
                   </p>
                   <p>
-                    {plan.maxStores == null ? '8 lojas' : `At� ${plan.maxStores} loja${plan.maxStores > 1 ? 's' : ''}`}
+                    {plan.maxStores == null ? '8 lojas' : `AtÃ© ${plan.maxStores} loja${plan.maxStores > 1 ? 's' : ''}`}
                   </p>
                 </div>
 
@@ -370,7 +370,7 @@ export default function PricingPage() {
       {/* -- Feature Comparison Table -------------------------------- */}
       <section className="mx-auto max-w-6xl px-6 pb-20">
         <h2 className="mb-8 text-center text-2xl font-bold text-foreground">
-          Compara��o completa de recursos
+          ComparaÃ§Ã£o completa de recursos
         </h2>
         <div className="overflow-x-auto rounded-lg border border-border bg-card">
           <table className="w-full text-sm">
@@ -431,23 +431,23 @@ export default function PricingPage() {
       {/* -- FAQ / CTA ----------------------------------------------- */}
       <section className="border-t border-border bg-muted/30 py-16">
         <div className="mx-auto max-w-3xl px-6 text-center">
-          <h2 className="text-2xl font-bold text-foreground">Pronto para come�ar?</h2>
+          <h2 className="text-2xl font-bold text-foreground">Pronto para comeÃ§ar?</h2>
           <p className="mt-3 text-muted-foreground">
-            Crie sua loja hoje, de gra�a. N�o precisamos de cart�o de cr�dito.
+            Crie sua loja hoje, de graÃ§a. NÃ£o precisamos de cartÃ£o de crÃ©dito.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
               href="/login?register=true"
               className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
             >
-              Criar conta gr�tis
+              Criar conta grÃ¡tis
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/login"
               className="inline-flex items-center gap-2 rounded-lg border border-border px-6 py-3 text-sm font-semibold text-foreground hover:bg-muted transition-colors"
             >
-              J� tenho conta
+              JÃ¡ tenho conta
             </Link>
           </div>
         </div>
@@ -455,7 +455,7 @@ export default function PricingPage() {
 
       {/* -- Footer ------------------------------------------------- */}
       <footer className="border-t border-border bg-card py-6 text-center text-xs text-muted-foreground">
-        � {new Date().getFullYear()} Lojaki � Todos os direitos reservados.
+        Â© {new Date().getFullYear()} Lojaki Â Todos os direitos reservados.
       </footer>
     </div>
   );

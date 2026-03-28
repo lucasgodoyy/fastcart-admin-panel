@@ -38,6 +38,8 @@ import type {
   EmailCampaignUpsertRequest,
   PlatformErrorLog,
   ErrorLogStats,
+  LandingConfig,
+  LandingConfigUpdateRequest,
 } from '@/types/super-admin';
 
 // ────────────────────────────────────────────────────────────────
@@ -564,6 +566,17 @@ const superAdminService = {
 
   addErrorLogNote: async (id: number, notes: string): Promise<PlatformErrorLog> => {
     const { data } = await apiClient.put<PlatformErrorLog>(`/super-admin/error-logs/${id}/notes`, { notes });
+    return data;
+  },
+
+  // ── Landing Config ────────────────────────────────────────
+  getLandingConfig: async (): Promise<LandingConfig> => {
+    const { data } = await apiClient.get<LandingConfig>('/super-admin/landing-config');
+    return data;
+  },
+
+  updateLandingConfig: async (body: LandingConfigUpdateRequest): Promise<LandingConfig> => {
+    const { data } = await apiClient.put<LandingConfig>('/super-admin/landing-config', body);
     return data;
   },
 };

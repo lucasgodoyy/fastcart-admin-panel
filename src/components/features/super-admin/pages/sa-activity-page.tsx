@@ -81,10 +81,10 @@ export function SaActivityPage() {
   const filters = [
     { key: "all", label: "Todos" },
     { key: "LOGIN", label: "Login" },
-    { key: "CREATE", label: "Cria��o" },
-    { key: "UPDATE", label: "Altera��o" },
-    { key: "DELETE", label: "Remo��o" },
-    { key: "SECURITY", label: "Seguran�a" },
+    { key: "CREATE", label: "CriaÃ§Ã£o" },
+    { key: "UPDATE", label: "AlteraÃ§Ã£o" },
+    { key: "DELETE", label: "RemoÃ§Ã£o" },
+    { key: "SECURITY", label: "SeguranÃ§a" },
     { key: "BILLING", label: "Financeiro" },
     { key: "TENANT_REGISTERED", label: "Novo Lojista" },
     { key: "SUBSCRIPTION_ACTIVATED", label: "Assinatura Ativa" },
@@ -95,7 +95,7 @@ export function SaActivityPage() {
     <div className="space-y-8">
       <SaPageHeader
         title="Registro de Atividades"
-        description="Log de todas as a��es realizadas na plataforma"
+        description="Log de todas as aÃ§Ãµes realizadas na plataforma"
       />
 
       {/* Filters */}
@@ -188,10 +188,10 @@ export function SaActivityPage() {
             <ChevronLeft className="h-4 w-4" /> Anterior
           </Button>
           <span className="text-[11px] text-[hsl(var(--sa-text-muted))]">
-            P�g. {logsData.page + 1} de {logsData.totalPages}
+            PÃ¡g. {logsData.page + 1} de {logsData.totalPages}
           </span>
           <Button variant="ghost" size="sm" disabled={logsData.last} onClick={() => setPage(p => p + 1)} className="rounded-lg text-[11px]">
-            Pr�xima <ChevronRight className="h-4 w-4" />
+            PrÃ³xima <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       )}

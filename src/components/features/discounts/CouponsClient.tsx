@@ -68,6 +68,7 @@ import {
 } from '@/types/coupon';
 import { Product } from '@/types/product';
 import { Category } from '@/types/category';
+import { FieldHelper } from '@/components/shared/field-helper';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -609,7 +610,13 @@ export function CouponsClient() {
             {!isFreeShipping && (
               <div className="mt-4 space-y-3">
                 <div className="space-y-1.5">
-                  <Label>{form.type === 'PERCENTAGE' ? 'Percentual de desconto (%)' : 'Valor do desconto (R$)'}</Label>
+                  <Label>
+                    {form.type === 'PERCENTAGE' ? 'Percentual de desconto (%)' : 'Valor do desconto (R$)'}
+                    <FieldHelper
+                      content="Percentual reduz uma fração do pedido; valor fixo subtrai um valor absoluto."
+                      learnMoreHref="/admin/tutorials/marketing"
+                    />
+                  </Label>
                   <Input
                     type="number"
                     step="0.01"
@@ -667,6 +674,13 @@ export function CouponsClient() {
 
             {showScopePicker && (
               <div className="mt-3 space-y-2">
+                <Label className="text-xs text-muted-foreground">
+                  Escopo do cupom
+                  <FieldHelper
+                    content="Defina se o cupom vale para toda a loja, categorias específicas ou produtos específicos."
+                    learnMoreHref="/admin/tutorials/marketing"
+                  />
+                </Label>
                 {selectedScopeIds.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
                     {selectedScopeIds.map((id) => (
@@ -712,7 +726,13 @@ export function CouponsClient() {
 
             {/* Total usage */}
             <div className="space-y-2">
-              <p className="text-xs font-medium text-foreground">Por cupom</p>
+              <p className="text-xs font-medium text-foreground">
+                Por cupom
+                <FieldHelper
+                  content="Controla quantas vezes esse código pode ser usado no total por todos os clientes."
+                  learnMoreHref="/admin/tutorials/marketing"
+                />
+              </p>
               <div className="flex gap-2">
                 <ModeChip active={form.usageLimitMode === 'unlimited'} onClick={() => setField('usageLimitMode', 'unlimited')}>
                   Ilimitado
@@ -734,7 +754,13 @@ export function CouponsClient() {
 
             {/* Per customer */}
             <div className="mt-4 space-y-2">
-              <p className="text-xs font-medium text-foreground">Por cliente</p>
+              <p className="text-xs font-medium text-foreground">
+                Por cliente
+                <FieldHelper
+                  content="Define limite individual por cliente para evitar abuso e controlar recorrência da promoção."
+                  learnMoreHref="/admin/tutorials/marketing"
+                />
+              </p>
               <div className="flex flex-wrap gap-2">
                 <ModeChip active={form.perCustomerMode === 'unlimited'} onClick={() => setField('perCustomerMode', 'unlimited')}>
                   Ilimitado
@@ -844,7 +870,10 @@ export function CouponsClient() {
       <div className="p-4 md:p-6 lg:p-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
-          <h1 className="text-lg font-semibold text-foreground">Cupons</h1>
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-foreground">Cupons</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Crie e gerencie cupons de desconto para sua loja.</p>
+          </div>
           <Button size="sm" className="gap-1.5" onClick={openCreate}>
             <Plus className="h-4 w-4" />
             Criar

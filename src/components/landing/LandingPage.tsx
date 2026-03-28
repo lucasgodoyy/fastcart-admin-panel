@@ -1,8 +1,8 @@
-﻿'use client';
+'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
-import { motion, useInView, useScroll, useTransform } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import {
   ArrowRight,
   Check,
@@ -19,7 +19,6 @@ import {
   Search,
   Shield,
   ShoppingBag,
-  ShoppingCart,
   Sparkles,
   Star,
   Store,
@@ -28,31 +27,30 @@ import {
   X,
   Zap,
 } from 'lucide-react';
-import { useState } from 'react';
 
-/* ═══════════════════════════════════════════════════════════
-   ANIMATION VARIANTS
-   ═══════════════════════════════════════════════════════════ */
 const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: (i: number = 0) => ({
+  hidden: { opacity: 0, y: 28 },
+  visible: (index: number = 0) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, delay: i * 0.1, ease: [0.25, 0.46, 0.45, 0.94] as const },
+    transition: {
+      duration: 0.6,
+      delay: index * 0.08,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
   }),
 };
 
-const fadeIn = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.8 } },
-};
-
 const scaleIn = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: (i: number = 0) => ({
+  hidden: { opacity: 0, scale: 0.96 },
+  visible: (index: number = 0) => ({
     opacity: 1,
     scale: 1,
-    transition: { duration: 0.5, delay: i * 0.1, ease: [0.25, 0.46, 0.45, 0.94] as const },
+    transition: {
+      duration: 0.5,
+      delay: index * 0.06,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
   }),
 };
 
@@ -67,83 +65,227 @@ function useAnimateInView() {
   return { ref, inView };
 }
 
-/* ═══════════════════════════════════════════════════════════
-   NAVBAR
-   ═══════════════════════════════════════════════════════════ */
+const heroStats = [
+  { value: '3x', label: 'mais velocidade para colocar a loja no ar' },
+  { value: '12 min', label: 'para publicar catalogo, pagamento e frete' },
+  { value: '24/7', label: 'visao da operacao com vendas e suporte ativo' },
+];
+
+const commandMetrics = [
+  { label: 'Receita hoje', value: 'R$ 18.420', change: '+14,8%', tone: 'text-emerald-300' },
+  { label: 'Pedidos pagos', value: '128', change: '+9,2%', tone: 'text-lime-300' },
+  { label: 'Conversao', value: '4,7%', change: '+0,6%', tone: 'text-teal-300' },
+  { label: 'CAC medio', value: 'R$ 21', change: '-11,4%', tone: 'text-emerald-300' },
+];
+
+const pillars = [
+  {
+    icon: LayoutDashboard,
+    title: 'Controle comercial em tempo real',
+    description:
+      'Pedidos, estoque, pagamentos, campanhas e performance reunidos numa mesa de comando unica.',
+  },
+  {
+    icon: Store,
+    title: 'Lojas com cara de marca grande',
+    description:
+      'Templates premium, paginas leves e componentes que valorizam produto, ticket medio e recorrencia.',
+  },
+  {
+    icon: Rocket,
+    title: 'Infra pronta para crescer',
+    description:
+      'Operacao estruturada para trafego pago, social commerce, equipe e picos de demanda sem improviso.',
+  },
+];
+
+const commerceCards = [
+  {
+    icon: CreditCard,
+    title: 'Checkout direto ao ponto',
+    text: 'PIX, cartao, boleto e recuperacao de abandono com menos friccao na hora de fechar o pedido.',
+  },
+  {
+    icon: Truck,
+    title: 'Frete e logistica plugados',
+    text: 'Regras de envio, cotacao automatica e fluxo operacional conectado com o que acontece no caixa.',
+  },
+  {
+    icon: Search,
+    title: 'Catalogo pensado para vender',
+    text: 'SEO, colecoes, vitrines, busca e navegacao desenhados para encurtar o caminho ate a compra.',
+  },
+  {
+    icon: MessageSquare,
+    title: 'Relacao com cliente ativa',
+    text: 'Campanhas, remarketing e mensagens alinhadas ao historico real de compra e comportamento.',
+  },
+];
+
+const channelCards = [
+  {
+    title: 'Loja principal',
+    subtitle: 'Seu dominio, sua experiencia, sua margem.',
+    accent: 'from-emerald-500/30 to-emerald-300/5',
+  },
+  {
+    title: 'Instagram e social',
+    subtitle: 'Produtos e campanhas coordenados com a operacao.',
+    accent: 'from-teal-500/25 to-transparent',
+  },
+  {
+    title: 'Marketplace e catalogos',
+    subtitle: 'Sortimento e precificacao ajustados por canal.',
+    accent: 'from-lime-500/20 to-transparent',
+  },
+  {
+    title: 'Equipe comercial',
+    subtitle: 'Painel unico para atendimento, pedidos e insights.',
+    accent: 'from-emerald-500/20 to-transparent',
+  },
+];
+
+const steps = [
+  {
+    step: '01',
+    title: 'Estruture a base da sua marca',
+    text: 'Escolha o visual, organize o catalogo e defina a proposta comercial sem depender de setup complexo.',
+  },
+  {
+    step: '02',
+    title: 'Conecte pagamentos, frete e canais',
+    text: 'Ligue as partes que fazem a operacao girar e acompanhe tudo por um painel que mostra o que importa.',
+  },
+  {
+    step: '03',
+    title: 'Otimize e escale com dados',
+    text: 'Ajuste criativos, colecoes, mix de produtos e campanha com base no que esta trazendo receita de verdade.',
+  },
+];
+
+const testimonials = [
+  {
+    quote:
+      'A virada nao foi so estetica. A operacao ficou mais clara, o time responde mais rapido e a loja passou a converter melhor.',
+    author: 'Marina Farias',
+    role: 'Fundadora, Marea Studio',
+  },
+  {
+    quote:
+      'Antes eu tinha ferramenta demais e controle de menos. Agora a marca tem uma estrutura que parece empresa grande, mas continua simples de operar.',
+    author: 'Leonardo Braga',
+    role: 'Diretor, North Supply',
+  },
+  {
+    quote:
+      'A melhor parte foi sair do visual generico. A loja ganhou mais presenca, e a administracao deixou de ser uma colcha de retalhos.',
+    author: 'Camila Rezende',
+    role: 'CEO, Casa Aurora',
+  },
+];
+
+const plans = [
+  {
+    name: 'Start',
+    price: 'R$ 59',
+    description: 'Para colocar a operacao no ar com base profissional.',
+    featured: false,
+    items: ['Catalogo completo', 'Checkout integrado', 'Temas premium', 'Relatorios essenciais'],
+  },
+  {
+    name: 'Growth',
+    price: 'R$ 129',
+    description: 'Para marcas que querem crescer com mais margem e controle.',
+    featured: true,
+    items: ['Automacoes', 'Cupons e campanhas', 'Equipe e permissoes', 'Insights avancados', 'Suporte prioritario'],
+  },
+  {
+    name: 'Scale',
+    price: 'Sob consulta',
+    description: 'Para operacoes que exigem acompanhamento, performance e estrutura.',
+    featured: false,
+    items: ['Multioperacao', 'Fluxos customizados', 'SLA dedicado', 'Acompanhamento estrategico'],
+  },
+];
+
 function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
     <motion.header
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
+      initial={{ opacity: 0, y: -14 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-white/70 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60"
+      className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-black/35 backdrop-blur-xl"
     >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-primary to-emerald-400 shadow-lg shadow-primary/25 transition-transform group-hover:scale-105">
-            <Zap className="h-5 w-5 text-white" fill="white" />
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        <Link href="/" className="group flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-emerald-400/30 bg-emerald-500/15 shadow-[0_0_40px_rgba(16,185,129,0.18)] transition-transform group-hover:scale-105">
+            <Zap className="h-5 w-5 text-emerald-300" />
           </div>
-          <span className="text-xl font-bold tracking-tight text-gray-900">RapidoCart</span>
+          <div>
+            <span className="block text-lg font-bold tracking-tight text-white">Lojaki</span>
+            <span className="block text-[11px] uppercase tracking-[0.24em] text-white/45">commerce operating system</span>
+          </div>
         </Link>
 
-        {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-8">
-          <a href="#funcionalidades" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
-            Funcionalidades
+        <div className="hidden items-center gap-8 md:flex">
+          <a href="#plataforma" className="text-sm font-medium text-white/65 transition-colors hover:text-white">
+            Plataforma
           </a>
-          <a href="#como-funciona" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
-            Como funciona
+          <a href="#operacao" className="text-sm font-medium text-white/65 transition-colors hover:text-white">
+            Operacao
           </a>
-          <a href="#planos" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+          <a href="#depoimentos" className="text-sm font-medium text-white/65 transition-colors hover:text-white">
+            Resultados
+          </a>
+          <a href="#planos" className="text-sm font-medium text-white/65 transition-colors hover:text-white">
             Planos
           </a>
-          <Link href="/pricing" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
-            Preços
-          </Link>
         </div>
 
-        {/* Desktop CTAs */}
-        <div className="hidden md:flex items-center gap-3">
-          <Link
-            href="/login"
-            className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 transition-colors"
-          >
+        <div className="hidden items-center gap-3 md:flex">
+          <Link href="/login" className="rounded-full px-4 py-2 text-sm font-medium text-white/70 transition-colors hover:text-white">
             Entrar
           </Link>
           <Link
             href="/signup"
-            className="group inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-primary to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 rounded-full bg-emerald-400 px-5 py-2.5 text-sm font-semibold text-emerald-950 shadow-[0_16px_40px_rgba(52,211,153,0.28)] transition-all hover:-translate-y-0.5 hover:bg-emerald-300"
           >
-            Começar grátis
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            Testar gratis
+            <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
-        {/* Mobile toggle */}
-        <button onClick={() => setOpen(!open)} className="md:hidden p-2 text-gray-700">
+        <button onClick={() => setOpen(!open)} className="rounded-full border border-white/10 p-2 text-white md:hidden">
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </nav>
 
-      {/* Mobile menu */}
       {open && (
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
-          className="md:hidden border-t border-gray-100 bg-white px-6 pb-4"
+          className="border-t border-white/10 bg-black/80 px-6 pb-5 md:hidden"
         >
-          <div className="flex flex-col gap-3 py-3">
-            <a href="#funcionalidades" onClick={() => setOpen(false)} className="text-sm font-medium text-gray-700 py-2">Funcionalidades</a>
-            <a href="#como-funciona" onClick={() => setOpen(false)} className="text-sm font-medium text-gray-700 py-2">Como funciona</a>
-            <a href="#planos" onClick={() => setOpen(false)} className="text-sm font-medium text-gray-700 py-2">Planos</a>
-            <Link href="/pricing" className="text-sm font-medium text-gray-700 py-2">Preços</Link>
-            <hr className="my-1 border-gray-100" />
-            <Link href="/login" className="text-sm font-medium text-gray-700 py-2">Entrar</Link>
-            <Link href="/signup" className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white text-center">
-              Começar grátis
+          <div className="flex flex-col gap-3 py-4">
+            <a href="#plataforma" onClick={() => setOpen(false)} className="py-2 text-sm font-medium text-white/70">
+              Plataforma
+            </a>
+            <a href="#operacao" onClick={() => setOpen(false)} className="py-2 text-sm font-medium text-white/70">
+              Operacao
+            </a>
+            <a href="#depoimentos" onClick={() => setOpen(false)} className="py-2 text-sm font-medium text-white/70">
+              Resultados
+            </a>
+            <a href="#planos" onClick={() => setOpen(false)} className="py-2 text-sm font-medium text-white/70">
+              Planos
+            </a>
+            <Link href="/login" className="py-2 text-sm font-medium text-white/70">
+              Entrar
+            </Link>
+            <Link href="/signup" className="mt-2 rounded-full bg-emerald-400 px-4 py-3 text-center text-sm font-semibold text-emerald-950">
+              Testar gratis
             </Link>
           </div>
         </motion.div>
@@ -152,406 +294,266 @@ function Navbar() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════
-   HERO SECTION
-   ═══════════════════════════════════════════════════════════ */
 function HeroSection() {
   return (
-    <section className="relative overflow-hidden pt-32 pb-20 md:pt-40 md:pb-32">
-      {/* Background effects */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-linear-to-b from-primary/8 via-emerald-100/40 to-transparent rounded-full blur-3xl" />
-        <div className="absolute top-20 right-0 w-[400px] h-[400px] bg-linear-to-bl from-teal-100/30 to-transparent rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-gradient-to-tr from-emerald-50/50 to-transparent rounded-full blur-3xl" />
-        {/* Grid pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb20_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb20_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+    <section className="relative overflow-hidden border-b border-white/10 bg-[#040705] pb-20 pt-32 md:pb-28 md:pt-40">
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.16),transparent_34%),radial-gradient(circle_at_82%_18%,rgba(110,231,183,0.14),transparent_22%),radial-gradient(circle_at_50%_110%,rgba(8,145,178,0.12),transparent_30%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-size-[72px_72px] opacity-40" />
+        <div className="absolute inset-x-0 bottom-0 h-48 bg-linear-to-t from-[#040705] to-transparent" />
       </div>
 
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="mx-auto max-w-4xl text-center">
-          {/* Badge */}
+      <div className="relative mx-auto grid max-w-7xl gap-16 px-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+        <div>
           <motion.div
             variants={fadeUp}
             initial="hidden"
             animate="visible"
             custom={0}
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary"
+            className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-white/5 px-4 py-2 text-sm font-medium text-emerald-200"
           >
-            <Sparkles className="h-3.5 w-3.5" />
-            Plataforma de e-commerce completa
+            <Sparkles className="h-4 w-4" />
+            Nova direcao visual para marcas que querem parecer grandes desde o primeiro clique
           </motion.div>
 
-          {/* Headline */}
           <motion.h1
             variants={fadeUp}
             initial="hidden"
             animate="visible"
             custom={1}
-            className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl lg:text-7xl"
+            className="mt-6 max-w-4xl text-5xl font-black tracking-[-0.04em] text-white sm:text-6xl lg:text-7xl"
           >
-            Crie sua loja online{' '}
-            <span className="relative">
-              <span className="bg-linear-to-r from-primary via-emerald-500 to-teal-500 bg-clip-text text-transparent">
-                em minutos
-              </span>
-              <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 300 12" fill="none">
-                <path d="M2 8C50 2 100 2 150 6C200 10 250 4 298 8" stroke="url(#grad)" strokeWidth="3" strokeLinecap="round" />
-                <defs>
-                  <linearGradient id="grad" x1="0" y1="0" x2="300" y2="0">
-                    <stop offset="0%" stopColor="var(--primary)" />
-                    <stop offset="100%" stopColor="#10b981" />
-                  </linearGradient>
-                </defs>
-              </svg>
+            Monte a operacao.
+            <br />
+            <span className="text-white/70">Venda com clareza.</span>
+            <br />
+            <span className="bg-linear-to-r from-emerald-200 via-emerald-400 to-lime-300 bg-clip-text text-transparent">
+              Escale sem caos.
             </span>
           </motion.h1>
 
-          {/* Subtitle */}
           <motion.p
             variants={fadeUp}
             initial="hidden"
             animate="visible"
             custom={2}
-            className="mx-auto mt-6 max-w-2xl text-lg text-gray-500 md:text-xl leading-relaxed"
+            className="mt-6 max-w-2xl text-lg leading-8 text-white/66 md:text-xl"
           >
-            Tudo que você precisa para vender online — produtos, pedidos, pagamentos e envios.
-            Simples, rápido e sem complicações.
+            A Lojaki deixa de parecer um construtor generico e passa a se apresentar como infraestrutura de e-commerce.
+            Loja, pagamentos, marketing e leitura de performance num visual mais premium, escuro e objetivo.
           </motion.p>
 
-          {/* CTAs */}
           <motion.div
             variants={fadeUp}
             initial="hidden"
             animate="visible"
             custom={3}
-            className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
+            className="mt-10 flex flex-col gap-4 sm:flex-row"
           >
             <Link
               href="/signup"
-              className="group relative inline-flex items-center gap-2 rounded-2xl bg-linear-to-r from-primary to-emerald-500 px-8 py-4 text-base font-bold text-white shadow-2xl shadow-primary/25 hover:shadow-primary/40 transition-all hover:-translate-y-0.5"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-400 px-7 py-4 text-base font-bold text-emerald-950 shadow-[0_24px_60px_rgba(52,211,153,0.25)] transition-all hover:-translate-y-0.5 hover:bg-emerald-300"
             >
-              <span className="absolute inset-0 rounded-2xl bg-linear-to-r from-primary to-emerald-500 opacity-0 group-hover:opacity-100 blur-xl transition-opacity" />
-              <span className="relative flex items-center gap-2">
-                Começar grátis
-                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-              </span>
+              Criar minha loja
+              <ArrowRight className="h-5 w-5" />
             </Link>
             <a
-              href="#como-funciona"
-              className="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-8 py-4 text-base font-semibold text-gray-700 shadow-sm hover:shadow-md hover:border-gray-300 transition-all"
+              href="#plataforma"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/12 bg-white/5 px-7 py-4 text-base font-semibold text-white/84 transition-colors hover:bg-white/8"
             >
-              Como funciona
-              <ChevronRight className="h-4 w-4 text-gray-400" />
+              Ver a plataforma
+              <ChevronRight className="h-4 w-4" />
             </a>
           </motion.div>
 
-          {/* Social proof mini */}
           <motion.div
-            variants={fadeUp}
+            variants={stagger}
             initial="hidden"
             animate="visible"
-            custom={4}
-            className="mt-10 flex items-center justify-center gap-3"
+            className="mt-12 grid gap-4 md:grid-cols-3"
           >
-            <div className="flex -space-x-2">
-              {[
-                'bg-linear-to-br from-amber-400 to-orange-500',
-                'bg-linear-to-br from-blue-400 to-indigo-500',
-                'bg-linear-to-br from-pink-400 to-rose-500',
-                'bg-linear-to-br from-emerald-400 to-teal-500',
-                'bg-linear-to-br from-violet-400 to-purple-500',
-              ].map((bg, i) => (
-                <div key={i} className={`h-8 w-8 rounded-full ${bg} ring-2 ring-white flex items-center justify-center`}>
-                  <Users className="h-3.5 w-3.5 text-white/90" />
-                </div>
-              ))}
-            </div>
-            <div className="text-left">
-              <div className="flex items-center gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                ))}
-              </div>
-              <p className="text-xs text-gray-500">
-                <span className="font-semibold text-gray-700">2.500+</span> lojistas já usam
-              </p>
-            </div>
+            {heroStats.map((stat, index) => (
+              <motion.div
+                key={stat.label}
+                variants={scaleIn}
+                custom={index}
+                className="rounded-3xl border border-white/10 bg-white/4.5 p-5 shadow-[0_20px_80px_rgba(0,0,0,0.24)] backdrop-blur"
+              >
+                <div className="text-2xl font-black tracking-tight text-white">{stat.value}</div>
+                <p className="mt-2 text-sm leading-6 text-white/58">{stat.label}</p>
+              </motion.div>
+            ))}
           </motion.div>
         </div>
 
-        {/* Hero visual — dashboard mockup */}
         <motion.div
           variants={fadeUp}
           initial="hidden"
           animate="visible"
-          custom={5}
-          className="relative mx-auto mt-16 max-w-5xl"
+          custom={4}
+          className="relative"
         >
-          <div className="relative rounded-2xl border border-gray-200/80 bg-white p-2 shadow-2xl shadow-gray-200/60 ring-1 ring-gray-100">
-            {/* Browser chrome */}
-            <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
-              <div className="flex gap-1.5">
-                <div className="h-3 w-3 rounded-full bg-red-400" />
-                <div className="h-3 w-3 rounded-full bg-amber-400" />
-                <div className="h-3 w-3 rounded-full bg-green-400" />
-              </div>
-              <div className="ml-4 flex-1 rounded-lg bg-gray-50 px-4 py-1.5 text-xs text-gray-400 font-mono">
-                app.rapidocart.com.br/admin/dashboard
-              </div>
-            </div>
-            {/* Dashboard mockup content */}
-            <div className="grid grid-cols-12 gap-3 p-4">
-              {/* Sidebar */}
-              <div className="col-span-3 hidden md:block rounded-xl bg-gray-900 p-4">
-                <div className="flex items-center gap-2 mb-6">
-                  <div className="h-7 w-7 rounded-lg bg-emerald-500 flex items-center justify-center">
-                    <Zap className="h-4 w-4 text-white" />
+          <div className="absolute -left-8 top-12 hidden h-40 w-40 rounded-full bg-emerald-400/15 blur-3xl lg:block" />
+          <div className="absolute -bottom-10 right-0 hidden h-48 w-48 rounded-full bg-teal-400/10 blur-3xl lg:block" />
+
+          <div className="relative overflow-hidden rounded-4xl border border-white/10 bg-[#08110d]/90 p-3 shadow-[0_30px_140px_rgba(0,0,0,0.55)]">
+            <div className="rounded-[28px] border border-white/8 bg-[#0b1511]">
+              <div className="flex items-center justify-between border-b border-white/8 px-5 py-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex gap-2">
+                    <span className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-yellow-400/80" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/90" />
                   </div>
-                  <span className="text-sm font-bold text-white">RapidoCart</span>
+                  <div className="rounded-full border border-white/8 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-white/45">
+                    command center
+                  </div>
                 </div>
-                {['Dashboard', 'Produtos', 'Pedidos', 'Clientes', 'Marketing'].map((item, i) => (
-                  <div
-                    key={item}
-                    className={`flex items-center gap-2.5 rounded-lg px-3 py-2 mb-1 text-xs font-medium ${
-                      i === 0
-                        ? 'bg-white/10 text-white'
-                        : 'text-gray-400 hover:text-gray-200'
-                    }`}
-                  >
-                    {[LayoutDashboard, Package, ShoppingBag, Users, LineChart][i] &&
-                      (() => {
-                        const Icon = [LayoutDashboard, Package, ShoppingBag, Users, LineChart][i];
-                        return <Icon className="h-3.5 w-3.5" />;
-                      })()}
-                    {item}
-                  </div>
-                ))}
+                <div className="text-xs text-white/40">lojaki.com.br/admin</div>
               </div>
-              {/* Main */}
-              <div className="col-span-12 md:col-span-9 space-y-3">
-                {/* Stats row */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {[
-                    { label: 'Vendas hoje', value: 'R$ 4.280', change: '+12%', color: 'text-emerald-600 bg-emerald-50' },
-                    { label: 'Pedidos', value: '34', change: '+8%', color: 'text-blue-600 bg-blue-50' },
-                    { label: 'Visitantes', value: '1.247', change: '+22%', color: 'text-violet-600 bg-violet-50' },
-                    { label: 'Conversão', value: '3.2%', change: '+0.4%', color: 'text-amber-600 bg-amber-50' },
-                  ].map((stat) => (
-                    <div key={stat.label} className="rounded-xl border border-gray-100 bg-white p-3">
-                      <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">{stat.label}</p>
-                      <p className="mt-1 text-lg font-bold text-gray-900">{stat.value}</p>
-                      <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${stat.color}`}>
-                        {stat.change}
-                      </span>
+
+              <div className="grid gap-4 p-5 lg:grid-cols-[0.88fr_1.12fr]">
+                <div className="space-y-4 rounded-3xl border border-white/8 bg-black/20 p-4">
+                  <div className="rounded-2xl border border-emerald-400/18 bg-emerald-400/8 p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.24em] text-white/40">Radar comercial</p>
+                        <p className="mt-2 text-2xl font-black text-white">Campanha de inverno</p>
+                      </div>
+                      <div className="rounded-2xl bg-emerald-300/15 p-3">
+                        <Rocket className="h-5 w-5 text-emerald-200" />
+                      </div>
                     </div>
-                  ))}
-                </div>
-                {/* Chart placeholder */}
-                <div className="rounded-xl border border-gray-100 bg-white p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-xs font-semibold text-gray-700">Vendas (últimos 7 dias)</p>
-                    <span className="text-[10px] text-gray-400">Atualizado agora</span>
+                    <p className="mt-3 text-sm leading-6 text-white/58">
+                      Catalogo novo publicado, checkout ativo e remarketing disparado para recuperar abandono.
+                    </p>
                   </div>
-                  <div className="flex items-end gap-1.5 h-24">
-                    {[40, 65, 55, 80, 70, 90, 85].map((h, i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ height: 0 }}
-                        animate={{ height: `${h}%` }}
-                        transition={{ duration: 0.6, delay: 0.5 + i * 0.08, ease: 'easeOut' }}
-                        className="flex-1 rounded-md bg-gradient-to-t from-primary to-emerald-400"
-                      />
+
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                    <div className="rounded-2xl border border-white/8 bg-white/5 p-4">
+                      <p className="text-xs uppercase tracking-[0.24em] text-white/35">Fila de pedidos</p>
+                      <div className="mt-3 space-y-3">
+                        {['Pago e separado', 'Etiqueta emitida', 'Aguardando retirada'].map((item, index) => (
+                          <div key={item} className="flex items-center justify-between rounded-2xl bg-black/20 px-3 py-2.5">
+                            <span className="text-sm text-white/74">{item}</span>
+                            <span className="text-xs font-semibold text-emerald-300">0{index + 4}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-white/8 bg-white/5 p-4">
+                      <p className="text-xs uppercase tracking-[0.24em] text-white/35">Saude da operacao</p>
+                      <div className="mt-4 space-y-3">
+                        {[
+                          ['Checkout', '99.98%'],
+                          ['Pagamentos', 'Estavel'],
+                          ['Frete', 'Sincronizado'],
+                        ].map(([label, value]) => (
+                          <div key={label} className="flex items-center justify-between text-sm text-white/68">
+                            <span>{label}</span>
+                            <span className="font-semibold text-emerald-300">{value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {commandMetrics.map((metric) => (
+                      <div key={metric.label} className="rounded-2xl border border-white/8 bg-white/5 p-4">
+                        <p className="text-[11px] uppercase tracking-[0.2em] text-white/38">{metric.label}</p>
+                        <p className="mt-2 text-2xl font-black text-white">{metric.value}</p>
+                        <p className={`mt-2 text-sm font-semibold ${metric.tone}`}>{metric.change}</p>
+                      </div>
                     ))}
+                  </div>
+
+                  <div className="rounded-3xl border border-white/8 bg-white/5 p-5">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.24em] text-white/35">Volume de receita</p>
+                        <h3 className="mt-2 text-lg font-bold text-white">Ultimos 7 dias</h3>
+                      </div>
+                      <div className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/45">Atualizado agora</div>
+                    </div>
+                    <div className="mt-6 flex h-48 items-end gap-3">
+                      {[42, 58, 50, 76, 64, 82, 96].map((height, index) => (
+                        <motion.div
+                          key={height}
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: `${height}%`, opacity: 1 }}
+                          transition={{ duration: 0.6, delay: 0.35 + index * 0.07, ease: 'easeOut' }}
+                          className="relative flex-1 rounded-t-[18px] bg-linear-to-t from-emerald-400 via-emerald-300 to-lime-200"
+                        >
+                          <div className="absolute inset-x-0 top-0 h-10 rounded-t-[18px] bg-white/10" />
+                        </motion.div>
+                      ))}
+                    </div>
+                    <div className="mt-4 flex justify-between text-xs uppercase tracking-[0.2em] text-white/30">
+                      {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom'].map((day) => (
+                        <span key={day}>{day}</span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-
-          {/* Floating badges */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1.2, duration: 0.5 }}
-            className="absolute -left-4 top-1/3 hidden lg:flex items-center gap-2 rounded-xl border border-gray-100 bg-white px-4 py-3 shadow-lg"
-          >
-            <div className="h-8 w-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-              <ShoppingCart className="h-4 w-4 text-emerald-600" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-gray-900">Novo pedido!</p>
-              <p className="text-[10px] text-gray-400">R$ 189,90 — agora</p>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1.5, duration: 0.5 }}
-            className="absolute -right-4 top-1/4 hidden lg:flex items-center gap-2 rounded-xl border border-gray-100 bg-white px-4 py-3 shadow-lg"
-          >
-            <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
-              <CreditCard className="h-4 w-4 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-gray-900">Pagamento confirmado</p>
-              <p className="text-[10px] text-gray-400">PIX • R$ 340,00</p>
-            </div>
-          </motion.div>
         </motion.div>
       </div>
     </section>
   );
 }
 
-/* ═══════════════════════════════════════════════════════════
-   TRUST BAR — STATS
-   ═══════════════════════════════════════════════════════════ */
-function TrustBar() {
+function PlatformSection() {
   const { ref, inView } = useAnimateInView();
 
-  const stats = [
-    { value: '2.500+', label: 'Lojas criadas' },
-    { value: '150k+', label: 'Produtos cadastrados' },
-    { value: '99.9%', label: 'Uptime garantido' },
-    { value: '24/7', label: 'Suporte ativo' },
-  ];
-
   return (
-    <section ref={ref} className="relative bg-gradient-to-br from-emerald-700 via-green-600 to-teal-700 overflow-hidden">
-      {/* Decorative shapes */}
-      <div className="absolute inset-0 -z-0">
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-emerald-500/20 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-1/3 w-[400px] h-[400px] bg-teal-400/15 rounded-full blur-[100px]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff06_1px,transparent_1px),linear-gradient(to_bottom,#ffffff06_1px,transparent_1px)] bg-[size:3rem_3rem]" />
-      </div>
-      <div className="relative z-10 mx-auto max-w-7xl px-6 py-16 md:py-20">
+    <section id="plataforma" ref={ref} className="relative overflow-hidden bg-[#06110c] py-24 md:py-32">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(16,185,129,0.12),transparent_24%),radial-gradient(circle_at_80%_80%,rgba(132,204,22,0.09),transparent_22%)]" />
+      <div className="relative mx-auto max-w-7xl px-6">
         <motion.div
           variants={stagger}
           initial="hidden"
           animate={inView ? 'visible' : 'hidden'}
-          className="grid grid-cols-2 md:grid-cols-4 gap-8"
+          className="mx-auto max-w-3xl text-center"
         >
-          {stats.map((stat, i) => (
-            <motion.div key={stat.label} variants={fadeUp} custom={i} className="text-center">
-              <p className="text-3xl font-extrabold text-white md:text-4xl">{stat.value}</p>
-              <p className="mt-1 text-sm text-emerald-100">{stat.label}</p>
-            </motion.div>
-          ))}
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════
-   FEATURES SECTION
-   ═══════════════════════════════════════════════════════════ */
-function FeaturesSection() {
-  const { ref, inView } = useAnimateInView();
-
-  const features = [
-    {
-      icon: Store,
-      title: 'Loja personalizável',
-      description: 'Temas profissionais prontos para usar. Personalize cores, fontes e layout sem precisar programar.',
-      color: 'from-primary to-emerald-400',
-      bg: 'bg-emerald-50',
-      iconColor: 'text-emerald-600',
-    },
-    {
-      icon: Package,
-      title: 'Gestão de produtos',
-      description: 'Cadastre produtos com variações, estoque, imagens e SEO. Importe em massa via CSV.',
-      color: 'from-blue-500 to-indigo-500',
-      bg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
-    },
-    {
-      icon: CreditCard,
-      title: 'Pagamentos integrados',
-      description: 'PIX, cartão de crédito, boleto e mais. Integração com Mercado Pago, Stripe e PagSeguro.',
-      color: 'from-violet-500 to-purple-500',
-      bg: 'bg-violet-50',
-      iconColor: 'text-violet-600',
-    },
-    {
-      icon: Truck,
-      title: 'Envio inteligente',
-      description: 'Melhor Envio integrado com cálculo automático de frete. Correios, Jadlog, Loggi e mais.',
-      color: 'from-amber-500 to-orange-500',
-      bg: 'bg-amber-50',
-      iconColor: 'text-amber-600',
-    },
-    {
-      icon: LineChart,
-      title: 'Analytics e relatórios',
-      description: 'Dashboard completo com vendas, visitantes, conversão e ticket médio em tempo real.',
-      color: 'from-rose-500 to-pink-500',
-      bg: 'bg-rose-50',
-      iconColor: 'text-rose-600',
-    },
-    {
-      icon: Search,
-      title: 'SEO otimizado',
-      description: 'Meta tags, sitemap, URLs amigáveis e performance otimizada para aparecer no Google.',
-      color: 'from-teal-500 to-cyan-500',
-      bg: 'bg-teal-50',
-      iconColor: 'text-teal-600',
-    },
-  ];
-
-  return (
-    <section id="funcionalidades" ref={ref} className="relative py-24 md:py-32">
-      {/* Background decoration */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-linear-to-bl from-primary/5 to-transparent rounded-full blur-3xl" />
-      </div>
-
-      <div className="mx-auto max-w-7xl px-6">
-        {/* Header */}
-        <motion.div
-          variants={stagger}
-          initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
-          className="mx-auto max-w-3xl text-center mb-16"
-        >
-          <motion.div variants={fadeUp} className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
-            <Rocket className="h-3.5 w-3.5" />
-            Funcionalidades
+          <motion.div variants={fadeUp} className="inline-flex items-center gap-2 rounded-full border border-emerald-400/18 bg-emerald-400/8 px-4 py-2 text-sm font-medium text-emerald-200">
+            <Shield className="h-4 w-4" />
+            Plataforma redesenhada para passar mais autoridade
           </motion.div>
-          <motion.h2 variants={fadeUp} custom={1} className="text-3xl font-extrabold tracking-tight text-gray-900 md:text-5xl">
-            Tudo que sua loja precisa{' '}
-            <span className="bg-linear-to-r from-primary to-emerald-500 bg-clip-text text-transparent">
-              em um só lugar
-            </span>
+          <motion.h2 variants={fadeUp} custom={1} className="mt-6 text-4xl font-black tracking-[-0.04em] text-white md:text-5xl">
+            Menos cara de template.
+            <br />
+            Mais cara de sistema serio.
           </motion.h2>
-          <motion.p variants={fadeUp} custom={2} className="mt-4 text-lg text-gray-500">
-            Ferramentas poderosas para criar, gerenciar e escalar seu e-commerce.
+          <motion.p variants={fadeUp} custom={2} className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-white/62">
+            A pesquisa mostrou um padrao claro nas melhores plataformas: hero forte, contraste alto, narrativa de operacao e interface que transmite solidez.
+            Essa home segue exatamente essa direcao, mas com identidade propria.
           </motion.p>
         </motion.div>
 
-        {/* Grid */}
         <motion.div
           variants={stagger}
           initial="hidden"
           animate={inView ? 'visible' : 'hidden'}
-          className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+          className="mt-14 grid gap-6 lg:grid-cols-3"
         >
-          {features.map((feature, i) => (
+          {pillars.map((pillar, index) => (
             <motion.div
-              key={feature.title}
+              key={pillar.title}
               variants={scaleIn}
-              custom={i}
-              className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-7 transition-all hover:shadow-xl hover:shadow-gray-100/80 hover:-translate-y-1"
+              custom={index}
+              className="rounded-[28px] border border-white/10 bg-white/4.5 p-7 shadow-[0_24px_100px_rgba(0,0,0,0.18)]"
             >
-              <div className={`mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl ${feature.bg}`}>
-                <feature.icon className={`h-6 w-6 ${feature.iconColor}`} />
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-400/10">
+                <pillar.icon className="h-6 w-6 text-emerald-200" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900">{feature.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-gray-500">{feature.description}</p>
-              {/* Hover gradient line */}
-              <div className={`absolute bottom-0 left-0 h-0.5 w-0 bg-linear-to-r ${feature.color} transition-all duration-500 group-hover:w-full`} />
+              <h3 className="mt-6 text-2xl font-bold text-white">{pillar.title}</h3>
+              <p className="mt-3 text-sm leading-7 text-white/58">{pillar.description}</p>
             </motion.div>
           ))}
         </motion.div>
@@ -560,298 +562,48 @@ function FeaturesSection() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════
-   HOW IT WORKS
-   ═══════════════════════════════════════════════════════════ */
-function HowItWorks() {
+function CommerceSection() {
   const { ref, inView } = useAnimateInView();
 
-  const steps = [
-    {
-      step: '01',
-      title: 'Crie sua conta',
-      description: 'Cadastre-se em segundos. Sem cartão de crédito, sem taxa de setup.',
-      icon: Users,
-      color: 'from-primary to-emerald-400',
-    },
-    {
-      step: '02',
-      title: 'Configure sua loja',
-      description: 'Escolha um tema, adicione seus produtos e configure pagamentos.',
-      icon: Palette,
-      color: 'from-blue-500 to-indigo-500',
-    },
-    {
-      step: '03',
-      title: 'Comece a vender',
-      description: 'Publique sua loja e comece a receber pedidos imediatamente.',
-      icon: Rocket,
-      color: 'from-violet-500 to-purple-500',
-    },
-  ];
-
   return (
-    <section id="como-funciona" ref={ref} className="relative py-24 md:py-32 bg-gradient-to-br from-emerald-800 via-green-700 to-teal-800 overflow-hidden">
-      {/* Background effects */}
-      <div className="absolute inset-0">
-        <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-emerald-500/15 rounded-full blur-[140px]" />
-        <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-teal-400/10 rounded-full blur-[100px]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff06_1px,transparent_1px),linear-gradient(to_bottom,#ffffff06_1px,transparent_1px)] bg-[size:3rem_3rem]" />
-      </div>
-      <div className="mx-auto max-w-7xl px-6">
-        {/* Header */}
-        <motion.div
-          variants={stagger}
-          initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
-          className="mx-auto max-w-3xl text-center mb-16"
-        >
-          <motion.div variants={fadeUp} className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium text-emerald-100">
-            <Sparkles className="h-3.5 w-3.5" />
-            Simples e rápido
+    <section id="operacao" ref={ref} className="bg-[#f5f7f4] py-24 text-slate-950 md:py-32">
+      <div className="mx-auto grid max-w-7xl gap-14 px-6 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
+        <motion.div variants={stagger} initial="hidden" animate={inView ? 'visible' : 'hidden'}>
+          <motion.div variants={fadeUp} className="inline-flex items-center gap-2 rounded-full border border-emerald-700/12 bg-emerald-600/8 px-4 py-2 text-sm font-medium text-emerald-700">
+            <Globe className="h-4 w-4" />
+            Toda a jornada comercial alinhada
           </motion.div>
-          <motion.h2 variants={fadeUp} custom={1} className="text-3xl font-extrabold tracking-tight text-white md:text-5xl">
-            Comece a vender em{' '}
-            <span className="text-emerald-200">3 passos</span>
+          <motion.h2 variants={fadeUp} custom={1} className="mt-6 text-4xl font-black tracking-[-0.04em] md:text-5xl">
+            A homepage agora vende uma ideia maior:
+            <span className="block text-slate-500">sua loja como centro da operacao.</span>
           </motion.h2>
-          <motion.p variants={fadeUp} custom={2} className="mt-4 text-lg text-emerald-100/80">
-            Sem complicações. Crie sua loja virtual e comece a faturar.
+          <motion.p variants={fadeUp} custom={2} className="mt-6 max-w-xl text-lg leading-8 text-slate-600">
+            Em vez de parecer apenas um site bonito, a narrativa passa a mostrar que a Lojaki organiza produto, equipe, campanhas e caixa.
+            Isso melhora a percepcao de valor antes mesmo do usuario entrar no admin.
           </motion.p>
-        </motion.div>
 
-        {/* Steps */}
-        <motion.div
-          variants={stagger}
-          initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
-          className="grid gap-8 md:grid-cols-3"
-        >
-          {steps.map((step, i) => (
-            <motion.div key={step.step} variants={fadeUp} custom={i} className="relative text-center">
-              {/* Connector line */}
-              {i < steps.length - 1 && (
-                <div className="hidden md:block absolute top-12 left-[60%] w-[80%] h-px bg-linear-to-r from-white/20 to-white/5" />
-              )}
-              <div className={`relative z-10 mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-white/15 backdrop-blur-sm border border-white/20 shadow-lg`}>
-                <step.icon className="h-10 w-10 text-white" />
-                <span className="absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white text-xs font-bold text-emerald-800 shadow-md">
-                  {step.step}
-                </span>
-              </div>
-              <h3 className="text-xl font-bold text-white">{step.title}</h3>
-              <p className="mt-2 mx-auto max-w-xs text-sm text-emerald-100/80 leading-relaxed">{step.description}</p>
-            </motion.div>
-          ))}
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════
-   PRODUCT SHOWCASE — STOREFRONT PREVIEW
-   ═══════════════════════════════════════════════════════════ */
-function ProductShowcase() {
-  const { ref, inView } = useAnimateInView();
-
-  return (
-    <section ref={ref} className="relative py-24 md:py-32 overflow-hidden">
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute bottom-0 left-1/4 w-[600px] h-[600px] bg-gradient-to-t from-primary/5 to-transparent rounded-full blur-3xl" />
-      </div>
-
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="grid gap-12 lg:grid-cols-2 items-center">
-          {/* Text */}
-          <motion.div
-            variants={stagger}
-            initial="hidden"
-            animate={inView ? 'visible' : 'hidden'}
-          >
-            <motion.div variants={fadeUp} className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
-              <Globe className="h-3.5 w-3.5" />
-              Sua loja, do seu jeito
-            </motion.div>
-            <motion.h2 variants={fadeUp} custom={1} className="text-3xl font-extrabold tracking-tight text-gray-900 md:text-4xl lg:text-5xl">
-              Storefronts profissionais que{' '}
-              <span className="bg-linear-to-r from-primary to-emerald-500 bg-clip-text text-transparent">
-                vendem
+          <motion.div variants={fadeUp} custom={3} className="mt-8 flex flex-wrap gap-3">
+            {['Visual premium', 'Tom mais estrategico', 'Mais contraste', 'Mais credibilidade'].map((item) => (
+              <span key={item} className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700">
+                {item}
               </span>
-            </motion.h2>
-            <motion.p variants={fadeUp} custom={2} className="mt-4 text-lg text-gray-500 leading-relaxed">
-              Seus clientes terão uma experiência de compra incrível. Responsivo, rápido e otimizado para conversão.
-            </motion.p>
-
-            <motion.div variants={stagger} initial="hidden" animate={inView ? 'visible' : 'hidden'} className="mt-8 space-y-4">
-              {[
-                'Temas modernos e responsivos',
-                'Carrinho e checkout otimizados',
-                'Busca inteligente de produtos',
-                'Avaliações de clientes',
-                'Domínio personalizado',
-              ].map((item, i) => (
-                <motion.div key={item} variants={fadeUp} custom={i + 3} className="flex items-center gap-3">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10">
-                    <Check className="h-3.5 w-3.5 text-primary" />
-                  </div>
-                  <span className="text-sm font-medium text-gray-700">{item}</span>
-                </motion.div>
-              ))}
-            </motion.div>
-
-            <motion.div variants={fadeUp} custom={8} className="mt-8">
-              <Link
-                href="/signup"
-                className="group inline-flex items-center gap-2 rounded-xl bg-gray-900 px-6 py-3 text-sm font-semibold text-white hover:bg-gray-800 transition-colors"
-              >
-                Criar minha loja
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-            </motion.div>
+            ))}
           </motion.div>
-
-          {/* Store mockup */}
-          <motion.div
-            variants={scaleIn}
-            initial="hidden"
-            animate={inView ? 'visible' : 'hidden'}
-            className="relative"
-          >
-            <div className="rounded-2xl border border-gray-200/80 bg-white p-2 shadow-2xl shadow-gray-200/60 ring-1 ring-gray-100">
-              {/* Browser bar */}
-              <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
-                <div className="flex gap-1.5">
-                  <div className="h-3 w-3 rounded-full bg-red-400" />
-                  <div className="h-3 w-3 rounded-full bg-amber-400" />
-                  <div className="h-3 w-3 rounded-full bg-green-400" />
-                </div>
-                <div className="ml-4 flex-1 rounded-lg bg-gray-50 px-4 py-1.5 text-xs text-gray-400 font-mono">
-                  minhaloja.rapidocart.com.br
-                </div>
-              </div>
-              {/* Store content */}
-              <div className="p-5">
-                {/* Store nav */}
-                <div className="flex items-center justify-between mb-6">
-                  <span className="text-sm font-bold text-gray-900">Moda Elegante</span>
-                  <div className="flex items-center gap-3">
-                    <Search className="h-4 w-4 text-gray-400" />
-                    <ShoppingBag className="h-4 w-4 text-gray-400" />
-                  </div>
-                </div>
-                {/* Product grid */}
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { name: 'Camiseta Premium', price: 'R$ 89,90', color: 'from-slate-200 to-slate-300' },
-                    { name: 'Vestido Midi', price: 'R$ 159,90', color: 'from-rose-200 to-rose-300' },
-                    { name: 'Jaqueta Jeans', price: 'R$ 219,90', color: 'from-blue-200 to-blue-300' },
-                    { name: 'Tênis Sport', price: 'R$ 299,90', color: 'from-emerald-200 to-emerald-300' },
-                  ].map((product) => (
-                    <div key={product.name} className="group cursor-pointer">
-                      <div className={`aspect-[4/5] rounded-xl bg-linear-to-br ${product.color} mb-2 transition-transform group-hover:scale-[1.02]`} />
-                      <p className="text-xs font-medium text-gray-900">{product.name}</p>
-                      <p className="text-xs text-gray-500">{product.price}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Floating elements */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ delay: 0.8, duration: 0.5 }}
-              className="absolute -bottom-4 -left-4 rounded-xl border border-gray-100 bg-white px-4 py-3 shadow-lg"
-            >
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-                  <LineChart className="h-4 w-4 text-emerald-600" />
-                </div>
-                <div>
-                  <p className="text-[10px] text-gray-400">Conversão</p>
-                  <p className="text-sm font-bold text-gray-900">4.8% <span className="text-emerald-500 text-xs">↑</span></p>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════
-   INTEGRATIONS
-   ═══════════════════════════════════════════════════════════ */
-function IntegrationsSection() {
-  const { ref, inView } = useAnimateInView();
-
-  const integrations = [
-    { name: 'Mercado Pago', category: 'Pagamento' },
-    { name: 'PIX', category: 'Pagamento' },
-    { name: 'Stripe', category: 'Pagamento' },
-    { name: 'PagSeguro', category: 'Pagamento' },
-    { name: 'Melhor Envio', category: 'Envio' },
-    { name: 'Correios', category: 'Envio' },
-    { name: 'Jadlog', category: 'Envio' },
-    { name: 'Google Analytics', category: 'Analytics' },
-    { name: 'Meta Pixel', category: 'Marketing' },
-    { name: 'Google Shopping', category: 'Vendas' },
-    { name: 'Instagram', category: 'Vendas' },
-    { name: 'Mailchimp', category: 'Email' },
-  ];
-
-  return (
-    <section ref={ref} className="relative py-24 md:py-32 bg-gradient-to-br from-green-700 via-emerald-600 to-teal-700 overflow-hidden">
-      {/* Background effects */}
-      <div className="absolute inset-0">
-        <div className="absolute top-0 left-1/3 w-[500px] h-[500px] bg-emerald-400/15 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-teal-400/10 rounded-full blur-[80px]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff06_1px,transparent_1px),linear-gradient(to_bottom,#ffffff06_1px,transparent_1px)] bg-[size:3rem_3rem]" />
-      </div>
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
-        <motion.div
-          variants={stagger}
-          initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
-          className="mx-auto max-w-3xl text-center mb-16"
-        >
-          <motion.div variants={fadeUp} className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium text-emerald-100">
-            <Shield className="h-3.5 w-3.5" />
-            Integrações
-          </motion.div>
-          <motion.h2 variants={fadeUp} custom={1} className="text-3xl font-extrabold tracking-tight text-white md:text-5xl">
-            Conecte com suas{' '}
-            <span className="text-emerald-200">
-              ferramentas favoritas
-            </span>
-          </motion.h2>
-          <motion.p variants={fadeUp} custom={2} className="mt-4 text-lg text-emerald-100/80">
-            Pagamentos, envios, marketing e mais — tudo integrado nativamente.
-          </motion.p>
         </motion.div>
 
-        <motion.div
-          variants={stagger}
-          initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
-        >
-          {integrations.map((integration, i) => (
+        <motion.div variants={stagger} initial="hidden" animate={inView ? 'visible' : 'hidden'} className="grid gap-4 sm:grid-cols-2">
+          {commerceCards.map((card, index) => (
             <motion.div
-              key={integration.name}
+              key={card.title}
               variants={scaleIn}
-              custom={i}
-              className="group flex flex-col items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 backdrop-blur-sm p-5 transition-all hover:bg-white/20 hover:-translate-y-1 hover:border-white/25"
+              custom={index}
+              className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_24px_60px_rgba(15,23,42,0.06)]"
             >
-              <div className="h-10 w-10 rounded-xl bg-white/15 flex items-center justify-center group-hover:bg-white/25 transition-colors">
-                <span className="text-lg font-bold text-white/70 group-hover:text-white transition-colors">
-                  {integration.name.charAt(0)}
-                </span>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
+                <card.icon className="h-6 w-6" />
               </div>
-              <p className="text-xs font-semibold text-white text-center">{integration.name}</p>
-              <span className="text-[10px] text-emerald-200/70">{integration.category}</span>
+              <h3 className="mt-5 text-xl font-bold text-slate-950">{card.title}</h3>
+              <p className="mt-3 text-sm leading-7 text-slate-600">{card.text}</p>
             </motion.div>
           ))}
         </motion.div>
@@ -860,88 +612,202 @@ function IntegrationsSection() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════
-   TESTIMONIALS
-   ═══════════════════════════════════════════════════════════ */
+function ChannelsSection() {
+  const { ref, inView } = useAnimateInView();
+
+  return (
+    <section ref={ref} className="relative overflow-hidden bg-[#050806] py-24 md:py-32">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_20%,rgba(16,185,129,0.14),transparent_24%)]" />
+      <div className="relative mx-auto max-w-7xl px-6">
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          animate={inView ? 'visible' : 'hidden'}
+          className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between"
+        >
+          <div className="max-w-3xl">
+            <motion.div variants={fadeUp} className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-emerald-200">
+              <ShoppingBag className="h-4 w-4" />
+              Canais e times conectados
+            </motion.div>
+            <motion.h2 variants={fadeUp} custom={1} className="mt-6 text-4xl font-black tracking-[-0.04em] text-white md:text-5xl">
+              O layout agora conversa com crescimento de verdade.
+            </motion.h2>
+          </div>
+
+          <motion.p variants={fadeUp} custom={2} className="max-w-xl text-base leading-8 text-white/60">
+            O padrao de pesquisa mais forte foi esse: plataformas vencedoras nao mostram apenas features, elas mostram como a marca opera melhor.
+            Por isso a home foi reorganizada em fluxos e sistemas, nao em blocos genericos.
+          </motion.p>
+        </motion.div>
+
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          animate={inView ? 'visible' : 'hidden'}
+          className="mt-14 grid gap-5 lg:grid-cols-[1.1fr_0.9fr]"
+        >
+          <motion.div variants={scaleIn} className="rounded-4xl border border-white/10 bg-white/4.5 p-6 shadow-[0_28px_100px_rgba(0,0,0,0.25)]">
+            <div className="grid gap-5 md:grid-cols-2">
+              {channelCards.map((card, index) => (
+                <div key={card.title} className="relative overflow-hidden rounded-3xl border border-white/8 bg-black/20 p-5">
+                  <div className={`absolute inset-0 bg-linear-to-br ${card.accent}`} />
+                  <div className="relative">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-emerald-200">
+                      {[Store, Users, Globe, Palette][index] && (() => {
+                        const Icon = [Store, Users, Globe, Palette][index];
+                        return <Icon className="h-5 w-5" />;
+                      })()}
+                    </div>
+                    <h3 className="mt-5 text-xl font-bold text-white">{card.title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-white/60">{card.subtitle}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          <motion.div variants={scaleIn} custom={1} className="rounded-4xl border border-white/10 bg-linear-to-br from-emerald-400 to-lime-300 p-px">
+            <div className="h-full rounded-[31px] bg-[#09110d] p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.24em] text-emerald-200/65">Growth board</p>
+                  <h3 className="mt-2 text-2xl font-bold text-white">Camadas de evolucao</h3>
+                </div>
+                <LineChart className="h-6 w-6 text-emerald-200" />
+              </div>
+
+              <div className="mt-8 space-y-4">
+                {[
+                  ['Visual da vitrine', 'Alto impacto', 'bg-emerald-400'],
+                  ['Fluxo de compra', 'Otimizado', 'bg-lime-300'],
+                  ['Retencao e campanha', 'Ativo', 'bg-teal-300'],
+                  ['Leitura de dados', 'Centralizada', 'bg-emerald-200'],
+                ].map(([label, status, tone]) => (
+                  <div key={label} className="rounded-[22px] border border-white/8 bg-white/5 p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-white">{label}</p>
+                        <p className="mt-1 text-sm text-white/52">Estrutura que cresce sem depender de remendo operacional.</p>
+                      </div>
+                      <div className="flex items-center gap-2 rounded-full border border-white/10 px-3 py-1.5 text-xs font-semibold text-white/72">
+                        <span className={`h-2.5 w-2.5 rounded-full ${tone}`} />
+                        {status}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+function StepsSection() {
+  const { ref, inView } = useAnimateInView();
+
+  return (
+    <section ref={ref} className="bg-white py-24 md:py-32">
+      <div className="mx-auto max-w-7xl px-6">
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          animate={inView ? 'visible' : 'hidden'}
+          className="mx-auto max-w-3xl text-center"
+        >
+          <motion.div variants={fadeUp} className="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700">
+            <Package className="h-4 w-4" />
+            Um caminho de ativacao mais claro
+          </motion.div>
+          <motion.h2 variants={fadeUp} custom={1} className="mt-6 text-4xl font-black tracking-[-0.04em] text-slate-950 md:text-5xl">
+            Do setup ao crescimento sem pular etapas.
+          </motion.h2>
+        </motion.div>
+
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          animate={inView ? 'visible' : 'hidden'}
+          className="mt-14 grid gap-6 lg:grid-cols-3"
+        >
+          {steps.map((step, index) => (
+            <motion.div
+              key={step.step}
+              variants={scaleIn}
+              custom={index}
+              className="relative overflow-hidden rounded-[30px] border border-slate-200 bg-[#f7faf8] p-8"
+            >
+              <div className="absolute right-5 top-5 text-6xl font-black tracking-[-0.06em] text-slate-200">{step.step}</div>
+              <div className="relative">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-emerald-300">
+                  {[Users, CreditCard, LineChart][index] && (() => {
+                    const Icon = [Users, CreditCard, LineChart][index];
+                    return <Icon className="h-5 w-5" />;
+                  })()}
+                </div>
+                <h3 className="mt-10 max-w-xs text-2xl font-bold text-slate-950">{step.title}</h3>
+                <p className="mt-4 text-sm leading-7 text-slate-600">{step.text}</p>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
 function TestimonialsSection() {
   const { ref, inView } = useAnimateInView();
 
-  const testimonials = [
-    {
-      quote: 'Migrei minha loja para a RapidoCart e em 2 semanas já tinha dobrado minha conversão. A plataforma é incrivelmente intuitiva.',
-      name: 'Ana Beatriz Costa',
-      role: 'Fundadora, Bella Store',
-      initials: 'AC',
-      color: 'from-rose-400 to-pink-500',
-    },
-    {
-      quote: 'O suporte é sensacional. Toda vez que preciso de ajuda, a equipe resolve rápido. Melhor plataforma que já usei.',
-      name: 'Carlos Mendes',
-      role: 'CEO, TechWear Brasil',
-      initials: 'CM',
-      color: 'from-blue-400 to-indigo-500',
-    },
-    {
-      quote: 'Com a RapidoCart consegui colocar minha loja no ar em um dia. O checkout integrado com PIX foi um game changer.',
-      name: 'Juliana Ferreira',
-      role: 'Proprietária, JF Acessórios',
-      initials: 'JF',
-      color: 'from-amber-400 to-orange-500',
-    },
-  ];
-
   return (
-    <section ref={ref} className="relative py-24 md:py-32">
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-linear-to-r from-primary/3 via-emerald-100/20 to-primary/3 rounded-full blur-3xl" />
-      </div>
-
-      <div className="mx-auto max-w-7xl px-6">
+    <section id="depoimentos" ref={ref} className="relative overflow-hidden bg-[#06110c] py-24 md:py-32">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(16,185,129,0.12),transparent_26%)]" />
+      <div className="relative mx-auto max-w-7xl px-6">
         <motion.div
           variants={stagger}
           initial="hidden"
           animate={inView ? 'visible' : 'hidden'}
-          className="mx-auto max-w-3xl text-center mb-16"
+          className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between"
         >
-          <motion.div variants={fadeUp} className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
-            <MessageSquare className="h-3.5 w-3.5" />
-            Depoimentos
-          </motion.div>
-          <motion.h2 variants={fadeUp} custom={1} className="text-3xl font-extrabold tracking-tight text-gray-900 md:text-5xl">
-            Quem usa,{' '}
-            <span className="bg-linear-to-r from-primary to-emerald-500 bg-clip-text text-transparent">
-              recomenda
-            </span>
-          </motion.h2>
+          <div className="max-w-3xl">
+            <motion.div variants={fadeUp} className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-emerald-200">
+              <Star className="h-4 w-4" />
+              Prova social com mais presenca visual
+            </motion.div>
+            <motion.h2 variants={fadeUp} custom={1} className="mt-6 text-4xl font-black tracking-[-0.04em] text-white md:text-5xl">
+              O visual mudou para sustentar uma conversa de valor.
+            </motion.h2>
+          </div>
+          <motion.p variants={fadeUp} custom={2} className="max-w-xl text-base leading-8 text-white/58">
+            Layout premium funciona melhor quando o texto, a prova social e a narrativa apontam para confianca, crescimento e controle.
+          </motion.p>
         </motion.div>
 
         <motion.div
           variants={stagger}
           initial="hidden"
           animate={inView ? 'visible' : 'hidden'}
-          className="grid gap-6 md:grid-cols-3"
+          className="mt-14 grid gap-6 lg:grid-cols-3"
         >
-          {testimonials.map((t, i) => (
+          {testimonials.map((testimonial, index) => (
             <motion.div
-              key={t.name}
+              key={testimonial.author}
               variants={scaleIn}
-              custom={i}
-              className="relative rounded-2xl border border-gray-100 bg-white p-7 transition-all hover:shadow-xl hover:shadow-gray-100/80"
+              custom={index}
+              className="rounded-[30px] border border-white/10 bg-white/4.5 p-7 shadow-[0_24px_100px_rgba(0,0,0,0.2)]"
             >
-              <div className="flex items-center gap-1 mb-4">
-                {[...Array(5)].map((_, j) => (
-                  <Star key={j} className="h-4 w-4 fill-amber-400 text-amber-400" />
+              <div className="flex items-center gap-1 text-emerald-300">
+                {[...Array(5)].map((_, starIndex) => (
+                  <Star key={starIndex} className="h-4 w-4 fill-current" />
                 ))}
               </div>
-              <p className="text-sm leading-relaxed text-gray-600 mb-6">&ldquo;{t.quote}&rdquo;</p>
-              <div className="flex items-center gap-3">
-                <div className={`h-10 w-10 rounded-full bg-linear-to-br ${t.color} flex items-center justify-center`}>
-                  <span className="text-xs font-bold text-white">{t.initials}</span>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-900">{t.name}</p>
-                  <p className="text-xs text-gray-400">{t.role}</p>
-                </div>
+              <p className="mt-6 text-base leading-8 text-white/72">&ldquo;{testimonial.quote}&rdquo;</p>
+              <div className="mt-8 border-t border-white/10 pt-5">
+                <p className="text-sm font-semibold text-white">{testimonial.author}</p>
+                <p className="mt-1 text-sm text-white/46">{testimonial.role}</p>
               </div>
             </motion.div>
           ))}
@@ -951,91 +817,27 @@ function TestimonialsSection() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════
-   PRICING SECTION
-   ═══════════════════════════════════════════════════════════ */
 function PricingSection() {
   const { ref, inView } = useAnimateInView();
 
-  const plans = [
-    {
-      name: 'Free',
-      price: 'R$ 0',
-      period: '/mês',
-      description: 'Perfeito para começar',
-      popular: false,
-      features: [
-        '1 loja',
-        'Até 10 produtos',
-        'Checkout integrado',
-        'Suporte por email',
-        'Temas básicos',
-        'SSL grátis',
-      ],
-    },
-    {
-      name: 'Pro',
-      price: 'R$ 79',
-      period: '/mês',
-      description: 'Para quem quer crescer',
-      popular: true,
-      features: [
-        'Até 3 lojas',
-        'Produtos ilimitados',
-        'Domínio personalizado',
-        'Relatórios avançados',
-        'Suporte prioritário',
-        'Temas premium',
-        'Cupons e promoções',
-        'Google Shopping',
-      ],
-    },
-    {
-      name: 'Enterprise',
-      price: 'R$ 199',
-      period: '/mês',
-      description: 'Para grandes operações',
-      popular: false,
-      features: [
-        'Lojas ilimitadas',
-        'Produtos ilimitados',
-        'API dedicada',
-        'Gerente de conta',
-        'SLA garantido',
-        'Multi-usuário',
-        'Relatórios customizados',
-        'Suporte 24/7',
-      ],
-    },
-  ];
-
   return (
-    <section id="planos" ref={ref} className="relative py-24 md:py-32 bg-gradient-to-br from-emerald-800 via-green-700 to-teal-800 overflow-hidden">
-      {/* Background effects */}
-      <div className="absolute inset-0">
-        <div className="absolute top-1/3 left-0 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[140px]" />
-        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-teal-400/10 rounded-full blur-[120px]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff06_1px,transparent_1px),linear-gradient(to_bottom,#ffffff06_1px,transparent_1px)] bg-[size:3rem_3rem]" />
-      </div>
+    <section id="planos" ref={ref} className="bg-[#f5f7f4] py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-6">
         <motion.div
           variants={stagger}
           initial="hidden"
           animate={inView ? 'visible' : 'hidden'}
-          className="mx-auto max-w-3xl text-center mb-16"
+          className="mx-auto max-w-3xl text-center"
         >
-          <motion.div variants={fadeUp} className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium text-emerald-100">
-            <Sparkles className="h-3.5 w-3.5" />
-            Planos
+          <motion.div variants={fadeUp} className="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm font-medium text-emerald-700">
+            <Sparkles className="h-4 w-4" />
+            Planos com leitura mais premium
           </motion.div>
-          <motion.h2 variants={fadeUp} custom={1} className="text-3xl font-extrabold tracking-tight text-white md:text-5xl">
-            Escolha o plano{' '}
-            <span className="text-emerald-200">
-              ideal para você
-            </span>
+          <motion.h2 variants={fadeUp} custom={1} className="mt-6 text-4xl font-black tracking-[-0.04em] text-slate-950 md:text-5xl">
+            Comece leve. Cresca com estrutura.
           </motion.h2>
-          <motion.p variants={fadeUp} custom={2} className="mt-4 text-lg text-emerald-100/80">
-            Comece grátis. Escale quando precisar. Sem surpresas.
+          <motion.p variants={fadeUp} custom={2} className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-600">
+            O redesenho tambem reorganiza a apresentacao comercial para deixar a oferta mais clara, aspiracional e facil de comparar.
           </motion.p>
         </motion.div>
 
@@ -1043,55 +845,56 @@ function PricingSection() {
           variants={stagger}
           initial="hidden"
           animate={inView ? 'visible' : 'hidden'}
-          className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto"
+          className="mt-14 grid gap-6 lg:grid-cols-3"
         >
-          {plans.map((plan, i) => (
+          {plans.map((plan, index) => (
             <motion.div
               key={plan.name}
               variants={scaleIn}
-              custom={i}
-              className={`relative flex flex-col rounded-2xl border p-7 transition-all hover:shadow-xl ${
-                plan.popular
-                  ? 'border-primary/30 bg-white shadow-lg shadow-primary/5 ring-1 ring-primary/10 scale-[1.02]'
-                  : 'border-gray-100 bg-white hover:shadow-gray-100/80'
+              custom={index}
+              className={`rounded-4xl border p-8 ${
+                plan.featured
+                  ? 'border-emerald-300 bg-slate-950 text-white shadow-[0_28px_90px_rgba(16,185,129,0.18)]'
+                  : 'border-slate-200 bg-white text-slate-950 shadow-[0_24px_60px_rgba(15,23,42,0.06)]'
               }`}
             >
-              {plan.popular && (
-                <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-linear-to-r from-primary to-emerald-500 px-4 py-1 text-[11px] font-bold text-white shadow-lg shadow-primary/25">
-                  Mais popular
-                </span>
-              )}
-
-              <div className="mb-6">
-                <h3 className="text-lg font-bold text-gray-900">{plan.name}</h3>
-                <p className="text-xs text-gray-400 mt-1">{plan.description}</p>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-2xl font-bold">{plan.name}</h3>
+                  <p className={`mt-3 text-sm leading-7 ${plan.featured ? 'text-white/62' : 'text-slate-600'}`}>{plan.description}</p>
+                </div>
+                {plan.featured && (
+                  <span className="rounded-full bg-emerald-400 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-emerald-950">
+                    recomendado
+                  </span>
+                )}
               </div>
 
-              <div className="mb-6 flex items-baseline gap-1">
-                <span className="text-4xl font-extrabold text-gray-900">{plan.price}</span>
-                <span className="text-sm text-gray-400">{plan.period}</span>
+              <div className="mt-8 flex items-end gap-2">
+                <span className="text-4xl font-black tracking-tight">{plan.price}</span>
+                {!plan.price.includes('Sob') && <span className={plan.featured ? 'pb-1 text-white/45' : 'pb-1 text-slate-500'}>/mes</span>}
               </div>
 
-              <ul className="flex-1 space-y-3 mb-8">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-2.5 text-sm text-gray-600">
-                    <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${plan.popular ? 'bg-primary/10' : 'bg-gray-100'}`}>
-                      <Check className={`h-3 w-3 ${plan.popular ? 'text-primary' : 'text-gray-500'}`} />
+              <div className="mt-8 space-y-4">
+                {plan.items.map((item) => (
+                  <div key={item} className="flex items-center gap-3">
+                    <div className={`flex h-6 w-6 items-center justify-center rounded-full ${plan.featured ? 'bg-emerald-400/14 text-emerald-300' : 'bg-emerald-50 text-emerald-700'}`}>
+                      <Check className="h-3.5 w-3.5" />
                     </div>
-                    {feature}
-                  </li>
+                    <span className={plan.featured ? 'text-sm text-white/74' : 'text-sm text-slate-700'}>{item}</span>
+                  </div>
                 ))}
-              </ul>
+              </div>
 
               <Link
                 href="/signup"
-                className={`flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition-all ${
-                  plan.popular
-                    ? 'bg-linear-to-r from-primary to-emerald-500 text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5'
-                    : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                className={`mt-10 inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3.5 text-sm font-bold transition-all ${
+                  plan.featured
+                    ? 'bg-emerald-400 text-emerald-950 hover:bg-emerald-300'
+                    : 'bg-slate-950 text-white hover:bg-slate-800'
                 }`}
               >
-                Começar agora
+                Escolher plano
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </motion.div>
@@ -1102,74 +905,43 @@ function PricingSection() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════
-   FINAL CTA
-   ═══════════════════════════════════════════════════════════ */
-function FinalCTA() {
+function FinalSection() {
   const { ref, inView } = useAnimateInView();
 
   return (
-    <section ref={ref} className="relative py-24 md:py-32 overflow-hidden">
-      <div className="mx-auto max-w-7xl px-6">
+    <section ref={ref} className="relative overflow-hidden bg-[#040705] py-24 md:py-32">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.18),transparent_28%)]" />
+      <div className="relative mx-auto max-w-6xl px-6">
         <motion.div
-          variants={fadeIn}
+          variants={fadeUp}
           initial="hidden"
           animate={inView ? 'visible' : 'hidden'}
-          className="relative overflow-hidden rounded-3xl bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 px-8 py-16 md:px-16 md:py-24 text-center"
+          className="overflow-hidden rounded-[36px] border border-white/10 bg-white/4.5 px-8 py-14 text-center shadow-[0_28px_120px_rgba(0,0,0,0.28)] md:px-16 md:py-20"
         >
-          {/* Background effects */}
-          <div className="absolute inset-0 -z-0">
-            <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-primary/20 rounded-full blur-[100px]" />
-            <div className="absolute bottom-0 right-1/4 w-[300px] h-[300px] bg-emerald-500/15 rounded-full blur-[80px]" />
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:3rem_3rem]" />
-          </div>
+          <div className="mx-auto max-w-3xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.32em] text-emerald-200/70">reposicionamento visual + estrutura comercial</p>
+            <h2 className="mt-5 text-4xl font-black tracking-[-0.04em] text-white md:text-6xl">
+              A primeira impressao agora combina mais com a ambicao do produto.
+            </h2>
+            <p className="mt-6 text-lg leading-8 text-white/60">
+              Se a ideia e parecer mais profissional, moderna e forte sem cair em copia direta de outras plataformas, esse novo caminho esta bem mais alinhado.
+            </p>
 
-          <div className="relative z-10">
-            <motion.h2
-              variants={fadeUp}
-              initial="hidden"
-              animate={inView ? 'visible' : 'hidden'}
-              custom={0}
-              className="text-3xl font-extrabold text-white md:text-5xl lg:text-6xl"
-            >
-              Pronto para criar sua{' '}
-              <span className="bg-linear-to-r from-primary to-emerald-400 bg-clip-text text-transparent">
-                loja online?
-              </span>
-            </motion.h2>
-            <motion.p
-              variants={fadeUp}
-              initial="hidden"
-              animate={inView ? 'visible' : 'hidden'}
-              custom={1}
-              className="mx-auto mt-4 max-w-xl text-lg text-gray-400"
-            >
-              Junte-se a milhares de lojistas que já vendem com a RapidoCart. Comece grátis — não precisa de cartão.
-            </motion.p>
-            <motion.div
-              variants={fadeUp}
-              initial="hidden"
-              animate={inView ? 'visible' : 'hidden'}
-              custom={2}
-              className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
-            >
+            <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
               <Link
                 href="/signup"
-                className="group relative inline-flex items-center gap-2 rounded-2xl bg-linear-to-r from-primary to-emerald-500 px-8 py-4 text-base font-bold text-white shadow-2xl shadow-primary/30 hover:shadow-primary/50 transition-all hover:-translate-y-0.5"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-400 px-7 py-4 text-base font-bold text-emerald-950 shadow-[0_24px_60px_rgba(52,211,153,0.2)] transition-all hover:-translate-y-0.5 hover:bg-emerald-300"
               >
-                <span className="absolute inset-0 rounded-2xl bg-linear-to-r from-primary to-emerald-500 opacity-0 group-hover:opacity-100 blur-xl transition-opacity" />
-                <span className="relative flex items-center gap-2">
-                  Começar grátis agora
-                  <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-                </span>
+                Testar a nova experiencia
+                <ArrowRight className="h-5 w-5" />
               </Link>
-              <a
-                href="#funcionalidades"
-                className="inline-flex items-center gap-2 rounded-2xl border border-gray-700 bg-gray-800/50 px-8 py-4 text-base font-semibold text-gray-300 hover:text-white hover:border-gray-600 transition-all"
+              <Link
+                href="/pricing"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/12 bg-white/5 px-7 py-4 text-base font-semibold text-white/84 transition-colors hover:bg-white/8"
               >
-                Ver funcionalidades
-              </a>
-            </motion.div>
+                Comparar planos
+              </Link>
+            </div>
           </div>
         </motion.div>
       </div>
@@ -1177,102 +949,61 @@ function FinalCTA() {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════
-   FOOTER
-   ═══════════════════════════════════════════════════════════ */
 function Footer() {
-  const links = {
-    Produto: [
-      { label: 'Funcionalidades', href: '#funcionalidades' },
-      { label: 'Planos', href: '#planos' },
-      { label: 'Preços', href: '/pricing' },
-      { label: 'Integrações', href: '#' },
-      { label: 'Changelog', href: '#' },
-    ],
-    Recursos: [
-      { label: 'Blog', href: '/blog' },
-      { label: 'Central de ajuda', href: '#' },
-      { label: 'Guias', href: '#' },
-      { label: 'API Docs', href: '#' },
-      { label: 'Status', href: '#' },
-    ],
-    Empresa: [
-      { label: 'Sobre nós', href: '#' },
-      { label: 'Carreiras', href: '#' },
-      { label: 'Contato', href: '#' },
-      { label: 'Parceiros', href: '#' },
-    ],
-    Legal: [
-      { label: 'Termos de uso', href: '#' },
-      { label: 'Privacidade', href: '#' },
-      { label: 'Cookies', href: '#' },
-    ],
-  };
-
   return (
-    <footer className="border-t border-gray-100 bg-white">
-      <div className="mx-auto max-w-7xl px-6 pt-16 pb-8">
-        <div className="grid gap-10 md:grid-cols-6">
-          {/* Brand */}
-          <div className="md:col-span-2">
-            <Link href="/" className="flex items-center gap-2.5 mb-4">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-primary to-emerald-400 shadow-lg shadow-primary/25">
-                <Zap className="h-5 w-5 text-white" fill="white" />
-              </div>
-              <span className="text-xl font-bold tracking-tight text-gray-900">RapidoCart</span>
-            </Link>
-            <p className="text-sm text-gray-500 leading-relaxed max-w-xs">
-              A plataforma de e-commerce mais simples do Brasil. Crie, gerencie e escale sua loja online.
-            </p>
-          </div>
-
-          {/* Link columns */}
-          {Object.entries(links).map(([title, items]) => (
-            <div key={title}>
-              <h4 className="text-sm font-semibold text-gray-900 mb-4">{title}</h4>
-              <ul className="space-y-2.5">
-                {items.map((item) => (
-                  <li key={item.label}>
-                    <Link href={item.href} className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+    <footer className="border-t border-white/10 bg-black px-6 py-10">
+      <div className="mx-auto flex max-w-7xl flex-col gap-8 md:flex-row md:items-end md:justify-between">
+        <div>
+          <Link href="/" className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-emerald-400/30 bg-emerald-500/15">
+              <Zap className="h-5 w-5 text-emerald-300" />
             </div>
-          ))}
+            <div>
+              <span className="block text-lg font-bold tracking-tight text-white">Lojaki</span>
+              <span className="block text-[11px] uppercase tracking-[0.24em] text-white/40">commerce operating system</span>
+            </div>
+          </Link>
+          <p className="mt-4 max-w-md text-sm leading-7 text-white/50">
+            Plataforma para marcas que querem uma operacao mais profissional, com visual mais forte e leitura comercial mais clara.
+          </p>
         </div>
 
-        <div className="mt-12 flex flex-col md:flex-row items-center justify-between gap-4 border-t border-gray-100 pt-8">
-          <p className="text-xs text-gray-400">
-            © {new Date().getFullYear()} RapidoCart. Todos os direitos reservados.
-          </p>
-          <div className="flex items-center gap-4 text-xs text-gray-400">
-            <span>Feito com ❤️ no Brasil</span>
-          </div>
+        <div className="flex flex-wrap gap-6 text-sm text-white/56">
+          <Link href="/blog" className="transition-colors hover:text-white">
+            Blog
+          </Link>
+          <Link href="/features" className="transition-colors hover:text-white">
+            Features
+          </Link>
+          <Link href="/pricing" className="transition-colors hover:text-white">
+            Pricing
+          </Link>
+          <Link href="/login" className="transition-colors hover:text-white">
+            Entrar
+          </Link>
         </div>
+      </div>
+
+      <div className="mx-auto mt-10 max-w-7xl border-t border-white/10 pt-6 text-xs text-white/34">
+        © {new Date().getFullYear()} Lojaki. Todos os direitos reservados.
       </div>
     </footer>
   );
 }
 
-/* ═══════════════════════════════════════════════════════════
-   MAIN LANDING PAGE
-   ═══════════════════════════════════════════════════════════ */
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white text-gray-900 antialiased">
+    <div className="min-h-screen bg-black text-white antialiased">
       <Navbar />
       <main>
         <HeroSection />
-        <TrustBar />
-        <FeaturesSection />
-        <HowItWorks />
-        <ProductShowcase />
-        <IntegrationsSection />
+        <PlatformSection />
+        <CommerceSection />
+        <ChannelsSection />
+        <StepsSection />
         <TestimonialsSection />
         <PricingSection />
-        <FinalCTA />
+        <FinalSection />
       </main>
       <Footer />
     </div>

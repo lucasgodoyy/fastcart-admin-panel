@@ -7,13 +7,14 @@ import Cookies from 'js-cookie';
 export const authService = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
-    const { token, email, role, storeId, emailVerified } = response.data;
+    const { token, email, role, userId, storeId, emailVerified } = response.data;
     const normalizedRole = normalizeRole(role);
 
     if (token) {
       localStorage.setItem('token', token);
       localStorage.setItem('email', email || credentials.email);
       if (normalizedRole) localStorage.setItem('role', normalizedRole);
+      if (userId) localStorage.setItem('userId', userId.toString());
       if (storeId) localStorage.setItem('storeId', storeId.toString());
       localStorage.setItem('emailVerified', emailVerified ? 'true' : 'false');
 
@@ -46,13 +47,14 @@ export const authService = {
 
   oauthLogin: async (provider: string, idToken: string): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>('/auth/oauth', { provider, idToken });
-    const { token, email, role, storeId, emailVerified } = response.data;
+    const { token, email, role, userId, storeId, emailVerified } = response.data;
     const normalizedRole = normalizeRole(role);
 
     if (token) {
       localStorage.setItem('token', token);
       if (email) localStorage.setItem('email', email);
       if (normalizedRole) localStorage.setItem('role', normalizedRole);
+      if (userId) localStorage.setItem('userId', userId.toString());
       if (storeId) localStorage.setItem('storeId', storeId.toString());
       localStorage.setItem('emailVerified', emailVerified ? 'true' : 'false');
 

@@ -7,7 +7,6 @@ import {
   ArrowRight,
   BarChart3,
   Bell,
-  Check,
   CreditCard,
   Globe,
   Layers,
@@ -76,59 +75,59 @@ function Section({ children, className = '' }: { children: React.ReactNode; clas
 /* --- Category data --- */
 const categories = [
   {
-    title: 'Gestão da Loja',
+    title: 'GestÃƒÂ£o da Loja',
     description: 'Tudo para montar e configurar sua loja virtual profissional.',
     icon: Store,
-    color: 'from-primary to-emerald-400',
+    color: 'from-emerald-500 to-teal-500',
     bg: 'bg-emerald-50',
-    iconColor: 'text-emerald-600',
+    iconColor: 'text-emerald-700',
     features: [
-      { icon: Palette, name: 'Temas personalizáveis', desc: 'Escolha entre dezenas de temas modernos e adapte cores, fontes e layout.' },
-      { icon: Globe, name: 'Domínio personalizado', desc: 'Conecte seu próprio domínio para uma presença profissional.' },
+      { icon: Palette, name: 'Temas personalizÃƒÂ¡veis', desc: 'Escolha entre dezenas de temas modernos e adapte cores, fontes e layout.' },
+      { icon: Globe, name: 'DomÃƒÂ­nio personalizado', desc: 'Conecte seu prÃƒÂ³prio domÃƒÂ­nio para uma presenÃƒÂ§a profissional.' },
       { icon: Smartphone, name: 'Design responsivo', desc: 'Sua loja fica perfeita em celular, tablet e desktop.' },
-      { icon: Search, name: 'SEO integrado', desc: 'Meta tags, sitemap automático, URLs amigáveis e schema markup.' },
+      { icon: Search, name: 'SEO integrado', desc: 'Meta tags, sitemap automÃƒÂ¡tico, URLs amigÃƒÂ¡veis e schema markup.' },
     ],
   },
   {
-    title: 'Produtos e Catálogo',
+    title: 'Produtos e CatÃƒÂ¡logo',
     description: 'Gerencie milhares de produtos com facilidade.',
     icon: Package,
-    color: 'from-blue-500 to-indigo-500',
+    color: 'from-emerald-500 to-cyan-500',
     bg: 'bg-blue-50',
     iconColor: 'text-blue-600',
     features: [
-      { icon: Package, name: 'Variações de produto', desc: 'Tamanho, cor, material — crie quantas variações precisar.' },
-      { icon: Tag, name: 'Categorias e tags', desc: 'Organize seu catálogo com categorias hierárquicas e tags.' },
-      { icon: Layers, name: 'Importação em massa', desc: 'Importe produtos via CSV e sincronize com marketplaces.' },
-      { icon: Star, name: 'Avaliações de clientes', desc: 'Permita que compradores avaliem e comentem seus produtos.' },
+      { icon: Package, name: 'VariaÃƒÂ§ÃƒÂµes de produto', desc: 'Tamanho, cor, material Ã‚Â— crie quantas variaÃƒÂ§ÃƒÂµes precisar.' },
+      { icon: Tag, name: 'Categorias e tags', desc: 'Organize seu catÃƒÂ¡logo com categorias hierÃƒÂ¡rquicas e tags.' },
+      { icon: Layers, name: 'ImportaÃƒÂ§ÃƒÂ£o em massa', desc: 'Importe produtos via CSV e sincronize com marketplaces.' },
+      { icon: Star, name: 'AvaliaÃƒÂ§ÃƒÂµes de clientes', desc: 'Permita que compradores avaliem e comentem seus produtos.' },
     ],
   },
   {
     title: 'Pagamentos',
     description: 'Aceite todos os meios de pagamento populares do Brasil.',
     icon: CreditCard,
-    color: 'from-violet-500 to-purple-500',
-    bg: 'bg-violet-50',
-    iconColor: 'text-violet-600',
+    color: 'from-teal-500 to-emerald-500',
+    bg: 'bg-teal-50',
+    iconColor: 'text-teal-700',
     features: [
-      { icon: CreditCard, name: 'Cartão de crédito', desc: 'Parcelamento automático com as melhores taxas do mercado.' },
-      { icon: Zap, name: 'PIX instantâneo', desc: 'Receba com PIX e confirme pagamentos em segundos.' },
+      { icon: CreditCard, name: 'CartÃƒÂ£o de crÃƒÂ©dito', desc: 'Parcelamento automÃƒÂ¡tico com as melhores taxas do mercado.' },
+      { icon: Zap, name: 'PIX instantÃƒÂ¢neo', desc: 'Receba com PIX e confirme pagamentos em segundos.' },
       { icon: Shield, name: 'Checkout seguro', desc: 'Certificado SSL, antifraude integrado e PCI compliance.' },
-      { icon: Percent, name: 'Cupons e descontos', desc: 'Crie cupons, promoções relâmpago e desconto progressivo.' },
+      { icon: Percent, name: 'Cupons e descontos', desc: 'Crie cupons, promoÃƒÂ§ÃƒÂµes relÃƒÂ¢mpago e desconto progressivo.' },
     ],
   },
   {
-    title: 'Envio e Logística',
-    description: 'Frete calculado automaticamente com as melhores opções.',
+    title: 'Envio e LogÃƒÂ­stica',
+    description: 'Frete calculado automaticamente com as melhores opÃƒÂ§ÃƒÂµes.',
     icon: Truck,
     color: 'from-amber-500 to-orange-500',
     bg: 'bg-amber-50',
     iconColor: 'text-amber-600',
     features: [
-      { icon: Truck, name: 'Melhor Envio', desc: 'Integração nativa com cálculo automático de frete e rastreio.' },
-      { icon: Package, name: 'Múltiplas transportadoras', desc: 'Correios, Jadlog, Loggi, Azul Cargo e mais.' },
-      { icon: Settings, name: 'Frete grátis condicional', desc: 'Configure frete grátis por valor mínimo, região ou cupom.' },
-      { icon: Bell, name: 'Rastreamento em tempo real', desc: 'Notificações automáticas de status do envio para o cliente.' },
+      { icon: Truck, name: 'Melhor Envio', desc: 'IntegraÃƒÂ§ÃƒÂ£o nativa com cÃƒÂ¡lculo automÃƒÂ¡tico de frete e rastreio.' },
+      { icon: Package, name: 'MÃƒÂºltiplas transportadoras', desc: 'Correios, Jadlog, Loggi, Azul Cargo e mais.' },
+      { icon: Settings, name: 'Frete grÃƒÂ¡tis condicional', desc: 'Configure frete grÃƒÂ¡tis por valor mÃƒÂ­nimo, regiÃƒÂ£o ou cupom.' },
+      { icon: Bell, name: 'Rastreamento em tempo real', desc: 'NotificaÃƒÂ§ÃƒÂµes automÃƒÂ¡ticas de status do envio para o cliente.' },
     ],
   },
   {
@@ -139,24 +138,24 @@ const categories = [
     bg: 'bg-rose-50',
     iconColor: 'text-rose-600',
     features: [
-      { icon: Mail, name: 'Email marketing', desc: 'Campanhas automáticas de carrinho abandonado e pós-venda.' },
+      { icon: Mail, name: 'Email marketing', desc: 'Campanhas automÃƒÂ¡ticas de carrinho abandonado e pÃƒÂ³s-venda.' },
       { icon: ShoppingBag, name: 'Google Shopping', desc: 'Exporte feed de produtos para o Google Merchant Center.' },
-      { icon: MessageSquare, name: 'Instagram e Facebook', desc: 'Integre catálogo com Meta para vender nas redes sociais.' },
-      { icon: BarChart3, name: 'Analytics avançado', desc: 'Dashboard com métricas de conversão, funil e LTV.' },
+      { icon: MessageSquare, name: 'Instagram e Facebook', desc: 'Integre catÃƒÂ¡logo com Meta para vender nas redes sociais.' },
+      { icon: BarChart3, name: 'Analytics avanÃƒÂ§ado', desc: 'Dashboard com mÃƒÂ©tricas de conversÃƒÂ£o, funil e LTV.' },
     ],
   },
   {
-    title: 'Gestão de Pedidos',
-    description: 'Acompanhe cada pedido do início ao fim.',
+    title: 'GestÃƒÂ£o de Pedidos',
+    description: 'Acompanhe cada pedido do inÃƒÂ­cio ao fim.',
     icon: ShoppingCart,
     color: 'from-teal-500 to-cyan-500',
     bg: 'bg-teal-50',
     iconColor: 'text-teal-600',
     features: [
       { icon: LayoutDashboard, name: 'Dashboard de pedidos', desc: 'Visualize, filtre e exporte pedidos com facilidade.' },
-      { icon: Users, name: 'Gestão de clientes', desc: 'Perfil completo com histórico de compras e segmentação.' },
-      { icon: Bell, name: 'Notificações automáticas', desc: 'Emails automáticos de confirmação, envio e entrega.' },
-      { icon: Rocket, name: 'Automação de status', desc: 'Fluxos automáticos de processamento e fulfillment.' },
+      { icon: Users, name: 'GestÃƒÂ£o de clientes', desc: 'Perfil completo com histÃƒÂ³rico de compras e segmentaÃƒÂ§ÃƒÂ£o.' },
+      { icon: Bell, name: 'NotificaÃƒÂ§ÃƒÂµes automÃƒÂ¡ticas', desc: 'Emails automÃƒÂ¡ticos de confirmaÃƒÂ§ÃƒÂ£o, envio e entrega.' },
+      { icon: Rocket, name: 'AutomaÃƒÂ§ÃƒÂ£o de status', desc: 'Fluxos automÃƒÂ¡ticos de processamento e fulfillment.' },
     ],
   },
 ];
@@ -165,10 +164,10 @@ export default function FeaturesPage() {
   return (
     <div className="min-h-screen bg-background text-foreground antialiased">
       {/* -- Navbar -- */}
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/70 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/70 backdrop-blur-xl supports-backdrop-filter:bg-background/60">
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-linear-to-br from-primary to-emerald-400 shadow-lg shadow-primary/25 transition-transform group-hover:scale-105">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-linear-to-br from-emerald-600 to-teal-500 shadow-lg shadow-emerald-500/25 transition-transform group-hover:scale-105">
               <Zap className="h-5 w-5 text-white" fill="white" />
             </div>
             <span className="text-xl font-bold tracking-tight text-foreground">Lojaki</span>
@@ -176,12 +175,12 @@ export default function FeaturesPage() {
           <div className="hidden md:flex items-center gap-8">
             <Link href="/#funcionalidades" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Funcionalidades</Link>
             <Link href="/#planos" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Planos</Link>
-            <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Preços</Link>
+            <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">PreÃƒÂ§os</Link>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/login" className="hidden md:block rounded-lg px-4 py-2 text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-muted transition-colors">Entrar</Link>
-            <Link href="/signup" className="group inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-primary to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all hover:-translate-y-0.5">
-              Começar grátis <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            <Link href="/signup" className="group inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-emerald-600 to-teal-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30 transition-all hover:-translate-y-0.5">
+              ComeÃƒÂ§ar grÃƒÂ¡tis <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
           </div>
         </nav>
@@ -190,22 +189,22 @@ export default function FeaturesPage() {
       {/* -- Hero -- */}
       <section className="relative overflow-hidden pt-32 pb-20 md:pt-40 md:pb-28">
         <div className="absolute inset-0 -z-10">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-linear-to-b from-primary/8 via-emerald-100/40 to-transparent rounded-full blur-3xl" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb20_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb20_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+          <div className="absolute top-0 left-1/2 h-150 w-200 -translate-x-1/2 rounded-full bg-linear-to-b from-emerald-100/60 via-teal-50/40 to-transparent blur-3xl" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb20_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb20_1px,transparent_1px)] bg-size-[4rem_4rem]" />
         </div>
         <div className="mx-auto max-w-4xl text-center px-6">
-          <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0} className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
+          <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0} className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-200/60 bg-emerald-50/80 px-4 py-1.5 text-sm font-medium text-emerald-700">
             <Sparkles className="h-3.5 w-3.5" />
             Todas as funcionalidades
           </motion.div>
           <motion.h1 variants={fadeUp} initial="hidden" animate="visible" custom={1} className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl">
             Ferramentas profissionais para{' '}
-            <span className="bg-linear-to-r from-primary via-emerald-500 to-teal-500 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-emerald-700 via-emerald-500 to-teal-500 bg-clip-text text-transparent">
               seu e-commerce
             </span>
           </motion.h1>
           <motion.p variants={fadeUp} initial="hidden" animate="visible" custom={2} className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl leading-relaxed">
-            De produtos a pagamentos, envio a marketing — tudo o que você precisa para construir uma loja online de sucesso.
+            De produtos a pagamentos, envio a marketing Ã‚Â— tudo o que vocÃƒÂª precisa para construir uma loja online de sucesso.
           </motion.p>
         </div>
       </section>
@@ -249,14 +248,14 @@ export default function FeaturesPage() {
         <div className="mx-auto max-w-4xl text-center">
           <h2 className="text-3xl font-extrabold text-foreground md:text-5xl">
             Pronto para{' '}
-            <span className="bg-linear-to-r from-primary to-emerald-500 bg-clip-text text-transparent">começar?</span>
+            <span className="bg-linear-to-r from-emerald-700 to-teal-500 bg-clip-text text-transparent">comeÃ§ar?</span>
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
-            Crie sua loja grátis e explore todas as funcionalidades. Sem cartão de crédito.
+            Crie sua loja grÃƒÂ¡tis e explore todas as funcionalidades. Sem cartÃƒÂ£o de crÃƒÂ©dito.
           </p>
           <div className="mt-8">
-            <Link href="/signup" className="group inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-primary to-emerald-500 px-8 py-4 text-base font-bold text-white shadow-2xl shadow-primary/25 hover:shadow-primary/40 transition-all hover:-translate-y-0.5">
-              Começar grátis agora
+            <Link href="/signup" className="group inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-emerald-600 to-teal-500 px-8 py-4 text-base font-bold text-white shadow-2xl shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all hover:-translate-y-0.5">
+              ComeÃƒÂ§ar grÃƒÂ¡tis agora
               <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
@@ -265,7 +264,7 @@ export default function FeaturesPage() {
 
       {/* -- Footer -- */}
       <footer className="border-t border-border bg-card px-6 py-8 text-center">
-        <p className="text-xs text-muted-foreground/70">© {new Date().getFullYear()} Lojaki. Todos os direitos reservados.</p>
+        <p className="text-xs text-muted-foreground/70">Ã‚Â© {new Date().getFullYear()} Lojaki. Todos os direitos reservados.</p>
       </footer>
     </div>
   );

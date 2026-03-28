@@ -25,6 +25,7 @@ import {
   fadeInUp,
 } from "../ui/sa-components";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { superAdminService } from "@/services/super-admin";
