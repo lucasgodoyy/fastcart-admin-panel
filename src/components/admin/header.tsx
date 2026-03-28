@@ -1,6 +1,6 @@
 ﻿"use client"
 
-import { Bell, Search, ChevronRight, LogOut, User, CheckCheck, Menu, PanelLeftClose, PanelLeftOpen, ExternalLink } from "lucide-react"
+import { Bell, Search, ChevronRight, LogOut, User, CheckCheck, Menu, PanelLeftClose, PanelLeftOpen, ExternalLink, Building2, CreditCard, Shield } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
 import { useMemo } from "react"
@@ -230,7 +230,7 @@ export function AdminHeader() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Profile */}
+        {/* Profile — Nuvemshop-style account menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-2.5 rounded-lg p-1.5 hover:bg-muted transition-colors outline-none">
@@ -239,26 +239,60 @@ export function AdminHeader() {
               </div>
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium">{user?.email || "admin@rapidocart.com.br"}</p>
-                <p className="text-xs text-muted-foreground">{user?.role || "ADMIN"}</p>
+          <DropdownMenuContent align="end" className="w-72 p-0">
+            {/* Identity header */}
+            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-border">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary to-primary/70 text-sm font-bold text-primary-foreground">
+                {user?.email?.slice(0, 1).toUpperCase() || "A"}
               </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer">
-              <User className="mr-2 h-4 w-4" />
-              {t("Meu Perfil", "My Profile")}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="text-destructive focus:text-destructive cursor-pointer"
-              onClick={logout}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              {t("Sair", "Sign Out")}
-            </DropdownMenuItem>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate">{user?.name || user?.email || "admin@rapidocart.com.br"}</p>
+                <p className="text-xs text-muted-foreground truncate">{user?.email || "admin@rapidocart.com.br"}</p>
+              </div>
+            </div>
+
+            {/* Settings navigation */}
+            <div className="py-1.5">
+              <DropdownMenuItem asChild className="cursor-pointer px-4 py-2.5">
+                <Link href="/admin/settings/business-data" className="flex items-center gap-3">
+                  <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <span className="flex-1 text-sm">{t("Dados do negócio", "Business data")}</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/60" />
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="cursor-pointer px-4 py-2.5">
+                <Link href="/admin/billing" className="flex items-center gap-3">
+                  <CreditCard className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <span className="flex-1 text-sm">{t("Planos e pagamentos", "Plans & billing")}</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/60" />
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="cursor-pointer px-4 py-2.5">
+                <Link href="/admin/settings/account" className="flex items-center gap-3">
+                  <User className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <span className="flex-1 text-sm">{t("Dados da conta", "Account settings")}</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/60" />
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="cursor-pointer px-4 py-2.5">
+                <Link href="/admin/settings/security" className="flex items-center gap-3">
+                  <Shield className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <span className="flex-1 text-sm">{t("Segurança", "Security")}</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/60" />
+                </Link>
+              </DropdownMenuItem>
+            </div>
+
+            {/* Logout */}
+            <div className="border-t border-border py-1.5">
+              <DropdownMenuItem
+                className="cursor-pointer px-4 py-2.5 text-destructive focus:text-destructive"
+                onClick={logout}
+              >
+                <LogOut className="mr-3 h-4 w-4" />
+                {t("Sair", "Sign Out")}
+              </DropdownMenuItem>
+            </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
