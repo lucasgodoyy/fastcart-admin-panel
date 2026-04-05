@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -144,7 +144,7 @@ export function SaShell({ children }: { children: React.ReactNode }) {
             {/* Quick search */}
             <div className="hidden md:flex items-center gap-2 rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg))] px-3 py-1.5 text-[12px] text-[hsl(var(--sa-text-muted))] cursor-pointer hover:border-[hsl(var(--sa-accent))/0.3] transition-colors">
               <Search className="h-3.5 w-3.5" />
-              <span>Busca rÃ¡pida...</span>
+              <span>Busca rápida...</span>
               <kbd className="ml-6 rounded bg-[hsl(var(--sa-surface))] px-1.5 py-0.5 text-[10px] font-mono text-[hsl(var(--sa-text-muted))]">
                 ?K
               </kbd>

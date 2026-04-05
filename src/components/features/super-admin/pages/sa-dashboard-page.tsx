@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -118,7 +118,7 @@ export function SaDashboardPage() {
     <div className="space-y-8">
       <SaPageHeader
         title="Dashboard"
-        description="VisÃ£o geral da plataforma em tempo real"
+        description="Visão geral da plataforma em tempo real"
         actions={
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 rounded-lg border border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-surface))] px-3 py-2 text-[12px] text-[hsl(var(--sa-text-muted))]">
@@ -132,7 +132,7 @@ export function SaDashboardPage() {
       {/* -- KPI Grid -- */}
       <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <SaStatCard title="Lojas Ativas" value={val(data?.activeStores)} subtitle={`${val(data?.totalStores)} total`} icon={Building2} color="accent" />
-        <SaStatCard title="UsuÃ¡rios" value={val(data?.totalUsers)} subtitle={`${val(data?.activeUsers)} ativos`} icon={Users} color="info" />
+        <SaStatCard title="Usuários" value={val(data?.totalUsers)} subtitle={`${val(data?.activeUsers)} ativos`} icon={Users} color="info" />
         <SaStatCard title="Tickets Abertos" value={val(data?.openSupportTickets)} subtitle={`${val(data?.totalSupportTickets)} total`} icon={Mail} color="warning" />
         <SaStatCard title="E-mails Enviados" value={val(data?.totalEmailLogs)} subtitle={`${val(data?.failedEmailLogs)} falhas`} icon={Mail} color="success" />
       </motion.div>
@@ -168,7 +168,7 @@ export function SaDashboardPage() {
 
           <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <QuickAction icon={Building2} label="Nova Loja" href="/super-admin/stores" />
-            <QuickAction icon={Users} label="UsuÃ¡rios" href="/super-admin/users" />
+            <QuickAction icon={Users} label="Usuários" href="/super-admin/users" />
             <QuickAction icon={CreditCard} label="Assinaturas" href="/super-admin/subscriptions" />
             <QuickAction icon={Mail} label="E-mails" href="/super-admin/emails" />
           </motion.div>
@@ -241,7 +241,7 @@ export function SaDashboardPage() {
 
         <motion.div variants={staggerContainer} initial="initial" animate="animate">
           <SaCard>
-            <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">SaÃºde das Assinaturas</h3>
+            <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">Saúde das Assinaturas</h3>
             <div className="space-y-4">
               <HealthBar label="Assinaturas Ativas" value={subStats?.activeSubscriptions ?? 0} suffix="" color="success" />
               <HealthBar label="Em Trial" value={subStats?.trialSubscriptions ?? 0} suffix="" color="info" />

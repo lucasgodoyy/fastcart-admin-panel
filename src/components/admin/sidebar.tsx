@@ -144,7 +144,6 @@ const navigation: NavSection[] = [
         { label: t("Frete grátis", "Free Shipping"), href: "/admin/discounts/free-shipping" },
       ]},
       { label: t("E-mail Marketing", "Email Marketing"), href: "/admin/marketing/email-campaigns", icon: <Mail className="h-4.5 w-4.5" /> },
-      { label: t("Afiliados", "Affiliates"), href: "/admin/marketing/affiliates", icon: <Speaker className="h-4.5 w-4.5" /> },
       { label: t("Upsell", "Upsell"), href: "/admin/upsell", icon: <Zap className="h-4.5 w-4.5" /> },
       { label: t("Fidelidade", "Loyalty"), href: "/admin/loyalty", icon: <Star className="h-4.5 w-4.5" /> },
       { label: t("Contadores", "Countdown"), href: "/admin/countdown-timers", icon: <Timer className="h-4.5 w-4.5" /> },

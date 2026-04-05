@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -100,20 +100,20 @@ export function SaUsersPage() {
   return (
     <div className="space-y-8">
       <SaPageHeader
-        title="Gerenciamento de UsuÃ¡rios"
-        description="Gerencie todos os usuÃ¡rios da plataforma, roles e permissÃµes"
+        title="Gerenciamento de Usuários"
+        description="Gerencie todos os usuários da plataforma, roles e permissões"
         actions={
           <Button className="bg-[hsl(var(--sa-accent))] hover:bg-[hsl(var(--sa-accent-hover))] text-white rounded-lg gap-2">
-            <Plus className="h-4 w-4" /> Novo UsuÃ¡rio
+            <Plus className="h-4 w-4" /> Novo Usuário
           </Button>
         }
       />
 
       <motion.div variants={staggerContainer} initial="initial" animate="animate" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SaStatCard title="Total de UsuÃ¡rios" value={fmt(overview?.totalUsers)} icon={Users} color="accent" trend={{ value: 12, label: "" }} />
+        <SaStatCard title="Total de Usuários" value={fmt(overview?.totalUsers)} icon={Users} color="accent" trend={{ value: 12, label: "" }} />
         <SaStatCard title="Ativos" value={fmt(overview?.activeUsers)} icon={Shield} color="info" />
         <SaStatCard title="Resultados" value={fmt(usersData?.totalElements)} icon={Clock} color="success" />
-        <SaStatCard title="PÃ¡ginas" value={`${(usersData?.page ?? 0) + 1}/${usersData?.totalPages ?? 1}`} icon={Ban} color="warning" />
+        <SaStatCard title="Páginas" value={`${(usersData?.page ?? 0) + 1}/${usersData?.totalPages ?? 1}`} icon={Ban} color="warning" />
       </motion.div>
 
       <motion.div variants={fadeInUp} initial="initial" animate="animate">
@@ -146,15 +146,15 @@ export function SaUsersPage() {
       </motion.div>
 
       <motion.div variants={fadeInUp} initial="initial" animate="animate">
-        <SaTableCard title="UsuÃ¡rios" subtitle={`${usersData?.totalElements ?? 0} resultado(s)`}>
+        <SaTableCard title="Usuários" subtitle={`${usersData?.totalElements ?? 0} resultado(s)`}>
           <Table>
             <TableHeader>
               <TableRow className="border-[hsl(var(--sa-border-subtle))] hover:bg-transparent">
-                <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">UsuÃ¡rio</TableHead>
+                <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Usuário</TableHead>
                 <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Role</TableHead>
                 <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Loja</TableHead>
                 <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Status</TableHead>
-                <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Ãltimo Login</TableHead>
+                <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">Último Login</TableHead>
                 <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider w-12"></TableHead>
               </TableRow>
             </TableHeader>
@@ -211,7 +211,7 @@ export function SaUsersPage() {
             </TableBody>
           </Table>
           {users.length === 0 && !isLoading && (
-            <SaEmptyState icon={Users} title="Nenhum usuÃ¡rio encontrado" description="Tente ajustar os filtros de busca" />
+            <SaEmptyState icon={Users} title="Nenhum usuário encontrado" description="Tente ajustar os filtros de busca" />
           )}
         </SaTableCard>
       </motion.div>

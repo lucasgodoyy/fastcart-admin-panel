@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -53,10 +53,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { superAdminService } from "@/services/super-admin";
+import { useTabFromPath } from "../hooks/use-tab-from-path";
 import type { StoreSummary } from "@/types/super-admin";
 
 export function SaStoresPage() {
+  const [tab, setTab] = useTabFromPath(
+    "/super-admin/stores",
+    { stores: "", approvals: "approvals", performance: "performance" },
+    "stores"
+  );
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [page, setPage] = useState(0);
@@ -71,15 +78,15 @@ export function SaStoresPage() {
   const PRESET_TEMPLATES: Record<string, { subject: string; bodyHtml: string }> = {
     welcome: {
       subject: "Bem-vindo(a) a Lojaki!",
-      bodyHtml: "<p>OlÃ¡!</p><p>Seu painel estÃ¡ pronto para vender mais.</p><p>Conte com nosso time para acelerar seus resultados.</p>",
+      bodyHtml: "<p>Olá!</p><p>Seu painel está pronto para vender mais.</p><p>Conte com nosso time para acelerar seus resultados.</p>",
     },
     order_updates: {
-      subject: "Ative os e-mails automÃ¡ticos da sua loja",
-      bodyHtml: "<p>OlÃ¡!</p><p>Configure os e-mails de pedido pago, envio e entrega para melhorar sua conversÃ£o e suporte.</p>",
+      subject: "Ative os e-mails automáticos da sua loja",
+      bodyHtml: "<p>Olá!</p><p>Configure os e-mails de pedido pago, envio e entrega para melhorar sua conversão e suporte.</p>",
     },
     growth: {
       subject: "Novos recursos para aumentar suas vendas",
-      bodyHtml: "<p>OlÃ¡!</p><p>Liberamos novos recursos de marketing e recuperaÃ§Ã£o de carrinho para sua loja.</p>",
+      bodyHtml: "<p>Olá!</p><p>Liberamos novos recursos de marketing e recuperação de carrinho para sua loja.</p>",
     },
   };
 
@@ -89,13 +96,16 @@ export function SaStoresPage() {
   });
 
   const { data: storesData, isLoading } = useQuery({
-    queryKey: ["sa-stores", statusFilter, search, page],
+    queryKey: ["sa-stores", tab, statusFilter, search, page],
     queryFn: () =>
       superAdminService.listStores({
-        status: statusFilter !== "ALL" ? statusFilter : undefined,
-        search: search || undefined,
-        page,
-        size: 20,
+        status:
+          tab === "approvals"
+            ? "INACTIVE"
+            : statusFilter !== "ALL" ? statusFilter : undefined,
+        search: tab === "performance" ? undefined : (search || undefined),
+        page: tab === "performance" ? 0 : page,
+        size: tab === "performance" ? 100 : 20,
       }),
   });
 
@@ -146,48 +156,63 @@ export function SaStoresPage() {
         <SaStatCard title="Resultados" value={fmt(storesData?.totalElements)} icon={TrendingUp} color="info" subtitle="Nesta busca" />
       </motion.div>
 
-      <motion.div variants={fadeInUp} initial="initial" animate="animate">
-        <SaCard className="p-4!">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--sa-text-muted))]" />
-              <Input value={search} onChange={e => { setSearch(e.target.value); setPage(0); }} placeholder="Buscar loja por nome ou slug..." className="pl-10 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] placeholder:text-[hsl(var(--sa-text-muted))]" />
-            </div>
-            <Select value={statusFilter} onValueChange={v => { setStatusFilter(v); setPage(0); }}>
-              <SelectTrigger className="w-full sm:w-40 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))]"><SelectValue placeholder="Status" /></SelectTrigger>
-              <SelectContent className="bg-[hsl(var(--sa-surface))] border-[hsl(var(--sa-border))]">
-                <SelectItem value="ALL">Todos</SelectItem>
-                <SelectItem value="ACTIVE">Ativo</SelectItem>
-                <SelectItem value="INACTIVE">Inativo</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </SaCard>
-      </motion.div>
+      <Tabs value={tab} onValueChange={setTab} className="space-y-5">
+        <TabsList className="bg-[hsl(var(--sa-surface))] border border-[hsl(var(--sa-border-subtle))] rounded-lg p-1 h-auto">
+          <TabsTrigger value="stores" className="rounded-md data-[state=active]:bg-[hsl(var(--sa-accent))] data-[state=active]:text-white text-[hsl(var(--sa-text-secondary))] text-[12px] px-4 py-1.5">
+            Todas as Lojas
+          </TabsTrigger>
+          <TabsTrigger value="approvals" className="rounded-md data-[state=active]:bg-[hsl(var(--sa-warning))] data-[state=active]:text-white text-[hsl(var(--sa-text-secondary))] text-[12px] px-4 py-1.5">
+            Aprovações
+          </TabsTrigger>
+          <TabsTrigger value="performance" className="rounded-md data-[state=active]:bg-[hsl(var(--sa-success))] data-[state=active]:text-white text-[hsl(var(--sa-text-secondary))] text-[12px] px-4 py-1.5">
+            Performance
+          </TabsTrigger>
+        </TabsList>
 
-      {/* -- Table layout -- */}
-      <motion.div variants={fadeInUp} initial="initial" animate="animate">
-        <SaCard className="p-0! overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg-secondary))]">
-                  <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))]">Loja</th>
-                  <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))]">Status</th>
-                  <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))]">Plano</th>
-                  <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))] text-right">Produtos</th>
-                  <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))] text-right">Pedidos</th>
-                  <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))] text-right">Receita</th>
-                  <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))] text-center">AÃ§Ãµes</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stores.map((store) => (
-                  <tr
-                    key={store.id}
-                    onClick={() => router.push(`/super-admin/stores/${store.id}`)}
-                    className="border-b border-[hsl(var(--sa-border-subtle))] hover:bg-[hsl(var(--sa-surface-hover))] transition-colors cursor-pointer"
-                  >
+        {/* ── TODAS AS LOJAS ── */}
+        <TabsContent value="stores" className="space-y-4">
+          <motion.div variants={fadeInUp} initial="initial" animate="animate">
+            <SaCard className="p-4!">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--sa-text-muted))]" />
+                  <Input value={search} onChange={e => { setSearch(e.target.value); setPage(0); }} placeholder="Buscar loja por nome ou slug..." className="pl-10 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))] placeholder:text-[hsl(var(--sa-text-muted))]" />
+                </div>
+                <Select value={statusFilter} onValueChange={v => { setStatusFilter(v); setPage(0); }}>
+                  <SelectTrigger className="w-full sm:w-40 bg-[hsl(var(--sa-bg))] border-[hsl(var(--sa-border-subtle))] text-[hsl(var(--sa-text))]"><SelectValue placeholder="Status" /></SelectTrigger>
+                  <SelectContent className="bg-[hsl(var(--sa-surface))] border-[hsl(var(--sa-border))]">
+                    <SelectItem value="ALL">Todos</SelectItem>
+                    <SelectItem value="ACTIVE">Ativo</SelectItem>
+                    <SelectItem value="INACTIVE">Inativo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </SaCard>
+          </motion.div>
+
+          {/* -- Tabela de lojas -- */}
+          <motion.div variants={fadeInUp} initial="initial" animate="animate">
+            <SaCard className="p-0! overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg-secondary))]">
+                      <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))]">Loja</th>
+                      <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))]">Status</th>
+                      <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))]">Plano</th>
+                      <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))] text-right">Produtos</th>
+                      <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))] text-right">Pedidos</th>
+                      <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))] text-right">Receita</th>
+                      <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))] text-center">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {stores.map((store) => (
+                      <tr
+                        key={store.id}
+                        onClick={() => router.push(`/super-admin/stores/${store.id}`)}
+                        className="border-b border-[hsl(var(--sa-border-subtle))] hover:bg-[hsl(var(--sa-surface-hover))] transition-colors cursor-pointer"
+                      >
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-[hsl(var(--sa-accent-subtle))] to-[hsl(var(--sa-info-subtle))] text-[hsl(var(--sa-accent))] font-bold text-sm">
@@ -204,7 +229,7 @@ export function SaStoresPage() {
                     </td>
                     <td className="px-5 py-4">
                       <span className="text-[12px] font-medium text-[hsl(var(--sa-text-secondary))] bg-[hsl(var(--sa-surface-hover))] rounded-full px-2.5 py-1">
-                        {store.planName || "Â"}
+                        {store.planName || "—"}
                       </span>
                     </td>
                     <td className="px-5 py-4 text-right">
@@ -257,7 +282,7 @@ export function SaStoresPage() {
           {totalPages > 1 && (
             <div className="flex items-center justify-between border-t border-[hsl(var(--sa-border-subtle))] px-5 py-3">
               <p className="text-[12px] text-[hsl(var(--sa-text-muted))]">
-                PÃ¡gina {page + 1} de {totalPages} Â {storesData?.totalElements ?? 0} lojas
+                Página {page + 1} de {totalPages} · {storesData?.totalElements ?? 0} lojas
               </p>
               <div className="flex items-center gap-2">
                 <Button
@@ -276,15 +301,149 @@ export function SaStoresPage() {
                   onClick={() => setPage(p => p + 1)}
                   className="h-8 px-2 text-[hsl(var(--sa-text-secondary))] hover:bg-[hsl(var(--sa-surface-hover))]"
                 >
-                  PrÃ³xima <ChevronRight className="h-4 w-4" />
+                  Próxima <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
             </div>
           )}
-        </SaCard>
-      </motion.div>
+            </SaCard>
+          </motion.div>
+          {stores.length === 0 && !isLoading && (
+            <SaEmptyState icon={Building2} title="Nenhuma loja encontrada" description="Tente ajustar os filtros de busca" />
+          )}
+        </TabsContent>
 
-      {stores.length === 0 && !isLoading && (<SaEmptyState icon={Building2} title="Nenhuma loja encontrada" description="Tente ajustar os filtros de busca" />)}
+        {/* ── APROVAÇÕES ── */}
+        <TabsContent value="approvals" className="space-y-4">
+          <div className="mb-2 flex items-center gap-2 px-1">
+            <p className="text-[12px] text-[hsl(var(--sa-text-muted))]">
+              Lojas inativas aguardando ativação. Revise e ative conforme necessário.
+            </p>
+          </div>
+          <motion.div variants={fadeInUp} initial="initial" animate="animate">
+            <SaCard className="p-0! overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg-secondary))]">
+                      <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))]">Loja</th>
+                      <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))]">Plano</th>
+                      <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))]">Cadastro</th>
+                      <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))] text-center">Ação</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {stores.map((store) => (
+                      <tr key={store.id} className="border-b border-[hsl(var(--sa-border-subtle))] hover:bg-[hsl(var(--sa-surface-hover))] transition-colors">
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--sa-warning-subtle))] text-[hsl(var(--sa-warning))] font-bold text-sm">
+                              {store.name.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="text-[13px] font-semibold text-[hsl(var(--sa-text))]">{store.name}</p>
+                              <p className="text-[11px] text-[hsl(var(--sa-text-muted))]">{store.email ?? `/${store.slug}`}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className="text-[12px] font-medium text-[hsl(var(--sa-text-secondary))] bg-[hsl(var(--sa-surface-hover))] rounded-full px-2.5 py-1">
+                            {store.planName || "—"}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4 text-[12px] text-[hsl(var(--sa-text-muted))]">
+                          {new Date(store.createdAt).toLocaleDateString("pt-BR")}
+                        </td>
+                        <td className="px-5 py-4 text-center">
+                          <Button
+                            size="sm"
+                            className="bg-[hsl(var(--sa-success))] hover:bg-[hsl(var(--sa-success))]/90 text-white rounded-lg gap-1.5 text-[11px]"
+                            onClick={() => toggleMutation.mutate(store.id)}
+                          >
+                            <CheckCircle className="h-3.5 w-3.5" /> Ativar
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {stores.length === 0 && !isLoading && (
+                <SaEmptyState icon={CheckCircle} title="Nenhuma loja para aprovar" description="Todas as lojas estão ativas" />
+              )}
+            </SaCard>
+          </motion.div>
+        </TabsContent>
+
+        {/* ── PERFORMANCE ── */}
+        <TabsContent value="performance" className="space-y-4">
+          <motion.div variants={fadeInUp} initial="initial" animate="animate">
+            <SaCard className="p-0! overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-[hsl(var(--sa-border-subtle))] bg-[hsl(var(--sa-bg-secondary))]">
+                      <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))] w-10">#</th>
+                      <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))]">Loja</th>
+                      <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))]">Receita</th>
+                      <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))] text-right">Pedidos</th>
+                      <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--sa-text-muted))] text-right">Produtos</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...stores]
+                      .sort((a, b) => (b.paidRevenue ?? 0) - (a.paidRevenue ?? 0))
+                      .map((store, idx) => {
+                        const maxRev = Math.max(...stores.map((s) => s.paidRevenue ?? 0), 1);
+                        const pct = Math.round(((store.paidRevenue ?? 0) / maxRev) * 100);
+                        return (
+                          <tr
+                            key={store.id}
+                            onClick={() => router.push(`/super-admin/stores/${store.id}`)}
+                            className="border-b border-[hsl(var(--sa-border-subtle))] hover:bg-[hsl(var(--sa-surface-hover))] transition-colors cursor-pointer"
+                          >
+                            <td className="px-5 py-4">
+                              <span
+                                className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold ${
+                                  idx === 0
+                                    ? "bg-[hsl(var(--sa-warning))] text-white"
+                                    : idx === 1
+                                    ? "bg-[hsl(var(--sa-text-muted))] text-white"
+                                    : idx === 2
+                                    ? "bg-amber-600 text-white"
+                                    : "bg-[hsl(var(--sa-surface-hover))] text-[hsl(var(--sa-text-muted))]"
+                                }`}
+                              >
+                                {idx + 1}
+                              </span>
+                            </td>
+                            <td className="px-5 py-4">
+                              <p className="text-[13px] font-semibold text-[hsl(var(--sa-text))]">{store.name}</p>
+                              <p className="text-[11px] text-[hsl(var(--sa-text-muted))]">/{store.slug}</p>
+                            </td>
+                            <td className="px-5 py-4 min-w-45">
+                              <p className="text-[13px] font-bold text-[hsl(var(--sa-success))] mb-1">
+                                R$ {(store.paidRevenue ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                              </p>
+                              <div className="h-1.5 w-full rounded-full bg-[hsl(var(--sa-surface-hover))]">
+                                <div className="h-1.5 rounded-full bg-[hsl(var(--sa-success))]" style={{ width: `${pct}%` }} />
+                              </div>
+                            </td>
+                            <td className="px-5 py-4 text-right text-[13px] font-medium text-[hsl(var(--sa-text))]">{store.ordersCount}</td>
+                            <td className="px-5 py-4 text-right text-[13px] font-medium text-[hsl(var(--sa-text))]">{store.productsCount}</td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
+              {stores.length === 0 && !isLoading && (
+                <SaEmptyState icon={TrendingUp} title="Sem dados de performance" description="Nenhuma loja encontrada" />
+              )}
+            </SaCard>
+          </motion.div>
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
         <DialogContent className="max-w-xl">

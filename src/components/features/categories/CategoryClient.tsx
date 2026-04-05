@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
   ChevronDown,
@@ -59,6 +60,7 @@ const buildCategoryTree = (categories: Category[]): CategoryWithDepth[] => {
 };
 
 export function CategoryClient() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [isCreating, setIsCreating] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -272,7 +274,7 @@ export function CategoryClient() {
                         <FolderPlus className="mr-2 h-4 w-4" />
                         Criar subcategoria
                       </DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => toast.info('Edição completa será adicionada na próxima etapa')}>
+                      <DropdownMenuItem onSelect={() => router.push(`/admin/products/categories/${category.id}`)}>
                         <Pencil className="mr-2 h-4 w-4" />
                         Editar
                       </DropdownMenuItem>

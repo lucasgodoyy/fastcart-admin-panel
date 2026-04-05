@@ -1,4 +1,4 @@
-export type CanonicalRole = 'SUPER_ADMIN' | 'ADMIN' | 'STAFF' | 'CUSTOMER';
+export type CanonicalRole = 'SUPER_ADMIN' | 'ADMIN' | 'STAFF' | 'AFFILIATE' | 'MANAGER' | 'CUSTOMER';
 
 export function normalizeRole(role?: string | null): CanonicalRole | undefined {
   if (!role) return undefined;
@@ -9,6 +9,8 @@ export function normalizeRole(role?: string | null): CanonicalRole | undefined {
   if (withoutPrefix === 'SUPER_ADMIN') return 'SUPER_ADMIN';
   if (withoutPrefix === 'ADMIN') return 'ADMIN';
   if (withoutPrefix === 'STAFF') return 'STAFF';
+  if (withoutPrefix === 'AFFILIATE') return 'AFFILIATE';
+  if (withoutPrefix === 'MANAGER') return 'MANAGER';
   if (withoutPrefix === 'CUSTOMER') return 'CUSTOMER';
 
   return undefined;

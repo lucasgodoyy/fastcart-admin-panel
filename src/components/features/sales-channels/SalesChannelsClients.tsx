@@ -37,7 +37,7 @@ const QUERY_KEY = ['sales-channel-settings'];
 
 const defaultSettings = (): SalesChannelSettings => ({
   storeId: 0,
-  templateId: 'template-1',
+  templateId: 'limpo',
   storeNiche: 'fashion',
   layoutPreset: 'fashion-classic',
   pages: [
@@ -128,43 +128,27 @@ const DEFAULT_ATTRIBUTES_BY_NICHE: Record<string, ProductAttributeSetting[]> = {
 
 const THEME_PRESETS: { id: string; name: string; templateId: string; storeNiche: string; layoutPreset: string; status: 'live' | 'draft' }[] = [
   {
-    id: 'clean',
-    name: 'Clean',
-    templateId: 'template-1',
+    id: 'limpo',
+    name: 'Limpo',
+    templateId: 'limpo',
     storeNiche: 'general',
     layoutPreset: 'clean-universal',
     status: 'live',
   },
   {
-    id: 'nova',
-    name: 'Nova',
-    templateId: 'template-2',
-    storeNiche: 'brand',
-    layoutPreset: 'nova-brand',
+    id: 'atlantico',
+    name: 'Atlântico',
+    templateId: 'template-6',
+    storeNiche: 'tech',
+    layoutPreset: 'atlantico-dark',
     status: 'live',
   },
   {
-    id: 'vogue',
-    name: 'Vogue',
-    templateId: 'template-3',
+    id: 'vitrine',
+    name: 'Vitrine',
+    templateId: 'template-7',
     storeNiche: 'fashion',
-    layoutPreset: 'vogue-editorial',
-    status: 'live',
-  },
-  {
-    id: 'boost',
-    name: 'Boost',
-    templateId: 'template-4',
-    storeNiche: 'dropshipping',
-    layoutPreset: 'boost-conversion',
-    status: 'live',
-  },
-  {
-    id: 'bulk',
-    name: 'Bulk',
-    templateId: 'template-5',
-    storeNiche: 'catalog',
-    layoutPreset: 'bulk-catalog',
+    layoutPreset: 'vitrine-marketplace',
     status: 'live',
   },
 ];
@@ -229,8 +213,8 @@ export function OnlineStoreLayoutClient() {
 
   return (
     <OnlineStoreLayoutEditor
-      key={settings.templateId || 'template-1'}
-      initialTemplateId={settings.templateId || 'template-1'}
+      key={settings.templateId || 'limpo'}
+      initialTemplateId={settings.templateId || 'limpo'}
       initialStoreNiche={settings.storeNiche || 'fashion'}
       initialLayoutPreset={settings.layoutPreset || 'fashion-classic'}
       initialAppearanceSettings={
@@ -379,7 +363,7 @@ function OnlineStoreLayoutEditor({
                   id="templateId"
                   value={templateId}
                   onChange={(event) => setTemplateId(event.target.value)}
-                  placeholder="template-1"
+                  placeholder="limpo"
                   className="mt-1.5"
                 />
               </div>

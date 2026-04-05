@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -216,7 +216,7 @@ export function SaSubscriptionsPage() {
             <SaEmptyState
               icon={Sparkles}
               title="Nenhum plano cadastrado"
-              description="Crie o primeiro plano de assinatura para comeÃ§ar a configurar o catÃ¡logo SaaS da plataforma."
+              description="Crie o primeiro plano de assinatura para começar a configurar o catálogo SaaS da plataforma."
             />
           ) : (
             <motion.div
@@ -268,7 +268,7 @@ export function SaSubscriptionsPage() {
                         <span className="text-[28px] font-bold text-[hsl(var(--sa-text))]">
                           {fmtCents(plan.priceCents)}
                         </span>
-                        <span className="pb-1 text-[11px] text-[hsl(var(--sa-text-muted))]">/mÃªs</span>
+                        <span className="pb-1 text-[11px] text-[hsl(var(--sa-text-muted))]">/mês</span>
                       </div>
                       {plan.annualPriceCents != null && (
                         <p className="mt-1 text-[11px] text-[hsl(var(--sa-success))]">
@@ -308,7 +308,7 @@ export function SaSubscriptionsPage() {
                       ))}
                       {(plan.features ?? []).length > 4 && (
                         <li className="pl-5 text-[10px] text-[hsl(var(--sa-text-muted))]">
-                          +{plan.features.length - 4} benefÃ­cios adicionais
+                          +{plan.features.length - 4} benefícios adicionais
                         </li>
                       )}
                     </ul>
@@ -373,7 +373,7 @@ export function SaSubscriptionsPage() {
                       Vencimento
                     </TableHead>
                     <TableHead className="text-[hsl(var(--sa-text-muted))] text-[11px] font-bold uppercase tracking-wider">
-                      AÃ§Ãµes
+                      Ações
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -414,7 +414,7 @@ export function SaSubscriptionsPage() {
                         {sub.currentPeriodEnd
                           ? new Date(sub.currentPeriodEnd).toLocaleDateString("pt-BR")
                           : sub.trialEnd
-                            ? `Trial atÃ© ${new Date(sub.trialEnd).toLocaleDateString("pt-BR")}`
+                            ? `Trial até ${new Date(sub.trialEnd).toLocaleDateString("pt-BR")}`
                             : "Â"}
                       </TableCell>
                       <TableCell>
@@ -461,15 +461,15 @@ export function SaSubscriptionsPage() {
           >
             <SaCard>
               <h3 className="text-[14px] font-semibold text-[hsl(var(--sa-text))] mb-4">
-                IntegraÃ§Ã£o Stripe
+                Integração Stripe
               </h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between py-3 border-b border-[hsl(var(--sa-border-subtle))]">
                   <span className="text-[12px] text-[hsl(var(--sa-text-secondary))]">
-                    Status da ConexÃ£o
+                    Status da Conexão
                   </span>
                   <span className="flex items-center gap-2 text-[12px] font-bold text-[hsl(var(--sa-warning))]">
-                    <div className="h-2 w-2 rounded-full bg-[hsl(var(--sa-warning))]" /> NÃ£o
+                    <div className="h-2 w-2 rounded-full bg-[hsl(var(--sa-warning))]" /> Não
                     configurado
                   </span>
                 </div>
@@ -557,7 +557,7 @@ export function SaSubscriptionsPage() {
               <SelectContent>
                 {plans.map((p) => (
                   <SelectItem key={p.id} value={String(p.id)}>
-                    {p.name} Â {fmtCents(p.priceCents)}/mÃªs
+                    {p.name} Â {fmtCents(p.priceCents)}/mês
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -599,7 +599,7 @@ export function SaSubscriptionsPage() {
           <DialogHeader>
             <DialogTitle>Excluir Plano</DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja excluir este plano? Esta aÃ§Ã£o nÃ£o pode ser desfeita.
+              Tem certeza que deseja excluir este plano? Esta ação não pode ser desfeita.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

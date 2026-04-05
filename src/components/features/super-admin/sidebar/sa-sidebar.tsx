@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Shield, ExternalLink, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -129,8 +129,8 @@ function NavItem({ item, pathname, expanded, onToggle, collapsed }: {
 }
 
 /* ---------------- Section ---------------- */
-function NavSection({ section, pathname, expandedKeys, toggle, collapsed }: {
-  section: SASidebarSection; pathname: string; expandedKeys: Set<string>; toggle: (k: string) => void; collapsed: boolean;
+function NavSection({ section, pathname, isExpanded, toggle, collapsed }: {
+  section: SASidebarSection; pathname: string; isExpanded: (key: string) => boolean; toggle: (k: string) => void; collapsed: boolean;
 }) {
   return (
     <div className="mb-2">
@@ -150,7 +150,7 @@ function NavSection({ section, pathname, expandedKeys, toggle, collapsed }: {
             key={item.href}
             item={item}
             pathname={pathname}
-            expanded={expandedKeys.has(item.title)}
+            expanded={isExpanded(item.title)}
             onToggle={() => toggle(item.title)}
             collapsed={collapsed}
           />
@@ -163,35 +163,33 @@ function NavSection({ section, pathname, expandedKeys, toggle, collapsed }: {
 /* ---------------- MAIN SIDEBAR ---------------- */
 export function SaSidebar({ collapsed = false }: { collapsed?: boolean }) {
   const pathname = usePathname();
-  const [expandedKeys, setExpanded] = useState<Set<string>>(new Set());
+  const [manualExpanded, setManualExpanded] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
-  const autoExpandedKeys = useMemo(() => {
-    const autoExpand = new Set<string>();
+  // Reset manual expansion on route change so auto-expand takes over
+  useEffect(() => {
+    setManualExpanded(null);
+  }, [pathname]);
+
+  // Auto-expand the menu item whose child matches the current route
+  const autoExpandedKey = useMemo(() => {
     for (const section of saSidebarSections) {
       for (const item of section.items) {
-        if (item.children?.some(child => isActive(pathname, child.href)) || isActive(pathname, item.href)) {
-          autoExpand.add(item.title);
+        if (item.children?.some(child => isActive(pathname, child.href))) {
+          return item.title;
         }
       }
     }
-    return autoExpand;
+    return null;
   }, [pathname]);
 
-  const mergedExpandedKeys = useMemo(() => {
-    return new Set([...expandedKeys, ...autoExpandedKeys]);
-  }, [expandedKeys, autoExpandedKeys]);
+  // Accordion: only one open at a time. Manual click wins over auto-expand.
+  const activeExpandedKey = manualExpanded ?? autoExpandedKey;
+
+  const isExpanded = useCallback((key: string) => activeExpandedKey === key, [activeExpandedKey]);
 
   const toggle = useCallback((key: string) => {
-    setExpanded(prev => {
-      const next = new Set(prev);
-      if (next.has(key)) {
-        next.delete(key);
-      } else {
-        next.add(key);
-      }
-      return next;
-    });
+    setManualExpanded(prev => (prev === key ? null : key));
   }, []);
 
   // filter sections by search
@@ -272,7 +270,7 @@ export function SaSidebar({ collapsed = false }: { collapsed?: boolean }) {
             key={section.label}
             section={section}
             pathname={pathname}
-            expandedKeys={mergedExpandedKeys}
+            isExpanded={isExpanded}
             toggle={toggle}
             collapsed={collapsed}
           />

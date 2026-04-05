@@ -19,78 +19,54 @@ import { t } from '@/lib/admin-language';
 /* ─── Template catalog ─────────────────────────────────── */
 const TEMPLATES = [
   {
-    id: 'template-1',
-    name: 'Clean',
-    tagline: 'Minimalista e universal',
-    description: 'Fundo branco, grid limpo, tipografia moderna. Perfeito para quem está começando — funciona para qualquer nicho.',
+    id: 'limpo',
+    name: 'Limpo',
+    tagline: 'Genérico, moderno e limpo',
+    description: 'Template base universal — fundo branco, grid limpo, tipografia moderna. Funciona para qualquer nicho e serve como base para criar novos temas.',
     niches: ['general', 'all'],
     catalogSize: ['few', 'some', 'lots'],
     badge: 'free' as const,
-    features: ['Grid 4 colunas', 'Hero slideshow', 'Drawer cart', 'Hover zoom'],
-    colors: { primary: '#000000', secondary: '#71717a', accent: '#dc2626', bg: '#ffffff', text: '#000000' },
+    features: ['Grid 4 colunas', 'Hero slideshow', 'Drawer cart', 'Todas as rotas'],
+    colors: { primary: '#000000', secondary: '#71717a', accent: '#2563eb', bg: '#ffffff', text: '#000000' },
     layout: { heroHeight: 'medium', gridCols: 4, logoPos: 'left', radius: 8 },
   },
   {
-    id: 'template-2',
-    name: 'Nova',
-    tagline: 'Marca forte, storytelling premium',
-    description: 'Hero fullscreen com vídeo, tipografia serifa impactante, blocos editoriais. Ideal para marcas DTC e lifestyle.',
-    niches: ['brand', 'dtc', 'premium', 'cosmetics'],
-    catalogSize: ['few', 'some'],
-    badge: 'pro' as const,
-    features: ['Hero fullscreen', 'Vídeo hero', 'Grid 3 colunas', 'Editorial blocks'],
-    colors: { primary: '#0f172a', secondary: '#1e293b', accent: '#f59e0b', bg: '#fafaf9', text: '#0f172a' },
-    layout: { heroHeight: 'full', gridCols: 3, logoPos: 'center', radius: 4 },
-  },
-  {
-    id: 'template-3',
-    name: 'Vogue',
-    tagline: 'Editorial de moda elegante',
-    description: 'Imagens enormes, layout angular sem border-radius, grid 2 colunas estilo lookbook. O template que mais converte em moda.',
-    niches: ['fashion', 'accessories', 'jewelry'],
-    catalogSize: ['few', 'some'],
-    badge: 'pro' as const,
-    features: ['Grid 2 colunas', 'Lookbook style', 'Angular design', 'Full hero'],
-    colors: { primary: '#1c1917', secondary: '#44403c', accent: '#e11d48', bg: '#fafaf9', text: '#1c1917' },
-    layout: { heroHeight: 'full', gridCols: 2, logoPos: 'center', radius: 0 },
-  },
-  {
-    id: 'template-4',
-    name: 'Boost',
-    tagline: 'Máquina de conversão',
-    description: 'CTAs fortes, badges de confiança, banners de urgência. Feito para vender muito com foco em conversão.',
-    niches: ['dropshipping', 'conversion', 'single-product', 'electronics'],
+    id: 'template-6',
+    name: 'Atlântico',
+    tagline: 'Dark tech profissional',
+    description: 'Tema dark com acentos cyan, design moderno e profissional. Inspirado no Atlántico da Nuvemshop — perfeito para tecnologia e brands premium.',
+    niches: ['tech', 'premium', 'saas', 'electronics', 'fashion'],
     catalogSize: ['few', 'some', 'lots'],
     badge: 'pro' as const,
-    features: ['Trust badges', 'Urgency banner', 'Popup cart', 'Reviews'],
-    colors: { primary: '#059669', secondary: '#111827', accent: '#f59e0b', bg: '#ffffff', text: '#111827' },
-    layout: { heroHeight: 'large', gridCols: 3, logoPos: 'left', radius: 8 },
+    features: ['Dark mode', 'Cyan accent', 'Glassmorphism cards', 'Smooth animations'],
+    colors: { primary: '#0a0a0a', secondary: '#141414', accent: '#06b6d4', bg: '#0a0a0a', text: '#ffffff' },
+    layout: { heroHeight: 'medium', gridCols: 4, logoPos: 'left', radius: 12 },
   },
   {
-    id: 'template-5',
-    name: 'Bulk',
-    tagline: 'Catálogo denso e eficiente',
-    description: 'Grid denso, navegação rápida, carrinho página inteira. Para lojas grandes com 500+ produtos e multi-categoria.',
-    niches: ['catalog', 'wholesale', 'multi-category'],
-    catalogSize: ['lots'],
+    id: 'template-7',
+    name: 'Vitrine',
+    tagline: 'Marketplace de moda e tênis',
+    description: 'Layout estilo marketplace com mega menu de marcas, trust badges, fundo claro e cards de produto com "Comprar Agora". Ideal para moda, tênis e colecionáveis.',
+    niches: ['fashion', 'sneakers', 'marketplace', 'streetwear', 'collectibles'],
+    catalogSize: ['some', 'lots'],
     badge: 'pro' as const,
-    features: ['Grid 4 colunas denso', 'Page cart', 'Quick filters', '32 por página'],
-    colors: { primary: '#1d4ed8', secondary: '#0f172a', accent: '#0ea5e9', bg: '#f8fafc', text: '#0f172a' },
-    layout: { heroHeight: 'small', gridCols: 4, logoPos: 'left', radius: 4 },
+    features: ['Mega menu de marcas', 'Trust badges', 'Cards marketplace', 'A-Z brands page'],
+    colors: { primary: '#111111', secondary: '#f5f5f5', accent: '#0d9f6e', bg: '#f5f5f5', text: '#111111' },
+    layout: { heroHeight: 'small', gridCols: 4, logoPos: 'left', radius: 12 },
   },
 ];
 
 /* ─── Niche presets ────────────────────────────────────── */
 const NICHE_PRESETS = [
-  { id: 'fashion-women', name: 'Moda Feminina', icon: <Crown className="h-4 w-4" />, recommendedTemplate: 'template-3', description: 'Grid 2 colunas, editorial, cores elegantes' },
-  { id: 'fashion-men', name: 'Moda Masculina', icon: <ShoppingBag className="h-4 w-4" />, recommendedTemplate: 'template-1', description: 'Grid limpo, minimalista, preto e branco' },
-  { id: 'electronics', name: 'Eletrônicos', icon: <Zap className="h-4 w-4" />, recommendedTemplate: 'template-4', description: 'Foco em conversão, badges, ofertas' },
-  { id: 'cosmetics', name: 'Cosméticos', icon: <Sparkles className="h-4 w-4" />, recommendedTemplate: 'template-2', description: 'Visual premium, vídeo, storytelling' },
-  { id: 'food', name: 'Alimentação', icon: <Store className="h-4 w-4" />, recommendedTemplate: 'template-1', description: 'Grid simples, cores naturais, clean' },
-  { id: 'sports', name: 'Esportes', icon: <Tag className="h-4 w-4" />, recommendedTemplate: 'template-4', description: 'Dinâmico, conversão, badges de confiança' },
-  { id: 'jewelry', name: 'Joias', icon: <Crown className="h-4 w-4" />, recommendedTemplate: 'template-3', description: 'Luxo, imagens grandes, angular' },
-  { id: 'wholesale', name: 'Atacado / B2B', icon: <Package className="h-4 w-4" />, recommendedTemplate: 'template-5', description: 'Catálogo denso, 4 colunas, eficiente' },
-  { id: 'general', name: 'Loja Geral', icon: <LayoutGrid className="h-4 w-4" />, recommendedTemplate: 'template-1', description: 'Serve para tudo, universal, grátis' },
+  { id: 'fashion-women', name: 'Moda Feminina', icon: <Crown className="h-4 w-4" />, recommendedTemplate: 'template-7', description: 'Marketplace de moda, mega menu, trust badges' },
+  { id: 'fashion-men', name: 'Moda Masculina', icon: <ShoppingBag className="h-4 w-4" />, recommendedTemplate: 'limpo', description: 'Grid limpo, minimalista, preto e branco' },
+  { id: 'electronics', name: 'Eletrônicos', icon: <Zap className="h-4 w-4" />, recommendedTemplate: 'template-6', description: 'Dark tech, profissional, glassmorphism' },
+  { id: 'cosmetics', name: 'Cosméticos', icon: <Sparkles className="h-4 w-4" />, recommendedTemplate: 'limpo', description: 'Visual limpo, premium, tipografia moderna' },
+  { id: 'food', name: 'Alimentação', icon: <Store className="h-4 w-4" />, recommendedTemplate: 'limpo', description: 'Grid simples, cores naturais, clean' },
+  { id: 'sports', name: 'Esportes', icon: <Tag className="h-4 w-4" />, recommendedTemplate: 'template-7', description: 'Marketplace, marcas, badges' },
+  { id: 'jewelry', name: 'Joias', icon: <Crown className="h-4 w-4" />, recommendedTemplate: 'limpo', description: 'Minimalista, imagens grandes, elegante' },
+  { id: 'wholesale', name: 'Atacado / B2B', icon: <Package className="h-4 w-4" />, recommendedTemplate: 'limpo', description: 'Catálogo limpo, universal, eficiente' },
+  { id: 'general', name: 'Loja Geral', icon: <LayoutGrid className="h-4 w-4" />, recommendedTemplate: 'limpo', description: 'Serve para tudo, universal, grátis' },
 ];
 
 const CATALOG_SIZE_FILTERS = [
@@ -225,7 +201,7 @@ export function ThemeGalleryClient() {
   });
 
   const isLoading = isThemeLoading || isChannelLoading;
-  const currentTemplateId = channelData?.templateId || 'template-1';
+  const currentTemplateId = channelData?.templateId || 'limpo';
 
   const handleEditLayout = () => {
     router.push('/admin/online-store/layout-editor');
@@ -359,7 +335,7 @@ export function ThemeGalleryClient() {
 
         <span className="text-muted-foreground/30">|</span>
 
-        {['fashion', 'brand', 'dropshipping', 'catalog'].map((n) => (
+        {['fashion', 'sneakers', 'brand', 'dropshipping', 'catalog'].map((n) => (
           <button
             key={n}
             onClick={() => setNicheFilter(nicheFilter === n ? null : n)}
@@ -368,6 +344,7 @@ export function ThemeGalleryClient() {
             }`}
           >
             {n === 'fashion' && 'Moda'}
+            {n === 'sneakers' && 'Sneakers'}
             {n === 'brand' && 'Marca'}
             {n === 'dropshipping' && 'Dropshipping'}
             {n === 'catalog' && 'Catálogo'}

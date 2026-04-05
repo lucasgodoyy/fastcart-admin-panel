@@ -57,6 +57,9 @@ export type AffiliateLink = {
   active: boolean;
   status: string;
   createdAt: string;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
 };
 
 export type AffiliateConversion = {

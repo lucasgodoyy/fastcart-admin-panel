@@ -70,7 +70,11 @@ export const LoginForm: React.FC = () => {
     setGoogleLoading(true);
     try {
       const authRes = await authService.oauthLogin('google', response.credential);
-      const redirectPath = authRes.role === 'SUPER_ADMIN' ? '/super-admin' : '/admin';
+      const role = authRes.role?.replace('ROLE_', '');
+      const redirectPath = role === 'SUPER_ADMIN' ? '/super-admin'
+        : role === 'AFFILIATE' ? '/affiliate'
+        : role === 'MANAGER' ? '/manager'
+        : '/admin';
       router.push(redirectPath);
     } catch {
       setBanner({
@@ -117,7 +121,11 @@ export const LoginForm: React.FC = () => {
   const handleSubmit = async (credentials: LoginCredentials) => {
     try {
       const response = await login(credentials);
-      const redirectPath = response.role === 'SUPER_ADMIN' ? '/super-admin' : '/admin';
+      const role = response.role?.replace('ROLE_', '');
+      const redirectPath = role === 'SUPER_ADMIN' ? '/super-admin'
+        : role === 'AFFILIATE' ? '/affiliate'
+        : role === 'MANAGER' ? '/manager'
+        : '/admin';
       router.push(redirectPath);
     } catch (err) {
       const errorObj = err as Record<string, unknown>;

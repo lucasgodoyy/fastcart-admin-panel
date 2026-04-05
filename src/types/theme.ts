@@ -19,22 +19,28 @@ export interface HeaderSection {
   textColor: string;
   // Logo
   logoPosition: 'left' | 'center';
-  logoSize: 'small' | 'medium' | 'large';
+  logoSize: 'preset' | 'small' | 'medium' | 'large';
   // Features
+  menuStyle: 'horizontal' | 'mega';
   showSearch: boolean;
   showCart: boolean;
   showLanguagesAndCurrencies: boolean;
-  // Transparent
+  // Transparent header
   transparentOnHero: boolean;
-  transparentApplyOver: 'banners' | 'banners-video';
+  transparentApplyOver: 'banners' | 'banners-video' | 'entire-store';
   useAlternativeColorsOnTransparent: boolean;
   alternativeTextColor: string;
+  alternativeLogoUrl: string;
   // Sticky
   stickyHeader: boolean;
   // Mobile
-  mobileLogoPosition: 'left' | 'center';
+  mobileLogoPosition: 'left' | 'center' | 'center-below-icons';
   mobileLinksStyle: 'text' | 'icons';
-  mobileSearchDisplay: 'icon' | 'open';
+  mobileSearchDisplay: 'icon' | 'open' | 'hidden';
+  // Desktop
+  desktopLogoPosition: 'left' | 'center';
+  desktopSearchStyle: 'none' | 'bar-left' | 'bar-center' | 'bar-below-icons';
+  desktopIconSize: 'normal' | 'large' | 'hidden';
   // Announcement bar
   announcementBar: AnnouncementBar;
 }
@@ -75,33 +81,102 @@ export type HomeSectionType =
   | 'newsletter'
   | 'mainProduct'
   | 'instagramPosts'
-  | 'testimonials';
+  | 'testimonials'
+  | 'welcomeMessage'
+  | 'mainCategories'
+  | 'institutionalMessage'
+  | 'shippingPaymentInfo'
+  | 'promoPopup';
 
 export interface HomeSectionItem {
   id: string;
   type: HomeSectionType;
   enabled: boolean;
   title: string;
-  // Type-specific config stored as flat fields
+
+  // ── Common text fields ──
+  subtitle?: string;
+  titleItalic?: boolean;
+  linkUrl?: string;
+  buttonText?: string;
+  fullWidth?: boolean;
+
+  // ── Product sections (featuredProducts, newProducts, saleProducts) ──
   maxProducts?: number;
   columns?: number;
-  // Banner items (promo, category, brand, news)
-  banners?: { imageUrl: string; mobileImageUrl: string; linkUrl: string; altText: string }[];
-  // Image + Text
+  mobileColumns?: number;
+  desktopColumns?: number;
+  displayMode?: 'grid' | 'carousel';
+  productIds?: number[];
+
+  // ── Banner sections (promo, category, brand, news, hero) ──
+  banners?: { imageUrl: string; mobileImageUrl: string; linkUrl: string; altText: string; title?: string; description?: string; buttonText?: string; buttonUrl?: string }[];
+  showTextOutside?: boolean;
+  showAsCarousel?: boolean;
+  sameHeight?: boolean;
+  removeSpacing?: boolean;
+  textAlignment?: 'left' | 'center' | 'right';
+  bannersPerRow?: number;
+  useMobileImages?: boolean;
+  parallaxEffect?: boolean;
+
+  // ── Image + Text modules ──
   imageUrl?: string;
   text?: string;
   textPosition?: 'left' | 'right';
-  // Video
+  modules?: { imageUrl: string; title?: string; description?: string; linkUrl?: string }[];
+
+  // ── Video ──
   videoUrl?: string;
-  // Newsletter
+  playbackType?: 'auto-muted' | 'click';
+  videoThumbnailUrl?: string;
+  videoTitle?: string;
+  videoDescription?: string;
+  videoButtonText?: string;
+  videoButtonUrl?: string;
+  verticalOnMobile?: boolean;
+
+  // ── Newsletter ──
   newsletterTitle?: string;
   newsletterDescription?: string;
-  // Main product
+  useCustomColors?: boolean;
+  bgColor?: string;
+  textColor?: string;
+
+  // ── Main product ──
   productId?: number;
-  // Instagram
+  displayOrder?: 'first' | 'selected';
+
+  // ── Instagram ──
   instagramUsername?: string;
-  // Testimonials
+  instagramToken?: string;
+  showOnHome?: boolean;
+
+  // ── Testimonials ──
   testimonials?: { name: string; text: string; rating: number; avatarUrl: string }[];
+  descriptionsItalic?: boolean;
+
+  // ── Welcome / Institutional messages ──
+  welcomeText?: string;
+  institutionalText?: string;
+
+  // ── Shipping / Payment info ──
+  shippingInfoItems?: { icon: string; title: string; description: string; imageUrl?: string; linkUrl?: string }[];
+
+  // ── Promo popup ──
+  popupImageUrl?: string;
+  popupTitle?: string;
+  popupDescription?: string;
+  popupButtonText?: string;
+  popupButtonUrl?: string;
+  popupDelay?: number;
+  showPopup?: boolean;
+  allowNewsletter?: boolean;
+
+  // ── Main categories ──
+  categoryIds?: number[];
+  maxCategories?: number;
+  categoryImages?: { imageUrl: string; categoryName?: string }[];
 }
 
 export const HOME_SECTION_LABELS: Record<HomeSectionType, string> = {
@@ -112,13 +187,18 @@ export const HOME_SECTION_LABELS: Record<HomeSectionType, string> = {
   saleProducts: 'Produtos em promoção',
   categoryBanners: 'Banners de categorias',
   newsBanners: 'Banners de novidades',
-  imageText: 'Módulo de imagem e texto',
-  brandBanners: 'Banners das marcas',
+  imageText: 'Módulos de imagem e texto',
+  brandBanners: 'Marcas',
   video: 'Vídeo',
   newsletter: 'Newsletter',
   mainProduct: 'Produto principal',
   instagramPosts: 'Postagens do Instagram',
   testimonials: 'Depoimentos',
+  welcomeMessage: 'Mensagem de boas vindas',
+  mainCategories: 'Categorias principais',
+  institutionalMessage: 'Mensagem institucional',
+  shippingPaymentInfo: 'Informações de frete, pagamento e compra',
+  promoPopup: 'Pop-up promocional',
 };
 
 // ── Featured Products ─────────────────────────────────────
@@ -126,7 +206,7 @@ export interface FeaturedProductsSection {
   enabled: boolean;
   title: string;
   maxProducts: number;
-  columns: 2 | 3 | 4;
+  columns: 2 | 3 | 4 | 5;
   showPrice: boolean;
   showBadge: boolean;
 }
@@ -135,11 +215,12 @@ export interface FeaturedProductsSection {
 export interface ProductListSection {
   enabled: boolean;
   defaultView: 'grid' | 'list';
-  columns: 2 | 3 | 4;
+  columns: 2 | 3 | 4 | 5;
   mobileColumns: 1 | 2;
   showFilters: boolean;
   filtersPosition: 'left' | 'right';
   showSort: boolean;
+  defaultSort: 'newest' | 'price-asc' | 'price-desc' | 'name-asc' | 'bestselling';
   productsPerPage: number;
   navigation: 'pagination' | 'infinite-scroll';
   quickView: boolean;
@@ -147,6 +228,11 @@ export interface ProductListSection {
   showIrregularGrid: boolean;
   hoverEffect: 'none' | 'zoom' | 'swap';
   categoryBannerUrl: string;
+  // Product card features
+  showColorVariants: boolean;
+  showSecondImageOnHover: boolean;
+  showImageCarousel: boolean;
+  showInstallments: boolean;
 }
 
 // ── Product Detail ────────────────────────────────────────
@@ -154,13 +240,41 @@ export interface ProductDetailSection {
   enabled: boolean;
   imagePosition: 'left' | 'right';
   zoomOnHover: boolean;
+  // Shipping
   showShippingCalculator: boolean;
+  showPhysicalStores: boolean;
+  // Installments
+  showInstallments: boolean;
+  // Payment discounts
+  showPaymentDiscount: boolean;
+  paymentDiscountPercent: number;
+  paymentDiscountMethod: string;
+  // Variants
   variantDisplay: 'dropdown' | 'buttons' | 'color-swatches';
+  showColorVariantPhoto: boolean;
+  // Size guide
+  showSizeGuide: boolean;
+  sizeGuideUrl: string;
+  // SKU
+  showSku: boolean;
+  // Stock
+  showStock: boolean;
+  showLastUnitMessage: boolean;
+  lastUnitMessage: string;
+  // Description
+  fullWidthDescription: boolean;
+  // Facebook comments
+  showFacebookComments: boolean;
+  facebookProfileId: string;
+  // Related & complementary
   showRelated: boolean;
+  relatedTitle: string;
+  showComplementary: boolean;
+  complementaryTitle: string;
+  // Other
   showReviews: boolean;
   showShareButtons: boolean;
   stickyAddToCart: boolean;
-  showSku: boolean;
 }
 
 // ── Cart ──────────────────────────────────────────────────
@@ -168,10 +282,16 @@ export interface CartSection {
   enabled: boolean;
   style: 'drawer' | 'page' | 'popup';
   showShippingEstimate: boolean;
+  showPhysicalStoresInCart: boolean;
   showCouponField: boolean;
   showCrossSell: boolean;
   showOrderNotes: boolean;
   showFreeShippingBar: boolean;
+  // Cart features
+  showViewMoreButton: boolean;
+  minimumOrderValue: number;
+  addToCartAction: 'notification' | 'open-cart';
+  showProductRecommendations: boolean;
 }
 
 // ── Footer ────────────────────────────────────────────────
@@ -181,7 +301,13 @@ export interface FooterSection {
   bgColor: string;
   textColor: string;
   columns: 2 | 3 | 4;
+  // Logo
   showLogo: boolean;
+  logoUrl: string;
+  // Languages & currencies
+  showLanguagesAndCurrencies: boolean;
+  // Menu
+  showMenu: boolean;
   // Newsletter
   showNewsletter: boolean;
   newsletterTitle: string;
@@ -208,6 +334,9 @@ export interface FooterSection {
   showPaymentIcons: boolean;
   showSecuritySeals: boolean;
   showShippingIcons: boolean;
+  // Custom seals
+  customSealImageUrl: string;
+  customSealCode: string;
   copyrightText: string;
 }
 
@@ -218,14 +347,34 @@ export interface ThemeColors {
   accent: string;
   background: string;
   text: string;
+  // Primary button
+  buttonBg: string;
+  buttonText: string;
+  // Promo badges / sale labels
+  promoBadgeBg: string;
+  promoBadgeText: string;
 }
 
 // ── Typography ────────────────────────────────────────────
-export type FontFamily = 'inter' | 'georgia' | 'system' | 'poppins' | 'playfair';
+export type FontFamily =
+  | 'inter'
+  | 'poppins'
+  | 'playfair'
+  | 'georgia'
+  | 'system'
+  | 'piazzolla'
+  | 'instrument-sans'
+  | 'dm-sans'
+  | 'lora'
+  | 'raleway'
+  | 'nunito';
 
 export interface ThemeTypography {
   headingFont: FontFamily;
+  headingSize: number;
+  headingBold: boolean;
   bodyFont: FontFamily;
+  bodySize: number;
   baseFontSize: 'small' | 'medium' | 'large';
 }
 
@@ -233,9 +382,9 @@ export interface ThemeTypography {
 export interface ThemeDesign {
   logoUrl: string;
   faviconUrl: string;
-  borderRadius: 'none' | 'small' | 'medium' | 'large';
+  borderRadius: 'none' | 'small' | 'medium' | 'large' | 'full';
   buttonStyle: 'filled' | 'outline' | 'pill';
-  containerWidth: 'narrow' | 'default' | 'wide';
+  containerWidth: number | 'narrow' | 'default' | 'wide';
 }
 
 // ── Full Theme Sections Config ────────────────────────────
@@ -295,20 +444,25 @@ export const SECTION_REGISTRY: SectionMeta[] = [
 
 // ── Default home sections ordering ────────────────────────
 export const DEFAULT_HOME_SECTIONS: HomeSectionItem[] = [
-  { id: 'hero-1', type: 'hero', enabled: true, title: 'Banners rotativos' },
-  { id: 'feat-1', type: 'featuredProducts', enabled: true, title: 'Produtos em destaque', maxProducts: 8, columns: 4 },
-  { id: 'promo-1', type: 'promoBanners', enabled: false, title: 'Banners promocionais', banners: [] },
-  { id: 'new-1', type: 'newProducts', enabled: false, title: 'Produtos novos', maxProducts: 8, columns: 4 },
-  { id: 'sale-1', type: 'saleProducts', enabled: false, title: 'Produtos em promoção', maxProducts: 8, columns: 4 },
-  { id: 'cat-1', type: 'categoryBanners', enabled: false, title: 'Banners de categorias', banners: [] },
-  { id: 'news-1', type: 'newsBanners', enabled: false, title: 'Banners de novidades', banners: [] },
-  { id: 'imgtxt-1', type: 'imageText', enabled: false, title: 'Módulo de imagem e texto', imageUrl: '', text: '', textPosition: 'right' },
-  { id: 'brand-1', type: 'brandBanners', enabled: false, title: 'Banners das marcas', banners: [] },
-  { id: 'video-1', type: 'video', enabled: false, title: 'Vídeo', videoUrl: '' },
-  { id: 'news-2', type: 'newsletter', enabled: false, title: 'Newsletter', newsletterTitle: 'Fique por dentro', newsletterDescription: 'Receba novidades e promoções' },
-  { id: 'main-1', type: 'mainProduct', enabled: false, title: 'Produto principal' },
-  { id: 'insta-1', type: 'instagramPosts', enabled: false, title: 'Postagens do Instagram', instagramUsername: '' },
-  { id: 'test-1', type: 'testimonials', enabled: false, title: 'Depoimentos', testimonials: [] },
+  { id: 'maincat-1', type: 'mainCategories', enabled: false, title: 'Categorias principais', maxCategories: 6, categoryImages: [] },
+  { id: 'welcome-1', type: 'welcomeMessage', enabled: false, title: 'Mensagem de boas vindas', subtitle: '', titleItalic: false, linkUrl: '', buttonText: '' },
+  { id: 'feat-1', type: 'featuredProducts', enabled: true, title: 'Produtos em destaque', displayMode: 'grid', mobileColumns: 2, desktopColumns: 3, maxProducts: 8 },
+  { id: 'hero-1', type: 'hero', enabled: true, title: 'Banners rotativos', fullWidth: false, parallaxEffect: false },
+  { id: 'instit-1', type: 'institutionalMessage', enabled: false, title: 'Mensagem institucional', subtitle: '', titleItalic: false, linkUrl: '', buttonText: '' },
+  { id: 'main-1', type: 'mainProduct', enabled: false, title: 'Produto principal', displayOrder: 'first' },
+  { id: 'promo-1', type: 'promoBanners', enabled: false, title: 'Banners promocionais', banners: [], showTextOutside: false, showAsCarousel: false, sameHeight: false, removeSpacing: false, textAlignment: 'center', bannersPerRow: 2, useMobileImages: false },
+  { id: 'test-1', type: 'testimonials', enabled: false, title: 'Depoimentos', testimonials: [], descriptionsItalic: false },
+  { id: 'video-1', type: 'video', enabled: false, title: 'Vídeo', videoUrl: '', fullWidth: false, playbackType: 'auto-muted', verticalOnMobile: false },
+  { id: 'shipping-1', type: 'shippingPaymentInfo', enabled: false, title: 'Informações de frete, pagamento e compra', shippingInfoItems: [{ icon: 'truck', title: '', description: '' }, { icon: 'credit-card', title: '', description: '' }, { icon: 'shield', title: '', description: '' }, { icon: 'refresh', title: '', description: '' }], useCustomColors: false },
+  { id: 'news-2', type: 'newsletter', enabled: false, title: 'Newsletter', newsletterTitle: 'Newsletter', newsletterDescription: 'Cadastre-se e receba nossas ofertas.', fullWidth: false, useCustomColors: false },
+  { id: 'new-1', type: 'newProducts', enabled: false, title: 'Produtos novos', displayMode: 'carousel', mobileColumns: 2, desktopColumns: 4, maxProducts: 8 },
+  { id: 'insta-1', type: 'instagramPosts', enabled: false, title: 'Postagens do Instagram', instagramUsername: '', instagramToken: '', showOnHome: true },
+  { id: 'sale-1', type: 'saleProducts', enabled: false, title: 'Produtos em oferta', displayMode: 'carousel', mobileColumns: 2, desktopColumns: 4, maxProducts: 8 },
+  { id: 'cat-1', type: 'categoryBanners', enabled: false, title: 'Banners de categorias', banners: [], showTextOutside: false, showAsCarousel: false, sameHeight: false, removeSpacing: false, textAlignment: 'center', bannersPerRow: 4, useMobileImages: false },
+  { id: 'news-1', type: 'newsBanners', enabled: false, title: 'Banners de novidades', banners: [], showTextOutside: false, showAsCarousel: false, sameHeight: false, removeSpacing: false, textAlignment: 'center', bannersPerRow: 1, useMobileImages: false },
+  { id: 'imgtxt-1', type: 'imageText', enabled: false, title: 'Módulos de imagem e texto', modules: [], showAsCarousel: false, sameHeight: false, removeSpacing: false },
+  { id: 'brand-1', type: 'brandBanners', enabled: false, title: 'Marcas', banners: [], displayMode: 'carousel' },
+  { id: 'popup-1', type: 'promoPopup', enabled: false, title: 'Pop-up promocional', showPopup: true, popupTitle: '', popupDescription: '', popupButtonText: 'Ver ofertas', popupButtonUrl: '', popupDelay: 3, allowNewsletter: false },
 ];
 
 // ── Default values ────────────────────────────────────────
@@ -318,11 +472,18 @@ export const DEFAULT_COLORS: ThemeColors = {
   accent: '#ef4444',
   background: '#ffffff',
   text: '#111111',
+  buttonBg: '#000000',
+  buttonText: '#ffffff',
+  promoBadgeBg: '#ef4444',
+  promoBadgeText: '#ffffff',
 };
 
 export const DEFAULT_TYPOGRAPHY: ThemeTypography = {
   headingFont: 'inter',
+  headingSize: 28,
+  headingBold: true,
   bodyFont: 'inter',
+  bodySize: 14,
   baseFontSize: 'medium',
 };
 
@@ -331,7 +492,7 @@ export const DEFAULT_DESIGN: ThemeDesign = {
   faviconUrl: '',
   borderRadius: 'medium',
   buttonStyle: 'filled',
-  containerWidth: 'default',
+  containerWidth: 1260,
 };
 
 export const DEFAULT_FOOTER: FooterSection = {
@@ -341,6 +502,9 @@ export const DEFAULT_FOOTER: FooterSection = {
   textColor: '#FFFFFF',
   columns: 4,
   showLogo: false,
+  logoUrl: '',
+  showLanguagesAndCurrencies: false,
+  showMenu: true,
   showNewsletter: true,
   newsletterTitle: 'Newsletter',
   newsletterDescription: 'Cadastre-se para receber novidades e ofertas exclusivas.',
@@ -354,6 +518,8 @@ export const DEFAULT_FOOTER: FooterSection = {
   showPaymentIcons: true,
   showSecuritySeals: false,
   showShippingIcons: false,
+  customSealImageUrl: '',
+  customSealCode: '',
   copyrightText: '',
 };
 
@@ -363,18 +529,23 @@ export const DEFAULT_HEADER: HeaderSection = {
   bgColor: '#ffffff',
   textColor: '#111111',
   logoPosition: 'left',
-  logoSize: 'medium',
+  logoSize: 'preset',
+  menuStyle: 'horizontal',
   showSearch: true,
   showCart: true,
   showLanguagesAndCurrencies: false,
   transparentOnHero: false,
-  transparentApplyOver: 'banners',
+  transparentApplyOver: 'banners-video',
   useAlternativeColorsOnTransparent: false,
   alternativeTextColor: '#ffffff',
+  alternativeLogoUrl: '',
   stickyHeader: true,
   mobileLogoPosition: 'left',
   mobileLinksStyle: 'icons',
   mobileSearchDisplay: 'icon',
+  desktopLogoPosition: 'left',
+  desktopSearchStyle: 'none',
+  desktopIconSize: 'normal',
   announcementBar: { enabled: false, text: '', bgColor: '#000000', textColor: '#FFFFFF' },
 };
 
@@ -407,6 +578,7 @@ export const DEFAULT_THEME_SECTIONS: ThemeSections = {
     showFilters: true,
     filtersPosition: 'left',
     showSort: true,
+    defaultSort: 'newest',
     productsPerPage: 24,
     navigation: 'pagination',
     quickView: true,
@@ -414,27 +586,53 @@ export const DEFAULT_THEME_SECTIONS: ThemeSections = {
     showIrregularGrid: false,
     hoverEffect: 'zoom',
     categoryBannerUrl: '',
+    showColorVariants: true,
+    showSecondImageOnHover: true,
+    showImageCarousel: true,
+    showInstallments: false,
   },
   productDetail: {
     enabled: true,
     imagePosition: 'left',
     zoomOnHover: true,
     showShippingCalculator: true,
+    showPhysicalStores: false,
+    showInstallments: true,
+    showPaymentDiscount: false,
+    paymentDiscountPercent: 10,
+    paymentDiscountMethod: 'Pix',
     variantDisplay: 'buttons',
+    showColorVariantPhoto: true,
+    showSizeGuide: false,
+    sizeGuideUrl: '',
+    showSku: false,
+    showStock: false,
+    showLastUnitMessage: false,
+    lastUnitMessage: 'Atenção, última peça!',
+    fullWidthDescription: false,
+    showFacebookComments: false,
+    facebookProfileId: '',
     showRelated: true,
+    relatedTitle: 'Produtos similares',
+    showComplementary: true,
+    complementaryTitle: 'Para comprar com esse produto',
     showReviews: false,
     showShareButtons: true,
     stickyAddToCart: true,
-    showSku: false,
   },
   cart: {
     enabled: true,
     style: 'drawer',
     showShippingEstimate: true,
+    showPhysicalStoresInCart: false,
     showCouponField: true,
     showCrossSell: true,
     showOrderNotes: false,
     showFreeShippingBar: true,
+    showViewMoreButton: true,
+    minimumOrderValue: 0,
+    addToCartAction: 'open-cart',
+    showProductRecommendations: false,
   },
   footer: { ...DEFAULT_FOOTER },
   customCss: '',
@@ -444,7 +642,7 @@ export const DEFAULT_THEME_SECTIONS: ThemeSections = {
 };
 
 // ── Helper: create a preset by overriding defaults ────────
-function makePreset(overrides: Omit<Partial<ThemeSections>, 'header' | 'footer'> & { header?: Partial<HeaderSection>; footer?: Partial<FooterSection> }): ThemeSections {
+function makePreset(overrides: Omit<Partial<ThemeSections>, 'header' | 'footer' | 'productDetail' | 'productList' | 'cart' | 'featuredProducts' | 'hero' | 'colors' | 'typography' | 'design'> & { header?: Partial<HeaderSection>; footer?: Partial<FooterSection>; productDetail?: Partial<ProductDetailSection>; productList?: Partial<ProductListSection>; cart?: Partial<CartSection>; featuredProducts?: Partial<FeaturedProductsSection>; hero?: Partial<HeroSection>; colors?: Partial<ThemeColors>; typography?: Partial<ThemeTypography>; design?: Partial<ThemeDesign> }): ThemeSections {
   return {
     ...DEFAULT_THEME_SECTIONS,
     ...overrides,
@@ -454,6 +652,12 @@ function makePreset(overrides: Omit<Partial<ThemeSections>, 'header' | 'footer'>
     colors: { ...DEFAULT_COLORS, ...(overrides.colors || {}) },
     typography: { ...DEFAULT_TYPOGRAPHY, ...(overrides.typography || {}) },
     design: { ...DEFAULT_DESIGN, ...(overrides.design || {}) },
+    // Merge sub-sections so new fields in defaults propagate to presets automatically
+    productList: { ...DEFAULT_THEME_SECTIONS.productList, ...(overrides.productList || {}) } as ProductListSection,
+    productDetail: { ...DEFAULT_THEME_SECTIONS.productDetail, ...(overrides.productDetail || {}) } as ProductDetailSection,
+    cart: { ...DEFAULT_THEME_SECTIONS.cart, ...(overrides.cart || {}) } as CartSection,
+    featuredProducts: { ...DEFAULT_THEME_SECTIONS.featuredProducts, ...(overrides.featuredProducts || {}) } as FeaturedProductsSection,
+    hero: { ...DEFAULT_THEME_SECTIONS.hero, ...(overrides.hero || {}) } as HeroSection,
   };
 }
 
@@ -497,6 +701,20 @@ export const BOOST_THEME_SECTIONS: ThemeSections = makePreset({
   design: { logoUrl: '', faviconUrl: '', borderRadius: 'medium', buttonStyle: 'filled', containerWidth: 'wide' },
 });
 
+/** Atlântico — dark tech / premium layout */
+export const ATLANTICO_THEME_SECTIONS: ThemeSections = makePreset({
+  header: { useCustomColors: true, bgColor: '#0a0a0a', textColor: '#ffffff', logoPosition: 'left', stickyHeader: true, announcementBar: { enabled: true, text: '✨ Bem-vindo ao tema Atlântico', bgColor: '#06b6d4', textColor: '#0a0a0a' } },
+  hero: { enabled: true, type: 'slideshow', slides: [], videoUrl: '', height: 'medium', overlayOpacity: 0.3, autoplay: true, autoplayInterval: 5 },
+  featuredProducts: { enabled: true, title: 'Destaques', maxProducts: 8, columns: 4, showPrice: true, showBadge: true },
+  productList: { enabled: true, defaultView: 'grid', columns: 4, mobileColumns: 2, showFilters: true, filtersPosition: 'left', showSort: true, productsPerPage: 24, navigation: 'pagination', quickView: true, quickBuy: true, showIrregularGrid: false, hoverEffect: 'zoom', categoryBannerUrl: '' },
+  productDetail: { enabled: true, imagePosition: 'left', showRelated: true, showReviews: false, showShareButtons: true, stickyAddToCart: true, zoomOnHover: true, showShippingCalculator: true, variantDisplay: 'buttons', showSku: true },
+  cart: { enabled: true, style: 'drawer', showShippingEstimate: true, showCouponField: true, showCrossSell: true, showOrderNotes: false, showFreeShippingBar: true },
+  footer: { bgColor: '#0a0a0a', textColor: '#ffffff', columns: 4 },
+  colors: { primary: '#0a0a0a', secondary: '#141414', accent: '#06b6d4', background: '#0a0a0a', text: '#ffffff' },
+  typography: { headingFont: 'inter', bodyFont: 'inter', baseFontSize: 'medium' },
+  design: { logoUrl: '', faviconUrl: '', borderRadius: 'large', buttonStyle: 'filled', containerWidth: 'default' },
+});
+
 /** Bulk — catalog / wholesale layout */
 export const BULK_THEME_SECTIONS: ThemeSections = makePreset({
   header: { announcementBar: { enabled: true, text: 'Desconto progressivo: compre mais, pague menos', bgColor: '#0f172a', textColor: '#e2e8f0' } },
@@ -510,11 +728,37 @@ export const BULK_THEME_SECTIONS: ThemeSections = makePreset({
   design: { logoUrl: '', faviconUrl: '', borderRadius: 'small', buttonStyle: 'filled', containerWidth: 'wide' },
 });
 
+/** Vitrine — marketplace fashion / sneakers layout */
+export const VITRINE_THEME_SECTIONS: ThemeSections = makePreset({
+  header: { useCustomColors: true, bgColor: '#0f0f0f', textColor: '#ffffff', logoPosition: 'left', stickyHeader: true, announcementBar: { enabled: false, text: '', bgColor: '#0d9f6e', textColor: '#ffffff' } },
+  hero: { enabled: false, type: 'single', slides: [], videoUrl: '', height: 'small', overlayOpacity: 0, autoplay: false, autoplayInterval: 5 },
+  featuredProducts: { enabled: true, title: 'Mais Procurados', maxProducts: 8, columns: 4, showPrice: true, showBadge: true },
+  productList: { enabled: true, defaultView: 'grid', columns: 4, mobileColumns: 2, showFilters: true, filtersPosition: 'left', showSort: true, productsPerPage: 24, navigation: 'pagination', quickView: false, quickBuy: true, showIrregularGrid: false, hoverEffect: 'zoom', categoryBannerUrl: '' },
+  productDetail: { enabled: true, imagePosition: 'left', showRelated: true, showReviews: false, showShareButtons: true, stickyAddToCart: true, zoomOnHover: true, showShippingCalculator: false, variantDisplay: 'buttons', showSku: false },
+  cart: { enabled: true, style: 'drawer', showShippingEstimate: true, showCouponField: true, showCrossSell: true, showOrderNotes: false, showFreeShippingBar: true },
+  footer: { bgColor: '#0f0f0f', textColor: '#9ca3af', columns: 4 },
+  colors: { primary: '#111111', secondary: '#f5f5f5', accent: '#0d9f6e', background: '#f5f5f5', text: '#111111' },
+  typography: { headingFont: 'inter', bodyFont: 'inter', baseFontSize: 'medium' },
+  design: { logoUrl: '', faviconUrl: '', borderRadius: 'large', buttonStyle: 'filled', containerWidth: 'default' },
+});
+
+/** Stock — StockX-style marketplace layout */
+export const STOCK_THEME_SECTIONS: ThemeSections = makePreset({
+  header: { useCustomColors: true, bgColor: '#ffffff', textColor: '#000000', logoPosition: 'left', stickyHeader: true, announcementBar: { enabled: false, text: '', bgColor: '#16a34a', textColor: '#ffffff' } },
+  hero: { enabled: false, type: 'single', slides: [], videoUrl: '', height: 'medium', overlayOpacity: 0, autoplay: false, autoplayInterval: 5 },
+  featuredProducts: { enabled: true, title: 'Featured', maxProducts: 10, columns: 5, showPrice: true, showBadge: true },
+  productList: { enabled: true, defaultView: 'grid', columns: 5, mobileColumns: 2, showFilters: true, filtersPosition: 'left', showSort: true, productsPerPage: 25, navigation: 'pagination', quickView: false, quickBuy: true, showIrregularGrid: false, hoverEffect: 'zoom', categoryBannerUrl: '' },
+  productDetail: { enabled: true, imagePosition: 'left', showRelated: true, showReviews: false, showShareButtons: true, stickyAddToCart: true, zoomOnHover: true, showShippingCalculator: false, variantDisplay: 'buttons', showSku: true },
+  cart: { enabled: true, style: 'drawer', showShippingEstimate: true, showCouponField: true, showCrossSell: true, showOrderNotes: false, showFreeShippingBar: true },
+  footer: { bgColor: '#000000', textColor: '#9ca3af', columns: 4 },
+  colors: { primary: '#000000', secondary: '#f9fafb', accent: '#16a34a', background: '#ffffff', text: '#000000' },
+  typography: { headingFont: 'inter', bodyFont: 'inter', baseFontSize: 'medium' },
+  design: { logoUrl: '', faviconUrl: '', borderRadius: 'full', buttonStyle: 'filled', containerWidth: 'default' },
+});
+
 /** Map template ID → default sections preset */
 export const TEMPLATE_PRESETS: Record<string, ThemeSections> = {
-  'template-1': DEFAULT_THEME_SECTIONS,
-  'template-2': NOVA_THEME_SECTIONS,
-  'template-3': VOGUE_THEME_SECTIONS,
-  'template-4': BOOST_THEME_SECTIONS,
-  'template-5': BULK_THEME_SECTIONS,
+  'limpo': DEFAULT_THEME_SECTIONS,
+  'template-6': ATLANTICO_THEME_SECTIONS,
+  'template-7': VITRINE_THEME_SECTIONS,
 };

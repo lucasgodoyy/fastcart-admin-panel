@@ -582,12 +582,23 @@ export function ProductClient() {
 
                 {/* Name + SKU */}
                 <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
                   <Link
                     href={`/admin/products/${product.id}`}
                     className="text-sm font-medium text-primary transition-colors hover:text-primary/80 hover:underline"
                   >
                     {product.name}
                   </Link>
+                  {(!product.variants || product.variants.length === 0) && (
+                    <Link
+                      href={`/admin/products/${product.id}#variants`}
+                      title="Este produto não possui variantes cadastradas. Clique para cadastrar variantes e permitir que clientes adicionem ao carrinho."
+                      className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700 hover:bg-amber-200 dark:bg-amber-950/40 dark:text-amber-400"
+                    >
+                      ⚠ Sem variantes
+                    </Link>
+                  )}
+                  </div>
                   <p className="text-xs text-muted-foreground">SKU: {product.sku || '-'}</p>
                 </div>
 
