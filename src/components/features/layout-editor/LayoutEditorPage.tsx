@@ -143,6 +143,37 @@ export default function LayoutEditorPage() {
             setPendingEditSectionId(sectionId);
           }
         }
+      } else if (event.data?.type === 'LOJAKI_UPDATE_SECTION_TITLE') {
+        const { sectionId, title, format } = event.data as {
+          sectionId: string;
+          title: string;
+          format?: {
+            fontSize?: number;
+            bold?: boolean;
+            italic?: boolean;
+            underline?: boolean;
+            color?: string;
+            alignment?: 'left' | 'center' | 'right';
+          };
+        };
+        if (!sectionId) return;
+        setSections((prev) => ({
+          ...prev,
+          homeSections: (prev.homeSections || []).map((s) =>
+            s.id === sectionId
+              ? {
+                  ...s,
+                  title,
+                  ...(format?.fontSize !== undefined && { titleFontSize: format.fontSize }),
+                  ...(format?.bold !== undefined && { titleBold: format.bold }),
+                  ...(format?.italic !== undefined && { titleItalic: format.italic }),
+                  ...(format?.underline !== undefined && { titleUnderline: format.underline }),
+                  ...(format?.color !== undefined && { titleColor: format.color }),
+                  ...(format?.alignment !== undefined && { titleAlignment: format.alignment }),
+                }
+              : s,
+          ),
+        }));
       }
     };
     window.addEventListener('message', handleMessage);
@@ -887,6 +918,7 @@ function HomeSectionsEditor({
                 </SelectContent>
               </Select>
             </div>
+            <ToggleRow label="Mostrar título" checked={editingSection.showTitle ?? true} onChange={(v) => upd({ showTitle: v })} />
             <div>
               <Label className="text-xs">Quantidade de produtos por linha em celulares</Label>
               <Select value={String(editingSection.mobileColumns || 2)} onValueChange={(v) => upd({ mobileColumns: parseInt(v) })}>
@@ -910,6 +942,9 @@ function HomeSectionsEditor({
               </Select>
             </div>
             <SectionDivider label="Produtos" />
+            <a href="/admin/products/organize" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-primary hover:underline">
+              <ExternalLink className="h-3 w-3" /> Escolha os produtos em destaques
+            </a>
             <ProductPickerInline
               selectedIds={editingSection.productIds || []}
               onChange={(ids) => upd({ productIds: ids })}
@@ -939,6 +974,7 @@ function HomeSectionsEditor({
                 </SelectContent>
               </Select>
             </div>
+            <ToggleRow label="Mostrar título" checked={editingSection.showTitle ?? true} onChange={(v) => upd({ showTitle: v })} />
             <div>
               <Label className="text-xs">Quantidade de produtos por linha em celulares</Label>
               <Select value={String(editingSection.mobileColumns || 2)} onValueChange={(v) => upd({ mobileColumns: parseInt(v) })}>
@@ -965,6 +1001,9 @@ function HomeSectionsEditor({
               <Label className="text-xs">Máx. produtos</Label>
               <Input type="number" min={2} max={24} value={editingSection.maxProducts || 8} onChange={(e) => upd({ maxProducts: parseInt(e.target.value) || 8 })} className="mt-1" />
             </div>
+            <a href="/admin/products/organize" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-primary hover:underline">
+              <ExternalLink className="h-3 w-3" /> Escolha os produtos em destaques
+            </a>
           </div>
         )}
 
@@ -1021,30 +1060,33 @@ function HomeSectionsEditor({
         {/* ─── Banners promocionais / categorias / novidades ─── */}
         {(editingSection.type === 'promoBanners' || editingSection.type === 'categoryBanners' || editingSection.type === 'newsBanners') && (
           <div className="space-y-4">
-            <p className="text-xs text-muted-foreground">Você pode carregar os banners que precisar, sem limite de quantidade.</p>
             <div>
               <Label className="text-xs">Título para os banners</Label>
               <Input value={editingSection.title} onChange={(e) => upd({ title: e.target.value })} className="mt-1" />
             </div>
-            <ToggleRow label="Mostrar texto fora da imagem" checked={editingSection.showTextOutside ?? false} onChange={(v) => upd({ showTextOutside: v })} />
-            <ToggleRow label="Mostrar banners dentro de um carrossel" checked={editingSection.showAsCarousel ?? false} onChange={(v) => upd({ showAsCarousel: v })} />
-            <ToggleRow label="Usar a mesma altura para todos os banners" checked={editingSection.sameHeight ?? false} onChange={(v) => upd({ sameHeight: v })} />
-            <ToggleRow label="Remover espaços entre os banners" checked={editingSection.removeSpacing ?? false} onChange={(v) => upd({ removeSpacing: v })} />
+
+            <SectionDivider label="Imagens" />
+            <BannerListEditor
+              banners={editingSection.banners || []}
+              onChange={(banners) => upd({ banners })}
+              recommendedSize={editingSection.type === 'categoryBanners' ? '930px × 465px' : editingSection.type === 'newsBanners' ? '1580px × 600px' : '930px × 465px'}
+            />
+
+            <SectionDivider label="Disposição" />
             <div>
-              <Label className="text-xs">Alinhamento do texto</Label>
-              <Select value={editingSection.textAlignment || 'center'} onValueChange={(v) => upd({ textAlignment: v as 'left' | 'center' | 'right' })}>
+              <Label className="text-xs">Disposição de banners em celulares</Label>
+              <Select value={String(editingSection.mobileBannersPerRow ?? (editingSection.type === 'newsBanners' ? 1 : 2))} onValueChange={(v) => upd({ mobileBannersPerRow: parseInt(v) })}>
                 <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="left">Esquerda</SelectItem>
-                  <SelectItem value="center">Centralizado</SelectItem>
-                  <SelectItem value="right">Direita</SelectItem>
+                  <SelectItem value="1">1 banner por linha</SelectItem>
+                  <SelectItem value="2">2 banners por linha</SelectItem>
+                  <SelectItem value="3">3 banners por linha</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <SectionDivider label="Imagens para computadores" />
             <div>
-              <Label className="text-xs">Disposição:</Label>
-              <Select value={String(editingSection.bannersPerRow || (editingSection.type === 'categoryBanners' ? 4 : editingSection.type === 'newsBanners' ? 1 : 2))} onValueChange={(v) => upd({ bannersPerRow: parseInt(v) })}>
+              <Label className="text-xs">Disposição de banners em computadores</Label>
+              <Select value={String(editingSection.bannersPerRow ?? (editingSection.type === 'categoryBanners' ? 4 : editingSection.type === 'newsBanners' ? 1 : 2))} onValueChange={(v) => upd({ bannersPerRow: parseInt(v) })}>
                 <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="1">1 banner por linha</SelectItem>
@@ -1054,12 +1096,42 @@ function HomeSectionsEditor({
                 </SelectContent>
               </Select>
             </div>
-            <BannerListEditor
-              banners={editingSection.banners || []}
-              onChange={(banners) => upd({ banners })}
-            />
-            <SectionDivider label="Imagens para celulares" />
-            <ToggleRow label="Carregar outras imagens para celulares" checked={editingSection.useMobileImages ?? false} onChange={(v) => upd({ useMobileImages: v })} />
+            <ToggleRow label="Mostrar banners dentro de um carrossel" checked={editingSection.showAsCarousel ?? false} onChange={(v) => upd({ showAsCarousel: v })} />
+            <ToggleRow label="Usar a mesma altura para todos os banners" checked={editingSection.sameHeight ?? false} onChange={(v) => upd({ sameHeight: v })} />
+            <ToggleRow label="Remover espaços entre os banners" checked={editingSection.removeSpacing ?? false} onChange={(v) => upd({ removeSpacing: v })} />
+
+            <SectionDivider label="Ajustes do texto" />
+            <div>
+              <Label className="text-xs font-medium">Alinhamento</Label>
+              <div className="mt-1.5 flex items-center gap-4">
+                <div>
+                  <p className="text-[10px] text-muted-foreground mb-1">Horizontal</p>
+                  <div className="flex rounded-md border overflow-hidden">
+                    {(['left', 'center', 'right'] as const).map((align) => (
+                      <button key={align} onClick={() => upd({ textAlignment: align })}
+                        className={`flex items-center justify-center h-8 w-8 text-xs transition-colors ${(editingSection.textAlignment || 'center') === align ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}
+                        title={align === 'left' ? 'Esquerda' : align === 'center' ? 'Centro' : 'Direita'}>
+                        {align === 'left' ? '☰' : align === 'center' ? '☰' : '☰'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground mb-1">Vertical</p>
+                  <div className="flex rounded-md border overflow-hidden">
+                    {(['top', 'center', 'bottom'] as const).map((vAlign) => (
+                      <button key={vAlign} onClick={() => upd({ textVerticalAlign: vAlign })}
+                        className={`flex items-center justify-center h-8 w-8 text-xs transition-colors ${(editingSection.textVerticalAlign || 'center') === vAlign ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}
+                        title={vAlign === 'top' ? 'Topo' : vAlign === 'center' ? 'Centro' : 'Rodapé'}>
+                        {vAlign === 'top' ? '⬆' : vAlign === 'center' ? '↕' : '⬇'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <ToggleRow label="Mostrar texto fora da imagem" checked={editingSection.showTextOutside ?? false} onChange={(v) => upd({ showTextOutside: v })} />
+            <ToggleRow label="Adicionar fundo atrás do texto" checked={editingSection.addTextBackground ?? true} onChange={(v) => upd({ addTextBackground: v })} />
           </div>
         )}
 
@@ -1106,46 +1178,85 @@ function HomeSectionsEditor({
         {/* ─── Vídeo ─── */}
         {editingSection.type === 'video' && (
           <div className="space-y-4">
+            <p className="text-xs text-muted-foreground">O vídeo será reproduzido automaticamente e sem som.</p>
             <ToggleRow label="Aumentar à largura da tela" checked={editingSection.fullWidth ?? false} onChange={(v) => upd({ fullWidth: v })} />
-            <div>
-              <Label className="text-xs">Tipo de reprodução</Label>
-              <Select value={editingSection.playbackType || 'auto-muted'} onValueChange={(v) => upd({ playbackType: v as 'auto-muted' | 'click' })}>
-                <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="auto-muted">Automática e sem som</SelectItem>
-                  <SelectItem value="click">Ao clicar</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
             <div>
               <Label className="text-xs">Link do YouTube</Label>
               <Input value={editingSection.videoUrl || ''} onChange={(e) => upd({ videoUrl: e.target.value })} className="mt-1" placeholder="Ex: https://www.youtube.com/watch?v=96Ec0dOHa5I" />
             </div>
-            <div>
-              <p className="text-[11px] text-muted-foreground mb-1">Imagem do vídeo — Não se aplica se o tipo de reprodução for automática</p>
-              <Label className="text-xs">URL da thumbnail</Label>
-              <Input value={editingSection.videoThumbnailUrl || ''} onChange={(e) => upd({ videoThumbnailUrl: e.target.value })} className="mt-1" placeholder="https://..." />
-              <p className="text-[10px] text-muted-foreground mt-1">Tamanho recomendado: 1920px × 1080px</p>
-            </div>
+
+            <SectionDivider label="Imagem do vídeo" />
+            <p className="text-[11px] text-muted-foreground -mt-2">Essa será a imagem mostrada até que o vídeo esteja pronto para ser reproduzido (só em celulares).</p>
+            {(() => {
+              const thumbnailUrl = editingSection.videoThumbnailUrl || '';
+              const handleThumbUpload = (file: File) => {
+                const reader = new FileReader();
+                reader.onload = (ev) => upd({ videoThumbnailUrl: ev.target?.result as string });
+                reader.readAsDataURL(file);
+              };
+              return thumbnailUrl ? (
+                <div>
+                  <div className="relative group rounded-md overflow-hidden border border-border aspect-video">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={thumbnailUrl} alt="" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                      <label className="cursor-pointer flex items-center gap-1 text-white text-xs bg-black/50 rounded px-2 py-1 hover:bg-black/70">
+                        <ImageIcon className="h-3 w-3" /> Trocar
+                        <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleThumbUpload(f); }} />
+                      </label>
+                      <button onClick={() => upd({ videoThumbnailUrl: '' })} className="flex items-center gap-1 text-white text-xs bg-black/50 rounded px-2 py-1 hover:bg-red-600/80"><Trash2 className="h-3 w-3" /></button>
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mt-1">📐 Tamanho recomendado: 1280px × 720px</p>
+                </div>
+              ) : (
+                <div>
+                  <label className="flex flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-primary/40 bg-primary/5 cursor-pointer py-5 hover:border-primary/60 hover:bg-primary/8 transition-all">
+                    <ImageIcon className="h-6 w-6 text-primary/50" />
+                    <span className="text-xs font-medium text-primary">Selecionar imagem</span>
+                    <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleThumbUpload(f); }} />
+                  </label>
+                  <p className="text-[10px] text-muted-foreground mt-1">📐 Tamanho recomendado: 1280px × 720px</p>
+                </div>
+              );
+            })()}
+
             <div>
               <Label className="text-xs">Título</Label>
               <Input value={editingSection.videoTitle || ''} onChange={(e) => upd({ videoTitle: e.target.value })} className="mt-1" />
             </div>
             <div>
+              <Label className="text-xs">Subtítulo</Label>
+              <Input value={editingSection.videoSubtitle || ''} onChange={(e) => upd({ videoSubtitle: e.target.value })} className="mt-1" />
+            </div>
+            <div>
               <Label className="text-xs">Descrição</Label>
               <Textarea value={editingSection.videoDescription || ''} onChange={(e) => upd({ videoDescription: e.target.value })} className="mt-1" rows={3} />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-xs">Texto do botão</Label>
-                <Input value={editingSection.videoButtonText || ''} onChange={(e) => upd({ videoButtonText: e.target.value })} className="mt-1" />
-              </div>
-              <div>
-                <Label className="text-xs">Link do botão</Label>
-                <Input value={editingSection.videoButtonUrl || ''} onChange={(e) => upd({ videoButtonUrl: e.target.value })} className="mt-1" placeholder="https://..." />
-              </div>
+            <div>
+              <Label className="text-xs">Texto do botão</Label>
+              <Input value={editingSection.videoButtonText || ''} onChange={(e) => upd({ videoButtonText: e.target.value })} className="mt-1" />
+            </div>
+            <div>
+              <Label className="text-xs">Link ao clicar no vídeo ou botão</Label>
+              <Input value={editingSection.videoButtonUrl || ''} onChange={(e) => upd({ videoButtonUrl: e.target.value })} className="mt-1" placeholder="https://..." />
             </div>
             <ToggleRow label="Usar disposição vertical em celulares" checked={editingSection.verticalOnMobile ?? false} onChange={(v) => upd({ verticalOnMobile: v })} />
+            <div>
+              <Label className="text-xs font-medium">Alinhamento do texto</Label>
+              <div className="mt-1.5 flex rounded-md border overflow-hidden w-fit">
+                {(['left', 'center', 'right'] as const).map((align) => (
+                  <button
+                    key={align}
+                    onClick={() => upd({ videoTextAlignment: align })}
+                    className={`flex items-center justify-center h-8 w-9 text-xs transition-colors ${(editingSection.videoTextAlignment || 'center') === align ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}
+                    title={align === 'left' ? 'Esquerda' : align === 'center' ? 'Centro' : 'Direita'}
+                  >
+                    {align === 'left' ? '≡' : align === 'center' ? '☰' : '≡'}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
@@ -1160,6 +1271,8 @@ function HomeSectionsEditor({
               </div>
             )}
             <ToggleRow label="Mostrar os banners na home" checked={editingSection.showOnHome ?? true} onChange={(v) => upd({ showOnHome: v })} />
+            <ToggleRow label="Mostrar títulos" checked={editingSection.showShippingTitles ?? true} onChange={(v) => upd({ showShippingTitles: v })} />
+            <ToggleRow label="Mostrar descrições" checked={editingSection.showShippingDescriptions ?? true} onChange={(v) => upd({ showShippingDescriptions: v })} />
             <ShippingInfoEditor
               items={editingSection.shippingInfoItems || []}
               onChange={(items) => upd({ shippingInfoItems: items })}
@@ -1260,6 +1373,42 @@ function HomeSectionsEditor({
             </div>
           </div>
         )}
+
+        {/* ─── Editorial de texto ─── */}
+        {editingSection.type === 'textEditorial' && (
+          <div className="space-y-4">
+            <div>
+              <Label className="text-xs">Título</Label>
+              <Input value={editingSection.title} onChange={(e) => upd({ title: e.target.value })} className="mt-1" />
+            </div>
+            <ToggleRow label="Mostrar título" checked={editingSection.showTitle ?? true} onChange={(v) => upd({ showTitle: v })} />
+            <div>
+              <Label className="text-xs">Texto</Label>
+              <Textarea
+                value={editingSection.editorialText || ''}
+                onChange={(e) => upd({ editorialText: e.target.value })}
+                className="mt-1"
+                rows={6}
+                placeholder="Escreva o conteúdo editorial aqui..."
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Alinhamento do texto</Label>
+              <div className="mt-1.5 flex gap-1.5">
+                {(['left', 'center', 'right'] as const).map((align) => (
+                  <button
+                    key={align}
+                    type="button"
+                    onClick={() => upd({ textAlignment: align })}
+                    className={`flex-1 rounded-md border px-2 py-1.5 text-[11px] font-medium transition-colors ${(editingSection.textAlignment ?? 'center') === align ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:bg-accent/50'}`}
+                  >
+                    {align === 'left' ? 'Esquerda' : align === 'center' ? 'Centro' : 'Direita'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -1335,31 +1484,109 @@ function BannerListEditor({
   const remove = (idx: number) => onChange(banners.filter((_, i) => i !== idx));
   const update = (idx: number, patch: Partial<BannerItem>) =>
     onChange(banners.map((b, i) => (i === idx ? { ...b, ...patch } : b)));
+  const move = (idx: number, dir: -1 | 1) => {
+    const next = [...banners];
+    const target = idx + dir;
+    if (target < 0 || target >= next.length) return;
+    [next[idx], next[target]] = [next[target], next[idx]];
+    onChange(next);
+  };
+  const handleUpload = (idx: number, field: 'imageUrl' | 'mobileImageUrl', file: File) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => update(idx, { [field]: ev.target?.result as string });
+    reader.readAsDataURL(file);
+  };
 
   return (
     <div className="space-y-3">
-      <p className="text-xs text-muted-foreground">Tamanho recomendado: {recommendedSize || '1920px × 900px'}</p>
       {banners.map((banner, idx) => (
-        <div key={idx} className="space-y-2 rounded-md border p-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium">Banner {idx + 1}</span>
-            <button onClick={() => remove(idx)} className="text-xs text-destructive hover:underline">Remover</button>
+        <div key={idx} className="rounded-lg border bg-card overflow-hidden">
+          {/* Card header */}
+          <div className="flex items-center gap-2 px-3 py-2 border-b bg-muted/30">
+            <div className="flex flex-col gap-0.5">
+              <button onClick={() => move(idx, -1)} disabled={idx === 0} className="h-4 w-4 flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors">▲</button>
+              <button onClick={() => move(idx, 1)} disabled={idx === banners.length - 1} className="h-4 w-4 flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors">▼</button>
+            </div>
+            <div className="flex items-center justify-center h-5 w-5 rounded-full bg-primary/10 text-[10px] font-bold text-primary">{idx + 1}</div>
+            <span className="text-xs font-medium flex-1">Banner {idx + 1}</span>
+            <button onClick={() => remove(idx)} className="text-muted-foreground hover:text-destructive transition-colors"><X className="h-3.5 w-3.5" /></button>
           </div>
-          <Input placeholder="URL da imagem (computadores)" value={banner.imageUrl} onChange={(e) => update(idx, { imageUrl: e.target.value })} />
-          <Input placeholder="URL imagem mobile (opcional)" value={banner.mobileImageUrl} onChange={(e) => update(idx, { mobileImageUrl: e.target.value })} />
-          <Input placeholder="Título (opcional)" value={banner.title || ''} onChange={(e) => update(idx, { title: e.target.value })} />
-          <Input placeholder="Descrição (opcional)" value={banner.description || ''} onChange={(e) => update(idx, { description: e.target.value })} />
-          <div className="grid grid-cols-2 gap-2">
-            <Input placeholder="Texto do botão" value={banner.buttonText || ''} onChange={(e) => update(idx, { buttonText: e.target.value })} />
-            <Input placeholder="Link do botão" value={banner.buttonUrl || ''} onChange={(e) => update(idx, { buttonUrl: e.target.value })} />
+
+          <div className="p-3 space-y-3">
+            {/* Desktop image */}
+            <div>
+              <p className="text-[10px] text-muted-foreground mb-1.5">Imagem para computadores <span className="text-muted-foreground/60">({recommendedSize || '930px × 465px'})</span></p>
+              {banner.imageUrl ? (
+                <div className="relative group rounded-md overflow-hidden border border-border aspect-[2/1]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={banner.imageUrl} alt="" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                    <label className="cursor-pointer flex items-center gap-1 text-white text-xs bg-black/50 rounded px-2 py-1 hover:bg-black/70">
+                      <ImageIcon className="h-3 w-3" /> Trocar
+                      <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(idx, 'imageUrl', f); }} />
+                    </label>
+                    <button onClick={() => update(idx, { imageUrl: '' })} className="flex items-center gap-1 text-white text-xs bg-black/50 rounded px-2 py-1 hover:bg-red-600/80"><Trash2 className="h-3 w-3" /></button>
+                  </div>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-primary/40 bg-primary/5 cursor-pointer py-5 hover:border-primary/60 hover:bg-primary/8 transition-all">
+                  <ImageIcon className="h-6 w-6 text-primary/50" />
+                  <span className="text-xs font-medium text-primary">Selecionar imagem</span>
+                  <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(idx, 'imageUrl', f); }} />
+                </label>
+              )}
+            </div>
+
+            {/* Mobile image */}
+            <div>
+              <p className="text-[10px] text-muted-foreground mb-1.5">Imagem para celulares <span className="text-muted-foreground/60">(opcional)</span></p>
+              {banner.mobileImageUrl ? (
+                <div className="relative group rounded-md overflow-hidden border border-border h-20">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={banner.mobileImageUrl} alt="" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                    <label className="cursor-pointer flex items-center gap-1 text-white text-xs bg-black/50 rounded px-2 py-1 hover:bg-black/70">
+                      <ImageIcon className="h-3 w-3" /> Trocar
+                      <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(idx, 'mobileImageUrl', f); }} />
+                    </label>
+                    <button onClick={() => update(idx, { mobileImageUrl: '' })} className="flex items-center gap-1 text-white text-xs bg-black/50 rounded px-2 py-1 hover:bg-red-600/80"><Trash2 className="h-3 w-3" /></button>
+                  </div>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-muted-foreground/30 cursor-pointer py-3 hover:border-muted-foreground/50 transition-all">
+                  <Plus className="h-4 w-4 text-muted-foreground/50" />
+                  <span className="text-[11px] text-muted-foreground">Carregar imagem para celulares</span>
+                  <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(idx, 'mobileImageUrl', f); }} />
+                </label>
+              )}
+            </div>
+
+            {/* Text fields */}
+            <div className="space-y-2">
+              <Input placeholder="Título (opcional)" value={banner.title || ''} onChange={(e) => update(idx, { title: e.target.value })} className="text-xs h-8" />
+              <Input placeholder="Descrição (opcional)" value={banner.description || ''} onChange={(e) => update(idx, { description: e.target.value })} className="text-xs h-8" />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Input placeholder="Texto do botão" value={banner.buttonText || ''} onChange={(e) => update(idx, { buttonText: e.target.value })} className="text-xs h-8" />
+              <Input placeholder="Link do botão" value={banner.buttonUrl || ''} onChange={(e) => update(idx, { buttonUrl: e.target.value })} className="text-xs h-8" />
+            </div>
+            <Input placeholder="Link de destino (banner)" value={banner.linkUrl} onChange={(e) => update(idx, { linkUrl: e.target.value })} className="text-xs h-8" />
           </div>
-          <Input placeholder="Link de destino" value={banner.linkUrl} onChange={(e) => update(idx, { linkUrl: e.target.value })} />
-          <Input placeholder="Texto alternativo" value={banner.altText} onChange={(e) => update(idx, { altText: e.target.value })} />
         </div>
       ))}
-      <Button type="button" variant="outline" size="sm" className="w-full" onClick={add}>
-        <Plus className="h-3.5 w-3.5 mr-1.5" /> Adicionar banner
-      </Button>
+
+      {/* Add new banner */}
+      <label className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-primary/40 bg-primary/5 cursor-pointer py-5 hover:border-primary/60 hover:bg-primary/10 transition-all">
+        <Plus className="h-5 w-5 text-primary/60" />
+        <span className="text-xs font-medium text-primary">Selecionar imagem</span>
+        <input type="file" accept="image/*" className="sr-only" onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (!f) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => onChange([...banners, { imageUrl: ev.target?.result as string, mobileImageUrl: '', linkUrl: '', altText: '', title: '', description: '', buttonText: '', buttonUrl: '' }]);
+          reader.readAsDataURL(f);
+        }} />
+      </label>
     </div>
   );
 }
@@ -1413,39 +1640,82 @@ function ShippingInfoEditor({
   const remove = (idx: number) => onChange(items.filter((_, i) => i !== idx));
   const update = (idx: number, patch: Partial<typeof items[number]>) =>
     onChange(items.map((item, i) => (i === idx ? { ...item, ...patch } : item)));
-
-  const defaultLabels = ['Frete', 'Tarjetas de crédito', 'Segurança', 'Trocas e devoluções'];
+  const move = (idx: number, dir: -1 | 1) => {
+    const next = [...items];
+    const target = idx + dir;
+    if (target < 0 || target >= next.length) return;
+    [next[idx], next[target]] = [next[target], next[idx]];
+    onChange(next);
+  };
+  const handleUpload = (idx: number, file: File) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => update(idx, { imageUrl: ev.target?.result as string, icon: 'custom' });
+    reader.readAsDataURL(file);
+  };
 
   return (
     <div className="space-y-3">
       {items.map((item, idx) => (
-        <div key={idx} className="space-y-2 rounded-md border p-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium">Banner {idx + 1}</span>
-            <button onClick={() => remove(idx)} className="text-xs text-destructive hover:underline">Remover</button>
+        <div key={idx} className="rounded-lg border bg-card overflow-hidden">
+          {/* Card header */}
+          <div className="flex items-center gap-2 px-3 py-2 border-b bg-muted/30">
+            <div className="flex flex-col gap-0.5">
+              <button onClick={() => move(idx, -1)} disabled={idx === 0} className="h-4 w-4 flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors">▲</button>
+              <button onClick={() => move(idx, 1)} disabled={idx === items.length - 1} className="h-4 w-4 flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors">▼</button>
+            </div>
+            <div className="flex items-center justify-center h-5 w-5 rounded-full bg-primary/10 text-[10px] font-bold text-primary">{idx + 1}</div>
+            <span className="text-xs font-medium flex-1">Banner {idx + 1}</span>
+            <button onClick={() => remove(idx)} className="text-muted-foreground hover:text-destructive transition-colors"><X className="h-3.5 w-3.5" /></button>
           </div>
-          <div>
-            <Label className="text-xs">Imagem (opcional)</Label>
-            <Input value={item.imageUrl || ''} onChange={(e) => update(idx, { imageUrl: e.target.value })} className="mt-1" placeholder="https://..." />
-            <p className="text-[10px] text-muted-foreground mt-1">Tamanho recomendado: 120px × 120px</p>
+
+          <div className="p-3 space-y-3">
+            {/* Image upload area */}
+            <div>
+              <p className="text-[10px] text-muted-foreground mb-1.5">Imagem <span className="text-muted-foreground/60">(600px × 600px)</span></p>
+              {item.imageUrl ? (
+                <div className="relative group rounded-md overflow-hidden border border-border h-24 w-24">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={item.imageUrl} alt="" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100">
+                    <label className="cursor-pointer flex items-center gap-1 text-white text-[10px] bg-black/50 rounded px-1.5 py-0.5 hover:bg-black/70">
+                      <ImageIcon className="h-2.5 w-2.5" /> Trocar
+                      <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(idx, f); }} />
+                    </label>
+                    <button onClick={() => update(idx, { imageUrl: '', icon: 'truck' })} className="flex items-center gap-1 text-white text-[10px] bg-black/50 rounded px-1.5 py-0.5 hover:bg-red-600/80"><Trash2 className="h-2.5 w-2.5" /></button>
+                  </div>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-primary/40 bg-primary/5 cursor-pointer py-4 w-24 h-24 hover:border-primary/60 hover:bg-primary/8 transition-all">
+                  <ImageIcon className="h-5 w-5 text-primary/50" />
+                  <span className="text-[10px] font-medium text-primary">Selecionar</span>
+                  <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(idx, f); }} />
+                </label>
+              )}
+            </div>
+
+            <div>
+              <Label className="text-xs">Ícone</Label>
+              <Select value={item.icon} onValueChange={(v) => { if (v === 'custom') return; update(idx, { icon: v, imageUrl: '' }); }}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="truck">Frete</SelectItem>
+                  <SelectItem value="credit-card">Tarjetas de crédito</SelectItem>
+                  <SelectItem value="shield">Segurança</SelectItem>
+                  <SelectItem value="refresh">Trocas e devoluções</SelectItem>
+                  <SelectItem value="clock">Relógio (prazo)</SelectItem>
+                  <SelectItem value="headphones">Suporte</SelectItem>
+                  <SelectItem value="custom">Imagem própria</SelectItem>
+                </SelectContent>
+              </Select>
+              {item.icon === 'custom' && !item.imageUrl && (
+                <p className="text-[10px] text-amber-600 mt-1">Envie uma imagem acima para usar como ícone personalizado.</p>
+              )}
+            </div>
+
+            <Input placeholder="Título" value={item.title} onChange={(e) => update(idx, { title: e.target.value })} className="text-xs h-8" />
+            <Input placeholder="Descrição" value={item.description} onChange={(e) => update(idx, { description: e.target.value })} className="text-xs h-8" />
+            <Input placeholder="Link (opcional)" value={item.linkUrl || ''} onChange={(e) => update(idx, { linkUrl: e.target.value })} className="text-xs h-8" />
           </div>
-          <div>
-            <Label className="text-xs">Ícone</Label>
-            <Select value={item.icon} onValueChange={(v) => update(idx, { icon: v })}>
-              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="truck">Frete</SelectItem>
-                <SelectItem value="credit-card">Tarjetas de crédito</SelectItem>
-                <SelectItem value="shield">Segurança</SelectItem>
-                <SelectItem value="refresh">Trocas e devoluções</SelectItem>
-                <SelectItem value="clock">Relógio (prazo)</SelectItem>
-                <SelectItem value="headphones">Suporte</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <Input placeholder={`Título (ex: ${defaultLabels[idx] || 'Título'})`} value={item.title} onChange={(e) => update(idx, { title: e.target.value })} />
-          <Input placeholder="Descrição" value={item.description} onChange={(e) => update(idx, { description: e.target.value })} />
-          <Input placeholder="Link (opcional)" value={item.linkUrl || ''} onChange={(e) => update(idx, { linkUrl: e.target.value })} />
         </div>
       ))}
       <Button type="button" variant="outline" size="sm" className="w-full" onClick={add}>
@@ -1529,7 +1799,7 @@ function HeroEditor({ value, onChange }: { value: HeroSection; onChange: (v: Her
     onChange({ ...value, [key]: val });
 
   const addSlide = () => {
-    set('slides', [...value.slides, { imageUrl: '', mobileImageUrl: '', title: '', subtitle: '', buttonText: '', buttonUrl: '' }]);
+    set('slides', [...value.slides, { imageUrl: '', mobileImageUrl: '', title: '', subtitle: '', buttonText: '', buttonUrl: '', textAlign: 'center', textVerticalAlign: 'center' }]);
   };
 
   const updateSlide = (idx: number, patch: Partial<HeroSlide>) => {
@@ -1541,8 +1811,190 @@ function HeroEditor({ value, onChange }: { value: HeroSection; onChange: (v: Her
     set('slides', value.slides.filter((_, i) => i !== idx));
   };
 
+  const moveSlide = (from: number, to: number) => {
+    if (to < 0 || to >= value.slides.length) return;
+    const next = [...value.slides];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    set('slides', next);
+  };
+
+  const handleImageUpload = (idx: number, field: 'imageUrl' | 'mobileImageUrl', file: File) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => updateSlide(idx, { [field]: ev.target?.result as string });
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="space-y-4">
+      {/* Slides */}
+      {value.type !== 'video' && (
+        <div className="space-y-3">
+          <p className="text-[11px] text-muted-foreground">
+            Arraste para reordenar. Tamanho recomendado: <strong>1580px × 600px</strong>
+          </p>
+
+          {value.slides.map((slide, idx) => (
+            <div key={idx} className="rounded-lg border bg-card overflow-hidden">
+              {/* Slide header with drag/number/remove */}
+              <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 border-b">
+                <div className="flex gap-0.5">
+                  <button
+                    onClick={() => moveSlide(idx, idx - 1)}
+                    disabled={idx === 0}
+                    className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors"
+                    title="Mover para cima"
+                  >
+                    <ArrowUp className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    onClick={() => moveSlide(idx, idx + 1)}
+                    disabled={idx === value.slides.length - 1}
+                    className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors"
+                    title="Mover para baixo"
+                  >
+                    <ArrowDown className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">{idx + 1}</span>
+                <span className="flex-1 text-xs font-medium truncate">{slide.title || `Slide ${idx + 1}`}</span>
+                <button onClick={() => removeSlide(idx)} className="p-1 text-muted-foreground hover:text-destructive transition-colors" title="Remover">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+
+              <div className="p-3 space-y-3">
+                {/* Desktop image */}
+                <div>
+                  <Label className="text-xs font-semibold">Imagem para computadores</Label>
+                  {slide.imageUrl ? (
+                    <div className="mt-1.5 relative group rounded-md overflow-hidden border bg-muted h-28">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={slide.imageUrl} alt={`Slide ${idx + 1}`} className="h-full w-full object-cover" />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        <label className="cursor-pointer rounded-md bg-white/90 px-3 py-1.5 text-xs font-medium text-black hover:bg-white transition-colors">
+                          Trocar
+                          <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload(idx, 'imageUrl', f); }} />
+                        </label>
+                        <button onClick={() => updateSlide(idx, { imageUrl: '' })} className="rounded-md bg-white/90 px-3 py-1.5 text-xs font-medium text-destructive hover:bg-white transition-colors">
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <label className="mt-1.5 flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-primary/40 bg-primary/5 cursor-pointer py-6 hover:border-primary/60 hover:bg-primary/10 transition-all">
+                      <Plus className="h-6 w-6 text-primary/60" />
+                      <span className="text-xs font-medium text-primary">Selecionar imagem</span>
+                      <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload(idx, 'imageUrl', f); }} />
+                    </label>
+                  )}
+                  <p className="text-[10px] text-muted-foreground mt-1">⊞ Tamanho recomendado: 1580px × 600px</p>
+                </div>
+
+                {/* Mobile image */}
+                <div>
+                  <Label className="text-xs font-semibold">Imagem para celulares</Label>
+                  <p className="text-[10px] text-muted-foreground mb-1.5">Melhore a qualidade e velocidade de carregamento com esta opção</p>
+                  {slide.mobileImageUrl ? (
+                    <div className="relative group rounded-md overflow-hidden border bg-muted h-20">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={slide.mobileImageUrl} alt={`Slide ${idx + 1} mobile`} className="h-full w-full object-cover" />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        <label className="cursor-pointer rounded-md bg-white/90 px-3 py-1.5 text-xs font-medium text-black hover:bg-white transition-colors">
+                          Trocar
+                          <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload(idx, 'mobileImageUrl', f); }} />
+                        </label>
+                        <button onClick={() => updateSlide(idx, { mobileImageUrl: '' })} className="rounded-md bg-white/90 px-3 py-1.5 text-xs font-medium text-destructive hover:bg-white transition-colors">
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-muted-foreground/30 cursor-pointer py-4 hover:border-muted-foreground/50 transition-all">
+                      <Plus className="h-5 w-5 text-muted-foreground/50" />
+                      <span className="text-[11px] text-muted-foreground">Carregar imagem para celulares</span>
+                      <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload(idx, 'mobileImageUrl', f); }} />
+                    </label>
+                  )}
+                </div>
+
+                {/* Text alignment */}
+                <div>
+                  <Label className="text-xs font-semibold">Ajustes do texto</Label>
+                  <div className="mt-1.5 flex items-center gap-4">
+                    <div>
+                      <p className="text-[10px] text-muted-foreground mb-1">Alinhamento</p>
+                      <div className="flex rounded-md border overflow-hidden">
+                        {(['left', 'center', 'right'] as const).map((align) => (
+                          <button
+                            key={align}
+                            onClick={() => updateSlide(idx, { textAlign: align })}
+                            className={`flex items-center justify-center h-8 w-8 text-xs transition-colors ${(slide.textAlign || 'center') === align ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}
+                            title={align === 'left' ? 'Esquerda' : align === 'center' ? 'Centro' : 'Direita'}
+                          >
+                            {align === 'left' ? '☰' : align === 'center' ? '☰' : '☰'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground mb-1">Posição vertical</p>
+                      <div className="flex rounded-md border overflow-hidden">
+                        {(['top', 'center', 'bottom'] as const).map((vAlign) => (
+                          <button
+                            key={vAlign}
+                            onClick={() => updateSlide(idx, { textVerticalAlign: vAlign })}
+                            className={`flex items-center justify-center h-8 w-8 text-xs transition-colors ${(slide.textVerticalAlign || 'center') === vAlign ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}
+                            title={vAlign === 'top' ? 'Topo' : vAlign === 'center' ? 'Centro' : 'Rodapé'}
+                          >
+                            {vAlign === 'top' ? '⬆' : vAlign === 'center' ? '↕' : '⬇'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Text fields */}
+                <div className="space-y-2">
+                  <Input placeholder="Título" value={slide.title} onChange={(e) => updateSlide(idx, { title: e.target.value })} />
+                  <Input placeholder="Subtítulo" value={slide.subtitle} onChange={(e) => updateSlide(idx, { subtitle: e.target.value })} />
+                  <div className="grid grid-cols-2 gap-2">
+                    <Input placeholder="Texto do botão" value={slide.buttonText} onChange={(e) => updateSlide(idx, { buttonText: e.target.value })} />
+                    <Input placeholder="URL do botão" value={slide.buttonUrl} onChange={(e) => updateSlide(idx, { buttonUrl: e.target.value })} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {/* Add slide button */}
+          <label className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-primary/40 bg-primary/5 cursor-pointer py-6 hover:border-primary/60 hover:bg-primary/10 transition-all">
+            <Plus className="h-6 w-6 text-primary/60" />
+            <span className="text-xs font-medium text-primary">Selecionar imagem</span>
+            <input type="file" accept="image/*" className="sr-only" onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (!f) return;
+              const reader = new FileReader();
+              reader.onload = (ev) => {
+                set('slides', [...value.slides, { imageUrl: ev.target?.result as string, mobileImageUrl: '', title: '', subtitle: '', buttonText: '', buttonUrl: '', textAlign: 'center', textVerticalAlign: 'center' }]);
+              };
+              reader.readAsDataURL(f);
+            }} />
+          </label>
+          <p className="text-[10px] text-muted-foreground text-center">⊞ Tamanho recomendado: 1580px × 600px</p>
+        </div>
+      )}
+
+      {value.type === 'video' && (
+        <div>
+          <Label className="text-xs">URL do vídeo</Label>
+          <Input value={value.videoUrl || ''} onChange={(e) => set('videoUrl', e.target.value)} className="mt-1" placeholder="https://youtube.com/watch?v=..." />
+        </div>
+      )}
+
+      {/* General settings */}
+      <SectionDivider label="Configurações" />
       <div>
         <Label className="text-xs">Tipo</Label>
         <Select value={value.type} onValueChange={(v) => set('type', v as HeroSection['type'])}>
@@ -1576,41 +2028,6 @@ function HeroEditor({ value, onChange }: { value: HeroSection; onChange: (v: Her
         <div>
           <Label className="text-xs">Intervalo (segundos)</Label>
           <Input type="number" min={2} max={15} value={value.autoplayInterval} onChange={(e) => set('autoplayInterval', parseInt(e.target.value) || 5)} className="mt-1" />
-        </div>
-      )}
-
-      {value.type === 'video' && (
-        <div>
-          <Label className="text-xs">URL do vídeo</Label>
-          <Input value={value.videoUrl || ''} onChange={(e) => set('videoUrl', e.target.value)} className="mt-1" placeholder="https://youtube.com/watch?v=..." />
-        </div>
-      )}
-
-      {/* Slides */}
-      {value.type !== 'video' && (
-        <div className="border-t pt-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium uppercase text-muted-foreground">Slides ({value.slides.length})</p>
-            <Button type="button" variant="outline" size="sm" onClick={addSlide}>
-              <Plus className="h-3.5 w-3.5 mr-1" /> Slide
-            </Button>
-          </div>
-          {value.slides.map((slide, idx) => (
-            <div key={idx} className="space-y-2 rounded-md border p-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium">Slide {idx + 1}</span>
-                <button onClick={() => removeSlide(idx)} className="text-xs text-destructive hover:underline">Remover</button>
-              </div>
-              <Input placeholder="URL da imagem" value={slide.imageUrl} onChange={(e) => updateSlide(idx, { imageUrl: e.target.value })} />
-              <Input placeholder="URL imagem mobile (opcional)" value={slide.mobileImageUrl || ''} onChange={(e) => updateSlide(idx, { mobileImageUrl: e.target.value })} />
-              <Input placeholder="Título" value={slide.title} onChange={(e) => updateSlide(idx, { title: e.target.value })} />
-              <Input placeholder="Subtítulo" value={slide.subtitle} onChange={(e) => updateSlide(idx, { subtitle: e.target.value })} />
-              <div className="grid grid-cols-2 gap-2">
-                <Input placeholder="Texto do botão" value={slide.buttonText} onChange={(e) => updateSlide(idx, { buttonText: e.target.value })} />
-                <Input placeholder="URL do botão" value={slide.buttonUrl} onChange={(e) => updateSlide(idx, { buttonUrl: e.target.value })} />
-              </div>
-            </div>
-          ))}
         </div>
       )}
     </div>
@@ -1648,9 +2065,9 @@ function ProductListEditor({ value, onChange }: { value: ProductListSection; onC
     <div className="space-y-5">
 
       {/* ── Banner de categoria ── */}
-      <SectionDivider label="Imagem para as categorias" />
+      <SectionDivider label="Imagem de capa" />
       <div>
-        <p className="text-[11px] text-muted-foreground mb-2">Tamanho recomendado: 930px × 465px<br />Pode subir uma imagem diferente para cada categoria{' '}
+        <p className="text-[11px] text-muted-foreground mb-2">Tamanho recomendado: 1580px × 220px<br />Pode subir uma imagem diferente para cada categoria{' '}
           <a href="/admin/products/categories" className="text-primary underline" target="_blank" rel="noopener noreferrer">por aqui</a>
         </p>
         <div className="flex gap-2 items-center">
@@ -1731,6 +2148,7 @@ function ProductListEditor({ value, onChange }: { value: ProductListSection; onC
             <SelectItem value="2">2 produtos</SelectItem>
           </SelectContent>
         </Select>
+        <p className="text-[10px] text-muted-foreground mt-1">Escolher 2 produtos mostrará apenas o preço e a imagem dos produtos</p>
       </div>
       <div>
         <Label className="text-xs">Quantidade de produtos por linha em computadores</Label>
@@ -1836,6 +2254,55 @@ function ProductListEditor({ value, onChange }: { value: ProductListSection; onC
       ) : (
         <p className="text-xs text-muted-foreground">Carregando configurações...</p>
       )}
+
+      {/* ── Newsletter Categoria ── */}
+      <SectionDivider label="Newsletter Categoria" />
+      <ToggleRow label="Mostrar newsletter na página de categoria" checked={value.categoryNewsletterEnabled ?? false} onChange={(v) => set('categoryNewsletterEnabled', v)} />
+      {(value.categoryNewsletterEnabled) && (
+        <div className="space-y-3">
+          <div>
+            <Label className="text-xs">Título</Label>
+            <Input className="mt-1.5" value={value.categoryNewsletterTitle ?? 'Assine nossa newsletter'} onChange={(e) => set('categoryNewsletterTitle', e.target.value)} placeholder="Assine nossa newsletter" />
+          </div>
+          <div>
+            <Label className="text-xs">Descrição</Label>
+            <Textarea className="mt-1.5" rows={3} value={value.categoryNewsletterDescription ?? ''} onChange={(e) => set('categoryNewsletterDescription', e.target.value)} placeholder="Receba nossas novidades e ofertas" />
+          </div>
+          <div>
+            <Label className="text-xs">Imagem</Label>
+            <p className="text-[10px] text-muted-foreground mb-1.5">Tamanho recomendado: 1580px × 600px</p>
+            <div className="flex gap-2 items-center">
+              <label className="flex-1 cursor-pointer">
+                <div className="flex items-center gap-2 w-full h-9 px-3 py-2 rounded-md border border-input bg-background text-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                  <ImageIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                  <span className="text-muted-foreground text-xs truncate">
+                    {value.categoryNewsletterImageUrl ? 'Imagem selecionada' : 'Nenhum arquivo escolhido'}
+                  </span>
+                </div>
+                <input type="file" accept="image/*" className="sr-only" onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = (ev) => set('categoryNewsletterImageUrl', ev.target?.result as string);
+                  reader.readAsDataURL(file);
+                }} />
+              </label>
+              {value.categoryNewsletterImageUrl && (
+                <button type="button" onClick={() => set('categoryNewsletterImageUrl', '')} className="h-9 px-2 rounded-md border border-input text-xs text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors">
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+            {value.categoryNewsletterImageUrl && (
+              <div className="mt-2 rounded-md overflow-hidden border border-border h-20 bg-muted">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={value.categoryNewsletterImageUrl} alt="Newsletter preview" className="w-full h-full object-cover" />
+              </div>
+            )}
+            <Input className="mt-2 text-[11px] h-8" placeholder="Ou cole a URL da imagem..." value={(value.categoryNewsletterImageUrl ?? '').startsWith('data:') ? '' : (value.categoryNewsletterImageUrl ?? '')} onChange={(e) => set('categoryNewsletterImageUrl', e.target.value)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1859,7 +2326,16 @@ function ProductDetailEditor({ value, onChange }: { value: ProductDetailSection;
 
   return (
     <div className="space-y-0 divide-y-0">
-      {/* Formas de entrega */}
+      {/* Fotos do produto */}
+      <SectionAccordion id="productPhotos" label="Fotos do produto">
+        <ToggleRow
+          label="Mostrar uma foto abaixo da outra ao navegar o produto em computadores"
+          checked={value.showStackedImages ?? false}
+          onChange={(v) => set('showStackedImages', v)}
+        />
+      </SectionAccordion>
+
+      {/* Formas de entrega */}}
       <SectionAccordion id="shipping" label="Formas de entrega">
         <p className="text-[11px] text-muted-foreground">Mostrar a calculadora de frete e as lojas físicas na página de produto</p>
         <ToggleRow label="Calculadora de frete" checked={value.showShippingCalculator ?? true} onChange={(v) => set('showShippingCalculator', v)} />
@@ -1938,6 +2414,15 @@ function ProductDetailEditor({ value, onChange }: { value: ProductDetailSection;
         )}
       </SectionAccordion>
 
+      {/* Quantidade de itens */}
+      <SectionAccordion id="quantityField" label="Quantidade de itens">
+        <ToggleRow
+          label="Mostrar campo de quantidade na página de produto"
+          checked={value.showQuantityField ?? true}
+          onChange={(v) => set('showQuantityField', v)}
+        />
+      </SectionAccordion>
+
       {/* Descrição do produto */}
       <SectionAccordion id="description" label="Descrição do produto">
         <ToggleRow label="Descrição em largura total (desktop)" checked={value.fullWidthDescription ?? false} onChange={(v) => set('fullWidthDescription', v)} />
@@ -1990,6 +2475,56 @@ function ProductDetailEditor({ value, onChange }: { value: ProductDetailSection;
         <ToggleRow label="Avaliações" checked={value.showReviews} onChange={(v) => set('showReviews', v)} />
         <ToggleRow label="Botões de compartilhar" checked={value.showShareButtons} onChange={(v) => set('showShareButtons', v)} />
         <ToggleRow label="Botão fixo 'Comprar'" checked={value.stickyAddToCart} onChange={(v) => set('stickyAddToCart', v)} />
+      </SectionAccordion>
+
+      {/* Newsletter Produto */}
+      <SectionAccordion id="productNewsletter" label="Newsletter Produto">
+        <ToggleRow label="Mostrar newsletter na página de produto" checked={value.productNewsletterEnabled ?? false} onChange={(v) => set('productNewsletterEnabled', v)} />
+        {value.productNewsletterEnabled && (
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs">Título</Label>
+              <Input className="mt-1.5" value={value.productNewsletterTitle ?? 'Assine nossa newsletter'} onChange={(e) => set('productNewsletterTitle', e.target.value)} placeholder="Assine nossa newsletter" />
+            </div>
+            <div>
+              <Label className="text-xs">Descrição</Label>
+              <Textarea className="mt-1.5" rows={3} value={value.productNewsletterDescription ?? ''} onChange={(e) => set('productNewsletterDescription', e.target.value)} placeholder="Receba nossas novidades e ofertas" />
+            </div>
+            <div>
+              <Label className="text-xs">Imagem</Label>
+              <p className="text-[10px] text-muted-foreground mb-1.5">Tamanho recomendado: 1580px × 600px</p>
+              <div className="flex gap-2 items-center">
+                <label className="flex-1 cursor-pointer">
+                  <div className="flex items-center gap-2 w-full h-9 px-3 py-2 rounded-md border border-input bg-background text-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <ImageIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                    <span className="text-muted-foreground text-xs truncate">
+                      {value.productNewsletterImageUrl ? 'Imagem selecionada' : 'Nenhum arquivo escolhido'}
+                    </span>
+                  </div>
+                  <input type="file" accept="image/*" className="sr-only" onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => set('productNewsletterImageUrl', ev.target?.result as string);
+                    reader.readAsDataURL(file);
+                  }} />
+                </label>
+                {value.productNewsletterImageUrl && (
+                  <button type="button" onClick={() => set('productNewsletterImageUrl', '')} className="h-9 px-2 rounded-md border border-input text-xs text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+              {value.productNewsletterImageUrl && (
+                <div className="mt-2 rounded-md overflow-hidden border border-border h-20 bg-muted">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={value.productNewsletterImageUrl} alt="Newsletter preview" className="w-full h-full object-cover" />
+                </div>
+              )}
+              <Input className="mt-2 text-[11px] h-8" placeholder="Ou cole a URL da imagem..." value={(value.productNewsletterImageUrl ?? '').startsWith('data:') ? '' : (value.productNewsletterImageUrl ?? '')} onChange={(e) => set('productNewsletterImageUrl', e.target.value)} />
+            </div>
+          </div>
+        )}
       </SectionAccordion>
     </div>
   );

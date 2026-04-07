@@ -54,12 +54,24 @@ const TEMPLATES = [
     colors: { primary: '#111111', secondary: '#f5f5f5', accent: '#0d9f6e', bg: '#f5f5f5', text: '#111111' },
     layout: { heroHeight: 'small', gridCols: 4, logoPos: 'left', radius: 12 },
   },
+  {
+    id: 'patagonia',
+    name: 'Patagonia',
+    tagline: 'Fashion editorial minimalista',
+    description: 'Tema premium para moda e alfaiataria. Barra de anúncio preta, header branco com nav em caixa alta, hero full-bleed e grid editorial com cards 3×4.',
+    niches: ['fashion', 'brand', 'catalog', 'fashion-women', 'fashion-men'],
+    catalogSize: ['some', 'lots'],
+    badge: 'pro' as const,
+    features: ['Barra de anúncio', 'Nav uppercase', 'Hero full-bleed', 'Footer dark editorial'],
+    colors: { primary: '#111111', secondary: '#f5f5f5', accent: '#111111', bg: '#ffffff', text: '#111111' },
+    layout: { heroHeight: 'large', gridCols: 4, logoPos: 'left', radius: 0 },
+  },
 ];
 
 /* ─── Niche presets ────────────────────────────────────── */
 const NICHE_PRESETS = [
-  { id: 'fashion-women', name: 'Moda Feminina', icon: <Crown className="h-4 w-4" />, recommendedTemplate: 'template-7', description: 'Marketplace de moda, mega menu, trust badges' },
-  { id: 'fashion-men', name: 'Moda Masculina', icon: <ShoppingBag className="h-4 w-4" />, recommendedTemplate: 'limpo', description: 'Grid limpo, minimalista, preto e branco' },
+  { id: 'fashion-women', name: 'Moda Feminina', icon: <Crown className="h-4 w-4" />, recommendedTemplate: 'patagonia', description: 'Editorial fashion, nav uppercase, footer escuro' },
+  { id: 'fashion-men', name: 'Moda Masculina', icon: <ShoppingBag className="h-4 w-4" />, recommendedTemplate: 'patagonia', description: 'Minimalista, preto e branco, alfaiataria' },
   { id: 'electronics', name: 'Eletrônicos', icon: <Zap className="h-4 w-4" />, recommendedTemplate: 'template-6', description: 'Dark tech, profissional, glassmorphism' },
   { id: 'cosmetics', name: 'Cosméticos', icon: <Sparkles className="h-4 w-4" />, recommendedTemplate: 'limpo', description: 'Visual limpo, premium, tipografia moderna' },
   { id: 'food', name: 'Alimentação', icon: <Store className="h-4 w-4" />, recommendedTemplate: 'limpo', description: 'Grid simples, cores naturais, clean' },

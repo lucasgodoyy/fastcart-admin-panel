@@ -53,6 +53,8 @@ export interface HeroSlide {
   subtitle: string;
   buttonText: string;
   buttonUrl: string;
+  textAlign?: 'left' | 'center' | 'right';
+  textVerticalAlign?: 'top' | 'center' | 'bottom';
 }
 
 export interface HeroSection {
@@ -86,7 +88,8 @@ export type HomeSectionType =
   | 'mainCategories'
   | 'institutionalMessage'
   | 'shippingPaymentInfo'
-  | 'promoPopup';
+  | 'promoPopup'
+  | 'textEditorial';
 
 export interface HomeSectionItem {
   id: string;
@@ -97,9 +100,16 @@ export interface HomeSectionItem {
   // ── Common text fields ──
   subtitle?: string;
   titleItalic?: boolean;
+  titleFontSize?: number;
+  titleBold?: boolean;
+  titleUnderline?: boolean;
+  titleColor?: string;
+  titleAlignment?: 'left' | 'center' | 'right';
   linkUrl?: string;
   buttonText?: string;
   fullWidth?: boolean;
+
+  showTitle?: boolean;
 
   // ── Product sections (featuredProducts, newProducts, saleProducts) ──
   maxProducts?: number;
@@ -116,7 +126,10 @@ export interface HomeSectionItem {
   sameHeight?: boolean;
   removeSpacing?: boolean;
   textAlignment?: 'left' | 'center' | 'right';
+  textVerticalAlign?: 'top' | 'center' | 'bottom';
   bannersPerRow?: number;
+  mobileBannersPerRow?: number;
+  addTextBackground?: boolean;
   useMobileImages?: boolean;
   parallaxEffect?: boolean;
 
@@ -131,9 +144,11 @@ export interface HomeSectionItem {
   playbackType?: 'auto-muted' | 'click';
   videoThumbnailUrl?: string;
   videoTitle?: string;
+  videoSubtitle?: string;
   videoDescription?: string;
   videoButtonText?: string;
   videoButtonUrl?: string;
+  videoTextAlignment?: 'left' | 'center' | 'right';
   verticalOnMobile?: boolean;
 
   // ── Newsletter ──
@@ -160,8 +175,13 @@ export interface HomeSectionItem {
   welcomeText?: string;
   institutionalText?: string;
 
+  // ── Text editorial ──
+  editorialText?: string;
+
   // ── Shipping / Payment info ──
   shippingInfoItems?: { icon: string; title: string; description: string; imageUrl?: string; linkUrl?: string }[];
+  showShippingTitles?: boolean;
+  showShippingDescriptions?: boolean;
 
   // ── Promo popup ──
   popupImageUrl?: string;
@@ -199,6 +219,7 @@ export const HOME_SECTION_LABELS: Record<HomeSectionType, string> = {
   institutionalMessage: 'Mensagem institucional',
   shippingPaymentInfo: 'Informações de frete, pagamento e compra',
   promoPopup: 'Pop-up promocional',
+  textEditorial: 'Editorial de texto',
 };
 
 // ── Featured Products ─────────────────────────────────────
@@ -233,6 +254,11 @@ export interface ProductListSection {
   showSecondImageOnHover: boolean;
   showImageCarousel: boolean;
   showInstallments: boolean;
+  // Category page newsletter
+  categoryNewsletterEnabled?: boolean;
+  categoryNewsletterTitle?: string;
+  categoryNewsletterDescription?: string;
+  categoryNewsletterImageUrl?: string;
 }
 
 // ── Product Detail ────────────────────────────────────────
@@ -275,6 +301,15 @@ export interface ProductDetailSection {
   showReviews: boolean;
   showShareButtons: boolean;
   stickyAddToCart: boolean;
+  // Photos
+  showStackedImages?: boolean;
+  // Quantity field
+  showQuantityField?: boolean;
+  // Product page newsletter
+  productNewsletterEnabled?: boolean;
+  productNewsletterTitle?: string;
+  productNewsletterDescription?: string;
+  productNewsletterImageUrl?: string;
 }
 
 // ── Cart ──────────────────────────────────────────────────
@@ -450,7 +485,7 @@ export const DEFAULT_HOME_SECTIONS: HomeSectionItem[] = [
   { id: 'hero-1', type: 'hero', enabled: true, title: 'Banners rotativos', fullWidth: false, parallaxEffect: false },
   { id: 'instit-1', type: 'institutionalMessage', enabled: false, title: 'Mensagem institucional', subtitle: '', titleItalic: false, linkUrl: '', buttonText: '' },
   { id: 'main-1', type: 'mainProduct', enabled: false, title: 'Produto principal', displayOrder: 'first' },
-  { id: 'promo-1', type: 'promoBanners', enabled: false, title: 'Banners promocionais', banners: [], showTextOutside: false, showAsCarousel: false, sameHeight: false, removeSpacing: false, textAlignment: 'center', bannersPerRow: 2, useMobileImages: false },
+  { id: 'promo-1', type: 'promoBanners', enabled: false, title: 'Banners promocionais', banners: [], showTextOutside: false, showAsCarousel: false, sameHeight: false, removeSpacing: false, textAlignment: 'center', textVerticalAlign: 'center', bannersPerRow: 2, mobileBannersPerRow: 2, addTextBackground: true, useMobileImages: false },
   { id: 'test-1', type: 'testimonials', enabled: false, title: 'Depoimentos', testimonials: [], descriptionsItalic: false },
   { id: 'video-1', type: 'video', enabled: false, title: 'Vídeo', videoUrl: '', fullWidth: false, playbackType: 'auto-muted', verticalOnMobile: false },
   { id: 'shipping-1', type: 'shippingPaymentInfo', enabled: false, title: 'Informações de frete, pagamento e compra', shippingInfoItems: [{ icon: 'truck', title: '', description: '' }, { icon: 'credit-card', title: '', description: '' }, { icon: 'shield', title: '', description: '' }, { icon: 'refresh', title: '', description: '' }], useCustomColors: false },
@@ -458,11 +493,12 @@ export const DEFAULT_HOME_SECTIONS: HomeSectionItem[] = [
   { id: 'new-1', type: 'newProducts', enabled: false, title: 'Produtos novos', displayMode: 'carousel', mobileColumns: 2, desktopColumns: 4, maxProducts: 8 },
   { id: 'insta-1', type: 'instagramPosts', enabled: false, title: 'Postagens do Instagram', instagramUsername: '', instagramToken: '', showOnHome: true },
   { id: 'sale-1', type: 'saleProducts', enabled: false, title: 'Produtos em oferta', displayMode: 'carousel', mobileColumns: 2, desktopColumns: 4, maxProducts: 8 },
-  { id: 'cat-1', type: 'categoryBanners', enabled: false, title: 'Banners de categorias', banners: [], showTextOutside: false, showAsCarousel: false, sameHeight: false, removeSpacing: false, textAlignment: 'center', bannersPerRow: 4, useMobileImages: false },
-  { id: 'news-1', type: 'newsBanners', enabled: false, title: 'Banners de novidades', banners: [], showTextOutside: false, showAsCarousel: false, sameHeight: false, removeSpacing: false, textAlignment: 'center', bannersPerRow: 1, useMobileImages: false },
+  { id: 'cat-1', type: 'categoryBanners', enabled: false, title: 'Banners de categorias', banners: [], showTextOutside: false, showAsCarousel: false, sameHeight: false, removeSpacing: false, textAlignment: 'center', textVerticalAlign: 'center', bannersPerRow: 4, mobileBannersPerRow: 2, addTextBackground: true, useMobileImages: false },
+  { id: 'news-1', type: 'newsBanners', enabled: false, title: 'Banners de novidades', banners: [], showTextOutside: false, showAsCarousel: false, sameHeight: false, removeSpacing: false, textAlignment: 'center', textVerticalAlign: 'center', bannersPerRow: 1, mobileBannersPerRow: 1, addTextBackground: true, useMobileImages: false },
   { id: 'imgtxt-1', type: 'imageText', enabled: false, title: 'Módulos de imagem e texto', modules: [], showAsCarousel: false, sameHeight: false, removeSpacing: false },
   { id: 'brand-1', type: 'brandBanners', enabled: false, title: 'Marcas', banners: [], displayMode: 'carousel' },
   { id: 'popup-1', type: 'promoPopup', enabled: false, title: 'Pop-up promocional', showPopup: true, popupTitle: '', popupDescription: '', popupButtonText: 'Ver ofertas', popupButtonUrl: '', popupDelay: 3, allowNewsletter: false },
+  { id: 'textedit-1', type: 'textEditorial', enabled: false, title: 'Editorial de texto', editorialText: '', textAlignment: 'center' },
 ];
 
 // ── Default values ────────────────────────────────────────
@@ -590,6 +626,10 @@ export const DEFAULT_THEME_SECTIONS: ThemeSections = {
     showSecondImageOnHover: true,
     showImageCarousel: true,
     showInstallments: false,
+    categoryNewsletterEnabled: false,
+    categoryNewsletterTitle: 'Assine nossa newsletter',
+    categoryNewsletterDescription: 'Receba nossas novidades e ofertas',
+    categoryNewsletterImageUrl: '',
   },
   productDetail: {
     enabled: true,
@@ -619,6 +659,12 @@ export const DEFAULT_THEME_SECTIONS: ThemeSections = {
     showReviews: false,
     showShareButtons: true,
     stickyAddToCart: true,
+    showStackedImages: false,
+    showQuantityField: true,
+    productNewsletterEnabled: false,
+    productNewsletterTitle: 'Assine nossa newsletter',
+    productNewsletterDescription: 'Receba nossas novidades e ofertas',
+    productNewsletterImageUrl: '',
   },
   cart: {
     enabled: true,
@@ -756,9 +802,24 @@ export const STOCK_THEME_SECTIONS: ThemeSections = makePreset({
   design: { logoUrl: '', faviconUrl: '', borderRadius: 'full', buttonStyle: 'filled', containerWidth: 'default' },
 });
 
+/** Patagonia — premium fashion / apparel layout */
+export const PATAGONIA_THEME_SECTIONS: ThemeSections = makePreset({
+  header: { useCustomColors: true, bgColor: '#ffffff', textColor: '#111111', logoPosition: 'left', stickyHeader: true, announcementBar: { enabled: true, text: 'FRETE GRÁTIS ACIMA DE R$220', bgColor: '#111111', textColor: '#ffffff' } },
+  hero: { enabled: true, type: 'slideshow', slides: [], videoUrl: '', height: 'large', overlayOpacity: 0.25, autoplay: true, autoplayInterval: 6 },
+  featuredProducts: { enabled: true, title: 'Destaques', maxProducts: 8, columns: 4, showPrice: true, showBadge: false },
+  productList: { enabled: true, defaultView: 'grid', columns: 4, mobileColumns: 2, showFilters: true, filtersPosition: 'left', showSort: true, productsPerPage: 20, navigation: 'pagination', quickView: false, quickBuy: false, showIrregularGrid: false, hoverEffect: 'zoom', categoryBannerUrl: '' },
+  productDetail: { enabled: true, imagePosition: 'left', showRelated: true, showReviews: false, showShareButtons: true, stickyAddToCart: true, zoomOnHover: true, showShippingCalculator: true, variantDisplay: 'buttons', showSku: false },
+  cart: { enabled: true, style: 'drawer', showShippingEstimate: true, showCouponField: true, showCrossSell: false, showOrderNotes: false, showFreeShippingBar: true },
+  footer: { bgColor: '#111111', textColor: '#ffffff', columns: 4 },
+  colors: { primary: '#111111', secondary: '#f5f5f5', accent: '#111111', background: '#ffffff', text: '#111111' },
+  typography: { headingFont: 'inter', bodyFont: 'inter', baseFontSize: 'medium' },
+  design: { logoUrl: '', faviconUrl: '', borderRadius: 'none', buttonStyle: 'filled', containerWidth: 'wide' },
+});
+
 /** Map template ID → default sections preset */
 export const TEMPLATE_PRESETS: Record<string, ThemeSections> = {
   'limpo': DEFAULT_THEME_SECTIONS,
   'template-6': ATLANTICO_THEME_SECTIONS,
   'template-7': VITRINE_THEME_SECTIONS,
+  'patagonia': PATAGONIA_THEME_SECTIONS,
 };
