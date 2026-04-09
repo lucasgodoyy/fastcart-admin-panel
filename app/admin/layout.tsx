@@ -3,6 +3,7 @@ import { AdminHeader } from "@/components/admin/header"
 import { MobileSidebarProvider } from "@/context/MobileSidebarContext"
 import { MobileSidebarSheet } from "@/components/admin/mobile-sidebar-sheet"
 import { EmailVerificationBanner } from "@/components/features/auth/EmailVerificationBanner"
+import { QuotaWarningBanner } from "@/components/shared/QuotaWarningBanner"
 
 export default function AdminLayout({
   children,
@@ -19,6 +20,7 @@ export default function AdminLayout({
         <div className="flex flex-1 flex-col overflow-hidden min-w-0">
           <AdminHeader />
           <EmailVerificationBanner />
+          <QuotaWarningBanner />
           <main className="flex-1 overflow-y-auto bg-muted/30">
             {children}
           </main>

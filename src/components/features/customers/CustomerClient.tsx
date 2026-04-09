@@ -3,7 +3,8 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Mail, MessageCircle, Plus, Search, Users, User } from 'lucide-react';
+import { Download, Mail, MessageCircle, Plus, Search, Users, User } from 'lucide-react';
+import { downloadCSV } from '@/lib/csv-export';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PageContainer, PageHeader, EmptyState } from '@/components/admin/page-header';
@@ -28,6 +29,16 @@ export function CustomerClient() {
     enabled: Boolean(storeId),
   });
 
+  const handleExportCsv = () => {
+    downloadCSV(customers, 'clientes', [
+      { key: 'id', label: 'ID' },
+      { key: 'firstName', label: 'Nome' },
+      { key: 'lastName', label: 'Sobrenome' },
+      { key: 'phone', label: 'Telefone' },
+      { key: 'document', label: 'Documento' },
+    ]);
+  };
+
   const filteredCustomers = useMemo(() => {
     const term = search.trim().toLowerCase();
     if (!term) return customers;
@@ -47,12 +58,18 @@ export function CustomerClient() {
         title="Clientes"
         description="Gerencie os clientes da sua loja."
         actions={
-          <Link href="/admin/customers/new">
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              Adicionar cliente
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="gap-2" onClick={handleExportCsv}>
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">Exportar CSV</span>
             </Button>
-          </Link>
+            <Link href="/admin/customers/new">
+              <Button size="sm" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Adicionar cliente
+              </Button>
+            </Link>
+          </div>
         }
       />
 

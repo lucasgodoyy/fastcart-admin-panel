@@ -1,10 +1,10 @@
-import { Suspense } from 'react';
-import { FinanceClient } from '@/components/features/finance/FinanceClient';
+import dynamic from 'next/dynamic'
+
+const FinanceClient = dynamic(
+  () => import('@/components/features/finance/FinanceClient').then(m => m.FinanceClient),
+  { loading: () => <div className="p-8 text-sm text-muted-foreground">Carregando financeiro...</div> }
+)
 
 export default function PaymentsPage() {
-  return (
-    <Suspense fallback={<div className="p-8 text-sm text-muted-foreground">Carregando financeiro...</div>}>
-      <FinanceClient />
-    </Suspense>
-  );
+  return <FinanceClient />
 }
